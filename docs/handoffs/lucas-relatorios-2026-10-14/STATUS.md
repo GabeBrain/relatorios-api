@@ -1,5 +1,9 @@
 # Estado do handoff
 
+## 10/11/2026 — Fortaleza12/14 antes do lote16–25
+
+Usuário autorizou push anterior e continuação de12/14+dez.1e1767eenviado; base main/origin0–0, único remoto, Windows/Codex Test. [Entrega/retomada](../../features/relatorios-institucionais/fortaleza/MENSAL_SLIDES_12_25_2026-11-10.md): mensal1–25na ordem original, fonte temporal segmentada compartilhada, VGL/lotes/vendas e13pontos móveis de12meses.127testes Fortaleza +16regressões, tipos/build/lint e Edge1440/390claro/escuro com todos os provedores interceptados. Office somente leitura dos originais; nenhuma GeoBrain real/exportação/homologação. INCC-DI/base selecionada provisórios explícitos nos insights; validar com analista. Próximo26–35. Sem Monday e sem alteração de motores/escopos paralelos. Nova fatia em commit local isolado, publicação exige autorização própria.
+
 ## 10/11/2026 — Fortaleza retomada com prioridade mensal
 
 Lucas pediu continuação priorizando mensal. Main03d3301/origin, fetch atualizado,0–0 e árvore limpa antes das edições; Windows/Codex Test. [Fatia e retomada](../../features/relatorios-institucionais/fortaleza/MENSAL_LANCAMENTOS_2026-11-10.md): mensal padrão,11/13/15 integrados,25meses de lançamentos verticais automáticos, insights.13composições mensais, não relatório completo.12/14casas/comercial e demais conteúdos/INCC/exportação pendentes. Original Drive baixado/hash conferido/Office leitura; GeoBrain real não consultado.105testes distintos incluindo regressões2T2026/4T2025 aprovados após rechecagem de uma asserção; tipos/build/lint e Edge sintético1440/390claro/escuro. SP e motores paralelos sem mudanças. Sem Monday, homologação ou push desta fatia; commit local isolado e contadores no fechamento.

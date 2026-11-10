@@ -2,6 +2,7 @@ import { fortalezaPeriod, type FortalezaSelection } from './model';
 import { marketMonth, normalizeMarketText, type MarketRow } from './market';
 import type { IntroData } from './intro-data';
 import { introMonth } from './intro-view';
+import type { MonthlyMarketData } from './monthly-market';
 
 export const FORTALEZA_STANDARDS = ['Econômico', 'Compacto', 'Standard', 'Médio', 'Médio-Alto', 'Alto', 'Luxo'] as const;
 export interface LaunchBin { month: string; label: string; economic: number; other: number; total: number }
@@ -13,7 +14,7 @@ export interface LaunchSeries {
 export interface MonthlyLaunchSource {
   city: string; rows: MarketRow[]; complete: boolean; requests: number; startedAt: string; finishedAt: string;
 }
-export interface MonthlyLaunchData { scopeKey?: string; sources: MonthlyLaunchSource[]; issues: string[] }
+export interface MonthlyLaunchData { scopeKey?: string; sources: MonthlyLaunchSource[]; issues: string[]; market?: MonthlyMarketData }
 export function monthlyLaunchMonths(selection: FortalezaSelection) {
   if (selection.periodicity !== 'monthly') throw new Error('O histórico mensal exige uma referência mensal.');
   fortalezaPeriod(selection);

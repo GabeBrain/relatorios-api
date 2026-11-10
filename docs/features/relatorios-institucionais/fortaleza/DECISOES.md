@@ -1,5 +1,9 @@
 # Fortaleza — fatos, propostas e pendências
 
+## 10/11 — contrato mensal segmentado e INCC provisório
+
+[Contrato12/14e16–25](MENSAL_SLIDES_12_25_2026-11-10.md) substitui as pendências de implementação desses slides, preservando homologação em aberto. Rótulos socioeconômicos em Horizontal tratados como casas/sobrados, produtos loteados separados; vocabulário fechado e categoria desconhecida bloqueia. Fonte temporal compartilhada25meses;24tem13pontos de12meses, não25pontos nem36meses brutos. Critério monetário provisório é INCC-DI na base selecionada, explícito ao analista e sem afirmar método Fortaleza aprovado. Validar modalidades, fotografia/segmentos e se VGL da API é nominal. Sem copiar valores ou índices/base de um deck antigo como política fixa.
+
 ## 10/11 — prioridade mensal e contratos de lançamentos
 
 Pedido do Lucas prioriza mensal; trimestral permanece disponível. [Contrato desta fatia](MENSAL_LANCAMENTOS_2026-11-10.md):11 por IDs verticais,13/15 por releases_in_period, Econômico/demais e comparativos mensais/acumulados separados. Não inferir casas/comercial a partir do vertical nem perpetuar teto editorial MCMV de abril/2026. Sete padrões explícitos por mês/cidade são uma guarda conservadora, sem novo aceite da fonte real.12/14/valores/INCC e demais conteúdos continuam pendentes.

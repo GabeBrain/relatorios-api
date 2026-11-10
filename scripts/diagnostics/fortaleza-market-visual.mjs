@@ -62,7 +62,7 @@ async function scenario({ mode = 'success', slow = false } = {}) {
   return { context, page, calls, state };
 }
 async function consult(page) {
-  await page.getByRole('button', { name: 'Gerar prévia vertical', exact: true }).click();
+  await page.getByRole('button', { name: /^Gerar prévia (vertical|mensal)$/ }).click();
   await page.getByRole('region', { name: 'Dados verticais consultados' }).waitFor();
 }
 async function inspectSlides(page, label) {
@@ -85,7 +85,7 @@ async function inspectSlides(page, label) {
 }
 try {
   const success = await scenario({ slow: true });
-  await success.page.getByRole('button', { name: 'Gerar prévia vertical', exact: true }).click();
+  await success.page.getByRole('button', { name: /^Gerar prévia (vertical|mensal)$/ }).click();
   await success.page.getByText('Consultando núcleo residencial vertical', { exact: true }).waitFor();
   assert.equal(await success.page.getByRole('region', { name: 'Etapas da prévia vertical' }).locator('li').count(), 4);
   await success.page.screenshot({ path: resolve(folder, 'loading.png') });
@@ -148,7 +148,7 @@ try {
   await recovery.context.close();
 
   const cancelled = await scenario({ slow: true });
-  await cancelled.page.getByRole('button', { name: 'Gerar prévia vertical', exact: true }).click();
+  await cancelled.page.getByRole('button', { name: /^Gerar prévia (vertical|mensal)$/ }).click();
   await cancelled.page.getByText('Consultando núcleo residencial vertical', { exact: true }).waitFor();
   await cancelled.page.getByRole('button', { name: 'Cancelar consulta', exact: true }).click();
   await cancelled.page.getByText('Consulta cancelada. Nenhum resultado parcial foi consolidado.', { exact: true }).waitFor();

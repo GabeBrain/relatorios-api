@@ -26,13 +26,8 @@ function Plot({ bins, x, width, accumulated, projects }: { bins: LaunchBin[]; x:
     })}
   </g>;
 }
-export default function FortalezaMonthlyLaunchSlide({ page, selection, series }: { page: 11 | 12 | 13 | 14 | 15; selection: FortalezaSelection; series: LaunchSeries }) {
+export default function FortalezaMonthlyLaunchSlide({ page, selection, series }: { page: 11 | 13 | 15; selection: FortalezaSelection; series: LaunchSeries }) {
   const projects = page === 11;
-  if (page === 12 || page === 14) return <svg className="fortaleza-intro-slide block aspect-video h-auto w-full" viewBox="0 0 1280 720" role="img" aria-label={`Fortaleza · slide ${page}`}>
-    <image href={artwork[`./assets/monthly/${page}.png`]} width={1280} height={720} aria-hidden="true" />
-    <text x={43} y={217} fill="#1B4059" fontSize={18}>{introMonth(selection.position)} de {selection.year}</text>
-    <g aria-label="Slide em preparação" fill="#1B4059" textAnchor="middle"><text x={640} y={355} fontSize={28} fontWeight={700}>Fonte segmentada em preparação</text><text x={640} y={395} fontSize={18}>{page === 12 ? 'Unidades verticais, comerciais e casas da capital e RM.' : 'Unidades verticais e casas da região metropolitana.'}</text></g>
-  </svg>;
   return <svg className="fortaleza-intro-slide block aspect-video h-auto w-full" viewBox="0 0 1280 720" role="img" aria-label={`Fortaleza · slide ${page}`}>
     <image href={artwork[`./assets/monthly/${page}.png`]} width={1280} height={720} aria-hidden="true" />
     <text x={43} y={187} fill="#1B4059" fontSize={24} fontWeight={700}>Residencial Vertical</text>

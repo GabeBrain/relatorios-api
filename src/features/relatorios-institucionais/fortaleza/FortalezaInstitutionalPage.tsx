@@ -66,7 +66,7 @@ export default function FortalezaInstitutionalPage() {
       <div className="flex items-start gap-3"><span className="shrink-0 rounded-xl bg-primary/10 p-3 text-primary"><FileChartColumn className="h-7 w-7" aria-hidden="true" /></span><div className="min-w-0"><div className="flex flex-wrap items-center gap-2"><h1 className="break-words text-2xl font-semibold">Fortaleza / SINDUSCON-CE</h1><Badge variant="secondary">Em preparação</Badge></div><p className="mt-1 text-sm text-muted-foreground">Base do panorama de Fortaleza e região metropolitana.</p></div></div>
       <p className="flex items-center gap-2 text-sm text-muted-foreground"><Layers className="h-4 w-4" aria-hidden="true" />Referências verificadas: 89 páginas trimestrais e 60 mensais</p>
     </header>
-    <Alert><AlertTitle>Núcleo residencial vertical</AlertTitle><AlertDescription>Consulte lançamentos, vendas líquidas e oferta na janela escolhida. Os demais indicadores, segmentos e a exportação do estudo ainda estão em preparação.</AlertDescription></Alert>
+    <Alert><AlertTitle>Relatório em implantação</AlertTitle><AlertDescription>{periodicity === 'monthly' ? 'Prévia mensal até o slide 25, com lançamentos, VGL e o início do bloco de vendas. Os demais blocos e a exportação continuam em preparação.' : 'Consulte o núcleo vertical e os dez slides iniciais. A continuação trimestral e a exportação estão em preparação.'}</AlertDescription></Alert>
     <section className="space-y-5 rounded-xl border bg-card p-4 sm:p-6" aria-label="Configuração do estudo">
       <h2 className="font-semibold">Configure o estudo</h2>
       {!scope.error && <GeoApiScopeSelector value={geo} onChange={changeGeo} disabled={busy} />}
@@ -81,7 +81,7 @@ export default function FortalezaInstitutionalPage() {
       </div>
       <p className="text-sm font-medium">Referência selecionada: {fortalezaPeriod(selection).label}</p>
       {territory === 'capital-rm' && scope.hasToken && !scope.isLoading && !scope.error && coverage.missing.length > 0 && <p role="status" className="text-sm text-destructive">O conjunto exige acesso aos cinco municípios. Não disponíveis: {coverage.missing.join(', ')}.</p>}
-      <div className="flex flex-wrap items-center gap-3"><Button disabled={!ready || busy} onClick={() => { void market.consult(); }}>Gerar prévia vertical</Button><Button variant="outline" disabled={!ready || busy} onClick={() => { void prepare(); }}>Preparar estrutura</Button></div>
+      <div className="flex flex-wrap items-center gap-3"><Button disabled={!ready || busy} onClick={() => { void market.consult(); }}>{periodicity === 'monthly' ? 'Gerar prévia mensal' : 'Gerar prévia vertical'}</Button><Button variant="outline" disabled={!ready || busy} onClick={() => { void prepare(); }}>Preparar estrutura</Button></div>
       <p className="text-xs text-muted-foreground">Uma ação valida o recorte, consulta as fontes municipais, confere os balanços e organiza a prévia. Preparar estrutura organiza apenas as páginas localmente.</p>
       {!ready && !scope.isLoading && !scope.error && <p className="text-sm text-muted-foreground">Faça login e selecione um município autorizado do estudo para continuar.</p>}
       {error && <Alert variant="destructive"><AlertTitle>Preparação interrompida</AlertTitle><AlertDescription>{error}<Button className="mt-3 block" variant="outline" disabled={!ready} onClick={() => { void prepare(); }}>Tentar preparar novamente</Button></AlertDescription></Alert>}
@@ -105,6 +105,6 @@ export default function FortalezaInstitutionalPage() {
     </Tabs>
     {scope.isLoading && <BrainLoadingState variant="overlay" title="Conferindo municípios autorizados" description="Aguarde a confirmação do seu acesso ao catálogo de cidades." startedAt={loadingStart.current} />}
     {running && <BrainLoadingState variant="overlay" title="Organizando páginas do estudo" startedAt={startedAt} description={`${progress.completed} de ${progress.total || reference.slideCount} páginas organizadas`}><Button className="mt-4" variant="outline" onClick={() => { controller.current?.abort(); setRunning(false); }}>Cancelar preparação</Button></BrainLoadingState>}
-    {querying && <BrainLoadingState variant="overlay" title="Consultando núcleo residencial vertical" startedAt={market.state.startedAt} description={market.state.message}><FortalezaGenerationPanel state={market.state} compact /><Button className="mt-4" variant="outline" onClick={market.cancel}>Cancelar consulta</Button></BrainLoadingState>}
+    {querying && <BrainLoadingState variant="overlay" title={periodicity === 'monthly' ? 'Consultando fontes do relatório mensal' : 'Consultando núcleo residencial vertical'} startedAt={market.state.startedAt} description={market.state.message}><FortalezaGenerationPanel state={market.state} compact /><Button className="mt-4" variant="outline" onClick={market.cancel}>Cancelar consulta</Button></BrainLoadingState>}
   </div>;
 }

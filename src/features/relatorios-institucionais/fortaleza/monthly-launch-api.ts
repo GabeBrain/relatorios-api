@@ -3,9 +3,15 @@ import { requestWithRetry } from '@/features/panorama-secovi-fiergs/lib/request-
 import { fortalezaPeriod, fortalezaScope, type FortalezaSelection } from './model';
 import { monthlyLaunchMonths, monthlyLaunchSourceIssue, type MonthlyLaunchData, type MonthlyLaunchSource } from './monthly-launches';
 import type { FortalezaReadOptions, FortalezaEnvelope } from './api';
+import { fetchMonthlyMarket } from './monthly-market-api';
 
 /** A bounded 25-month vertical window, at most three pages per authorized city. */
-export async function fetchMonthlyLaunches(selection: FortalezaSelection, authorized: string[], options: FortalezaReadOptions, previous?: MonthlyLaunchData | null): Promise<MonthlyLaunchData> {
+export async function fetchMonthlyLaunches(selection: FortalezaSelection, authorized: string[], options: FortalezaReadOptions & { includeMonthlyReport?: boolean }, previous?: MonthlyLaunchData | null): Promise<MonthlyLaunchData> {
+  if (options.includeMonthlyReport) {
+    const market = await fetchMonthlyMarket(selection, authorized, options, previous?.market);
+    const firstMonth = monthlyLaunchMonths(selection)[0];
+    return { scopeKey: market.scopeKey, market, issues: market.issues, sources: market.sources.filter(source => source.segment === 'Vertical' && source.metric === 'releases').map(source => ({ city:source.city, complete:source.complete, rows:source.rows.filter(row => String(row.period).slice(0,7) >= firstMonth), requests:source.requests, startedAt:source.startedAt, finishedAt:source.finishedAt })) };
+  }
   const scope = fortalezaScope(selection, authorized), period = fortalezaPeriod(selection);
   const months = monthlyLaunchMonths(selection);
   if (!options.token || !scope.valid) throw new Error('Confirme o acesso ao recorte mensal antes da consulta.');

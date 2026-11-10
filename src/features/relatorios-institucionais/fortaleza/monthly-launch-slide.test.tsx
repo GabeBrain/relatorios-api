@@ -29,7 +29,7 @@ describe('Fortaleza mensal — lâminas e navegação', () => {
     fireEvent.click(screen.getByRole('button', { name: '11' }));
     fireEvent.click(screen.getByRole('button', { name: 'Próximo' }));
     expect(screen.getByRole('img', { name: 'Fortaleza · slide 12' })).toBeTruthy();
-    expect(screen.getByLabelText('Slide em preparação')).toBeTruthy();
+    expect(screen.getByLabelText('Histórico mensal pendente')).toBeTruthy();
     fireEvent.click(screen.getByRole('button', { name: 'Próximo' }));
     expect(screen.getByRole('img', { name: 'Fortaleza · slide 13' })).toBeTruthy();
     fireEvent.click(screen.getByRole('button', { name: 'Próximo' }));

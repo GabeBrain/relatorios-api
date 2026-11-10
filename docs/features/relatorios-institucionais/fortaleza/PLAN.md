@@ -1,5 +1,9 @@
 # Fortaleza / SINDUSCON-CE — plano inicial
 
+## 10/11 —12/14concluídos e dez slides16–25
+
+Usuário autorizou e foi enviado1e1767e. Pedido seguinte implementa12/14antes de16–25, na ordem oficial; [entrega, contratos, evidências e limites](MENSAL_SLIDES_12_25_2026-11-10.md). Prévia mensal1–25, coleta segmentada compartilhada, VGL/INCC-DI provisório explícito nos insights, loteamentos, vendas e13janelas móveis de12meses.127testes Fortaleza e16regressões aprovados, build/lint/Edge sintético. Próximo lote26–35. Sem nova API real, exportação, homologação ou push desta nova fatia. Registros abaixo são históricos.
+
 ## 10/11 — prioridade: mensal
 
 Reforço do Lucas durante a implementação: seguir a ordem oficial no site e no desenvolvimento. Navegação1–15sem saltos,12/14identificados como fontes pendentes. Fechar12/14antes de avançar ao próximo bloco; não renumerar13/15nem simular universo completo com dados apenas verticais.

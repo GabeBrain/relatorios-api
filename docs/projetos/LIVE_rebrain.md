@@ -385,6 +385,16 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-11-10 — Fortaleza:12/14 e lote mensal16–25 — usuário / Codex
+
+- **Ambiente/funcionalidade:** Rebrain — `/rebrain/relatorios-institucionais/fortaleza`, somente rota.
+- **O quê:** push autorizado anterior1e1767econcluído; nova implementação fecha12/14eacrescenta16–25sem saltos: VGL, loteamentos, divisórias, vendas e13pontos móveis de12meses. Coleta compartilhada por segmento/cidade/fonte, concorrência2, cache/retry/abort por sessão.13/15reutilizam a mesma fonte vertical; navegar não consulta.
+- **Contrato/limites:** [mensal12–25](../features/relatorios-institucionais/fortaleza/MENSAL_SLIDES_12_25_2026-11-10.md). Casas versus lotes/comercial explícitos; desconhecido/incompleto não vira zero. INCC-DI/base selecionada provisórios e identificados nos insights; validar VGL nominal e metodologia com fonte real. Sem afirmar aceite ou relatório completo.
+- **Validação/padrões:**127testes Fortaleza +16regressões selecionadas Secovi/FIERGS, build/tipos/lint, Edge1440/390claro/escuro/estados lento/vazio/incompleto/cancelado, ordem11–25. Arte original Office em leitura, SVG dinâmico, GeoApiScopeEngine/BrainLoadingState/shadcn. Sem GeoBrain real, novo exportador, deploy observado ou Monday.
+- **Arquivos/commits:** módulo Fortaleza, artes sanitizadas11–25, diagnósticos e documentos; commit isolado `feat(relatorios): complete Fortaleza monthly slides 12 through 25`, base1e1767e. Nova fatia local até autorização própria de envio; sem mudanças SP ou política compartilhada.
+- **Monday:** [Fortaleza — SINDUSCON](https://brain381753.monday.com/boards/18398638577/pulses/13149406420) — `13149406420`.
+- **Impacto em Etapas/Pendências:** prévia mensal1–25implementada condicional às fontes; próximo lote26–35. Fontes reais/INCC/homologação, amostra institucional e exportação seguem pendentes.
+
 ### 2026-11-10 — Fortaleza: prioridade mensal e lançamentos verticais — Lucas / Codex
 
 - **Ambiente/funcionalidade:** Rebrain — `/rebrain/relatorios-institucionais/fortaleza`, somente rota, sem menu/painel.
@@ -1222,6 +1232,8 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 
 ## 2. Etapas
 
+- 🟡 **Fortaleza mensal — lote12/14+16–25,10/11:** prévia1–25na ordem original, fontes segmentadas e cálculo/render dos doze novos slides. Validado localmente; método INCC e fontes reais aguardam homologação. [Estado atual](../features/relatorios-institucionais/fortaleza/MENSAL_SLIDES_12_25_2026-11-10.md).1e1767epublicado; novo lote local.
+
 - 🟡 **Fortaleza mensal —10/11:**1–10e11/13/15 implementados localmente, histórico vertical automático25meses e insights;13composições, restante ainda pendente. [Estado atual](../features/relatorios-institucionais/fortaleza/MENSAL_LANCAMENTOS_2026-11-10.md), que atualiza os registros históricos de09/11 abaixo.
 
 **05/11 — SP, equipe/consultoria:** cinco e quinze posições personalizáveis na prévia, com nomes/cargos e retratos separados no PPTX. Validado localmente com Edge/Office; publicar e conferir no site. Navegação do menu já publicada em219ed1c.
@@ -1318,6 +1330,8 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 ---
 
 ## 3. Pendências
+
+- **Fortaleza mensal — continuação10/11:** próximo26–35; depois36–60/exportação. Homologar produtos horizontais/comercial, VGL nominal, INCC-DI/base provisórios e fotografias reais pareadas. Amostra/empresas do2ainda sem fonte própria.12/14não são mais pendências de implementação; estados anteriores abaixo são históricos.
 
 - **Fortaleza mensal —10/11:** priorizar12/14com casas/comercial/loteamentos e valores/INCC; depois vendas/oferta/preços/IVV/tabelas e exportação. Fonte da amostra, ensaio real e homologação continuam pendentes. Fatia11/13/15local; publicação exige autorização. Estados09/11abaixo preservados como histórico; base anterior já enviada em03d3301.
 

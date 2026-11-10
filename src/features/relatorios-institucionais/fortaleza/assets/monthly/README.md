@@ -1,5 +1,9 @@
 # Arte mensal — lançamentos verticais
 
+## Lote12/14e16–25
+
+Atualização10/11: extração cobre11–25do mesmo original/hash.12/14agora têm renderer analítico segmentado, não placeholders;18/21têm arte nativa com municípios/período variáveis. Gráficos e notas antigas removidos também em16–25; “Atualizado pelo INCC” é substituído por identificação dinâmica do índice/base efetivamente calculados. Composição não afirma equivalência pixel a pixel. Referência anterior abaixo preservada como histórico.
+
 Origem: `BRAIN_PANORAMA_FORTALEZA_E_RM_JULHO_VAP_26ago_9h31.pptx`, Drive `10-lrnOUhSIN0Yju2fqA88F3uLmp4TT8a`, SHA256 `296fe59a14cb914e84c070700a177fe999950aab54468ea261ade2167fa245a8`.
 
 Slides 11–15 renderizados em 1280×720 pelo PowerPoint instalado, somente leitura do arquivo original.12/14usam a arte apenas para preservar a posição oficial e mostram fonte em preparação; não têm gráficos de dados implementados. `scripts/diagnostics/fortaleza-monthly-art.ps1` remove gráficos, variações e seus textos de comparação, além da nota histórica de teto do MCMV, antes de renderizar a arte. Nenhum dado de mercado antigo é utilizado para preencher a nova geração. Títulos, logos e fundos originais preservados. `layout.json` registra medidas nativas de origem; renderer usa a mesma geometria geral com rótulos dinâmicos próprios, sem afirmar equivalência pixel a pixel.

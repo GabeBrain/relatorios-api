@@ -1,5 +1,9 @@
 # Fortaleza — evidências da abertura
 
+## 10/11/2026 —12/14 e lote16–25
+
+Push autorizado1e1767econcluído; nova entrega documentada em [mensal12–25](MENSAL_SLIDES_12_25_2026-11-10.md), base main/origin1e1767e.127testes Fortaleza/12arquivos +16regressões selecionadas Secovi/FIERGS aprovados; build/tipos/lint e Edge1440/390claro/escuro, quinze lâminas11–25, estados lento/vazio/incompleto/cancelado. Originais Office em leitura e renders novos inspecionados; sobreposições monetárias/divisória21 corrigidas e rechecadas. Sem fonte GeoBrain real, exportação, homologação ou Monday. Índice outubro/2026 conferido na página pública; modalidade/base Fortaleza ainda provisórias. Nova fatia local, sem push até autorização própria.
+
 ## 10/11/2026 — continuação mensal
 
 [Implementação, fontes e validações desta fatia](MENSAL_LANCAMENTOS_2026-11-10.md). Base03d3301, main/origin0–0 após fetch, Windows/Codex Test. PPTX mensal recuperado pelo Drive e SHA256 conferido; Office somente leitura. Novos11/13/15, coleta mensal limitada e seleção mensal padrão.105testes distintos aprovados após correção/rechecagem de uma asserção de mensagem duplicada; tipos/build/lint e Edge1440/390claro/escuro com fontes interceptadas. Sem API real, exportação nova, homologação ou Monday. Commit local; publicação separada.
