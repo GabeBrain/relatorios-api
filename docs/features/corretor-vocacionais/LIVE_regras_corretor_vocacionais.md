@@ -16,6 +16,12 @@ Este arquivo deve ser atualizado sempre que uma regra for adicionada, removida, 
 4. Informar a fonte técnica/documental da mudança.
 5. Separar regras `DET` de regras `IA/LLM`.
 
+## Versão 0.75 — 10/11/2026 — registro da proteção CSV recebida do remoto
+
+- **DET / RUNTIME, exportação:** serializers CSV de auditoria (`lib/audit/session.ts`) e calibração (`pages/CorretorCalibrationPage.tsx`) prefixam apóstrofo em textos iniciados por `=`, `+`, `-`, `@`, tab ou CR, antes de escapar aspas e envolver a célula. O prefixo é literal do arquivo para neutralizar interpretação como fórmula de planilha.
+- **Origem:** alteração já existente de gpt-engineer-app/Lovable em e7a00db, preservada na integração autorizada b6c6488. Este registro documenta o remoto; não houve nova edição do código Corretor nesta sessão de Fortaleza.
+- Não altera achados, regras de análise, prompts, classificações DET/IA, schema, extração ou dados persistidos. Novas verificações desta sessão cobrem Fortaleza/build integrado; runtime/exportação Corretor não foram exercitados.
+
 ## 22/10/2026 — Ajuste visual do tema escuro, sem mudança nas regras
 
 Rodapé de apontamentos deixava uma faixa Papel clara no modo escuro; triagem em portal não herdava aliases locais. Corrigida adaptação escura da carteira/preparação, bancada, carregamento, materiais, Sugestão em blocos e triagem: superfícies neutras próximas, texto menos luminoso, bordas discretas e preenchimentos de estado suaves. Botões de decisão indicam seleção com aria-pressed/filete, mantendo callbacks e decisões existentes. Tokens da fundação copiados sem alteração; nenhum motor, prompt, perfil, limite, retomada, material ou registro de consumo alterado.

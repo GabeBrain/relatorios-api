@@ -385,6 +385,15 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-11-10 — Fortaleza: integração autorizada do fechamento mensal — usuário / Codex
+
+- **Ambiente/funcionalidade:** Rebrain / Fortaleza mensal1–60e diagnóstico JSON. Usuário autorizou integrar/publicar; merge b6c6488 preserva0ec2dcbe nove commits remotos atée7a00db, sem conflito/rebase/reset/force. Fortaleza permaneceu idêntico ao commit local.
+- **Remoto preservado:** mapa/CSV, armazenamento de autenticação de preview e configurações/dependências Lovable. Nenhuma nova regra de mercado introduzida pela integração. Comportamento CSV remoto do Corretor registrado no seu live conforme protocolo, com autoria original preservada.
+- **Validação:**214testes Fortaleza/18arquivos aprovados na integração. Build e tipagem integrados aprovados; avisos anteriores de Browserslist/chunks preservados. Validações visuais/JSON do lote anterior não foram apresentadas como novo ensaio autenticado; sem API real/homologação/deploy observado/Monday.
+- **Monday:** [Fortaleza — SINDUSCON](https://brain381753.monday.com/boards/18398638577/pulses/13149406420) — `13149406420`.
+- **Impacto em Etapas/Pendências:** envio autorizado do mensal60e JSON; aguardar teste real/diagnóstico do usuário. Exportação/homologação continuam pendentes; próxima frente indicada é SP estética/diagnóstico.
+
+
 ### 2026-11-10 — Fortaleza mensal60slides e diagnóstico JSON — usuário / Codex
 
 - **Ambiente/funcionalidade:** Rebrain / Fortaleza mensal, cinco posições finais56–60; não há mensal61. Basefbe9742atualizada porFF limpo após fetch, com dois commits do time lidos e preservados.
@@ -1311,6 +1320,8 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 
 
 ## 2. Etapas
+
+- **Fortaleza mensal60/JSON:** integrado em b6c6488,214testes e build aprovados; publicação autorizada. Próxima validação é o teste real/diagnóstico do usuário.
 
 - 🟡 **Fortaleza mensal1–60:** todas as posições da prévia implementadas; diagnóstico JSON e editor final disponíveis localmente. Publicação/revisão real/homologação/exportação ainda pendentes.
 
