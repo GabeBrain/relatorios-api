@@ -385,6 +385,17 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-11-10 — Fortaleza mensal60slides e diagnóstico JSON — usuário / Codex
+
+- **Ambiente/funcionalidade:** Rebrain / Fortaleza mensal, cinco posições finais56–60; não há mensal61. Basefbe9742atualizada porFF limpo após fetch, com dois commits do time lidos e preservados.
+- **Entrega:** [contrato e evidências](../features/relatorios-institucionais/fortaleza/MENSAL_SLIDES_56_60_DIAGNOSTICO_2026-11-10.md). Equipes57/58editáveis, quadro59substituível, arte original e competência variável. Pedido posterior atendido: JSON preparado automaticamente ao concluir, com download,60situações/valores/fontes; sem token, fotos ou históricos brutos. Worker cancelável, sem API extra.
+- **Validação:**214testes Fortaleza +31contratos/regressões selecionados, tipos/build/lint e Edge1440/390claro/escuro com fontes sintéticas e download JSON conferidos no fechamento. Não equivale a homologação, estudo real, exportador ou deploy observado; sem Monday.
+- **Commits:** fatia isolada `feat(relatorios): finish Fortaleza monthly preview and diagnostic`, basefbe9742; permanece local até autorização própria de push.
+- **Fechamento Git:** fetch encontrou9remotos novos atée7a00db(mapa/segurança/auth), sem diff de Fortaleza. Não integrados com árvore suja; testes/build desta fatia na basefbe9742. Pedir autorização para integrar antes do envio.
+- **Monday:** [Fortaleza — SINDUSCON](https://brain381753.monday.com/boards/18398638577/pulses/13149406420) — `13149406420`.
+- **Impacto em Etapas/Pendências:** mensal1–60implementado como prévia; receber JSON real e revisar fontes/estética/metodologia/exportação. Trimestral89mantém dez iniciais. Usuário indicou depois refinamentos estéticos/diagnóstico SP; SP e motores paralelos não alterados nesta fatia.
+
+
 ### 10/11/2026 — Panorama: somente consolidado e ressalvas acessíveis — Gabriel / Codex
 
 - **Mudança:** seleção com2+cidades permite Somente consolidado, semnomesougruposobrigatórios; opções2/3grupos preservadas. O manifesto compartilhado omite comparativosmunicipais/territoriais, incluindo antigosSecovi eFIERGS31, mantendo todascidades e análisesconsolidadas. Cidadeúnica continua direta. Novidadesnãoalteramcálculos ouguardas.
@@ -1301,6 +1312,8 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 
 ## 2. Etapas
 
+- 🟡 **Fortaleza mensal1–60:** todas as posições da prévia implementadas; diagnóstico JSON e editor final disponíveis localmente. Publicação/revisão real/homologação/exportação ainda pendentes.
+
 - **Fortaleza46–55:** integrado ao remoto em c0441be com recortes automáticos, preservando Panorama; envio autorizado nesta sessão. Sem aceite remoto presumido.
 
 - 🟡 **Fortaleza mensal46–55:** prévia1–55, IVV RM e tabelas implementadas;198testes +16regressões e visual sintético. Novo lote local; homologação/exportação pendentes.
@@ -1407,6 +1420,8 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 ---
 
 ## 3. Pendências
+
+- **Fortaleza mensal após60:** autorizar envio, gerar teste real e analisar JSON; revisar fontes/INCC/preços/IVV/capacidade/amostra/equipe e exportação. Não há outros slides mensais. Depois, correções estéticas/diagnóstico SP indicadas pelo usuário. Trimestral segue separado.
 
 - **Fortaleza mensal após46–55:** implementar56–60, revisar conjunto/exportação e homologar fontes/metodologia; validar capacidade histórica/universo ativo, bairro, preço/IVV e diferenças entre fontes. Estados abaixo são históricos, sem retirar amostra/empresas do2da fila.
 

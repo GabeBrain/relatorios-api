@@ -1,5 +1,10 @@
 # Fortaleza — fatos, propostas e pendências
 
+## 10/11/2026 — mensal1–60 e diagnóstico JSON
+
+[Entrega e contrato](MENSAL_SLIDES_56_60_DIAGNOSTICO_2026-11-10.md): cinco posições finais implementadas; mensal original termina no60. Equipes57/58editáveis e quadro59substituível como imagem, sem presumir equipe atual. Diagnóstico JSON preparado automaticamente ao terminar a geração, download disponível para enviar ao Codex; sem credenciais/fotos/históricos brutos.214testes Fortaleza +31regressões/contratos, build/lint e Edge sintético conferidos no fechamento. Basefbe9742porFF limpo; nova fatia local. Restam revisão real/fontes/homologação/exportação, não outros slides mensais. Trimestral89segue com dez iniciais. SP estética/diagnóstico é a próxima frente indicada pelo usuário, sem alteração nesta fatia. Estados abaixo são históricos.
+
+
 ## 10/11/2026 — mensal46–55
 
 [Entrega e contratos](MENSAL_SLIDES_46_55_2026-11-10.md): prévia1–55dos60originais, IVV da RM e tabelas de oferta por município/tipo/bairro; fontes existentes reutilizadas.198testes Fortaleza +16regressões, build/tipos/lint e Edge sintético. Universo/capacidade, bairro, preços/IVV candidatos, sem API real/homologação.84568dfpublicado com autorização; nova fatia local. Próximo56–60, depois revisão/exportação/homologação. Registros abaixo são históricos.

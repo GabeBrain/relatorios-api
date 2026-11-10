@@ -17,6 +17,7 @@ export interface FortalezaGenerationState {
   key: string;
   phase: 'loading' | 'done' | 'error' | 'cancelled';
   startedAt: number;
+  finishedAt?: string;
   message: string;
   report: FortalezaMarketReport | null;
   hasFailedCities: boolean;
@@ -81,7 +82,7 @@ export function useFortalezaMarket(selection: FortalezaSelection, authorizedCiti
       }
       if (controller.signal.aborted) return;
       const finishedSteps: FortalezaGenerationState['steps'] = FORTALEZA_GENERATION_STEPS.map(step => ({ ...step, status: step.id === 'validation' ? 'done' : step.id === 'sources' ? report.metrics && intro.status === 'ready' && !monthlyLaunches?.issues.length ? 'done' : 'attention' : step.id === 'reconciliation' ? report.metrics && !report.issues.length ? 'done' : 'attention' : blueprint ? 'done' : 'waiting' }));
-      setState({ key, phase: 'done', startedAt, message: report.metrics ? report.issues.length || intro.status !== 'ready' || monthlyLaunches?.issues.length ? 'Prévia organizada; confira os balanços e as fontes pendentes.' : monthlyLaunches?.market ? 'Prévia mensal organizada até o slide 55.' : 'Prévia vertical e slides iniciais organizados.' : 'Há fontes ou cobertura a conferir antes de organizar a prévia.', report, hasFailedCities: result.collection.failedCities.length > 0 || Boolean(monthlyLaunches?.issues.length), blueprint, intro, monthlyLaunches, steps: finishedSteps });
+      setState({ key, phase: 'done', startedAt, finishedAt:new Date().toISOString(), message: report.metrics ? report.issues.length || intro.status !== 'ready' || monthlyLaunches?.issues.length ? 'Prévia organizada; confira os balanços e as fontes pendentes.' : monthlyLaunches?.market ? 'Prévia mensal organizada até o slide 60.' : 'Prévia vertical e slides iniciais organizados.' : 'Há fontes ou cobertura a conferir antes de organizar a prévia.', report, hasFailedCities: result.collection.failedCities.length > 0 || Boolean(monthlyLaunches?.issues.length), blueprint, intro, monthlyLaunches, steps: finishedSteps });
     } catch {
       if (!controller.signal.aborted) setState(current => ({ key, phase: 'error', startedAt, message: 'Não foi possível concluir a consulta. Confira sua autenticação e tente novamente.', report: null, hasFailedCities: false, blueprint: null, intro: null, monthlyLaunches: null, steps: (current?.steps ?? steps).map(step => ({ ...step, status: step.status === 'running' ? 'failed' : step.status })) }));
     } finally { if (operation.current === controller) operation.current = null; }

@@ -1,5 +1,9 @@
 # Arte mensal — lançamentos verticais
 
+## Fechamento56–60
+
+Mesmo original/hash, PowerPoint em leitura.57/58com pessoas removidas do fundo para edição SVG; nove retratos derivados dos renders originais por `fortaleza-monthly-people.py`.59mantém o quadro como imagem inteira, substituível;56/60preservam arte e recebem competência dinâmica. Equipes iniciais são da referência julho/2026, não atualizadas pela API.
+
 ## Lote46–55
 
 Arte nova46–55do mesmo original/hash, Office somente leitura. Gráficos e tabelas antigos removidos. IVV e tabelas recebem números/períodos SVG, sem copiar a base anterior. Layouts antigos preservados no manifesto.

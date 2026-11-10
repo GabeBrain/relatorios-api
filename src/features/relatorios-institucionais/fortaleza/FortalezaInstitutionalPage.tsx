@@ -1,3 +1,4 @@
+import { FortalezaDiagnosticExport } from './FortalezaDiagnosticExport';
 import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { FileChartColumn, Layers } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -66,7 +67,7 @@ export default function FortalezaInstitutionalPage() {
       <div className="flex items-start gap-3"><span className="shrink-0 rounded-xl bg-primary/10 p-3 text-primary"><FileChartColumn className="h-7 w-7" aria-hidden="true" /></span><div className="min-w-0"><div className="flex flex-wrap items-center gap-2"><h1 className="break-words text-2xl font-semibold">Fortaleza / SINDUSCON-CE</h1><Badge variant="secondary">Em preparação</Badge></div><p className="mt-1 text-sm text-muted-foreground">Base do panorama de Fortaleza e região metropolitana.</p></div></div>
       <p className="flex items-center gap-2 text-sm text-muted-foreground"><Layers className="h-4 w-4" aria-hidden="true" />Referências verificadas: 89 páginas trimestrais e 60 mensais</p>
     </header>
-    <Alert><AlertTitle>Relatório em implantação</AlertTitle><AlertDescription>{periodicity === 'monthly' ? 'Prévia mensal até o slide 55, com lançamentos, vendas, VGL/VGV e oferta final. Os demais blocos e a exportação continuam em preparação.' : 'Consulte o núcleo vertical e os dez slides iniciais. A continuação trimestral e a exportação estão em preparação.'}</AlertDescription></Alert>
+    <Alert><AlertTitle>Relatório em implantação</AlertTitle><AlertDescription>{periodicity === 'monthly' ? 'Os 60 slides do modelo mensal estão na prévia. A disponibilidade depende das fontes conferidas; revisão, homologação e exportação continuam em preparação.' : 'Consulte o núcleo vertical e os dez slides iniciais. A continuação trimestral e a exportação estão em preparação.'}</AlertDescription></Alert>
     <section className="space-y-5 rounded-xl border bg-card p-4 sm:p-6" aria-label="Configuração do estudo">
       <h2 className="font-semibold">Escolha o período</h2>
       <p className="text-sm text-muted-foreground">Recortes automáticos por slide: Fortaleza, região metropolitana ou o conjunto completo. RM: Aquiraz, Caucaia, Eusébio e Maracanaú.</p>
@@ -92,6 +93,7 @@ export default function FortalezaInstitutionalPage() {
     {market.state && !querying && <FortalezaGenerationPanel state={market.state} />}
     {market.state?.phase === 'cancelled' && <p role="status" className="text-sm text-muted-foreground">{market.state.message}</p>}
     {market.state?.phase === 'error' && <Alert variant="destructive"><AlertTitle>Consulta não concluída</AlertTitle><AlertDescription>{market.state.message}<Button className="mt-3 block" variant="outline" disabled={!ready || busy} onClick={() => { void market.consult(); }}>Tentar consultar novamente</Button></AlertDescription></Alert>}
+    {market.state && <FortalezaDiagnosticExport selection={selection} state={market.state} />}
     {market.state?.report && <FortalezaMarketPanel report={market.state.report} />}
     {market.state?.hasFailedCities && <Button variant="outline" disabled={!ready || busy} onClick={() => { void market.consult(true); }}>Tentar cidades faltantes</Button>}
     <Tabs defaultValue="slides">

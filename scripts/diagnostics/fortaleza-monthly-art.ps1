@@ -13,7 +13,8 @@ try {
       $slide.Export((Join-Path $fortMonthlyRoot "monthly-original-$number.png"), 'PNG', 1280, 720)
       $charts = @(); $texts = @(); $changes = 0; $scopeSlot = $null
       foreach ($shape in @($slide.Shapes)) {
-        if ($number -ge 47 -and $shape.HasTable -eq -1) { $shape.Delete()
+        if ($number -in @(57,58) -and $shape.Left -lt 600) { $shape.Delete()
+        } elseif ($number -ge 47 -and $shape.HasTable -eq -1) { $shape.Delete()
         } elseif ($shape.HasChart -eq -1) {
           $charts += @{x=[double]$shape.Left*4/3;y=[double]$shape.Top*4/3;width=[double]$shape.Width*4/3;height=[double]$shape.Height*4/3}
           $shape.Delete()
