@@ -385,6 +385,14 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 10/11/2026 — Panorama: somente consolidado e ressalvas acessíveis — Gabriel / Codex
+
+- **Mudança:** seleção com2+cidades permite Somente consolidado, semnomesougruposobrigatórios; opções2/3grupos preservadas. O manifesto compartilhado omite comparativosmunicipais/territoriais, incluindo antigosSecovi eFIERGS31, mantendo todascidades e análisesconsolidadas. Cidadeúnica continua direta. Novidadesnãoalteramcálculos ouguardas.
+- **Alertas:** “Médias gerais de preço e área” explicita pendência defórmula/filtros/competência naorigem; classificaçãohorizontal segue noavisoexistente comestoqueexcluído. Semvaloresfixos, imputação oualegação deatualização dafonte.
+- **Fonte:** [plano territorial](../features/Relatorios%20Secovi_FIERGS/PLAN_COMPARACAO_TERRITORIAL_PANORAMA_2026-11-05.md), seção10/11; paridadenumérica nareferênciaexistente.48testesfocados,tipos/lint aprovados;4percursosvisuaisdesktop/mobileclaro/escuro semerro/overflow. SemAPIreal,artefatos `.local-inputs/panorama-consolidado-2026-11-10/`.
+- **Estado:** validado localmente, para disponibilizar no teste solicitado; publicaçãoLovable e aceiteexternopendentes. E-mail curto preparado no chat, não enviado.
+
+
 ### 10/11/2026 — Panorama FIERGS: paridade por planta implementada — Gabriel / Codex
 
 - **Entrega:** oferta ativa no fechamento separada dos lançamentos históricos; vendas trimestrais sem duplicar reservas Futuro; estoques/áreas por planta; preços Padrão por contribuições de quantidade, valor e área. Tabelas, série, faixas, coortes/produtos e mapas usam a base correspondente. Campo `work` explícito recupera produtos sem exceções por ID. Metodologia, avisos, CSV e cache atualizados. PPT híbrido mantido; faixa do título ancorada ao DOM.

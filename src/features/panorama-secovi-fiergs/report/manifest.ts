@@ -117,7 +117,7 @@ export interface ManifestSubject {
 export function panoramaManifestOptions(report: ManifestSubject, mapboxAccessToken = ''): { includeCityComparisons: boolean; includeHorizontal: boolean; includeMap: boolean } {
   const horizontal = report.cube.projects.filter((project) => project.segment === 'Horizontal');
   return {
-    includeCityComparisons: report.cityComparisons.enabled,
+    includeCityComparisons: report.scope?.presentation?.mode !== 'consolidated' && report.cityComparisons.enabled,
     // JG-34: "se não tiver empreendimentos ativos, essa página precisa ser excluída". Existir no
     // histórico não basta — o bloco só entra com oferta ativa no fechamento selecionado.
     includeHorizontal: (report.provenance.engineVersion !== 'v3' && report.provenance.engineVersion !== 'v4') || horizontal.some((project) => (project.finalUnits ?? 0) > 0),
@@ -164,7 +164,7 @@ export function panoramaManifestFor(report: ManifestSubject, mapboxAccessToken =
     }
     const scope = report.scope;
     const territory = scope.uf && scope.cities ? panoramaScopeIdentity({ uf: scope.uf, cities: scope.cities, entity: scope.entity }) : null;
-    if (territory?.cities.length === 1) omitted.add(31);
+    if (territory?.cities.length === 1 || scope.presentation?.mode === 'consolidated') omitted.add(31);
     if ((report.provenance.completedCities?.length ?? 0) > 0) {
       if (!report.cube.projects.some((project) => project.segment === 'Horizontal')) [62, 63, 64, 65, 66].forEach((slide) => omitted.add(slide));
       if (!report.cube.projects.some((project) => project.segment === 'Vertical')) {

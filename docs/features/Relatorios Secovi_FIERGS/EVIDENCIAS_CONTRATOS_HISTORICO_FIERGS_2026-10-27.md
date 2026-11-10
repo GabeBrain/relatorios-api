@@ -188,3 +188,8 @@ Artefatos: `.local-inputs/fiergs-sao-leopoldo-2026-11-10/`; `implemented-summary
 3. Campo autoritativo de produto dos dois horizontais ativos pendentes. O estoque excluído é explícito; não afirmar que todo o horizontal coincide com o Geobrain.
 
 Publicar no Lovable após o push e gerar São Leopoldo,1T2020–3T2026, com CSV/PDF/PPT. Conferir oferta/vendas/faixas e preços, os121deestoque em classificação, e repetir um recorte anterior. A resposta deve anunciar correções comprovadas e essas ressalvas; não declarar homologação encerrada. Nenhuma mensagem externa foi enviada pelo agente.
+
+
+### 10/11 — Ressalvas de médias no painel de alertas
+
+O item informativo`GEOBRAIN_PRICE_TOTAL_METHOD_REVIEW` identifica “Médias gerais de preço e área”, explica que os totais vêm das contribuições primitivas e que aequivalência com outros totais doGeobrain ainda depende de confirmação de fórmula/filtros/competência epayload datado. Não afirma que abase mudou. Éumaviso porcategoria, semnúmerosfixos oubloqueio. “Classificação de produtos” jáinformaosregistros eestoques excluídos. Isso permite mencionar ambasasressalvas noemail sem afirmar que osprints foramtodosreconciliados. Teste decontrato confirma oaviso e amesma média numérica. O envioaoGit anterior está confirmado atéa1db2ba5; publicaçãoLovable/ensaio site continuam pendentes. Aescolha deconsolidado semcomparação édocumentada no plano territorial05/11, fonteúnica dessa interface.

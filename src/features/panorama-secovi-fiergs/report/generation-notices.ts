@@ -63,6 +63,11 @@ export function buildGenerationNotices(report: PanoramaReportModel): ReportGener
   if (unpricedMapLocations) add({ code: 'MARKET_MAP_PRICE_UNOBSERVED', severity: 'info', indicator: 'Mapa por preço',
     reason: `${unpricedMapLocations} empreendimento(s) sem preço observado elegível não recebem marcador no mapa por R$/m².`,
     source: 'geobrain-market-v1', displayDecision: 'Coordenadas e contagens permanecem na auditoria e nos outros mapas; preço ausente não é apresentado como zero.' });
+  if (report.granular.marketContract) add({ code: 'GEOBRAIN_PRICE_TOTAL_METHOD_REVIEW', severity: 'info',
+    indicator: 'Médias gerais de preço e área',
+    reason: 'O relatório recalcula os totais a partir das plantas Padrão com estoque positivo. A equivalência com a fórmula do total exibido em outras consultas do Geobrain ainda está em verificação; capturas feitas em outro momento ou com outros filtros também podem divergir.',
+    source: 'geobrain-market-v1 / confirmação metodológica na origem pendente',
+    displayDecision: 'Valores calculados e arquivos continuam disponíveis. A confirmação depende dos mesmos filtros e competência, da fórmula do total e de uma resposta datada da origem; os pesos não são alterados apenas para coincidir com um print.' });
   if (report.scope.entity === 'fiergs-rs' && report.provenance.completedCities.length === report.scope.cities.length) {
     const slides = (['launches', 'sales'] as const).flatMap((kind) => {
       const activity = mcmvActivity(report, kind);

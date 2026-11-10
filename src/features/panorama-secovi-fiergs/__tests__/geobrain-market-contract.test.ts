@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { buildCityCube, mergeCubes } from '../domain/cube';
-import { buildGranularBlocks } from '../report/model';
+import { buildGranularBlocks, buildPanoramaReportModel } from '../report/model';
 import { activeMarketCube, closingPlants, priceContributions } from '../domain/market-observations';
 import { offerByAreaBand, offerByTypology, pricesByStandard } from '../domain/aggregations';
 import type { PanoramaScope } from '../types';
@@ -97,4 +97,12 @@ describe('geobrain-market-v1: plant identity, active offer, flows and price deno
     expect(series.series[0].observed?.vertical).toBe(false);
     expect(series.byGroup.find((r) => r.label==='Standard')?.vertical).toBeCloseTo(34000000 / 5400);
   });
+  it('explicita a verificação da média geral nos alertas sem alterar o cálculo',()=>{
+    const cube=cubeOf(),empty={rows:[],available:false,source:'não coletado'};
+    const sources={sales:empty,salesTypology:empty,stock:empty,stockTypology:empty,ivv:empty,ivvTypology:empty,ticket:empty,ticketTypology:empty,meter:empty,meterTypology:empty};
+    const report=buildPanoramaReportModel(scope,[],sources,[],{cubes:[cube]});
+    expect(report.notices.find(n=>n.code==='GEOBRAIN_PRICE_TOTAL_METHOD_REVIEW')).toMatchObject({indicator:'Médias gerais de preço e área',severity:'info'});
+    expect(report.granular.pricesByStandard.at(-1)?.averagePricePerMeter).toBe(5000);
+  });
+
 });

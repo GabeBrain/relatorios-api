@@ -84,7 +84,7 @@ export default function PanoramaSecoviFiergsPage() {
     const next={...scope,uf:geo.uf,cities:[...cities].sort((a,b)=>a.localeCompare(b,'pt-BR')),presentation};
     resetCollectionSession();setGenerationId(id=>id+1);setGenerationProgress(null);setScope(next);setSubmitted(next);setGroupsOpen(false);
   };
-  const generate=()=>{if(!ready)return;if(cities.length>3)setGroupsOpen(true);else submit(defaultTerritorialPresentation(cities));};
+  const generate=()=>{if(!ready)return;if(cities.length>=2)setGroupsOpen(true);else submit(defaultTerritorialPresentation(cities));};
 
   return <div className="panorama-scope-page mx-auto max-w-[1440px] space-y-5 p-4 sm:p-6 animate-fade-in">
     <header className="max-w-3xl"><h1 className="text-2xl font-semibold tracking-tight">Panorama de Mercado</h1><p className="mt-1 text-sm text-muted-foreground">Panoramas executivos Secovi/FIERGS por praça e período.</p></header>

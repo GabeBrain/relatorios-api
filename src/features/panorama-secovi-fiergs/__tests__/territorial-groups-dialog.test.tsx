@@ -50,4 +50,27 @@ describe('grupos no relatório único',()=>{
   expect(screen.queryByText('Outra cidade')).toBeNull();
  });
 
+ it.each([2,4,10])('permite somente consolidado com %i cidades, sem exigir nomes ou partições',count=>{
+  const selected=Array.from({length:count},(_,i)=>`Cidade ${i+1}`),confirm=vi.fn();
+  render(<TerritorialGroupsDialog open onOpenChange={()=>{}} cities={selected} onConfirm={confirm}/>);
+  fireEvent.click(screen.getByRole('button',{name:'Somente consolidado'}));
+  expect(screen.queryByRole('region',{name:'Grupo 1'})).toBeNull();
+  expect(screen.queryByLabelText('Nome do grupo 2')).toBeNull();
+  fireEvent.click(screen.getByRole('button',{name:'Gerar consolidado'}));
+  expect(confirm).toHaveBeenCalledWith({mode:'consolidated',layout:'integrated'});
+ });
+ it('preserva os grupos ao alternar para consolidado e voltar, sem gerar ao cancelar',()=>{
+  const confirm=vi.fn(),close=vi.fn();render(<TerritorialGroupsDialog open onOpenChange={close} cities={cities} onConfirm={confirm}/>);
+  fireEvent.change(screen.getByLabelText('Nome do grupo 2'),{target:{value:'Entorno'}});
+  fireEvent.click(screen.getByRole('button',{name:'Somente consolidado'}));
+  fireEvent.click(screen.getByRole('button',{name:'2 grupos'}));
+  expect(screen.getByLabelText('Nome do grupo 2')).toHaveValue('Entorno');
+  fireEvent.click(screen.getByRole('button',{name:'Cancelar'}));expect(confirm).not.toHaveBeenCalled();
+ });
+ it('reabre uma escolha consolidada e impede três grupos para somente duas cidades',()=>{
+  render(<TerritorialGroupsDialog open onOpenChange={()=>{}} cities={cities.slice(0,2)} value={{mode:'consolidated',layout:'integrated'}} onConfirm={()=>{}}/>);
+  expect(screen.getByRole('button',{name:'Somente consolidado'})).toHaveAttribute('aria-pressed','true');
+  expect(screen.getByRole('button',{name:'3 grupos'})).toBeDisabled();
+ });
+
 });

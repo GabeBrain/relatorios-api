@@ -26,7 +26,7 @@ function setup(entity='fiergs-rs'){
   render(<QueryClientProvider client={client}><PanoramaSecoviFiergsPage/></QueryClientProvider>);
   if(entity==='fiergs-rs')fireEvent.change(screen.getAllByRole('combobox')[0],{target:{value:entity}});
 }
-async function generate(){fireEvent.click(screen.getByRole('button',{name:'Gerar relatório'}));await screen.findByRole('button',{name:'Baixar PPT'});}
+async function generate(groups=2){fireEvent.click(screen.getByRole('button',{name:'Gerar relatório'}));if(screen.queryByRole('dialog')){if(groups===3)fireEvent.click(screen.getByRole('button',{name:'3 grupos'}));fireEvent.click(screen.getByRole('button',{name:'Gerar relatório com grupos'}));}await screen.findByRole('button',{name:'Baixar PPT'});}
 describe('rota real Panorama → projeção → manifesto → exportação',()=>{
   it('mantém seleção vazia, gera o relatório integrado e entrega o mesmo manifesto ao PPT',async()=>{
     setup();expect(screen.getByRole('button',{name:'Gerar relatório'})).toBeDisabled();expect(mocks.fetch).not.toHaveBeenCalled();
@@ -45,12 +45,15 @@ describe('rota real Panorama → projeção → manifesto → exportação',()=>
     expect(document.querySelector('.panorama-report-page')).not.toBeNull();
   });
   it('cobre três cidades, consolidado maior e cidade versus grupo sem nova coleta editorial',async()=>{
-    setup();fireEvent.click(screen.getByText('Selecionar 3'));await generate();
+    setup();fireEvent.click(screen.getByText('Selecionar 3'));await generate(3);
     expect(mocks.fetch.mock.calls[0][0].presentation.units).toHaveLength(3);
     fireEvent.click(screen.getByText('Selecionar 4'));
     fireEvent.click(screen.getByRole('button',{name:'Gerar relatório'}));
     expect(screen.getByRole('dialog')).toBeInTheDocument();
     expect(mocks.fetch).toHaveBeenCalledTimes(1);
+    fireEvent.click(screen.getByRole('button',{name:'2 grupos'}));
+    fireEvent.click(screen.getByRole('button',{name:'Mover Esteio'}));
+    fireEvent.click(screen.getByRole('button',{name:'Mover para grupo 2'}));
     fireEvent.change(screen.getByLabelText('Nome do grupo 2'),{target:{value:'Região do entorno'}});
     fireEvent.click(screen.getByRole('button',{name:'Gerar relatório com grupos'}));
     await screen.findByRole('button',{name:'Baixar PPT'});
@@ -75,4 +78,22 @@ describe('rota real Panorama → projeção → manifesto → exportação',()=>
     mocks.mode='ok';fireEvent.click(screen.getByRole('button',{name:'Recomeçar coleta'}));await screen.findByRole('button',{name:'Baixar PPT'});
     expect(mocks.fetch.mock.calls.at(-1)[0].entity).toBe('secovi-sp');expect(document.querySelector('.panorama-report-page')).not.toBeNull();
   });
+  it.each(['fiergs-rs','secovi-sp'])('gera somente o consolidado em %s sem nenhuma lâmina municipal ou territorial',async(entity)=>{
+    setup(entity);fireEvent.click(screen.getByText('Selecionar 2'));
+    fireEvent.click(screen.getByRole('button',{name:'Gerar relatório'}));
+    expect(mocks.fetch).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole('button',{name:'Somente consolidado'}));
+    fireEvent.click(screen.getByRole('button',{name:'Gerar consolidado'}));
+    await screen.findByRole('button',{name:'Baixar PPT'});
+    expect(mocks.fetch).toHaveBeenCalledTimes(1);
+    expect(mocks.fetch.mock.calls[0][0].presentation).toEqual({mode:'consolidated',layout:'integrated'});
+    const start=vi.fn();usePanoramaExportStore.setState({start});
+    fireEvent.click(screen.getByRole('button',{name:'Baixar PPT'}));
+    const proceed=screen.queryByRole('button',{name:'Continuar e baixar PPT'});if(proceed)fireEvent.click(proceed);
+    await waitFor(()=>expect(start).toHaveBeenCalled());
+    const [report,,options]=start.mock.calls[0];
+    expect(report.scope.cities).toHaveLength(2);
+    expect(options.manifest.some(p=>p.territorialKind||p.territorialUnitId||p.cityComparison||p.fiergsOfficialSlide===31)).toBe(false);
+  });
+
 });

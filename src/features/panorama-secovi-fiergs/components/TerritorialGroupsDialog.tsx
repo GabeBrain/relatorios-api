@@ -14,10 +14,11 @@ export function TerritorialGroupsDialog({open,onOpenChange,cities,value,onConfir
   const [draggedCity,setDraggedCity]=useState<string|null>(null);
   const [dropTarget,setDropTarget]=useState<string|null>(null);
   const [announcement,setAnnouncement]=useState('');
+  const [consolidatedOnly,setConsolidatedOnly]=useState(value?.mode==='consolidated');
   const [draft,setDraft]=useState(()=>initialTerritorialGroups(cities,value));
-  useEffect(()=>{if(open){setDraft(initialTerritorialGroups(cities,value));setSelectedCity(null);setDraggedCity(null);setDropTarget(null);setAnnouncement('');}},[open,cities,value]);
+  useEffect(()=>{if(open){setDraft(initialTerritorialGroups(cities,value));setConsolidatedOnly(value?.mode==='consolidated');setSelectedCity(null);setDraggedCity(null);setDropTarget(null);setAnnouncement('');}},[open,cities,value]);
   const units=draft.units??[];
-  const errors=territorialPresentationErrors({cities,presentation:draft});
+  const errors=consolidatedOnly?[]:territorialPresentationErrors({cities,presentation:draft});
   const assigned=units.reduce((sum,u)=>sum+u.cities.length,0);
   function move(city:string,target:string){
     if(!cities.includes(city)||!units.some(u=>u.id===target))return;
@@ -46,9 +47,9 @@ export function TerritorialGroupsDialog({open,onOpenChange,cities,value,onConfir
     </button>;
   }
   return <Dialog open={open} onOpenChange={onOpenChange}><DialogContent className="w-[calc(100%_-_2rem)] max-w-2xl max-h-[calc(100dvh_-_2rem)] overflow-y-auto gap-4 rounded-xl" data-territorial-groups-dialog="">
-    <DialogHeader><DialogTitle>Organizar cidades</DialogTitle><DialogDescription>O relatório mantém o consolidado e inclui as visões por cidade ou grupo. Distribua as {cities.length} cidades em dois ou três grupos.</DialogDescription></DialogHeader>
-    <div className="flex items-center justify-between gap-3"><span className="text-sm font-medium">Quantos grupos?</span><div className="flex gap-1 rounded-lg bg-muted p-1">{[2,3].map(n=><Button key={n} type="button" variant={units.length===n?'default':'ghost'} size="sm" className="h-8 px-3" aria-pressed={units.length===n} onClick={()=>resize(n)}>{n} grupos</Button>)}</div></div>
-    <p id={`${id}-move-hint`} className="text-xs text-muted-foreground">Arraste os cartões de cidade para outro grupo. Você também pode tocar em uma cidade e escolher o destino.</p>
+    <DialogHeader><DialogTitle>Organizar cidades</DialogTitle><DialogDescription>Gere somente o consolidado das {cities.length} cidades ou acrescente visões por cidade ou grupo, mantendo o consolidado.</DialogDescription></DialogHeader>
+    <div className="flex flex-wrap items-center justify-between gap-3"><span className="text-sm font-medium">Como apresentar?</span><div className="flex flex-wrap gap-1 rounded-lg bg-muted p-1"><Button type="button" variant={consolidatedOnly?'default':'ghost'} size="sm" className="h-8 px-3" aria-pressed={consolidatedOnly} onClick={()=>{setConsolidatedOnly(true);setSelectedCity(null);setDraggedCity(null);setDropTarget(null);}}>Somente consolidado</Button>{[2,3].map(n=><Button key={n} type="button" disabled={n>cities.length} variant={!consolidatedOnly&&units.length===n?'default':'ghost'} size="sm" className="h-8 px-3" aria-pressed={!consolidatedOnly&&units.length===n} onClick={()=>{setConsolidatedOnly(false);resize(n);}}>{n} grupos</Button>)}</div></div>
+    {consolidatedOnly?<div className="rounded-lg border border-border bg-muted/40 p-4"><p className="text-sm font-medium">Todas as cidades em um único estudo</p><p className="mt-1 text-sm text-muted-foreground">Os dados serão somados no consolidado, sem lâminas comparativas por cidade ou grupo.</p><p className="mt-3 max-h-40 overflow-y-auto text-xs leading-5 text-muted-foreground">{cities.join(' · ')}</p></div>:<><p id={`${id}-move-hint`} className="text-xs text-muted-foreground">Arraste os cartões de cidade para outro grupo. Você também pode tocar em uma cidade e escolher o destino.</p>
     <div className={cn('grid max-h-[min(48vh,420px)] gap-3 overflow-y-auto p-1',units.length===3?'sm:grid-cols-3':'sm:grid-cols-2')}>
       {units.map((unit,index)=><section key={unit.id} role="region" aria-label={`Grupo ${index+1}`} data-territorial-drop={unit.id}
         onDragOver={e=>{if(draggedCity){e.preventDefault();e.dataTransfer.dropEffect='move';setDropTarget(unit.id);}}}
@@ -62,9 +63,9 @@ export function TerritorialGroupsDialog({open,onOpenChange,cities,value,onConfir
         {selectedCity&&!unit.cities.includes(selectedCity)&&<Button type="button" variant="outline" size="sm" className="mt-3 h-auto w-full whitespace-normal text-xs" onClick={()=>move(selectedCity,unit.id)}>Mover para grupo {index+1}</Button>}
       </section>)}
       {cities.some(city=>!units.some(u=>u.cities.includes(city)))&&<section className="space-y-2 rounded-lg border border-dashed border-border p-3 sm:col-span-full"><p className="text-xs font-medium">Cidades sem grupo</p>{cities.filter(city=>!units.some(u=>u.cities.includes(city))).map(city=>cityCard(city))}</section>}
-    </div>
+    </div></>}
     <span className="sr-only" role="status">{announcement}</span>
-    <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground" role="status"><span>{assigned} de {cities.length} cidades atribuídas</span><span>{units.some(u=>!u.cities.length)?'Cada grupo precisa de ao menos uma cidade.':units.some(u=>u.cities.length>1&&!u.label.trim())?'Nomeie os grupos com mais de uma cidade.':errors.length?errors[0]:'Grupos prontos para gerar'}</span></div>
-    <DialogFooter><Button type="button" variant="outline" onClick={()=>onOpenChange(false)}>Cancelar</Button><Button type="button" disabled={errors.length>0} onClick={()=>onConfirm(normalizeTerritorialGroups(units.map(u=>({...u,label:u.label.trim()}))))}>Gerar relatório com grupos</Button></DialogFooter>
+    <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground" role="status"><span>{consolidatedOnly?`${cities.length} cidades no consolidado`:`${assigned} de ${cities.length} cidades atribuídas`}</span><span>{consolidatedOnly?'Sem comparações entre cidades ou grupos.':units.some(u=>!u.cities.length)?'Cada grupo precisa de ao menos uma cidade.':units.some(u=>u.cities.length>1&&!u.label.trim())?'Nomeie os grupos com mais de uma cidade.':errors.length?errors[0]:'Grupos prontos para gerar'}</span></div>
+    <DialogFooter><Button type="button" variant="outline" onClick={()=>onOpenChange(false)}>Cancelar</Button><Button type="button" disabled={errors.length>0} onClick={()=>onConfirm(consolidatedOnly?{mode:'consolidated',layout:'integrated'}:normalizeTerritorialGroups(units.map(u=>({...u,label:u.label.trim()}))))}>{consolidatedOnly?'Gerar consolidado':'Gerar relatório com grupos'}</Button></DialogFooter>
   </DialogContent></Dialog>;
 }
