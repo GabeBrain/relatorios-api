@@ -10,7 +10,7 @@ export function SpStockMapSlide({report,slide,token=import.meta.env.VITE_MAPBOX_
   const mode:SpMapMode=slide<=68?'stock':slide<=71?'standard':slide<=75?'meter':'vgv',close=[68,71,75,80].includes(slide),market=report.granularDetails?.market;
   const map=useMemo(()=>spMapPlan(market?.projects??[],mode,close,token),[market,mode,close,token]);
   const heatId=useId().replace(/:/g,'_');
-  const heat=useMemo(()=>mode==='vgv'&&map.plan?spVgvHeat(map.all.flatMap(point=>{ const pos=map.plan?.positionOf(point); return pos && pos.left>=0 && pos.left<=100 && pos.top>=0 && pos.top<=100 ? [{...pos,value:point.vgv}] : []; })):null,[map,mode]);
+  const heat=useMemo(()=>mode==='vgv'&&map.plan?spVgvHeat(map.positioned.map(({point,left,top})=>({left,top,value:point.vgv}))):null,[map,mode]);
   const [failedTiles,setFailedTiles]=useState<Set<string>>(new Set());
   const [finished,setFinished]=useState<Set<string>>(new Set()),[failed,setFailed]=useState(false),[started,setStarted]=useState(Date.now());
   useEffect(()=>{setFinished(new Set());setFailedTiles(new Set());setFailed(false);setStarted(Date.now());},[map.plan]);

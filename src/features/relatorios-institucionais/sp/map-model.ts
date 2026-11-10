@@ -19,7 +19,8 @@ export function spMapPlan(projects:SpMapProject[],mode:SpMapMode,close:boolean,t
   const standards=Object.keys(SP_SEGMENT_RULE.groups);
   const segment=(p:SpMapProject)=>Object.entries(SP_SEGMENT_RULE.groups).find(([,patterns])=>(patterns as readonly string[]).includes(p.standard))?.[0];
   const palette=(p:SpMapProject)=>mode==='standard'?colors[standards.indexOf(segment(p)??'')%colors.length]??'#727272':value(p)===null?'#727272':colors[limits.findIndex(limit=>value(p)!<=limit)%colors.length];
-  const within=plan?(close?all.filter(p=>{const pos=plan!.positionOf(p);return pos.left>=0&&pos.left<=100&&pos.top>=0&&pos.top<=100;}):core.points):[];
+  const activePlan=plan;
+  const within=activePlan?(close?all.filter(p=>{const pos=activePlan.positionOf(p);return pos.left>=0&&pos.left<=100&&pos.top>=0&&pos.top<=100;}):core.points):[];
   const positioned=plan?positionMapPoints(within,plan as MapTilePlan):[];
   return {plan,positioned,palette,value,limits,standards,colors,all,visible:within.length,total:projects.length,mappedUnits:all.reduce((s,p)=>s+p.stock,0),totalUnits:projects.reduce((s,p)=>s+p.stock,0),missingValues:mode==='standard'?0:all.filter(p=>value(p)===null).length};
 }
