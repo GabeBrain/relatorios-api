@@ -398,6 +398,25 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 - **Diagnóstico:** OfertaLançada4591versus2923 integralmente explicada por janela e statusAtivo histórico porplanta; vendas168versus370 explicadas por último mês versus fluxo trimestral. Plantas preservadas reproduzem todas as faixas e781/891/480/370 doGeobrain. Preços atuais porgrupo reproduzidos por contratos diferentes dos agregadores doPanorama. Horizontal perde126unidades por rejeições deproduto, incluindo5comrótulo explícito emwork ignorado.
 - **Fonte:** [mapeamento e lacunas](../features/Relatorios%20Secovi_FIERGS/EVIDENCIAS_CONTRATOS_HISTORICO_FIERGS_2026-10-27.md#10112026--são-leopoldo-reabertura-da-paridade-com-o-geobrain), com matriz versionada e insumos `.local-inputs/fiergs-sao-leopoldo-2026-11-10/`. Oito consultas delimitadas,81asserçõesoffline aprovadas, semestudo completo.
 - **Estado:** diagnóstico local; nenhuma mudança de runtime ou publicação. Total do preço/área e classificações horizontais semcampo autoritativo permanecem pendentes de contrato/snapshot daorigem. Não antecipar correção/aceite. Gabriel determinou aguardar resolução antes de responderoemail. Fetch:9remotosSP/Fortaleza,0locais antesdesteregistro, códigoPanorama semdiferença; árvoreparalela não integrada.
+### 2026-11-10 — Fortaleza mensal36–45, preços e IVV — usuário / Codex
+
+- **Ambiente/funcionalidade:** Rebrain / relatório Fortaleza mensal; prévia1–45emordem dos60originais, carregamento local preservado.
+- **Entrega:** [contratos e evidências](../features/relatorios-institucionais/fortaleza/MENSAL_SLIDES_36_45_2026-11-10.md). Preços v2 tipologia/mês, produtos horizontais separados, média regional ponderada, exclusões40e IVV25meses com abertura observada. Critérios candidatos explícitos nos insights; sem API real/homologação.
+- **Validação:**170testes Fortaleza +16regressões, build/tipos/lint e Edge1440/390claro/escuro sintético, estados e menu preservados. SP/Secovi/FIERGS sem mudança de regra; sem Monday/deploy observado/exportador.
+- **Commits:**9fa553eenviado com autorização; novo commit isolado `feat(relatorios): add Fortaleza monthly slides 36 through 45`, base9fa553e, local até autorização própria.
+- **Monday:** [Fortaleza — SINDUSCON](https://brain381753.monday.com/boards/18398638577/pulses/13149406420) — `13149406420`.
+- **Impacto em Etapas/Pendências:** próximo46–55e56–60; validar pesos/área dos lotes/IVV, fontes reais e metodologias anteriores antes de homologação.
+
+
+### 2026-11-10 — Fortaleza mensal:26–35, VGV e oferta final — usuário / Codex
+
+- **Ambiente/funcionalidade:** Rebrain — `/rebrain/relatorios-institucionais/fortaleza`, rota oculta.
+- **O quê:** prévia1–35na ordem dos60slides mensais originais. RM móvel, VGV vendido por recorte/padrão, lotes, divisórias e oferta final em25fotografias. Oferta nunca é somada no ano; comparações com mesmo mês de1/2anos. VGV preserva sinal e INCC-DI/base provisórios explícitos nos insights.
+- **Contrato/arquivos:** [lote26–35](../features/relatorios-institucionais/fortaleza/MENSAL_SLIDES_26_35_2026-11-10.md); módulo/arte Fortaleza, diagnósticos e docs. Coleta compartilhada adiciona stock apenas V/H,40fontes, concorrência2, cache/abort mantidos; navegar não consulta. Sem alterações de SP/Secovi/FIERGS ou componente global.
+- **Validação:**148testes Fortaleza +16regressões selecionadas2T2026/4T2025, tipos/build/lint; Edge1440/390claro/escuro,25renders11–35, estados lento/vazio/incompleto/cancelado e cartão de carregamento/menu preservados. Office original em leitura, dez renders novos inspecionados. Sem API real/homologação/deploy observado/Monday.
+- **Commits:** commit isolado `feat(relatorios): add Fortaleza monthly slides 26 through 35`, base3a846f0; local até autorização própria de push.
+- **Monday:** [Fortaleza — SINDUSCON](https://brain381753.monday.com/boards/18398638577/pulses/13149406420) — `13149406420`.
+- **Impacto em Etapas/Pendências:** novo lote validado localmente; próximo36–45, depois46–60/exportação. Amostra, metodologia/INCC e fontes reais permanecem sujeitos à homologação.
 
 ### 2026-11-10 — Fortaleza: carregamento local, menu acessível — usuário / Codex
 
@@ -1256,6 +1275,10 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 
 ## 2. Etapas
 
+- 🟡 **Fortaleza mensal36–45:** prévia1–45, preços/IVV candidatos e insights implementados;170testes +16regressões e visual sintético. Novo lote local, homologação/exportação pendentes.
+
+- 🟡 **Fortaleza mensal —26–35,10/11:** prévia chega ao35dos60originais, dados condicionados à cobertura;164casos locais/regressões e visual aprovados. [Estado atual](../features/relatorios-institucionais/fortaleza/MENSAL_SLIDES_26_35_2026-11-10.md). Lote local; homologação/exportação ainda pendentes.
+
 - 🟡 **Fortaleza mensal — lote12/14+16–25,10/11:** prévia1–25na ordem original, fontes segmentadas e cálculo/render dos doze novos slides. Validado localmente; método INCC e fontes reais aguardam homologação. [Estado atual](../features/relatorios-institucionais/fortaleza/MENSAL_SLIDES_12_25_2026-11-10.md).1e1767epublicado; novo lote local.
 
 - 🟡 **Fortaleza mensal —10/11:**1–10e11/13/15 implementados localmente, histórico vertical automático25meses e insights;13composições, restante ainda pendente. [Estado atual](../features/relatorios-institucionais/fortaleza/MENSAL_LANCAMENTOS_2026-11-10.md), que atualiza os registros históricos de09/11 abaixo.
@@ -1354,6 +1377,10 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 ---
 
 ## 3. Pendências
+
+- **Fortaleza mensal após36–45:** implementar46–55e56–60, exportação; validar ponderação dos preços, área de lotes, IVV e fontes reais, além de amostra/INCC/metodologias anteriores. Estados abaixo preservam o histórico;36–45não são mais pendência de implementação.
+
+- **Fortaleza mensal — após26–35:** próximos36–45e46–60, exportação e homologação de fontes/INCC/produtos/VGV nominal. Amostra/empresas do2ainda sem fonte própria;36–60são25posições remanescentes, não uma estimativa de conclusão total. Lote26–35local, envio depende de autorização.
 
 - **Fortaleza mensal — continuação10/11:** próximo26–35; depois36–60/exportação. Homologar produtos horizontais/comercial, VGL nominal, INCC-DI/base provisórios e fotografias reais pareadas. Amostra/empresas do2ainda sem fonte própria.12/14não são mais pendências de implementação; estados anteriores abaixo são históricos.
 
