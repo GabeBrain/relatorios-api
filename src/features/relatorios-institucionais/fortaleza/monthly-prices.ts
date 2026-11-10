@@ -15,7 +15,7 @@ export function priceMonths(selection:FortalezaSelection) {
   const closing = Number(fortalezaPeriod(selection).end.slice(5,7));
   return Array.from({ length:13 },(_,index) => new Date(Date.UTC(selection.year,closing-13+index,1)).toISOString().slice(0,7));
 }
-function productOf(building:Record<string,unknown>):PriceProduct|null {
+export function productOf(building:Record<string,unknown>):PriceProduct|null {
   if (normalizeMarketText(building.building_type) === 'vertical') return 'vertical';
   const labels = [building.building_subtype,building.subtype,building.product_type,building.horizontal_type,building.standard].map(normalizeMarketText);
   if (labels.includes('loteamento fechado')) return 'closed-lots';

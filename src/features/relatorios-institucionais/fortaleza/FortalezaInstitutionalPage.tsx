@@ -6,21 +6,20 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { BrainLoadingState } from '@/components/feedback/BrainLoadingState';
-import { GeoApiScopeSelector, useGeoApiScope, type GeoScope } from '@/features/shared/geo-api-scope-engine';
+import { useGeoApiScope, type GeoScope } from '@/features/shared/geo-api-scope-engine';
 import { useAuthStore } from '@/store/auth-store';
-import { FORTALEZA_CITIES, FORTALEZA_REFERENCES, fortalezaPeriod, fortalezaScope, prepareFortalezaBlueprint, type FortalezaBlueprint, type FortalezaSelection, type Periodicity, type Territory } from './model';
+import { FORTALEZA_CITIES, FORTALEZA_REFERENCES, fortalezaPeriod, fortalezaScope, prepareFortalezaBlueprint, type FortalezaBlueprint, type FortalezaSelection, type Periodicity } from './model';
 import { useFortalezaMarket } from './useFortalezaMarket';
 import { FortalezaMarketPanel } from './FortalezaMarketPanel';
 import { FortalezaGenerationPanel } from './FortalezaGenerationPanel';
 const FortalezaIntroSlides = lazy(() => import('./FortalezaIntroSlides'));
 
 export default function FortalezaInstitutionalPage() {
-  const [geo, setGeo] = useState<GeoScope>({ uf: '', city: '' });
+  const [geo, setGeo] = useState<GeoScope>({ uf: 'CE', city: '' });
   const [initialMonth] = useState(() => { const now = new Date(); return new Date(now.getFullYear(), now.getMonth() - 1, 1); });
   const [periodicity, setPeriodicity] = useState<Periodicity>('monthly');
   const [year, setYear] = useState(initialMonth.getFullYear());
   const [position, setPosition] = useState(initialMonth.getMonth() + 1);
-  const [territory, setTerritory] = useState<Territory>('city');
   const [blueprint, setBlueprint] = useState<FortalezaBlueprint | null>(null);
   const [error, setError] = useState('');
   const [running, setRunning] = useState(false);
@@ -28,16 +27,17 @@ export default function FortalezaInstitutionalPage() {
   const [progress, setProgress] = useState({ completed: 0, total: 0 });
   const controller = useRef<AbortController | null>(null);
   const token = useAuthStore(state => state.getToken());
-  const changeGeo = (value: GeoScope) => { controller.current?.abort(); setBlueprint(null); setGeo(value); };
-  const scope = useGeoApiScope({ value: geo, onChange: changeGeo });
-  const selection: FortalezaSelection = { ...geo, territory, periodicity, year, position };
+  const scope = useGeoApiScope({ value: geo, onChange: setGeo });
+  const capital = scope.citiesByUf?.CE?.find(city => city.normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim().toLowerCase() === 'fortaleza') ?? '';
+  useEffect(() => { setGeo({ uf:'CE',city:capital }); },[capital]);
+  const selection: FortalezaSelection = { ...geo, territory:'capital-rm', periodicity, year, position };
   const coverage = fortalezaScope(selection, scope.citiesByUf?.CE ?? []);
   const ready = scope.hasToken && scope.strictReady && !scope.isLoading && !scope.error && coverage.valid;
   const market = useFortalezaMarket(selection, scope.citiesByUf?.CE ?? [], token, ready);
   const querying = market.state?.phase === 'loading';
   const busy = running || querying;
   const visibleBlueprint = ready ? market.state?.blueprint ?? blueprint : null;
-  const key = `${token}/${geo.uf}/${geo.city}/${territory}/${periodicity}/${year}/${position}`;
+  const key = `${token}/${geo.uf}/${geo.city}/${selection.territory}/${periodicity}/${year}/${position}`;
   useEffect(() => {
     controller.current?.abort();
     setBlueprint(null); setError(''); setRunning(false);
@@ -66,24 +66,22 @@ export default function FortalezaInstitutionalPage() {
       <div className="flex items-start gap-3"><span className="shrink-0 rounded-xl bg-primary/10 p-3 text-primary"><FileChartColumn className="h-7 w-7" aria-hidden="true" /></span><div className="min-w-0"><div className="flex flex-wrap items-center gap-2"><h1 className="break-words text-2xl font-semibold">Fortaleza / SINDUSCON-CE</h1><Badge variant="secondary">Em preparação</Badge></div><p className="mt-1 text-sm text-muted-foreground">Base do panorama de Fortaleza e região metropolitana.</p></div></div>
       <p className="flex items-center gap-2 text-sm text-muted-foreground"><Layers className="h-4 w-4" aria-hidden="true" />Referências verificadas: 89 páginas trimestrais e 60 mensais</p>
     </header>
-    <Alert><AlertTitle>Relatório em implantação</AlertTitle><AlertDescription>{periodicity === 'monthly' ? 'Prévia mensal até o slide 45, com lançamentos, vendas, VGL/VGV e oferta final. Os demais blocos e a exportação continuam em preparação.' : 'Consulte o núcleo vertical e os dez slides iniciais. A continuação trimestral e a exportação estão em preparação.'}</AlertDescription></Alert>
+    <Alert><AlertTitle>Relatório em implantação</AlertTitle><AlertDescription>{periodicity === 'monthly' ? 'Prévia mensal até o slide 55, com lançamentos, vendas, VGL/VGV e oferta final. Os demais blocos e a exportação continuam em preparação.' : 'Consulte o núcleo vertical e os dez slides iniciais. A continuação trimestral e a exportação estão em preparação.'}</AlertDescription></Alert>
     <section className="space-y-5 rounded-xl border bg-card p-4 sm:p-6" aria-label="Configuração do estudo">
-      <h2 className="font-semibold">Configure o estudo</h2>
-      {!scope.error && <GeoApiScopeSelector value={geo} onChange={changeGeo} disabled={busy} />}
+      <h2 className="font-semibold">Escolha o período</h2>
+      <p className="text-sm text-muted-foreground">Recortes automáticos por slide: Fortaleza, região metropolitana ou o conjunto completo. RM: Aquiraz, Caucaia, Eusébio e Maracanaú.</p>
       {scope.error && <Alert variant="destructive"><AlertTitle>Cidades indisponíveis</AlertTitle><AlertDescription>Não foi possível confirmar os municípios autorizados. Confira seu acesso e tente novamente.<Button className="mt-3 block" variant="outline" onClick={scope.reload}>Tentar novamente</Button></AlertDescription></Alert>}
       {scope.hasToken && !scope.isLoading && !scope.error && !scope.availableUfs.length && <p role="status" className="text-sm text-muted-foreground">Nenhum município monitorado disponível para este acesso.</p>}
-      {geo.city && !coverage.supported && <p role="status" className="text-sm text-destructive">Selecione CE e um dos municípios do estudo: {FORTALEZA_CITIES.join(', ')}.</p>}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-3">
         <div className="space-y-1.5"><label htmlFor="fortaleza-periodicity" className="text-sm font-medium">Tipo de relatório</label><Select value={periodicity} disabled={busy} onValueChange={value => { if (value === periodicity) return; setPosition(value === 'monthly' ? position * 3 : Math.ceil(position / 3)); setPeriodicity(value as Periodicity); }}><SelectTrigger id="fortaleza-periodicity"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="monthly">Mensal</SelectItem><SelectItem value="quarterly">Trimestral</SelectItem></SelectContent></Select></div>
         <div className="space-y-1.5"><label htmlFor="fortaleza-position" className="text-sm font-medium">{periodicity === 'monthly' ? 'Mês de referência' : 'Trimestre de referência'}</label><Select value={String(position)} disabled={busy} onValueChange={value => setPosition(Number(value))}><SelectTrigger id="fortaleza-position"><SelectValue /></SelectTrigger><SelectContent>{Array.from({ length: periodicity === 'monthly' ? 12 : 4 }, (_, index) => index + 1).map(value => <SelectItem key={value} value={String(value)}>{periodicity === 'monthly' ? new Intl.DateTimeFormat('pt-BR', { month: 'long', timeZone: 'UTC' }).format(new Date(Date.UTC(year, value - 1, 1))) : `${value}º trimestre`}</SelectItem>)}</SelectContent></Select></div>
         <div className="space-y-1.5"><label htmlFor="fortaleza-year" className="text-sm font-medium">Ano de referência</label><Select value={String(year)} disabled={busy} onValueChange={value => setYear(Number(value))}><SelectTrigger id="fortaleza-year"><SelectValue /></SelectTrigger><SelectContent>{years.map(value => <SelectItem key={value} value={String(value)}>{value}</SelectItem>)}</SelectContent></Select></div>
-        <div className="space-y-1.5"><label htmlFor="fortaleza-territory" className="text-sm font-medium">Recorte territorial</label><Select value={territory} disabled={busy} onValueChange={value => setTerritory(value as Territory)}><SelectTrigger id="fortaleza-territory"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="city">Município selecionado</SelectItem><SelectItem value="capital-rm">Fortaleza e RM · 5 municípios</SelectItem></SelectContent></Select></div>
       </div>
       <p className="text-sm font-medium">Referência selecionada: {fortalezaPeriod(selection).label}</p>
-      {territory === 'capital-rm' && scope.hasToken && !scope.isLoading && !scope.error && coverage.missing.length > 0 && <p role="status" className="text-sm text-destructive">O conjunto exige acesso aos cinco municípios. Não disponíveis: {coverage.missing.join(', ')}.</p>}
+      {scope.hasToken && !scope.isLoading && !scope.error && coverage.missing.length > 0 && <p role="status" className="text-sm text-destructive">O conjunto exige acesso aos cinco municípios. Não disponíveis: {coverage.missing.join(', ')}.</p>}
       <div className="flex flex-wrap items-center gap-3"><Button disabled={!ready || busy} onClick={() => { void market.consult(); }}>{periodicity === 'monthly' ? 'Gerar prévia mensal' : 'Gerar prévia vertical'}</Button><Button variant="outline" disabled={!ready || busy} onClick={() => { void prepare(); }}>Preparar estrutura</Button></div>
       <p className="text-xs text-muted-foreground">Uma ação valida o recorte, consulta as fontes municipais, confere os balanços e organiza a prévia. Preparar estrutura organiza apenas as páginas localmente.</p>
-      {!ready && !scope.isLoading && !scope.error && <p className="text-sm text-muted-foreground">Faça login e selecione um município autorizado do estudo para continuar.</p>}
+      {!ready && !scope.isLoading && !scope.error && <p className="text-sm text-muted-foreground">Faça login com acesso aos cinco municípios do relatório para continuar.</p>}
       {error && <Alert variant="destructive"><AlertTitle>Preparação interrompida</AlertTitle><AlertDescription>{error}<Button className="mt-3 block" variant="outline" disabled={!ready} onClick={() => { void prepare(); }}>Tentar preparar novamente</Button></AlertDescription></Alert>}
     </section>
     {scope.isLoading || busy ? <section aria-label="Carregamento do relatório Fortaleza" aria-busy="true" className="relative min-h-[48rem] overflow-hidden rounded-xl border bg-card">

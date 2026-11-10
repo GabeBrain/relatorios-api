@@ -98,7 +98,7 @@ describe('Fortaleza mensal 36–45',()=>{
   it('mantém ordem oficial35–45 e encerra no45',()=>{
     render(<FortalezaIntroSlides selection={selection} cities={cities} data={null} monthlyLaunches={{sources:[],issues:[],market:monthlyMarketFixture(),prices:fixture()}}/>);
     fireEvent.click(screen.getByRole('button',{name:'35'}));for(let page=36;page<=45;page++){fireEvent.click(screen.getByRole('button',{name:'Próximo'}));expect(screen.getByRole('img',{name:`Fortaleza · slide ${page}`})).toBeTruthy();}
-    expect((screen.getByRole('button',{name:'Próximo'})as HTMLButtonElement).disabled).toBe(true);
+    expect((screen.getByRole('button',{name:'Próximo'})as HTMLButtonElement).disabled).toBe(false);
   });
   it('troca mensal para trimestral sem manter uma posição inexistente na prévia',()=>{
     const {rerender}=render(<FortalezaIntroSlides selection={selection} cities={cities} data={null}/>);

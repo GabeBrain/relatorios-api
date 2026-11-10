@@ -1,0 +1,33 @@
+import type { FortalezaSelection } from './model';
+import { introMonth } from './intro-view';
+import { offerRatio,type OfferTable,type OfferRow } from './monthly-tables';
+import { Table,TableBody,TableCell,TableHead,TableHeader,TableRow } from '@/components/ui/table';
+const artwork=import.meta.glob('./assets/monthly/*.png',{eager:true,import:'default',query:'?url'}) as Record<string,string>;
+const format=(value:number|null,percent=false)=>value===null?'—':`${value.toLocaleString('pt-BR',{maximumFractionDigits:percent?1:0})}${percent?'%':''}`;
+function tableCells(row:OfferRow,total:OfferRow,capacity:boolean){return capacity?[row.label,format(row.projects),format(offerRatio(row.projects,total.projects),true),format(row.capacity),format(offerRatio(row.capacity,total.capacity),true),format(row.stock),format(offerRatio(row.stock,total.stock),true),format(offerRatio(row.capacity-row.stock,row.capacity),true),format(offerRatio(row.stock,row.capacity),true)]:[row.label,format(row.opening),format(row.stock),format(offerRatio(row.stock,total.stock),true),format(row.launches),format(offerRatio(row.launches,total.launches),true),format(row.sales),format(offerRatio(row.sales,total.sales),true),format(offerRatio(row.sales,row.opening+row.launches),true),format(row.priceUnits?row.weighted/row.priceUnits:null)];}
+export default function FortalezaMonthlyTableSlide({page,selection,data}:{page:number;selection:FortalezaSelection;data:OfferTable}){
+  const capacity=page===50||page===51,neighborhood=page>=52;
+  const previous=new Date(Date.UTC(selection.year,selection.position-2,1)),label=(date:Date)=>`${introMonth(date.getUTCMonth()+1,true)}/${String(date.getUTCFullYear()).slice(2)}`;
+  const columns=capacity?['Tipologia','Nº de\nempreend.','(%)','Oferta\nlançada','(%)','Oferta\nfinal','(%)','%\nvendidas','Disponível\ns/ O.L.']:[neighborhood?'Bairro':page===47?'Município':'Tipo',`Oferta final\n${label(previous)}`,`Oferta final\n${introMonth(selection.position,true)}/${String(selection.year).slice(2)}`,'(%)','Lançamentos','(%)','Vendas\nlíquidas','(%)','IVV (%)',...(neighborhood?['Preço médio\nR$/m² priv.']:[])];
+  const visible=neighborhood?data.rows.slice((page-52)*14,(page-51)*14):data.rows;
+  const rows=[...visible,data.total],widths=columns.map((_,index)=>index===0?neighborhood?215:250:((1200-(neighborhood?215:250))/(columns.length-1))),height=neighborhood?29:65,header=neighborhood?48:83,top=neighborhood?147:195;
+  let offset=40;const offsets=widths.map(width=>{const value=offset;offset+=width;return value;});
+  return <svg className="fortaleza-intro-slide block aspect-video h-auto w-full" viewBox="0 0 1280 720" role="img" aria-label={`Fortaleza · slide ${page}`}>
+    <image href={artwork[`./assets/monthly/${page}.png`]} width={1280} height={720} aria-hidden="true"/>
+    <text x={43} y={neighborhood?133:170} fontSize={14} fill="#1B4059">{introMonth(selection.position)} de {selection.year}</text>
+    {data.status!=='ready'?<text aria-label="Tabela mensal pendente" x={640} y={380} textAnchor="middle" fontSize={25} fill="#1B4059">Aguardando conferência da fonte</text>:<g aria-label="Tabela de oferta e vendas">
+      {columns.map((column,index)=><g key={index}><rect x={offsets[index]} y={top} width={widths[index]} height={header} fill="#F1F1F1" stroke="white"/>{column.split('\n').map((line,lineIndex)=><text key={lineIndex} x={offsets[index]+widths[index]/2} y={top+header/2-((column.split('\n').length-1)*9)+lineIndex*20} textAnchor="middle" fontSize={neighborhood?14:17} fontWeight={700}>{line}</text>)}</g>)}
+      {rows.map((row,rowIndex)=>{const total=rowIndex===rows.length-1,cells=tableCells(row,data.total,capacity).slice(0,columns.length);return <g key={`${row.label}-${rowIndex}`}>{cells.map((value,column)=><g key={column}><rect x={offsets[column]} y={top+header+rowIndex*height} width={widths[column]} height={height} fill={total?'#F1F1F1':column>=(capacity?7:8)?'#E6DAEE':column>=(capacity?5:6)?'#C7DDEA':column>=(capacity?3:4)?'#D9F4EC':'white'} stroke="#C3CDD2" strokeWidth={.5}/><text x={offsets[column]+widths[column]/2} y={top+header+rowIndex*height+height/2+5} textAnchor="middle" fontSize={column===0?Math.min(neighborhood?13:17,widths[0]/(value.length*.62)):neighborhood?14:18} fontWeight={total?700:400}>{value}</text></g>)}</g>;})}
+      {neighborhood&&!visible.length&&<text x={640} y={top+header+height*3} textAnchor="middle" fontSize={18}>Sem bairros adicionais nesta página</text>}
+    </g>}
+  </svg>;
+}
+export function FortalezaTableInsights({page,data}:{page:number;data:OfferTable|null}){
+  if(!data)return null;
+  return <details className="rounded-lg border p-3 text-sm"><summary className="cursor-pointer font-medium">Origem e cálculo deste slide</summary><div className="mt-3 space-y-3 text-muted-foreground">
+    <p>{page<=49?'Séries municipais do mês selecionado e fotografia do mês anterior.':'Histórico detalhado v2 por ID de empreendimento e tipologia/mês. Não preenche fotografia ausente com cadastro atual.'} IVV = vendas líquidas ÷ (oferta inicial + lançamentos) ×100. Totais são calculados antes das taxas; não são médias simples das taxas das linhas. Participações usam os totais do mesmo universo; denominador zero resulta em —.</p>
+    {page===50||page===51?<p>Universo candidato: empreendimentos horizontais com estoque positivo no fechamento. Oferta lançada = soma de qty na fotografia histórica das tipologias desses empreendimentos; não usa total_units atual. % vendidas = (oferta lançada − oferta final)/oferta lançada, indicador de escoamento, sem provar vendas brutas acumuladas. A definição do universo e da capacidade histórica precisa de homologação.</p>:page>=52?<p>Bairros em ordem alfabética, até14por página; os quatro totais representam o universo completo, e não apenas as linhas da página. Usa sold_in_period dos históricos e qty dos lançados no mês. Preço/m² ponderado pelo estoque positivo. Bairro é o cadastro da fonte na coleta, sujeito a revisão. Contrato candidato; não força igualdade com liquid_sales municipal.</p>:<p>Vertical por município da RM; horizontal por produto, separando loteamento aberto, fechado e casas. Produtos ausentes não são convertidos em zero.</p>}
+    {data.issue&&<p role="status">{data.issue}</p>}{data.warnings.map(warning=><p key={warning}>{warning}</p>)}
+    <Table><TableHeader><TableRow><TableHead>Universo</TableHead><TableHead>Oferta final</TableHead><TableHead>Vendas líquidas</TableHead></TableRow></TableHeader><TableBody><TableRow><TableCell>{data.rows.length} grupos conferidos</TableCell><TableCell>{data.status==='ready'?format(data.total.stock):'—'}</TableCell><TableCell>{data.status==='ready'?format(data.total.sales):'—'}</TableCell></TableRow></TableBody></Table>
+  </div></details>;
+}
