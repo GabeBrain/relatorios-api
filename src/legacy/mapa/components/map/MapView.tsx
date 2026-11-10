@@ -257,12 +257,22 @@ function buildDeckLayer(
         const entries = Object.entries(props).filter(
           ([k]) => !k.startsWith('_')
         );
-        el.innerHTML = entries.length
-          ? entries
-              .slice(0, 6)
-              .map(([k, v]) => `<div><span class="font-semibold">${k}:</span> ${v}</div>`)
-              .join('')
-          : '<div class="text-muted-foreground">No properties</div>';
+        el.replaceChildren();
+        if (entries.length) {
+          entries.slice(0, 6).forEach(([k, v]) => {
+            const row = document.createElement('div');
+            const label = document.createElement('span');
+            label.className = 'font-semibold';
+            label.textContent = `${k}:`;
+            row.append(label, document.createTextNode(` ${String(v ?? '')}`));
+            el.appendChild(row);
+          });
+        } else {
+          const empty = document.createElement('div');
+          empty.className = 'text-muted-foreground';
+          empty.textContent = 'No properties';
+          el.appendChild(empty);
+        }
       } else {
         setHovered(null);
         el.classList.add('hidden');
