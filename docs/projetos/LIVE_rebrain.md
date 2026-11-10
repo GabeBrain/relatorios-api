@@ -385,6 +385,13 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 10/11/2026 — Panorama: São Leopoldo, paridade com Geobrain mapeada — Gabriel / Codex
+
+- **Diagnóstico:** OfertaLançada4591versus2923 integralmente explicada por janela e statusAtivo histórico porplanta; vendas168versus370 explicadas por último mês versus fluxo trimestral. Plantas preservadas reproduzem todas as faixas e781/891/480/370 doGeobrain. Preços atuais porgrupo reproduzidos por contratos diferentes dos agregadores doPanorama. Horizontal perde126unidades por rejeições deproduto, incluindo5comrótulo explícito emwork ignorado.
+- **Fonte:** [mapeamento e lacunas](../features/Relatorios%20Secovi_FIERGS/EVIDENCIAS_CONTRATOS_HISTORICO_FIERGS_2026-10-27.md#10112026--são-leopoldo-reabertura-da-paridade-com-o-geobrain), com matriz versionada e insumos `.local-inputs/fiergs-sao-leopoldo-2026-11-10/`. Oito consultas delimitadas,81asserçõesoffline aprovadas, semestudo completo.
+- **Estado:** diagnóstico local; nenhuma mudança de runtime ou publicação. Total do preço/área e classificações horizontais semcampo autoritativo permanecem pendentes de contrato/snapshot daorigem. Não antecipar correção/aceite. Gabriel determinou aguardar resolução antes de responderoemail. Fetch:9remotosSP/Fortaleza,0locais antesdesteregistro, códigoPanorama semdiferença; árvoreparalela não integrada.
+
+
 ### 06/11/2026 — Panorama: auditoria real individualiza ausência de VGV em Taquari
 
 - Diagnóstico da sessão de Gabriel: CSV das cinco cidades sem `different`, mas com cobertura indisponível. VGV vertical de Taquari3T2026 ausente; consulta posterior à API confirma última linha vertical emjunho, com setembro horizontal presente. Sem preencher zero ou mudar runtime.
