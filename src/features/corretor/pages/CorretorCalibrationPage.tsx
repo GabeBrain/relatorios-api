@@ -15,7 +15,10 @@ import {
 } from '../lib/v3/db';
 
 function csvCell(value: unknown): string {
-  return `"${String(value ?? '').replace(/"/g, '""')}"`;
+  let text = String(value ?? '');
+  // Neutraliza fórmulas de planilha (CSV injection).
+  if (/^[=+\-@\t\r]/.test(text)) text = `'${text}`;
+  return `"${text.replace(/"/g, '""')}"`;
 }
 
 function exportCsv(rows: CalibrationFinding[]) {
