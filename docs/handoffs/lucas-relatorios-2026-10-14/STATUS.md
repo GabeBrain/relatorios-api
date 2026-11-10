@@ -1,5 +1,9 @@
 # Estado do handoff
 
+## 10/11/2026 — Fortaleza: carregamento somente no relatório
+
+d9b2448publicado com autorização; main/origin0–0eárvore limpa antes do ajuste. Usuário pediu que a espera não ocupe o sistema inteiro. Cartão relativo na área do relatório com BrainLoadingState absoluto substitui overlay global para catálogo/preparação/consulta; menu continua acessível, etapas/tempo/cancelamento preservados. Build/tipos/lint e Edge1440/390claro/escuro com fontes lentas sintéticas e asserções de geometria/hit-test aprovados, assim como sucesso/vazio/incompleto/cancelamento. [Evidências](../../features/relatorios-institucionais/fortaleza/EVIDENCIAS.md). Nenhuma API real, fórmula alterada, deploy observado ou Monday. Novo commit local, push depende de autorização desta fatia.
+
 ## 10/11/2026 — Fortaleza12/14 antes do lote16–25
 
 Usuário autorizou push anterior e continuação de12/14+dez.1e1767eenviado; base main/origin0–0, único remoto, Windows/Codex Test. [Entrega/retomada](../../features/relatorios-institucionais/fortaleza/MENSAL_SLIDES_12_25_2026-11-10.md): mensal1–25na ordem original, fonte temporal segmentada compartilhada, VGL/lotes/vendas e13pontos móveis de12meses.127testes Fortaleza +16regressões, tipos/build/lint e Edge1440/390claro/escuro com todos os provedores interceptados. Office somente leitura dos originais; nenhuma GeoBrain real/exportação/homologação. INCC-DI/base selecionada provisórios explícitos nos insights; validar com analista. Próximo26–35. Sem Monday e sem alteração de motores/escopos paralelos. Nova fatia em commit local isolado, publicação exige autorização própria.

@@ -58,6 +58,15 @@ try {
     mode = orderOnly ? 'success' : 'slow'; await page.getByRole('button', { name: 'Gerar prévia mensal', exact: true }).click();
     if (!orderOnly) {
       await page.getByText(/fontes mensais concluídas/).first().waitFor();
+      const localLoading = page.getByRole('region', { name:'Carregamento do relatório Fortaleza',exact:true });
+      await localLoading.scrollIntoViewIfNeeded();
+      const geometry = await localLoading.evaluate(section => {
+        const overlay = section.querySelector('[role="status"]'), card = section.getBoundingClientRect(), box = overlay.getBoundingClientRect();
+        const aside = document.querySelector('aside').getBoundingClientRect();
+        const hit = document.elementFromPoint(aside.left + aside.width / 2, Math.max(aside.top + 100,100));
+        return { position:getComputedStyle(overlay).position,contained:box.left >= card.left-1 && box.right <= card.right+1 && box.top >= card.top-1 && box.bottom <= card.bottom+1,menuAccessible:Boolean(hit?.closest('aside')) };
+      });
+      assert.equal(geometry.position,'absolute'); assert.equal(geometry.contained,true); assert.equal(geometry.menuAccessible,true);
       await page.screenshot({ path: resolve(folder, `loading-${width}-${dark}.png`) });
     }
     await page.getByRole('button', { name: 'Gerar prévia mensal', exact: true }).waitFor({ state: 'visible' });

@@ -385,6 +385,16 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-11-10 — Fortaleza: carregamento local, menu acessível — usuário / Codex
+
+- **Ambiente/funcionalidade:** Rebrain — `/rebrain/relatorios-institucionais/fortaleza`.
+- **O quê/por quê:** após envio autorizado de d9b2448, usuário pediu espera sem cobrir o sistema inteiro. Catálogo, preparação e consulta agora usam BrainLoadingState absoluto dentro de cartão relativo da página, com rolagem local; configuração/menu ficam fora do véu. Etapas, cronômetro e cancelar preservados.
+- **Padrão/arquivos:** padrão local já usado no SP; somente página Fortaleza e diagnóstico mensal alterados, sem novo primitive nem mudança no BrainLoadingState compartilhado ou em fontes/fórmulas.
+- **Validação:** build/tipos/lint; Edge com fontes sintéticas lentas1440/390claro/escuro, contenção geométrica e menu acessível por hit-test. Sucesso/vazio/incompleto/cancelamento e navegação11–25mantidos. [Evidências](../features/relatorios-institucionais/fortaleza/EVIDENCIAS.md). Sem API real/deploy observado/Monday.
+- **Commits:** commit isolado `fix(relatorios): contain Fortaleza loading within report`, base d9b2448; local até autorização própria de envio.
+- **Monday:** [Fortaleza — SINDUSCON](https://brain381753.monday.com/boards/18398638577/pulses/13149406420) — `13149406420`.
+- **Impacto em Etapas/Pendências:** ajuste de carregamento validado localmente; próximo lote26–35e homologação mantidos.
+
 ### 2026-11-10 — Fortaleza:12/14 e lote mensal16–25 — usuário / Codex
 
 - **Ambiente/funcionalidade:** Rebrain — `/rebrain/relatorios-institucionais/fortaleza`, somente rota.

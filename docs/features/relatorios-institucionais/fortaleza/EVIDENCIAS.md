@@ -1,5 +1,11 @@
 # Fortaleza — evidências da abertura
 
+## 10/11/2026 — carregamento restrito ao relatório
+
+Após push autorizado de d9b2448, usuário pediu remover o carregamento de tela inteira. Base main/origin0–0, árvore inicialmente limpa. Página usa cartão relativo depois da configuração, BrainLoadingState overlay absoluto com rolagem local e etapas/tempo/cancelamento preservados; catálogo, preparação e consulta seguem o mesmo contêiner. Reutiliza padrão do SP, sem alterar componente compartilhado, fontes ou cálculos.
+
+Build/tipos e lint da página aprovados. Diagnóstico `fortaleza-monthly-visual.mjs` ampliado com resposta lenta: em1440/390claro/escuro comprova CSSabsolute, limites dentro do cartão e menu acessível por hit-test. Inspeção visual do screenshot desktop confirma navegação fora do véu. Sucesso, vazio/incompleto e cancelamento também passaram com fontes sintéticas; nenhuma API real ou deploy observado. Capturas locais ignoradas no diretório monthly-visual. Commit local isolado; novo push sujeito a autorização própria.
+
 ## 10/11/2026 —12/14 e lote16–25
 
 Push autorizado1e1767econcluído; nova entrega documentada em [mensal12–25](MENSAL_SLIDES_12_25_2026-11-10.md), base main/origin1e1767e.127testes Fortaleza/12arquivos +16regressões selecionadas Secovi/FIERGS aprovados; build/tipos/lint e Edge1440/390claro/escuro, quinze lâminas11–25, estados lento/vazio/incompleto/cancelado. Originais Office em leitura e renders novos inspecionados; sobreposições monetárias/divisória21 corrigidas e rechecadas. Sem fonte GeoBrain real, exportação, homologação ou Monday. Índice outubro/2026 conferido na página pública; modalidade/base Fortaleza ainda provisórias. Nova fatia local, sem push até autorização própria.
