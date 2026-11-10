@@ -1,7 +1,7 @@
 import { useEffect,useId,useMemo,useState } from 'react';
 import { BrainLoadingState } from '@/components/feedback/BrainLoadingState';
 import { spMapPlan,type SpMapMode } from './map-model';
-import { spPeriodLabel,type SpPreview } from './model';
+import { spSlidePeriod,type SpPreview } from './model';
 import { spMarketSlideIssue } from './market-details';
 import { spVgvHeat } from './map-heat';
 const count=(n:number)=>n.toLocaleString('pt-BR',{maximumFractionDigits:0});
@@ -22,7 +22,7 @@ export function SpStockMapSlide({report,slide,token=import.meta.env.VITE_MAPBOX_
   return <div className="absolute inset-0" data-sp-map-loading={loading?'true':'false'} aria-label={`Mapa ${titles[mode]} · ${close?'aproximação':'visão ampla'}`}>
     <svg role="img" aria-label={`Mapa atualizado ${slide}`} viewBox="0 0 1280 720" className="absolute inset-0 h-full w-full">
       <rect width="1280" height="720" fill="#f8f8f8"/><rect x="1069" width="211" height="55" fill="#5b7638"/><text x="1175" y="34" fill="white" textAnchor="middle" fontSize="18" fontWeight="bold">SÃO PAULO</text>
-      <text x="40" y="55" fontSize="28" fontWeight="bold">LOCALIZAÇÃO DOS EMPREENDIMENTOS · {titles[mode]}</text><rect x="40" y="77" width="90" height="9" rx="5" fill="#ffcf00"/><text x="40" y="120" fontSize="17">{report.quarter} · {spPeriodLabel(report)} · {close?'Aproximação central':'Visão ampla'}</text>
+      <text x="40" y="55" fontSize="28" fontWeight="bold">LOCALIZAÇÃO DOS EMPREENDIMENTOS · {titles[mode]}</text><rect x="40" y="77" width="90" height="9" rx="5" fill="#ffcf00"/><text x="40" y="120" fontSize="17">{spSlidePeriod(report)} · {close?'Aproximação central':'Visão ampla'}</text>
       <rect x="30" y="155" width="910" height="490" fill="#e8ece8" stroke="#ccc"/>
       {ready&&plan?<svg x="30" y="155" width="910" height="490" viewBox={`0 0 ${plan.columns*256} ${plan.rows*256}`} preserveAspectRatio="xMidYMid meet">
         {!token&&<g stroke="#c4ccc4">{Array.from({length:8},(_,i)=><g key={i}><line x1={i*plan.columns*256/7} x2={i*plan.columns*256/7} y1="0" y2={plan.rows*256}/><line x1="0" x2={plan.columns*256} y1={i*plan.rows*256/7} y2={i*plan.rows*256/7}/></g>)}</g>}

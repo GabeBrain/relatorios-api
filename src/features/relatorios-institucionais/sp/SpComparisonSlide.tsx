@@ -1,4 +1,4 @@
-import { spPeriodLabel, type SpPreview } from './model';
+import { spSlidePeriod, type SpPreview } from './model';
 import type { SpGroupComparison } from './comparisons';
 import { resolveSpTypologyComparison } from './typology-history';
 
@@ -14,7 +14,7 @@ export function SpComparisonSlide({ report, number }: { report: SpPreview; numbe
     <rect x="40" y="10" width="1000" height="140" fill="#f8f8f8" />
     <text x="62" y="62" fontSize="31" fontWeight="bold">{title}</text><text x="62" y="101" fontSize="27" fontWeight="bold" fill="#5b7638">POR {typology ? 'TIPOLOGIA' : 'SEGMENTO'}</text>
     <rect x="62" y="117" width="85" height="9" rx="4" fill="#ffcf00" />
-    <text x="62" y="158" fontSize="17">{report.quarter} · {spPeriodLabel(report)}</text>
+    <text x="62" y="158" fontSize="17">{spSlidePeriod(report)}</text>
     {result?.status === 'ready' ? <ComparisonChart result={result} report={report} /> : <><text x="640" y="335" textAnchor="middle" fontSize="28" fontWeight="bold">Comparativo em conferência</text><text x="640" y="380" textAnchor="middle" fontSize="18">{result?.issues[0] ?? (typology ? 'A conferência das tipologias nos dois anos preencherá este slide.' : 'A série municipal dos dois anos preencherá este slide.')}</text></>}
     <text x="62" y="621" fontSize="13">{stock ? 'Fotografia do último mês disponível nos dois anos. Estoques mensais não são somados.' : 'Mesmos meses nos dois anos. Participações calculadas sobre a mesma janela de meses.'}</text>
   </svg>;

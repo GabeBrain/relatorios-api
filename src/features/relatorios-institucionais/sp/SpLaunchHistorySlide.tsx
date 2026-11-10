@@ -1,3 +1,4 @@
+import { spSmoothPath } from './chart-path';
 import type { SpPreview, SpHistoryMetric } from './model';
 
 const quantity = (value: number) => value.toLocaleString('pt-BR');
@@ -22,7 +23,7 @@ export function SpLaunchHistorySlide({ report, metric = 'launches', segment, pat
       <line x1="90" x2="1190" y1="540" y2="540" stroke="#d9d9d9" />
       <line x1="90" x2="135" y1="250" y2="250" stroke="#999" strokeWidth="4" strokeDasharray="8 5" /><text x="145" y="256" fontSize="18">{previousYear}</text>
       <line x1="250" x2="295" y1="250" y2="250" stroke="#5b7638" strokeWidth="4" /><text x="305" y="256" fontSize="18">{currentYear}</text>
-      {(['previous', 'current'] as const).map(field => <g key={field}><polyline points={history.rows.map((row, index) => `${x(index)},${y(row[field])}`).join(' ')} fill="none" stroke={field === 'current' ? '#5b7638' : '#999'} strokeWidth="4" strokeDasharray={field === 'previous' ? '8 5' : undefined} />{history.rows.map((row, index) => <g key={row.currentMonth}><circle cx={x(index)} cy={y(row[field])} r="5" fill={field === 'current' ? '#5b7638' : '#999'} /><text data-history-value={field} x={x(index)} y={y(row[field]) + ((row.current >= row.previous ? field === 'current' : field === 'previous') ? -18 : 28)} textAnchor="middle" fill={field === 'current' ? '#5b7638' : '#555'} fontSize="24" fontWeight="bold">{quantity(row[field])}</text></g>)}</g>)}
+      {(['previous', 'current'] as const).map(field => <g key={field}><path d={spSmoothPath(history.rows.map((row, index) => ({ x: x(index), y: y(row[field]) })))} fill="none" stroke={field === 'current' ? '#5b7638' : '#999'} strokeWidth="4" strokeDasharray={field === 'previous' ? '8 5' : undefined} />{history.rows.map((row, index) => <g key={row.currentMonth}><circle cx={x(index)} cy={y(row[field])} r="5" fill={field === 'current' ? '#5b7638' : '#999'} /><text data-history-value={field} x={x(index)} y={y(row[field]) + ((row.current >= row.previous ? field === 'current' : field === 'previous') ? -18 : 28)} textAnchor="middle" fill={field === 'current' ? '#5b7638' : '#555'} fontSize="24" fontWeight="bold">{quantity(row[field])}</text></g>)}</g>)}
       {history.rows.map((row, index) => <text key={row.currentMonth} x={x(index)} y="570" textAnchor="middle" fontSize="20">{monthName(row.currentMonth)}</text>)}
     </svg>
     <p className="absolute left-[62px] top-[605px] text-[16px]">{metric === 'stock' ? 'Oferta: fotografia do último mês, sem somar estoques.' : 'Totais acumulados nos mesmos meses. Ausência de dados não representa zero.'}</p>

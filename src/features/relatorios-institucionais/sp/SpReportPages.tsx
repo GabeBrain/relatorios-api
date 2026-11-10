@@ -39,7 +39,7 @@ const templates: Record<number, string> = { 1: cover, 2: aboutTemplate, 13: proj
 
 export function SpSlideContent({report,page,onNavigate,people}:{report:SpPreview;page:number;onNavigate?:(page:number)=>void;people?:SpPeople}) {
   const definition=SP_ORIGINAL_SLIDES[page-1];
-  if(page===82||page===83)return <article aria-label={`Slide ${page}: ${definition.title}`} className="relative h-full w-full" style={{fontFamily:'Arial, sans-serif',background:'#f8f8f8'}}><SpPeopleSlide page={page} people={people}/></article>;
+  if(page===82||page===83)return <article aria-label={`Slide ${page}: ${definition.title}`} className="relative h-full w-full" style={{fontFamily:'Tahoma, sans-serif',background:'#f8f8f8'}}><SpPeopleSlide page={page} people={people}/></article>;
   return <article aria-label={`Slide ${page}: ${definition.title}`} className="relative h-full w-full text-[#262626]" style={{ fontFamily: 'Tahoma, sans-serif', background: '#f8f8f8' }}>
     <img key={`template-${page}`} src={SP_DIVIDER_ASSETS[page] ?? SP_INSTITUTIONAL_ASSETS[page] ?? templates[page] ?? (page >= 32 && page <= 44 ? salesTemplate : projectsTemplate)} alt={page === 1 ? 'Capa original Brain Inteligência Estratégica' : SP_DIVIDER_ASSETS[page] ? definition.title : SP_INSTITUTIONAL_ASSETS[page] ? `Referência institucional: ${definition.title}` : `Layout: ${definition.title}`} className="absolute inset-0 h-full w-full" />
     {SP_DIVIDER_ASSETS[page] && <span className="sr-only">{definition.title.toLocaleUpperCase('pt-BR')}</span>}
