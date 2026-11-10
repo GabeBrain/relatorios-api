@@ -6,7 +6,7 @@ const stockColors=['#1254d4','#478cc6','#74a82c','#edc500','#ed4e31','#ac1d5d','
 export function spMapPlan(projects:SpMapProject[],mode:SpMapMode,close:boolean,token:string){
   const colors=mode==='meter'?['#f01923','#f97479','#ff9833','#f2cb00','#69a821','#285f18']:mode==='vgv'?['#194e71','#3b8cc4','#b5d775','#76a54a','#506b20','#efaa00','#f04759','#b71854']:stockColors;
   const all=projects.filter((p):p is SpMapProject&{latitude:number;longitude:number}=>p.latitude!==null&&p.longitude!==null);
-  const core=close?all:spMapCore(all);
+  const core=close?{points:all,excluded:0}:spMapCore(all);
   const base=buildMapTilePlan(core.points,token||'geometry-only');let plan=base;
   if(base&&close){const median=(values:number[])=>values.sort((a,b)=>a-b)[Math.floor(values.length/2)],zoom=Math.min(17,base.zoom+2),world=2**zoom;
     const tx=(lon:number)=>(lon+180)/360*world,ty=(lat:number)=>(1-Math.asinh(Math.tan(lat*Math.PI/180))/Math.PI)/2*world;
