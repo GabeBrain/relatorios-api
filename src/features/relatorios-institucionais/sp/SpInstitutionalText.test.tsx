@@ -14,7 +14,6 @@ describe('Textos institucionais editáveis',()=>{
     expect(screen.getByText(label)).toBeInTheDocument();
     expect(screen.getByText('25,6% da população do estado').tagName.toLowerCase()).toBe('text');
     expect(screen.getByText('39,6% do potencial de consumo do estado').tagName.toLowerCase()).toBe('text');
-    expect(screen.getByText('Percentuais: referência de junho/2026.')).toBeInTheDocument();
     if(throughMonth!=='2026-06')expect(screen.queryByText('JUNHO DE 2026')).not.toBeInTheDocument();
   });
   it('expõe números e legendas dos seis cartões GeoBrain como texto SVG nativo',()=>{

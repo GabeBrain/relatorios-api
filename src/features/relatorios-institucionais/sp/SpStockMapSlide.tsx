@@ -10,7 +10,7 @@ export function SpStockMapSlide({report,slide,token=import.meta.env.VITE_MAPBOX_
   const mode:SpMapMode=slide<=68?'stock':slide<=71?'standard':slide<=75?'meter':'vgv',close=[68,71,75,80].includes(slide),market=report.granularDetails?.market;
   const map=useMemo(()=>spMapPlan(market?.projects??[],mode,close,token),[market,mode,close,token]);
   const heatId=useId().replace(/:/g,'_');
-  const heat=useMemo(()=>mode==='vgv'&&map.plan?spVgvHeat(map.all.map(point=>({...map.plan!.positionOf(point),value:point.vgv}))):null,[map,mode]);
+  const heat=useMemo(()=>mode==='vgv'&&map.plan?spVgvHeat(map.all.flatMap(point=>{ const pos=map.plan?.positionOf(point); return pos && pos.left>=0 && pos.left<=100 && pos.top>=0 && pos.top<=100 ? [{...pos,value:point.vgv}] : []; })):null,[map,mode]);
   const [failedTiles,setFailedTiles]=useState<Set<string>>(new Set());
   const [finished,setFinished]=useState<Set<string>>(new Set()),[failed,setFailed]=useState(false),[started,setStarted]=useState(Date.now());
   useEffect(()=>{setFinished(new Set());setFailedTiles(new Set());setFailed(false);setStarted(Date.now());},[map.plan]);
@@ -33,7 +33,7 @@ export function SpStockMapSlide({report,slide,token=import.meta.env.VITE_MAPBOX_
       <text x="970" y="190" fontSize="21" fontWeight="bold">LEGENDA</text>{labels.map((label,i)=><g key={label}><circle cx="980" cy={225+i*29} r="8" fill={map.colors[i%map.colors.length]}/><text x="1000" y={231+i*29} fontSize="15">{label}</text></g>)}
       {heat&&<g><defs><linearGradient id={`${heatId}-ramp`}><stop stopColor="rgb(62,163,69)"/><stop offset="50%" stopColor="rgb(255,235,0)"/><stop offset="100%" stopColor="rgb(235,40,30)"/></linearGradient></defs><text x="970" y="469" fontSize="12">Calor: concentração relativa de VGV</text><rect x="970" y="480" width="230" height="10" fill={`url(#${heatId}-ramp)`}/><text x="970" y="507" fontSize="11">Menor</text><text x="1200" y="507" textAnchor="end" fontSize="11">Maior</text></g>}
       {map.missingValues>0&&<><circle cx="980" cy="475" r="8" fill="#727272"/><text x="1000" y="481" fontSize="15">Sem valor: {map.missingValues}</text></>}
-      <text x="970" y="525" fontSize="16">Geocodificados: {map.all.length}/{map.total}</text><text x="970" y="551" fontSize="16">Neste recorte: {map.visible}</text><text x="970" y="577" fontSize="15">Unid. geo: {count(map.mappedUnits)}/{count(map.totalUnits)}</text>
+      <text x="970" y="525" fontSize="16">Geocodificados: {map.all.length}/{map.total}</text><text x="970" y="551" fontSize="12">Empreendimentos nesta visão: {map.visible}</text><text x="970" y="577" fontSize="15">Unid. geo: {count(map.mappedUnits)}/{count(map.totalUnits)}</text>
       <text x="40" y="675" fontSize="13">{!token?'Base cartográfica indisponível; localizações preservadas.':failed?'Base cartográfica parcialmente indisponível.':mode==='vgv'?'VGV nominal da oferta final. O calor indica concentração relativa em cada visão.':'Localização dos empreendimentos com unidades em oferta na data do estudo.'}</text>
       <text x="40" y="698" fontSize="12">{token?'© Mapbox · © OpenStreetMap contributors. ':''}A cobertura dos empreendimentos localizados está indicada ao lado.</text>
     </svg>
