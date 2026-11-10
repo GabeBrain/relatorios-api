@@ -1,5 +1,9 @@
 # Estado do handoff
 
+## 10/11/2026 — integração e publicação autorizadas
+
+73b14dc(46–55e geografia automática) integrado ao remoto a1db2ba(quatro commits Panorama) em c0441be, sem conflito e sem reescrever histórico. Fortaleza preservado; LIVE conferido pela identidade de três pontos.228testes/20arquivos aprovados, tipagem/build integrados aprovados para o push autorizado. Sem API real/homologação/deploy observado/Monday. Próximo56–60, exportação e validação de fontes continuam pendentes.
+
 ## 10/11/2026 — mensal46–55
 
 [Entrega e contratos](../../features/relatorios-institucionais/fortaleza/MENSAL_SLIDES_46_55_2026-11-10.md): prévia1–55dos60originais, IVV da RM e tabelas de oferta por município/tipo/bairro; fontes existentes reutilizadas.198testes Fortaleza +16regressões, build/tipos/lint e Edge sintético. Universo/capacidade, bairro, preços/IVV candidatos, sem API real/homologação.84568dfpublicado com autorização; nova fatia local. Próximo56–60, depois revisão/exportação/homologação. Registros abaixo são históricos.

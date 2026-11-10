@@ -385,6 +385,15 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-11-10 — Fortaleza: integração autorizada para publicar46–55 — usuário / Codex
+
+- **Ambiente/funcionalidade:** Rebrain / Fortaleza mensal. Usuário autorizou o push e, após aviso de divergência, autorizou integrar os dois trabalhos. Remoto a1db2ba com quatro commits novos de Panorama; local73b14dc. Merge c0441be sem conflitos, sem rebase/reset/force.
+- **Preservação:** Fortaleza idêntico a73b14dc. Entradas LIVE dos dois lados preservadas pela identidade de três pontos, excluindo linhas vazias da comparação. Entradas novas de Gabriel sobre paridade de plantas/fluxos/preços FIERGS foram lidas; limites/pendências e autoria preservados.
+- **Validação:**228testes/20arquivos aprovados (Fortaleza e contratos/regressões selecionados Panorama). Tipagem e build integrados aprovados; avisos anteriores de Browserslist/chunks preservados. Sem novo ensaio de API real/homologação/deploy observado ou escrita no Monday.
+- **Monday:** [Fortaleza — SINDUSCON](https://brain381753.monday.com/boards/18398638577/pulses/13149406420) — `13149406420`.
+- **Impacto em Etapas/Pendências:**46–55e recortes automáticos prontos para envio autorizado. Próximo56–60, revisão/exportação e homologação de fontes/metodologia continuam pendentes.
+
+
 ### 2026-11-10 — Fortaleza mensal46–55, IVV e tabelas — usuário / Codex
 
 - **Ambiente/funcionalidade:** Rebrain / relatório Fortaleza mensal, prévia1–55na ordem dos60originais, carregamento local preservado.
@@ -1285,6 +1294,8 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 
 
 ## 2. Etapas
+
+- **Fortaleza46–55:** integrado ao remoto em c0441be com recortes automáticos, preservando Panorama; envio autorizado nesta sessão. Sem aceite remoto presumido.
 
 - 🟡 **Fortaleza mensal46–55:** prévia1–55, IVV RM e tabelas implementadas;198testes +16regressões e visual sintético. Novo lote local; homologação/exportação pendentes.
 
