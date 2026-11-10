@@ -72,7 +72,7 @@ export function buildSpSalesNeighborhoods(buildings: Record<string, unknown>[], 
   for (const row of report.monthly) compare(differences, `Mês ${row.month}`, monthly.get(row.month) ?? 0, row.sales);
   for (const row of report.patterns.rows) compare(patternDifferences, `Padrão ${row.group}`, patterns.get(row.group) ?? 0, row.sales);
   if (differences.length) return block(`As vendas por bairro não coincidem com os totais municipais. ${[...differences,...patternDifferences].join('. ')}. Comparação de sold_in_period dos históricos com liquid_sales municipal, no período selecionado. O ranking aguarda reconciliação; nenhuma diferença foi atribuída automaticamente a distratos.`);
-  const shares = cityTotal > 0;
+  const shares = cityTotal > 0 && all.every(row => row.units >= 0);
   const rows = all.sort((a,b) => b.units - a.units || a.neighborhood.localeCompare(b.neighborhood, 'pt-BR')).slice(0,10).map(row => ({ ...row, share: shares ? row.units / cityTotal * 100 : null }));
   const topTotal = rows.reduce((sum,row) => sum + row.units, 0);
   // Pattern classification is not a dimension of this neighborhood ranking.
