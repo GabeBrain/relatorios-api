@@ -1,3 +1,7 @@
+## 10/11/2026 — Fortaleza: geografia definida pelo relatório
+
+Pedido explícito do usuário: retirar UF/município/recorte territorial da tela, pois o original define Fortaleza, RM ou conjunto por slide. Configuração passa a tipo/mês ou trimestre/ano. UseGeoApiScope continua carregando o catálogo paginado, valida a capital com grafia autorizada e exige as cinco cidades antes de consultas pesadas. CE interna precede a identificação da capital. Sem fallback IBGE ou redução silenciosa para subconjunto. Retirada somente do GeoApiScopeSelector visual desta rota, por instrução do usuário; não muda o padrão de telas com geografia livre. Mantém BrainLoadingState no cartão, rota lazy e primitives Select/Button/Tabs existentes. [Entrega e limites](../features/relatorios-institucionais/fortaleza/MENSAL_SLIDES_46_55_2026-11-10.md).
+
 ## 09/11/2026 — Fortaleza: composição editorial fiel ao original
 
 Slides1–10 ficam em módulo lazy dentro da rota existente; fallback BrainLoadingState, navegação Button/Tabs e ampliação Dialog. O conteúdo editorial preserva cores, fonte Montserrat local e canvas16:9 dos originais, isolado por classes `fortaleza-intro-*`; esses valores pertencem ao relatório e não alteram tokens/tema da aplicação. Arte nativa extraída em leitura, campos variáveis nas medidas do Office e avisos de fonte/capacidade fora da lâmina. Sem novo primitive global; [contrato e limitações de fidelidade](../features/relatorios-institucionais/fortaleza/SLIDES_01_10_2026-11-09.md).

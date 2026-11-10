@@ -7,7 +7,7 @@ const palette=['#3D2055','#42CCA2'];
 const format=(value:number,percent=false)=>`${value.toLocaleString('pt-BR',{maximumFractionDigits:percent?1:0})}${percent?'%':''}`;
 const change=(value:number|null)=>value===null?'—':`${value>0?'+':''}${format(value,true)}`;
 export default function FortalezaMonthlyAnalysisSlide({page,selection,data}:{page:number;selection:FortalezaSelection;data:PriceSlideData|null}) {
-  const divider=[36,39,44].includes(page),ivv=page===45,bar=page===37 || page>=40&&page<=43;
+  const divider=[36,39,44].includes(page),ivv=page>=45,bar=page===37 || page>=40&&page<=43;
   const lines=data?.series??[],bars=data?.cities?.map(city=>({label:city.city,value:city.value}))??lines[0]?.points.map(point=>({label:point.label,value:point.value!}))??[];
   const values=data?.cities?.map(city=>city.value)??lines.flatMap(line=>line.points.map(point=>point.value!));
   const min=Math.min(0,...values),max=Math.max(1,...values,data?.average??0),top=270,bottom=535;

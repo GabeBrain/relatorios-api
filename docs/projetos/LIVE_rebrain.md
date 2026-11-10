@@ -385,6 +385,17 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-11-10 — Fortaleza mensal46–55, IVV e tabelas — usuário / Codex
+
+- **Ambiente/funcionalidade:** Rebrain / relatório Fortaleza mensal, prévia1–55na ordem dos60originais, carregamento local preservado.
+- **Entrega:** [contratos e evidências](../features/relatorios-institucionais/fortaleza/MENSAL_SLIDES_46_55_2026-11-10.md). IVV agregado da RM; oferta por município/tipo, capacidade histórica de ativos e quatro páginas de bairros, com totais integrais e insights. Reutiliza fontes sem novas consultas ao navegar, sem alterar SP/Secovi/FIERGS.
+- **Refinamento pedido na mesma sessão:** geografia fixa por slide, sem seletores UF/cidade/território; mantidos catálogo/autoriza??o das cinco cidades e guardas. Referências original mensal/trimestral em página local no Desktop. Relato remoto22/25ainda sem nova evidência de fonte, sem declarar homologação.
+- **Validação:**198testes Fortaleza +16regressões selecionadas, build/tipos/lint e Edge1440/390claro/escuro sintético; Office em leitura. Sem API real/homologação/exportador/deploy observado/Monday.
+- **Commits:**84568dfenviado com autorização nesta sessão; nova fatia isolada `feat(relatorios): add Fortaleza monthly slides 46 through 55`, base84568df, local até autorização própria.
+- **Monday:** [Fortaleza — SINDUSCON](https://brain381753.monday.com/boards/18398638577/pulses/13149406420) — `13149406420`.
+- **Impacto em Etapas/Pendências:** próximo56–60; validar universo ativo/capacidade, bairro cadastral, fonte granular versus municipal e metodologias antes da homologação; amostra/empresas e exportação continuam pendentes.
+
+
 ### 2026-11-10 — Fortaleza mensal36–45, preços e IVV — usuário / Codex
 
 - **Ambiente/funcionalidade:** Rebrain / relatório Fortaleza mensal; prévia1–45emordem dos60originais, carregamento local preservado.
@@ -1262,6 +1273,8 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 
 ## 2. Etapas
 
+- 🟡 **Fortaleza mensal46–55:** prévia1–55, IVV RM e tabelas implementadas;198testes +16regressões e visual sintético. Novo lote local; homologação/exportação pendentes.
+
 - 🟡 **Fortaleza mensal36–45:** prévia1–45, preços/IVV candidatos e insights implementados;170testes +16regressões e visual sintético. Novo lote local, homologação/exportação pendentes.
 
 - 🟡 **Fortaleza mensal —26–35,10/11:** prévia chega ao35dos60originais, dados condicionados à cobertura;164casos locais/regressões e visual aprovados. [Estado atual](../features/relatorios-institucionais/fortaleza/MENSAL_SLIDES_26_35_2026-11-10.md). Lote local; homologação/exportação ainda pendentes.
@@ -1364,6 +1377,8 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 ---
 
 ## 3. Pendências
+
+- **Fortaleza mensal após46–55:** implementar56–60, revisar conjunto/exportação e homologar fontes/metodologia; validar capacidade histórica/universo ativo, bairro, preço/IVV e diferenças entre fontes. Estados abaixo são históricos, sem retirar amostra/empresas do2da fila.
 
 - **Fortaleza mensal após36–45:** implementar46–55e56–60, exportação; validar ponderação dos preços, área de lotes, IVV e fontes reais, além de amostra/INCC/metodologias anteriores. Estados abaixo preservam o histórico;36–45não são mais pendência de implementação.
 

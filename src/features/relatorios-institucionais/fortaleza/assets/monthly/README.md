@@ -1,5 +1,9 @@
 # Arte mensal — lançamentos verticais
 
+## Lote46–55
+
+Arte nova46–55do mesmo original/hash, Office somente leitura. Gráficos e tabelas antigos removidos. IVV e tabelas recebem números/períodos SVG, sem copiar a base anterior. Layouts antigos preservados no manifesto.
+
 ## Lote36–45
 
 Extração cobre11–45do mesmo original/hash, Office somente leitura.36/39/44preservam divisórias, mês/ano novos.37/38/40–43/45recebem preços ou IVV dinâmicos, sem dados antigos. Título datado40–43substituído em SVG.

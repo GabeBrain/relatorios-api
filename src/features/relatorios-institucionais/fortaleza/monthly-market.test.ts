@@ -5,6 +5,16 @@ import { monthlyMarketFixture,monthlyMarketSelection as selection } from './__te
 const cities = [...FORTALEZA_CITIES];
 const indices = Object.fromEntries(monthlyMarketFixture().months.map((month,index) => [month,100 + index]));
 describe('Fortaleza mensal — 12/14 e lote 16–25', () => {
+  it('município Fortaleza libera23/24 e exige RM para22/25, com cidades faltantes explícitas',()=>{
+    const data=monthlyMarketFixture();
+    for(const page of [23,24])expect(buildMonthlySlide(page,data,{...selection,territory:'city'},['Fortaleza']).status).toBe('ready');
+    for(const page of [22,25]){const result=buildMonthlySlide(page,data,{...selection,territory:'city'},['Fortaleza']);expect(result.status).toBe('blocked');expect(result.issue).toContain('Aquiraz');expect(result.issue).toContain('5 municípios');}
+    for(const page of [22,23,24,25])expect(buildMonthlySlide(page,data,selection,cities).status).toBe('ready');
+  });
+  it('município da RM não é tratado como capital; cadastro com outra caixa mantém a identidade',()=>{
+    const data=monthlyMarketFixture();expect(buildMonthlySlide(23,data,{...selection,city:'Aquiraz',territory:'city'},['Aquiraz']).issue).toContain('Fortaleza');
+    expect(buildMonthlySlide(24,data,selection,['FORTALEZA']).status).toBe('ready');
+  });
   it('12 inclui capital/RM vertical/comercial/casas e exclui lotes/chácaras', () => {
     const result = buildMonthlySlide(12,monthlyMarketFixture(),selection,cities);
     expect(result.status).toBe('ready');

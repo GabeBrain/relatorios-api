@@ -1,5 +1,10 @@
 # Fortaleza / SINDUSCON-CE — plano inicial
 
+## 10/11/2026 — mensal46–55
+
+[Entrega e contratos](MENSAL_SLIDES_46_55_2026-11-10.md): prévia1–55dos60originais, IVV da RM e tabelas de oferta por município/tipo/bairro; fontes existentes reutilizadas.198testes Fortaleza +16regressões, build/tipos/lint e Edge sintético. Universo/capacidade, bairro, preços/IVV candidatos, sem API real/homologação.84568dfpublicado com autorização; nova fatia local. Próximo56–60, depois revisão/exportação/homologação. Registros abaixo são históricos.
+
+
 ## 10/11/2026 — mensal36–45
 
 [Entrega e contratos](MENSAL_SLIDES_36_45_2026-11-10.md): prévia1–45dos60originais, preços históricos v2 e IVV com abertura observada.170testes Fortaleza +16regressões, build/tipos/lint e Edge sintético1440/390claro/escuro. Ponderação/área de lotes e IVV candidatos, homologação pendente; nenhuma API real.9fa553epublicado com autorização; novo lote local até envio autorizado. Próximo46–55, depois56–60/exportação. Registros anteriores são históricos.

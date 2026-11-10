@@ -24,10 +24,10 @@ try {
       const reply = value => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(value) });
       if (url.pathname === '/public-api/monitored-cities') return reply({ data: cities.map(city => ({ city, state: 'CE' })), links: { next: null } });
       if (url.pathname === '/public-api/v2/building-with-history-internal') {
-        assert.equal(route.request().method(),'POST');
+        assert.equal(route.request().method(),'POST'); calls.push({city:url.searchParams.get('city'),metric:'history-v2'});
         const city=url.searchParams.get('city'),type=url.searchParams.get('type'),months=Array.from({length:13},(_,i)=>new Date(Date.UTC(2025,6+i,1)).toISOString().slice(0,7));
-        const products=type==='Vertical'?['Standard']:['Condominio de Casas','Loteamento Fechado','Loteamento Aberto'];
-        const data=mode==='empty'?[]:products.map((product,index)=>({building_id:`${city}-${type}-${index}`,city,state:'CE',building_type:type,standard:product,release_date:'2020-01-01',typologies:[{id:index+1,type_of_typology:'Padrao'}],typologies_history:months.map((month,i)=>({typology_id:index+1,period:`${month}-01`,typology_stock:10,price_private_area:1000+index*500+i*30}))}));
+        const products=type==='Vertical'?Array.from({length:44},()=> 'Standard'):['Condominio de Casas','Loteamento Fechado','Loteamento Aberto'];
+        const data=mode==='empty'?[]:products.map((product,index)=>({building_id:`${city}-${type}-${index}`,city,state:'CE',building_type:type,standard:product,release_date:'2020-01-01',neighborhood:`Bairro ${String(index+1).padStart(2,'0')}`,typologies:[{id:index+1,type_of_typology:'Padrao'}],typologies_history:months.map((month,i)=>({typology_id:index+1,period:`${month}-01`,qty:100,sold_in_period:3,typology_stock:10,price_private_area:1000+index*500+i*30}))}));
         if(mode==='missing'&&data.length)data[0].typologies_history.pop();
         return reply({data,meta:{total:data.length,current_page:1,last_page:1}});
       }
@@ -55,14 +55,11 @@ try {
     await page.goto(`${base}/rebrain/relatorios-institucionais/fortaleza`);
     await page.evaluate(dark => document.documentElement.classList.toggle('dark', dark), dark);
     assert.match(await page.locator('#fortaleza-periodicity').innerText(), /Mensal/);
+    assert.equal(await page.locator('#fortaleza-territory').count(),0);
+    assert.equal(await page.getByRole('combobox').count(),3);
     await page.getByRole('heading', { name: 'Fortaleza / SINDUSCON-CE', exact: true }).waitFor();
-    await page.getByRole('combobox').first().click(); await page.getByRole('option', { name: 'CE', exact: true }).click();
-    // GeoApiScopeSelector uses a municipality combobox with search.
-    const cityControl = page.getByRole('combobox').nth(1);
-    await cityControl.click(); await page.getByRole('option', { name: 'Fortaleza', exact: true }).click();
     await page.locator('#fortaleza-position').click(); await page.getByRole('option', { name: 'julho', exact: true }).click();
     await page.locator('#fortaleza-year').click(); await page.getByRole('option', { name: '2026', exact: true }).click();
-    await page.locator('#fortaleza-territory').click(); await page.getByRole('option', { name: 'Fortaleza e RM · 5 municípios', exact: true }).click();
     mode = orderOnly ? 'success' : 'slow'; await page.getByRole('button', { name: 'Gerar prévia mensal', exact: true }).click();
     if (!orderOnly) {
       await page.getByText(/fontes mensais concluídas/).first().waitFor();
@@ -81,19 +78,20 @@ try {
     await page.waitForFunction(() => !document.querySelector('button') || ![...document.querySelectorAll('button')].find(button => button.textContent === 'Gerar prévia mensal')?.disabled);
     mode = 'success';
     const count = calls.length;
-    for (const number of Array.from({ length:35 },(_,index) => index+11)) {
+    for (const number of Array.from({ length:45 },(_,index) => index+11)) {
       await page.getByRole('navigation', { name: 'Slides implementados', exact: true }).getByRole('button', { name: String(number), exact: true }).click();
       await page.evaluate(() => document.fonts.ready);
       const slide = page.getByRole('img', { name: `Fortaleza · slide ${number}`, exact: true });
       assert.equal(await slide.getByLabel('Histórico de lançamentos pendente').count(), 0);
       assert.equal(await slide.getByLabel('Histórico mensal pendente').count(), 0);
+      assert.equal(await slide.getByLabel('Tabela mensal pendente').count(), 0, `slide ${number}: ${(await page.locator('details').allTextContents()).join(' | ')}`);
       assert.equal(await slide.getByLabel('Análise mensal pendente').count(), 0, `slide ${number}: ${(await page.locator('details').allTextContents()).join(' | ')}`);
       await slide.screenshot({ path: resolve(folder, `slide-${number}-${width}-${dark}.png`) });
       assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth), false);
     }
     assert.equal(calls.length, count, 'Slide navigation must not issue queries.');
     await page.getByRole('navigation', { name: 'Slides implementados', exact: true }).getByRole('button', { name: '11', exact: true }).click();
-    for (let number = 12;number <= 45;number++) {
+    for (let number = 12;number <= 55;number++) {
       await page.getByRole('navigation', { name: 'Slides implementados', exact: true }).getByRole('button', { name: 'Próximo', exact: true }).click();
       await page.getByRole('img', { name: `Fortaleza · slide ${number}`, exact: true }).waitFor();
       if (number === 12 || number === 14) {
@@ -115,7 +113,7 @@ try {
       await page.getByRole('button', { name: 'Cancelar consulta', exact: true }).click();
       await page.getByText('Prévia cancelada', { exact: true }).waitFor();
     }
-    results.push({ width, dark, calls: calls.length, slides: Array.from({ length:35 },(_,index) => index+11), officialSequence: '11–45 sem saltos', offline: true });
+    results.push({ width, dark, calls: calls.length, slides: Array.from({ length:45 },(_,index) => index+11), officialSequence: '11–55 sem saltos', offline: true });
     await context.close();
   }
 } finally { await browser.close(); }

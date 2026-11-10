@@ -78,7 +78,8 @@ export function buildMonthlySlide(page: number, data: MonthlyMarketData | null, 
   const block = (issue: string) => ({ ...blockedMonthlySlide(issue, labels), unit: money ? 'milhões' as const : 'unidades' as const });
   if (![12,14,16,17,19,20,22,23,24,25,26,27,28,30,31,33,34,35].includes(page)) return block('Lâmina sem contrato de cálculo.');
   const required = rmOnly ? FORTALEZA_CITIES.filter(city => city !== 'Fortaleza') : pattern || page === 24 || page === 34 ? ['Fortaleza'] : [...FORTALEZA_CITIES];
-  if (required.some(city => !cities.some(value => normalizeMarketText(value) === normalizeMarketText(city)))) return block('O recorte não inclui todos os municípios desta análise.');
+  const missing = required.filter(city => !cities.some(value => normalizeMarketText(value) === normalizeMarketText(city)));
+  if (missing.length) return block(`Faltam municípios no recorte deste slide: ${missing.join(', ')}. ${required.length === 1 ? 'Selecione Fortaleza ou o conjunto Fortaleza e RM.' : 'Para o relatório completo, escolha “Fortaleza e RM · 5 municípios” e gere novamente.'}`);
   const months = monthlyMarketMonths(selection), visibleMonths = months.slice(-25), bins = new Map(months.map(month => [month, blank(month)]));
   const metrics: MonthlyMetric[] = rollingPage ? ['releases','sales'] : stockPage ? ['stock'] : [22,23,25,27,28,30,31].includes(page) ? ['sales'] : ['releases'];
   const segments: MonthlySegment[] = pattern || rollingPage || page === 34 || page === 35 ? ['Vertical'] : lots ? ['Horizontal'] : page === 14 || page === 33 ? ['Vertical','Horizontal'] : ['Vertical','Horizontal','Comercial'];
