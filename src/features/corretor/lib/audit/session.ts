@@ -62,7 +62,8 @@ export function calibrationFor(findings: Finding[], v: VerdictMap): Calibration 
 }
 
 function csvCell(v: string | number | boolean | undefined): string {
-  const s = v === undefined ? '' : String(v);
+  let s = v === undefined ? '' : String(v);
+  if (/^[=+\-@\t\r]/.test(s)) s = `'${s}`;
   return `"${s.replace(/"/g, '""')}"`;
 }
 
