@@ -1,3 +1,9 @@
+import { territorialMembershipSummary } from '../domain/territorial-presentation';
+import { FiergsPointValue } from './FiergsPointValue';
+export { FiergsPointValue } from './FiergsPointValue';
+import { AnnualCompositionSlide } from './AnnualCompositionSlide';
+import { TerritorialComparisonSlide } from './TerritorialComparisonSlides';
+import { territorialReportView } from '../report/territorial-projections';
 import { analyticContext, observedComparison, monetaryTitle } from '../report/editorial-contracts';
 import { Children, cloneElement, isValidElement } from 'react';
 import { Component, useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from 'react';
@@ -82,19 +88,19 @@ function Corporate({ page, report }: { page: number; report: PanoramaReportModel
 function V2Divider({ title }: { title: string }) { return <div className="panorama-v2-divider"><h2>{title}</h2></div>; }
 function FiergsCityScope({ report, cities }: { report: PanoramaReportModel; cities?: string[] }) {
   const territory = panoramaScopeIdentity(report.scope);
-  if (!territory.official) return <CustomFiergsTerritoryCover scope={report.scope} cities={cities}/>;
+  if (!territory.official || report.scope.presentation?.layout==='integrated'&&report.scope.presentation.units?.some(u=>u.cities.length>1)) return <CustomFiergsTerritoryCover scope={report.scope} cities={cities}/>;
   return <div className="panorama-fiergs-city-scope"><p>RECORTE DO ESTUDO · {territory.uf}</p><h2>{territory.cities.length === 1 ? 'CIDADE ANALISADA' : 'CIDADES ANALISADAS'}</h2><div>{(cities ?? territory.cities).map((city) => <span key={city}>{city}</span>)}</div><small>{territory.cities.length} município(s) no recorte · {quarterLabel(report.scope.endQuarter)}{territory.official ? ' · Região Metropolitana de Porto Alegre, sem Porto Alegre no universo analisado' : ''}</small></div>;
 }
 function FiergsTerritorialCover({ report, cities }: { report: PanoramaReportModel; cities?: string[] }) {
-  if (!panoramaScopeIdentity(report.scope).official) return <FiergsCityScope report={report} cities={cities}/>;
+  if (report.territorial && report.scope.presentation?.layout!=='integrated' || !panoramaScopeIdentity(report.scope).official) return <FiergsCityScope report={report} cities={cities}/>;
   return <div className="panorama-fiergs-territorial"><img src={FIERGS_REGION_MAP} alt="Mapa da Região Metropolitana de Porto Alegre"/><div><p>RECORTE FIERGS</p><h1>REGIÃO<br/>METROPOLITANA<br/>DE PORTO ALEGRE</h1><strong>{quarterLabel(report.scope.endQuarter)}</strong><small>10 municípios analisados · Porto Alegre exibida somente como referência geográfica</small></div></div>;
 }
 function FiergsStudyCover({ report }: { report: PanoramaReportModel }) {
-  if (!panoramaScopeIdentity(report.scope).official) return <CustomFiergsStudyCover scope={report.scope}/>;
+  if (report.territorial && report.scope.presentation?.layout!=='integrated' || !panoramaScopeIdentity(report.scope).official) return <CustomFiergsStudyCover scope={report.scope}/>;
   return <div className="panorama-fiergs-study-cover"><p>PANORAMA DO MERCADO IMOBILIÁRIO · FIERGS</p><h1>{panoramaScopeIdentity(report.scope).coverTitle}</h1><i/><strong>{quarterLabel(report.scope.endQuarter)}</strong></div>;
 }
 function CityCover({ report }: { report: PanoramaReportModel }) {
-  const cities = report.scope.cities.filter(Boolean);
+  const cities = report.scope.presentation?.mode === 'comparison' && report.scope.presentation.layout !== 'integrated' ? (report.scope.presentation.units ?? []).map((u)=>u.label) : report.scope.cities.filter(Boolean);
   if (report.scope.entity === 'fiergs-rs') return <div aria-label="Capa institucional FIERGS"/>;
   return <div className="panorama-v2-city-cover"><div className="panorama-v2-city-cover-copy"><p>PANORAMA IMOBILIÁRIO DE</p><h1>{cities.map((city) => <span key={city}>{city}</span>)}</h1><strong>{quarterLabel(report.scope.endQuarter)}</strong></div></div>;
 }
@@ -291,18 +297,6 @@ export function annualizeSeries(series: LaunchSeries[]) {
   return [...annual.values()].sort((a, b) => a.year - b.year);
 }
 
-export function FiergsPointValue({ x, y, value, index, data, format, referenceQuarter }: { x?: number; y?: number; value?: number; index?: number; data: LaunchSeries[]; format: (value: number) => string; referenceQuarter: string }) {
-  if (x === undefined || y === undefined || value === undefined || index === undefined) return null;
-  const label = format(Number(value)); const equivalent = data[index]?.quarter[0] === referenceQuarter;
-  // Os atributos visuais essenciais ficam inline de propósito. O preview aplica normalmente as
-  // classes CSS ao SVG do Recharts, mas o `html-to-image` serializa os nós customizados em outro
-  // SVG: nesse caminho o `<rect>` voltava ao fill preto padrão e o texto branco também perdia o
-  // fill, ficando invisível no PDF/PPT. Inline mantém preview e arquivos espelho idênticos.
-  const textStyle = { fontFamily: 'Montserrat, Arial, sans-serif', fontSize: '1.12cqw', fontWeight: 700 } as const;
-  if (!equivalent) return <text x={x} y={y - 12} textAnchor="middle" className="panorama-fiergs-point" fill="#20231d" stroke="#ffffff" strokeWidth={4} paintOrder="stroke" strokeLinejoin="round" style={textStyle}>{label}</text>;
-  const width = Math.max(36, label.length * 8 + 14);
-  return <g className="panorama-fiergs-point-highlight"><rect x={x - width / 2} y={y - 29} width={width} height={22} rx={2} fill="#5d7737"/><text x={x} y={y - 18} textAnchor="middle" fill="#ffffff" dominantBaseline="middle" style={textStyle}>{label}</text></g>;
-}
 
 function FiergsContextComparisons({ pairs, format }: { pairs: FiergsComparisonPair[]; format: (value: number) => string }) {
   return <aside className="panorama-fiergs-context-comparisons">{pairs.filter((p) => observedComparison(p.left, p.right, p.complete).visible).map((pair) => {
@@ -556,6 +550,8 @@ function CityComparisonPage({ kind, report }: { kind: NonNullable<ReportPageDefi
   return <div className="panorama-table-page panorama-city-comparison"><h2>DISPONIBILIDADE RESIDENCIAL VERTICAL POR PADRÃO</h2><table><thead><tr><th>Padrão</th>{report.cityComparisons.sales.map((row) => <th key={row.city}>{row.city}</th>)}</tr></thead><tbody>{report.cityComparisons.availabilityByStandard.map((row) => <tr key={row.standard}><td>{row.standard}</td>{report.cityComparisons.sales.map(({ city }) => <td key={city}>{pct(row.values.find((value) => value.city === city)?.availability ?? null)}</td>)}</tr>)}</tbody></table></div>;
 }
 function PresentationContentBody({ def, report }: { def: ReportPageDefinition; report: PanoramaReportModel }) {
+  if (def.annualCompositionMetric) { const block=report.annualCompositions?.find((b)=>b.metric===def.annualCompositionMetric); return block ? <AnnualCompositionSlide block={block}/> : null; }
+  if (def.territorialKind) return <TerritorialComparisonSlide report={report} def={def}/>;
   const cityLabel = scopeCityLabel(report.scope); const title = def.title.replace('{cidade}', cityLabel); const p = def.contentReferenceSlide ?? def.referenceSlide;
   const official = def.fiergsOfficialSlide;
   if (official === 2) return <FiergsStudyCover report={report}/>;
@@ -607,9 +603,10 @@ function PresentationContentBody({ def, report }: { def: ReportPageDefinition; r
 }
 /** Shared context is presentation only: it never changes the numeric universe. */
 export function PanoramaPresentationContent({ def, report }: { def: ReportPageDefinition; report: PanoramaReportModel }) {
+  if (def.territorialUnitId) report = territorialReportView(report, def.territorialUnitId);
   let content: ReactNode = PresentationContentBody({ def, report });
   if (['cover', 'static', 'divider', 'summary', 'closing'].includes(def.visualFamily)) return content;
-  const temporal = def.fiergsOfficialSlide
+  const temporal = def.annualCompositionMetric ? true : def.fiergsOfficialSlide
     ? [9,11,12,14,15,16,20,22,24,26,27,28,32,33,35,39,43,44,45,46,47].includes(def.fiergsOfficialSlide)
     : /por trimestre|acumulado|evolução|ao longo do tempo/i.test(def.title);
   const rolling = /12 meses/i.test(def.title);
@@ -617,7 +614,11 @@ export function PanoramaPresentationContent({ def, report }: { def: ReportPageDe
   for (let depth = 0; depth < 6 && isValidElement(content) && typeof content.type === 'function'; depth++) {
     content = (content.type as (props: unknown) => ReactNode)(content.props);
   }
-  const context = <p className="panorama-analytic-context">{analyticContext(report, temporal, rolling)}</p>;
+  const consolidated=Boolean(report.territorial&&!def.territorialKind&&!def.territorialUnitId);
+  const contextReport=consolidated&&report.scope.presentation?.layout==='integrated'?{...report,territorial:undefined}:report;
+  const membership=def.territorialKind?territorialMembershipSummary(report.scope.presentation):'';
+  const context = <p className="panorama-analytic-context">{consolidated?'Consolidado · ':def.territorialKind&&report.scope.presentation?.layout==='integrated'?'Por cidade/grupo · ':''}{analyticContext(contextReport,temporal,rolling)}{membership&&membership.length<=180&&<small style={{display:'block',marginTop:'.25cqw',fontSize:'.85em',fontWeight:400}}>{membership}</small>}</p>;
+
   if (!isValidElement<{ children?: ReactNode }>(content)) return content;
   let inserted = false;
   const children = Children.toArray(content.props.children).flatMap<ReactNode>((child) => {

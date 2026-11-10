@@ -168,7 +168,7 @@ export function AppLayout({ children }: AppLayoutProps) {
   const session = useGeobrainSession();
   const [compact, setCompact] = useState(() => window.innerWidth < 768);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const responsiveMobile = (location.pathname.startsWith('/corretor') || location.pathname.startsWith('/rebrain/estimativas-vendas')) && compact;
+  const responsiveMobile = (location.pathname.startsWith('/corretor') || location.pathname.startsWith('/rebrain/estimativas-vendas') || location.pathname === '/rebrain/relatorios-institucionais/fortaleza') && compact;
   const collapsed = responsiveMobile ? !mobileMenuOpen : savedCollapsed;
 
   useEffect(() => {

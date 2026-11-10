@@ -1,5 +1,6 @@
+import { annualLaunchFacts, type AnnualLaunchFact } from './report/annual-composition';
 import { httpRequest } from '@/lib/http-client';
-import { periodToQuarter, quarterKey, safeNumber } from './lib/launches';
+import { periodToQuarter, quarterKey, safeNumber, launchRecordsFromCube } from './lib/launches';
 import type { CalibrationCell, LaunchAuditBuilding, LaunchRecord, MarketCalibrationCell, MarketCohortRow, PanoramaReference, PanoramaReportModel, PanoramaScope, Quarter, Segment } from './types';
 import { buildPanoramaReportModel } from './report/model';
 import { loadMunicipalTerritory } from './lib/municipal-territory';
@@ -200,16 +201,6 @@ function segmentOf(value: unknown): Segment | null {
 }
 function standardOf(value: unknown): string { return String(value ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase(); }
 
-/** Firewall V3: números horizontais só atravessam se o cubo oficial os aceitou. */
-function launchRecordsFromCube(cube: MarketCube): LaunchRecord[] {
-  return cube.projects.map((project) => {
-    const economic = standardOf(project.standard).includes('econom');
-    return { quarter: project.releaseQuarter, segment: project.segment, projects: 1, units: project.launchedUnits ?? 0, vgvMillions: project.launchedVgvMillions,
-      economicProjects: economic ? 1 : 0, otherProjects: economic ? 0 : 1, economicUnits: economic ? (project.launchedUnits ?? 0) : 0, otherUnits: economic ? 0 : (project.launchedUnits ?? 0),
-      economicVgvMillions: economic ? project.launchedVgvMillions : 0, otherVgvMillions: economic ? 0 : project.launchedVgvMillions, name: project.name, latitude: project.latitude, longitude: project.longitude };
-  });
-}
-
 /** Promoted launch contract: a release is one building on its release_date, never every history snapshot. */
 export function launchRecordsFrom(data: Record<string, unknown>[], scope: CityScope): LaunchRecord[] {
   const records: LaunchRecord[] = [];
@@ -231,6 +222,7 @@ export function launchRecordsFrom(data: Record<string, unknown>[], scope: CitySc
 
 /** Tudo o que uma cidade contribui para o consolidado. */
 interface CityHarvest {
+  annualLaunchFacts: AnnualLaunchFact[];
   city: string;
   records: LaunchRecord[];
   cube: MarketCube;
@@ -273,14 +265,15 @@ export class PanoramaCollectionError extends Error {
   }
 }
 
-function collectionFailureRow(city: string, error: string, attempts: number, durationMs: number): CollectionFailureAuditRow {
-  const statusMatch = error.match(/\bHTTP\s+(\d{3})\b/i);
-  const statusCode = statusMatch ? Number(statusMatch[1]) : null;
-  const failureClass: CollectionFailureAuditRow['failureClass'] = /sem (linhas|dados)|vazio/i.test(error) || statusCode === 200
-    ? 'empty'
-    : statusCode === 401 || statusCode === 403 ? 'auth'
-      : /Contrato da fonte:/.test(error) || statusCode === 400 || statusCode === 404 || statusCode === 405 || statusCode === 422 ? 'contract'
-        : 'transient';
+export function collectionFailureRow(city: string, error: string, attempts: number, durationMs: number): CollectionFailureAuditRow {
+  const statuses = [...error.matchAll(/\bHTTP\s+(\d{3})\b/gi)].map((match) => Number(match[1]));
+  const statusCode = statuses.find((status) => status === 401 || status === 403)
+    ?? statuses.find((status) => status >= 400 && status < 500 && status !== 408 && status !== 429)
+    ?? statuses.find((status) => status === 408 || status === 429 || status >= 500)
+    ?? (/HTTP\s+rede\/timeout/i.test(error) ? null : statuses[0] ?? null);
+  const failureClass: CollectionFailureAuditRow['failureClass'] = statusCode === 401 || statusCode === 403 ? 'auth'
+    : /Contrato da fonte:/.test(error) || (statusCode !== null && statusCode >= 400 && statusCode < 500 && statusCode !== 408 && statusCode !== 429) ? 'contract'
+      : isTransientCityFailure(new Error(error)) ? 'transient' : 'empty';
   const operation = error.match(/^(sales|stock|ivv|medium-prices-meter|medium-prices)\b/i)?.[1]
     ?? (error.includes('temporal-analysis-city/') ? error.match(/temporal-analysis-city\/([a-z-]+)/)?.[1] : null)
     ?? 'empreendimentos/histórico';
@@ -338,6 +331,19 @@ export function describeTemporalFailure(city: string, issues: TemporalIssue[]): 
   return `Não foi possível consultar ${metrics} em ${city}: a Geobrain respondeu de formas diferentes entre os indicadores. O relatório foi interrompido para não misturar dados reais com zeros; o time técnico precisa revisar a integração com o provedor.`;
 }
 
+/** Tipologia de dormitórios não se aplica a uma base comprovadamente só horizontal.
+ * Só aceita ausência explícita HTTP 200; falha de transporte/acesso continua impeditiva. */
+export function unavailableRequiredCitySources(buildings: Record<string, unknown>[], sources: Pick<Record<TemporalKey, SourceResult>, 'sales' | 'stock' | 'salesTypology' | 'stockTypology'>): SourceResult[] {
+  const standards = [sources.sales, sources.stock];
+  const horizontalOnly = buildings.length > 0
+    && buildings.every((building) => segmentOf(building.building_type ?? building.type) === 'Horizontal')
+    && standards.every((source) => source.available && source.rows.length > 0
+      && source.rows.every((row) => segmentOf(row.building_type ?? row.type) === 'Horizontal'));
+  const requiredTypology = [sources.salesTypology, sources.stockTypology].filter((source) =>
+    !(horizontalOnly && source.issue?.empty === true && source.issue.status === 200));
+  return [...standards, ...requiredTypology].filter((source) => !source.available);
+}
+
 async function harvestCity(scope: CityScope, entity: PanoramaScope['entity'], engineVersion: 'v2' | 'v3' | 'v4', circuit: PanoramaTemporalCircuit, gate: PanoramaRequestGate, signal?: AbortSignal, onUnit?: (city: string, operation: string) => void): Promise<CityHarvest> {
   const track = <T,>(operation: string, request: () => Promise<T>) => gate(request).finally(() => onUnit?.(scope.city, operation));
   const [buildings, sales, salesTypology, stock, stockTypology, ivv, ticket, ticketTypology, meter, meterTypology] = await Promise.all([
@@ -352,8 +358,7 @@ async function harvestCity(scope: CityScope, entity: PanoramaScope['entity'], en
   // pelo cubo granular, que contém estoque, vendas e lançamentos por tipologia.
   const ivvTypology: SourceResult = { rows: [], available: false, source: 'IVV por tipologia calculado pelo histórico granular do recorte' };
   const sources = { sales, salesTypology, stock, stockTypology, ivv, ivvTypology, ticket, ticketTypology, meter, meterTypology };
-  const mandatory = [sales, salesTypology, stock, stockTypology];
-  const unavailableMandatory = mandatory.filter((source) => !source.available);
+  const unavailableMandatory = unavailableRequiredCitySources(buildings, sources);
   if (unavailableMandatory.length) {
     const issues = unavailableMandatory.flatMap((source) => source.issue ? [source.issue] : []);
     const details = issues.map(failureLabel);
@@ -368,6 +373,7 @@ async function harvestCity(scope: CityScope, entity: PanoramaScope['entity'], en
   const cube = buildCityCube(buildings, { city: scope.city, uf: scope.uf, endQuarter: scope.endQuarter, entity, engineVersion });
   return {
     city: scope.city,
+    annualLaunchFacts: annualLaunchFacts(buildings, cube),
     records: engineVersion !== 'v2' ? launchRecordsFromCube(cube) : launchRecordsFrom(buildings, scope),
     cube,
     cohorts: engineVersion !== 'v2' ? cube.projects.map((project) => ({ segment: project.segment, releaseYear: String(project.releaseYear), standard: project.standard, stock: project.finalUnits ?? 0 })).filter((row) => row.stock > 0) : cohortRowsFrom(buildings, scope),
@@ -459,6 +465,8 @@ export async function fetchPanoramaReportModel(scope: PanoramaScope, signal?: Ab
         cityCollectionAttempts: scopes.map(({ city }) => ({ city, attempts: session.attempts.get(city) ?? 1, recovered: (session.attempts.get(city) ?? 1) > 1 })),
         cityCollectionMetrics: harvests.flatMap(({ city, sources }) => Object.entries(sources).map(([operation, source]) => ({ city, operation, requests: source.requestCount ?? 0, durationMs: source.durationMs ?? 0 }))),
       },
+      annualLaunchFacts: harvests.flatMap((h) => h.annualLaunchFacts),
+      cityLaunchRecords: harvests.map(({ city, records }) => ({ city, records })),
       citySalesSources: harvests.map((harvest) => ({ city: harvest.city, rows: harvest.sources.sales.rows })),
       cityTemporalSources,
     },

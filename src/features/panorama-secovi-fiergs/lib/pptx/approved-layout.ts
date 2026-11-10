@@ -49,6 +49,9 @@ export function approvedLayoutText(root: HTMLElement): { texts: LayoutText[]; pa
         face: style.fontFamily.split(',')[0].replace(/["']/g, '').trim(), color: rgb,
         bold: Number(style.fontWeight) >= 600 || style.fontWeight === 'bold', italic: style.fontStyle === 'italic',
         spacing: (parseFloat(style.letterSpacing) || 0) * sx * 72 };
+      // Office mede Montserrat de forma um pouco mais larga que o navegador.
+      // Folga apenas no título, sem mover a origem nem alterar a tipografia aprovada.
+      if (parent.closest('h1,h2,h3')) item.w = Math.min(W - item.x - .04, item.w * 1.12 + .03);
       const cell = parent.closest<HTMLElement>('td,th');
       if (cell) { if (!cells.has(cell)) cells.set(cell, []); cells.get(cell)!.push(item); }
       else texts.push(item);

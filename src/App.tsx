@@ -39,6 +39,7 @@ const RelatorioApiExcelPage = lazy(() => import('./pages/RelatorioApiExcel.tsx')
 const RelatorioAeloPage = lazy(() => import('./pages/RelatorioAelo.tsx'));
 const PanoramaSecoviFiergsPage = lazy(() => import('./features/panorama-secovi-fiergs/pages/PanoramaSecoviFiergsPage.tsx'));
 const SpInstitutionalPage = lazy(() => import('./features/relatorios-institucionais/sp/SpInstitutionalPage'));
+const FortalezaInstitutionalPage = lazy(() => import('./features/relatorios-institucionais/fortaleza/FortalezaInstitutionalPage'));
 const EmpresasEmpregadosPage = lazy(() => import('./features/empresas-empregados/pages/EmpresasEmpregadosPage.tsx'));
 const SindusconCuritibaPage = lazy(() => import('./features/sinduscon-curitiba/pages/SindusconCuritibaPage.tsx'));
 const EstimativasPage = lazy(() => import('./features/estimativas-vendas/EstimativasPage.tsx'));
@@ -92,6 +93,7 @@ const App = () => (
                 <Route path="/rebrain/panorama-secovi-fiergs" element={<PanoramaSecoviFiergsPage />} />
                 <Route path="/rebrain/estimativas-vendas" element={<EstimativasPage />} />
                 <Route path="/rebrain/relatorios-institucionais/sp" element={<Suspense fallback={<div className="p-6"><BrainLoadingState variant="page" title="Carregando SP institucional" /></div>}><SpInstitutionalPage /></Suspense>} />
+                <Route path="/rebrain/relatorios-institucionais/fortaleza" element={<FortalezaInstitutionalPage />} />
                 <Route
                   path="/rebrain/aelo"
                   element={(

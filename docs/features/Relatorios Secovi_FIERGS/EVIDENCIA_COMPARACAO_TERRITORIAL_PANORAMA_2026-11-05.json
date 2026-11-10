@@ -1,0 +1,1165 @@
+{
+  "date": "2026-11-05",
+  "status": "validated locally; no push; G7 pending",
+  "inputs": {
+    "referenceManifest": ".local-inputs/finoti-comparativos-2026-11-05/manifest.json",
+    "exactResponses": 37,
+    "newApiCollection": false,
+    "baselineDirectory": ".local-inputs/panorama-territorial-2026-11-05/before"
+  },
+  "regression": {
+    "offlineModels": 11,
+    "canonicalFieldsUnchanged": true,
+    "matrixRows": 30218,
+    "matched": 14844,
+    "different": 0,
+    "unavailable": 15374,
+    "newSourceReadsOnReprojection": 0,
+    "reprojectionMs": {
+      "min": 19.362499999995634,
+      "max": 154.79609999999957
+    },
+    "summaryPath": ".local-inputs/panorama-territorial-2026-11-05/after/summary.json"
+  },
+  "tests": {
+    "passed": 78,
+    "failed": 0,
+    "optionalSkipped": 1,
+    "lastTargetedPassed": 13,
+    "typecheck": "passed",
+    "build": "passed",
+    "lintErrors": 0,
+    "existingLintWarnings": 4
+  },
+  "ui": [
+    {
+      "width": 1440,
+      "dark": false,
+      "valid": true,
+      "overflow": false,
+      "disabled": true,
+      "errors": []
+    },
+    {
+      "width": 1440,
+      "dark": true,
+      "valid": true,
+      "overflow": false,
+      "disabled": true,
+      "errors": []
+    },
+    {
+      "width": 390,
+      "dark": false,
+      "valid": true,
+      "overflow": false,
+      "disabled": true,
+      "errors": []
+    },
+    {
+      "width": 390,
+      "dark": true,
+      "valid": true,
+      "overflow": false,
+      "disabled": true,
+      "errors": []
+    }
+  ],
+  "exports": [
+    {
+      "case": "R1",
+      "pages": 12,
+      "synthetic": false,
+      "csvRows": 5865,
+      "checks": 5018,
+      "different": 0,
+      "hashes": {
+        ".csv": "a3023538e0215b15a45b52b86ec5fa9523cf49b63da85b1988a75ed2269acff3",
+        ".pdf": "9b896569623c0d396f002e12332a28c607af2426ad23e34419302b0dd4d11c1a",
+        ".pptx": "52898f9b2b744bb47ccf495d152c74e7e8e95bd05e8d4bb492df4a71b67de5fc"
+      }
+    },
+    {
+      "case": "R2",
+      "pages": 8,
+      "synthetic": true,
+      "csvRows": 1655,
+      "checks": 1584,
+      "different": 0,
+      "hashes": {
+        ".csv": "3ecd234b28af122ceb15c6e28ef0d12026971b442100c610e1fd4e3610fba3af",
+        ".pdf": "1e88a65ac0dc12c7986b5925efd11d1cf2e396e82be7859cfe8cf942150fb595",
+        ".pptx": "02c48e8c0dd253a7df67659dc84fa669bd8097709f79b2db5882245bfa89e1ac"
+      }
+    }
+  ],
+  "office": {
+    "edit": {
+      "valuePersisted": true,
+      "reopened": true,
+      "textPersisted": true,
+      "text": true,
+      "cellValue": true
+    },
+    "decks": [
+      {
+        "nativeCharts": 0,
+        "outside": [],
+        "name": "R1",
+        "slides": 12,
+        "textObjects": 348
+      },
+      {
+        "nativeCharts": 0,
+        "outside": [],
+        "name": "R2",
+        "slides": 8,
+        "textObjects": 125
+      }
+    ]
+  },
+  "limits": [
+    "Local component/browser checks, not authenticated production verification",
+    "R2 is synthetic, not a Lajeado numerical study",
+    "Full official preset uses existing synthetic 2T2026/4T2025 regression, not a newly collected full study",
+    "Canonical seven categories preserved, not a new Economic-to-MCMV mapping",
+    "Current raw data does not prove the original API coordinate anomaly corrected",
+    "No new real collection or external acceptance"
+  ],
+  "git": {
+    "authorizedMerge": "8d3eaec",
+    "newRemoteNotIntegrated": "219ed1c",
+    "push": false
+  },
+  "visualRevision": {
+    "trigger": "Gabriel compared the new PPT with the approved study layout on 2026-11-05; first territorial composition rejected",
+    "scope": "Approved quarterly layout reused: stacked black/green title, annual table top-right, paired blue comparison bars right, series colors and reference-quarter highlights; offer/price/annual heading hierarchy aligned",
+    "dataChanged": false,
+    "csvIdenticalToBefore": true,
+    "testsPassed": 15,
+    "testsFailed": 0,
+    "browserCases": [
+      "R1",
+      "R2"
+    ],
+    "pdfPages": 20,
+    "officePages": 20,
+    "externalAcceptance": false
+  },
+  "annualAreaRevision": {
+    "request": "Continuous stacked area instead of separated stacked columns, as Finoti reference",
+    "metrics": [
+      "projects",
+      "units",
+      "vgl"
+    ],
+    "interpolation": "linear",
+    "missingYears": "gaps; no connection over missing observations",
+    "valuesChanged": false,
+    "testsPassed": 3,
+    "typecheck": "passed",
+    "lint": "passed",
+    "office": "12-slide copy opened; annual area slide rendered in PowerPoint",
+    "published": false
+  },
+  "finalReferenceReview": {
+    "date": "2026-11-05",
+    "candidate": "3cee42b",
+    "driveFilesRelisted": 17,
+    "pngReferencesReviewed": 15,
+    "pdfReferencePagesReviewedInContactSheets": 147,
+    "localFileHashesVerified": 17,
+    "freshRemoteContentHashes": false,
+    "centralTerritorialRequest": "addressed in local candidate, not externally accepted",
+    "remainingBeforePublication": [
+      "visual mean reference lines",
+      "annual panel with no valid comparisons",
+      "single-year annual area fallback",
+      "explicit annual window subtitle",
+      "three active territories / six side comparisons and representative families on real route"
+    ],
+    "executionPlan": "PLAN_COMPARACAO_TERRITORIAL_PANORAMA_2026-11-05.md / I0-I6",
+    "implementationThisReview": false,
+    "push": false
+  },
+  "incorporation": {
+    "date": "2026-11-06",
+    "gates": {
+      "I0": "completed locally",
+      "I1": "completed locally, commit 8058949",
+      "I2": "completed locally, commit c32953a",
+      "I3": "completed locally",
+      "I4": "completed locally",
+      "I5": "authorized merge completed and checks passed; push authorized",
+      "I6": "human published generation pending"
+    },
+    "baselineHead": "c547ab7",
+    "remoteAtOpening": "219ed1c",
+    "numericModels": 11,
+    "canonicalDifferences": 0,
+    "csvComparison": {
+      "models": 11,
+      "canonicalDifferences": [],
+      "csvComparisons": [
+        {
+          "case": "canela-2T2026-audit.csv",
+          "removedOrChangedDataRows": 0,
+          "newOmissionNotices": 0
+        },
+        {
+          "case": "canela-4T2025-audit.csv",
+          "removedOrChangedDataRows": 0,
+          "newOmissionNotices": 0
+        },
+        {
+          "case": "canoas-esteio-sao-leopoldo-2T2026-audit.csv",
+          "removedOrChangedDataRows": 0,
+          "newOmissionNotices": 0
+        },
+        {
+          "case": "canoas-esteio-sao-leopoldo-4T2025-audit.csv",
+          "removedOrChangedDataRows": 0,
+          "newOmissionNotices": 0
+        },
+        {
+          "case": "gramado-2T2026-audit.csv",
+          "removedOrChangedDataRows": 0,
+          "newOmissionNotices": 0
+        },
+        {
+          "case": "gramado-4T2025-audit.csv",
+          "removedOrChangedDataRows": 0,
+          "newOmissionNotices": 0
+        },
+        {
+          "case": "gramado-canela-2T2026-audit.csv",
+          "removedOrChangedDataRows": 0,
+          "newOmissionNotices": 0
+        },
+        {
+          "case": "gramado-canela-3T2026-audit.csv",
+          "removedOrChangedDataRows": 0,
+          "newOmissionNotices": 0
+        },
+        {
+          "case": "gramado-canela-4T2025-audit.csv",
+          "removedOrChangedDataRows": 0,
+          "newOmissionNotices": 0
+        },
+        {
+          "case": "porto-alegre-2T2026-audit.csv",
+          "removedOrChangedDataRows": 0,
+          "newOmissionNotices": 0
+        },
+        {
+          "case": "porto-alegre-4T2025-audit.csv",
+          "removedOrChangedDataRows": 0,
+          "newOmissionNotices": 0
+        }
+      ],
+      "method": "Previous candidate c547ab7 rebuilt through esbuild Git-blob overlay, without touching worktree. Same offline inputs. Only generated timestamp ignored for CSV comparison."
+    },
+    "tests": {
+      "passed": 79,
+      "failed": 0,
+      "skipped": 0,
+      "files": 11,
+      "oldExpectationFixed": "Only test source spelling GeoBrain→Geobrain, established product spelling; no IVV runtime change"
+    },
+    "typecheck": "passed",
+    "build": "npm run build passed, final Vite output 24.77s",
+    "lint": "0 errors/warnings in changed components/helpers/tests; pre-existing ReportPaginator export warning not in targeted lint",
+    "exports": [
+      {
+        "case": "R1",
+        "pages": 12,
+        "synthetic": false,
+        "hashes": {
+          ".pdf": "f361cbc1713156f4c136ca75e901a434d37acabc2140e0c5fcc0bc9b09b9d193",
+          ".pptx": "e4a024d1d86b60ce97ac4b3ff721722b289e24bd49c0caa9f36eed5bf4ada346",
+          ".csv": "8d07e4cab4c9310d1bc314cf6c2bd36dcd8ecf4d8f1a6687a2579f0ec572a4ec"
+        },
+        "browser": {
+          "pages": [
+            {
+              "page": 2,
+              "official": 2,
+              "title": "2 municípios · RS · Mercado Imobiliário · 3T2026"
+            },
+            {
+              "page": 7,
+              "official": 7,
+              "title": "Recorte do estudo · 2 municípios · RS"
+            },
+            {
+              "page": 9,
+              "id": "territorial-9-trend-chart",
+              "official": 9,
+              "title": "Empreendimentos verticais lançados por trimestre"
+            },
+            {
+              "page": 11,
+              "id": "territorial-11-trend-chart",
+              "official": 11,
+              "title": "Empreendimentos verticais lançados · acumulado 12 meses"
+            },
+            {
+              "page": 24,
+              "id": "territorial-24-trend-chart",
+              "official": 24,
+              "title": "Unidades verticais vendidas por trimestre"
+            },
+            {
+              "page": 33,
+              "id": "territorial-36-trend-chart",
+              "official": 36,
+              "title": "Oferta final por tipologia"
+            },
+            {
+              "page": 46,
+              "id": "territorial-50-trend-chart",
+              "official": 50,
+              "title": "Preço médio m²/privativo por padrão"
+            },
+            {
+              "page": 53,
+              "id": "territorial-58-trend-chart-city-gramado",
+              "official": 58,
+              "unit": "city-gramado",
+              "title": "Mínimo, média e máximo do preço por tipologia · Gramado"
+            },
+            {
+              "page": 54,
+              "id": "territorial-58-trend-chart-city-canela",
+              "official": 58,
+              "unit": "city-canela",
+              "title": "Mínimo, média e máximo do preço por tipologia · Canela"
+            },
+            {
+              "page": 57,
+              "id": "territorial-61-market-table-city-gramado",
+              "official": 61,
+              "unit": "city-gramado",
+              "title": "VGV ofertado, disponível e vendido por padrão · Gramado"
+            },
+            {
+              "page": 60,
+              "id": "territorial-63-horizontal-offer-products-city-gramado",
+              "official": 63,
+              "unit": "city-gramado",
+              "title": "Oferta lançada e final por tipo · Gramado"
+            },
+            {
+              "page": 21,
+              "id": "annual-composition-units",
+              "title": "Unidades lançadas por padrão · composição anual"
+            }
+          ],
+          "fullPages": 75,
+          "missing": [],
+          "errors": [],
+          "violations": [],
+          "blockedDataRequests": []
+        }
+      },
+      {
+        "case": "R1extra",
+        "pages": 12,
+        "synthetic": false,
+        "hashes": {
+          ".pdf": "b561fd0a96cd2a39868db47137440fdb23a8d430d610f3f6a9cfea6f6569206f",
+          ".pptx": "51a49fbdb1fd36e3d54b8daf2a96d06fe1f1a30dfe8030ed99e796d223f82d0b",
+          ".csv": "8d07e4cab4c9310d1bc314cf6c2bd36dcd8ecf4d8f1a6687a2579f0ec572a4ec"
+        },
+        "browser": {
+          "pages": [
+            {
+              "page": 26,
+              "id": "territorial-26-trend-chart",
+              "official": 26,
+              "title": "Unidades verticais vendidas · acumulado 12 meses"
+            },
+            {
+              "page": 19,
+              "id": "territorial-22-trend-chart",
+              "official": 22,
+              "title": "VGV lançado vertical · acumulado 12 meses"
+            },
+            {
+              "page": 30,
+              "id": "territorial-33-trend-chart",
+              "official": 33,
+              "title": "VGV vendido vertical · acumulado 12 meses"
+            },
+            {
+              "page": 32,
+              "id": "territorial-35-trend-chart",
+              "official": 35,
+              "title": "Oferta final vertical por trimestre"
+            },
+            {
+              "page": 36,
+              "id": "territorial-39-trend-chart",
+              "official": 39,
+              "title": "IVV por trimestre"
+            },
+            {
+              "page": 34,
+              "id": "territorial-37-trend-chart",
+              "official": 37,
+              "title": "Oferta final por padrão"
+            },
+            {
+              "page": 45,
+              "id": "territorial-49-trend-chart",
+              "official": 49,
+              "title": "Ticket médio por padrão residencial"
+            },
+            {
+              "page": 47,
+              "id": "territorial-51-trend-chart",
+              "official": 51,
+              "title": "Ticket médio por tipologia residencial"
+            },
+            {
+              "page": 48,
+              "id": "territorial-52-trend-chart",
+              "official": 52,
+              "title": "Preço médio m²/privativo por tipologia"
+            },
+            {
+              "page": 50,
+              "id": "territorial-offer-cohort",
+              "title": "Oferta final por ano de lançamento"
+            },
+            {
+              "page": 20,
+              "id": "annual-composition-projects",
+              "title": "Empreendimentos lançados por padrão · composição anual"
+            },
+            {
+              "page": 22,
+              "id": "annual-composition-vgl",
+              "title": "VGL — Valor Geral Lançado por padrão · composição anual"
+            }
+          ],
+          "fullPages": 75,
+          "missing": [],
+          "errors": [],
+          "violations": [],
+          "blockedDataRequests": []
+        }
+      },
+      {
+        "case": "R2",
+        "pages": 8,
+        "synthetic": true,
+        "hashes": {
+          ".pdf": "f799cb010c1dae63c2963fe0dc7509b57c3fd2a486a07ef8c6fc38269456f299",
+          ".pptx": "130a5b5bd9999bfc3c3b45d010061b03f836e69edea987bcb7da2c491b288763",
+          ".csv": "8f69f8da52c0befcee990d60e4cca184805eac06c373c2677d6a939b4f35a384"
+        },
+        "browser": {
+          "pages": [
+            {
+              "page": 2,
+              "official": 2,
+              "title": "5 municípios · RS · Mercado Imobiliário · 2T2026"
+            },
+            {
+              "page": 7,
+              "official": 7,
+              "title": "Recorte do estudo · 5 municípios · RS"
+            },
+            {
+              "page": 9,
+              "id": "territorial-9-trend-chart",
+              "official": 9,
+              "title": "Empreendimentos verticais lançados por trimestre"
+            },
+            {
+              "page": 24,
+              "id": "territorial-24-trend-chart",
+              "official": 24,
+              "title": "Unidades verticais vendidas por trimestre"
+            },
+            {
+              "page": 32,
+              "id": "territorial-35-trend-chart",
+              "official": 35,
+              "title": "Oferta final vertical por trimestre"
+            },
+            {
+              "page": 33,
+              "id": "territorial-36-trend-chart",
+              "official": 36,
+              "title": "Oferta final por tipologia"
+            },
+            {
+              "page": 42,
+              "id": "territorial-50-trend-chart",
+              "official": 50,
+              "title": "Preço médio m²/privativo por padrão"
+            },
+            {
+              "page": 20,
+              "id": "annual-composition-projects",
+              "title": "Empreendimentos lançados por padrão · composição anual"
+            }
+          ],
+          "fullPages": 61,
+          "missing": [],
+          "errors": [],
+          "violations": [],
+          "blockedDataRequests": []
+        }
+      },
+      {
+        "case": "single",
+        "pages": 1,
+        "synthetic": true,
+        "hashes": {
+          ".pdf": "fee0be792e1e3f2a517d5e823dd986e551e43b4024d35baecfba99e4f7b5509b",
+          ".pptx": "c96637f43bcf73f81ca2c11d516e26e2cf0741acbf37d35d770b4ed734f7bdc5",
+          ".csv": "d04d192e3e4728a69e36eb784cc9287c07976a117579a5dc36347d71d35523b1"
+        },
+        "browser": {
+          "pages": [
+            {
+              "page": 20,
+              "id": "annual-composition-units",
+              "title": "Unidades lançadas por padrão · composição anual"
+            }
+          ],
+          "fullPages": 59,
+          "missing": [],
+          "errors": [],
+          "violations": [],
+          "blockedDataRequests": []
+        }
+      },
+      {
+        "case": "gap",
+        "pages": 1,
+        "synthetic": true,
+        "hashes": {
+          ".pdf": "2f2248af485b860bbd19f0734b73ce88cd1b22eb3f02cd841c219fdc9e856d79",
+          ".pptx": "7e49a362c4730595a0bb9b6574ca93d11a72fb76e10aed338d9954069d487598",
+          ".csv": "3fb73d1cce61ac9db1e9168371190c1d908257290c899006dc9994875d2e725c"
+        },
+        "browser": {
+          "pages": [
+            {
+              "page": 20,
+              "id": "annual-composition-units",
+              "title": "Unidades lançadas por padrão · composição anual"
+            }
+          ],
+          "fullPages": 59,
+          "missing": [],
+          "errors": [],
+          "violations": [],
+          "blockedDataRequests": []
+        }
+      }
+    ],
+    "office": {
+      "edit": {
+        "valuePersisted": true,
+        "textPersisted": true,
+        "text": true,
+        "cellValue": true
+      },
+      "decks": [
+        {
+          "nativeCharts": 0,
+          "outside": [],
+          "name": "R1",
+          "slides": 12,
+          "textObjects": 348
+        },
+        {
+          "nativeCharts": 0,
+          "outside": [],
+          "name": "R1extra",
+          "slides": 12,
+          "textObjects": 208
+        },
+        {
+          "nativeCharts": 0,
+          "outside": [],
+          "name": "R2",
+          "slides": 8,
+          "textObjects": 133
+        },
+        {
+          "nativeCharts": 0,
+          "outside": [],
+          "name": "single",
+          "slides": 1,
+          "textObjects": 11
+        },
+        {
+          "nativeCharts": 0,
+          "outside": [],
+          "name": "gap",
+          "slides": 1,
+          "textObjects": 5
+        }
+      ]
+    },
+    "rawDirectory": ".local-inputs/panorama-territorial-2026-11-05/incorporation-2026-11-06",
+    "apiCallsReal": 0,
+    "production": "not verified in this session",
+    "limitations": [
+      "jsdom geographical inputs and Select primitives simplified; real page/model/paginator/manifest/export handoff tested",
+      "R2 and annual edge fixtures are synthetic, not real Lajeado studies",
+      "PDF/PPT are short extracts, not full real studies",
+      "No integration, push, deployment or new external acceptance",
+      "Previous build warnings for chunks, xlsx import modes and Browserslist retained"
+    ],
+    "integration": {
+      "authorization": "Gabriel 2026-11-06, merge and push after affected checks",
+      "merge": "f9810a0",
+      "remoteIntegrated": [
+        "4aed591",
+        "219ed1c"
+      ],
+      "preservation": {
+        "unchangedDirtyFiles": [
+          "docs/features/Relatorios Secovi_FIERGS/EVIDENCIAS_FIERGS_RECORTES_LIVRES_2026-10-13.md",
+          "docs/features/Relatorios Secovi_FIERGS/PLAN_PPTX_EDITAVEL_PANORAMA_2026-11-03.md",
+          "docs/features/Relatorios Secovi_FIERGS/PLAN_REFINAMENTO_CAPAS_CUSTOMIZADAS_FIERGS_2026-10-13.md",
+          "docs/features/estimativas-vendas/FONTES_E_DECISOES.md",
+          "docs/features/estimativas-vendas/README.md"
+        ],
+        "parallelLiveDeltaIdentical": true,
+        "committedLiveUnionVerified": true,
+        "merge": "f9810a0973baf89ad9c4433f8786a366900c072f"
+      },
+      "affectedTestsPassed": 17,
+      "failed": 0,
+      "build": "passed in27.72s",
+      "pushConfirmationPath": ".local-inputs/panorama-territorial-2026-11-05/incorporation-2026-11-06/I5-push.json",
+      "productionVerified": false
+    }
+  },
+  "unifiedReportRevision": {
+    "date": "2026-11-06",
+    "trigger": "Gabriel clarified: preserve consolidated slides and insert grouped detail immediately after each analogue; remove consolidated/comparison mode UI",
+    "scope": "shared FIERGS/Secovi; one city municipal, 2-3 individual units automatic, 4+ explicit 2-3 group modal on Generate",
+    "numericalContract": "unchanged; tests assert equal canonical blocks across consolidated/territorial/integrated views",
+    "testsPassed": 62,
+    "testsFailed": 0,
+    "modal": [
+      {
+        "width": 1440,
+        "n": 4,
+        "bounds": {
+          "x": 384,
+          "y": 208,
+          "width": 672,
+          "height": 584
+        },
+        "noOverflow": true,
+        "value": {
+          "mode": "comparison",
+          "layout": "integrated",
+          "units": [
+            {
+              "id": "group-1",
+              "label": "Canela",
+              "cities": [
+                "Canela"
+              ]
+            },
+            {
+              "id": "group-2",
+              "label": "Entorno",
+              "cities": [
+                "Gramado",
+                "Bom Retiro do Sul"
+              ]
+            },
+            {
+              "id": "group-3",
+              "label": "Canoas",
+              "cities": [
+                "Canoas"
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "width": 390,
+        "n": 4,
+        "bounds": {
+          "x": 16,
+          "y": 100,
+          "width": 358,
+          "height": 644
+        },
+        "noOverflow": true,
+        "value": {
+          "mode": "comparison",
+          "layout": "integrated",
+          "units": [
+            {
+              "id": "group-1",
+              "label": "Canela",
+              "cities": [
+                "Canela"
+              ]
+            },
+            {
+              "id": "group-2",
+              "label": "Entorno",
+              "cities": [
+                "Gramado",
+                "Bom Retiro do Sul"
+              ]
+            },
+            {
+              "id": "group-3",
+              "label": "Canoas",
+              "cities": [
+                "Canoas"
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "width": 390,
+        "n": 15,
+        "bounds": {
+          "x": 16,
+          "y": 55,
+          "width": 358,
+          "height": 734
+        },
+        "noOverflow": true
+      },
+      {
+        "width": 1440,
+        "n": 8,
+        "bounds": {
+          "x": 384,
+          "y": 163,
+          "width": 672,
+          "height": 674
+        },
+        "noOverflow": true
+      }
+    ],
+    "shortExtract": {
+      "source": "exact local Gramado+Canela 1T2023-3T2026, only layout metadata changed for rendering",
+      "pages": 6,
+      "fullManifestPages": 105,
+      "officeOpenedAndRendered": true,
+      "hashes": {
+        ".pdf": "25ec11db213072ee20809bf07164dc992a471a8604515a940c4ff2dc62405941",
+        ".pptx": "b465b2a60e2ebea6b664dc04a532aa8f514fef2192663fafd0156bfdd08550ce",
+        ".csv": "85abcacad200a1f2874e512bb50847a0dc2d4aae614c8e1424a4aceed2e9dace"
+      }
+    },
+    "rawDirectory": ".local-inputs/panorama-territorial-2026-11-05/integrated-2026-11-06",
+    "published": false,
+    "externalAcceptance": false
+  },
+  "integrated_push_and_teresa_preview_2026_11_06": {
+    "pushed_commit": "0a8a672a5f72b7bb8d6329db1a5684a399938560",
+    "remote_verified": true,
+    "divergence_after_push": [
+      0,
+      0
+    ],
+    "deployed_verified": false,
+    "preview": {
+      "kind": "actual-component-offline-preview",
+      "realStudyGenerated": false,
+      "apiRequests": 0,
+      "result": {
+        "mode": "comparison",
+        "layout": "integrated",
+        "units": [
+          {
+            "id": "group-1",
+            "label": "Lajeado",
+            "cities": [
+              "Lajeado"
+            ]
+          },
+          {
+            "id": "group-2",
+            "label": "Vale do Taquari",
+            "cities": [
+              "Bom Retiro do Sul",
+              "Estrela",
+              "Taquari",
+              "Teutônia"
+            ]
+          }
+        ]
+      },
+      "errors": []
+    },
+    "screenshot": ".local-inputs\\panorama-territorial-2026-11-05\\integrated-2026-11-06\\TERESA-LAJEADO-VALE-INTERFACE.png",
+    "browser_limit": "No connected browsers available; headless actual component preview only."
+  },
+  "published_ppt_review_2026_11_06": {
+    "source": ".local-inputs\\panorama-territorial-2026-11-05\\panorama-fiergs-rs-bom-retiro-do-sul-estrela-e-mais-3-c3872334-1T2023-3T2026-editavel.pptx",
+    "sha256": "5e9a19a326e4988f1ba7e83f297db0b6c0db17df8f629e736660ec2ec59804e4",
+    "period": "1T2023–3T2026",
+    "slides": 105,
+    "reviewMethod": "All slides rendered by PowerPoint read-only and reviewed in seven grids; selected pages inspected full-size. No CSV of this completed generation received.",
+    "positives": [
+      "Group assignment matches Teresa: Lajeado vs four-city Vale do Taquari",
+      "Consolidated-to-territorial sequences present",
+      "23-year institutional art present",
+      "Tables and native text readable; chart images preserved",
+      "Original unchanged; no objects outside slide"
+    ],
+    "openIssues": [
+      {
+        "slides": [
+          29,
+          32,
+          38,
+          40,
+          50,
+          54
+        ],
+        "kind": "territorial-series-coverage",
+        "confirmed": "Vale do Taquari legend but series/comparison absent in several families. Slide36 has20Lajeado+8Teutônia=28; slide29 does not display Vale, including those8.",
+        "hypothesis": "Strict every-member observed mask in territorial-projections may treat an inapplicable segment in a member as missing group coverage. Needs frozen city-level inputs/CSV before numerical change."
+      },
+      {
+        "slides": [
+          37
+        ],
+        "kind": "ppt-text-layout",
+        "confirmed": "Native editable text VENDIDO exists in XML, but PowerPoint rendering visibly shows only VO. Cause not proven."
+      },
+      {
+        "slides": [
+          21
+        ],
+        "kind": "editorial",
+        "confirmed": "No launches in closing quarter, empty neighborhood plot and five gray city rows. Recommend analyst omission or explicitly designed empty state, not suppressing low nonzero activity."
+      },
+      {
+        "slides": [
+          51
+        ],
+        "kind": "zero-denominator-presentation",
+        "confirmed": "Launches total0, percentage cells unavailable but total100%. Needs denominator-aware total formatting; keep observed zeros and negatives."
+      }
+    ],
+    "assessment": "Not final for external review until territorial detail omission is resolved. No external acceptance inferred."
+  },
+  "targeted_I6_fixes_2026_11_06": {
+    "state": "validated-locally-awaiting-push-and-real-five-city-regeneration",
+    "contracts": [
+      "non-applicable segment requires complete nonempty clean municipal cube and no temporal segment evidence",
+      "price absence exempt only with observed zero stock same period",
+      "dashed gap bridge visual only; no interpolation/coverage/compare changes",
+      "official19 omitted only no observed launch activity",
+      "zero denominator total share unavailable; observedzero remains"
+    ],
+    "offlineModels": 11,
+    "tests": {
+      "passed": 40,
+      "skippedExistingOptional": 1
+    },
+    "types": "pass",
+    "lint": "0errors4existingwarnings",
+    "buildSeconds": 39.64,
+    "browser": {
+      "pages": 3,
+      "bridges": 2,
+      "errors": [],
+      "syntheticGapControl": true,
+      "realStudy": false,
+      "apiRequests": 0
+    },
+    "office": {
+      "readOnly": true,
+      "outside": [],
+      "slides": 3
+    },
+    "realFiveCityReplay": false,
+    "apiRequests": 0,
+    "remaining": "Authorized publication and real site CSV/PPT verification."
+  },
+  "drag_and_batch_2026_11_06": {
+    "state": "validated-locally-push-authorized",
+    "testsPassed": 23,
+    "types": "pass",
+    "lint": "pass",
+    "buildSeconds": 37.16,
+    "browser": {
+      "apiRequests": 0,
+      "results": [
+        {
+          "case": "desktop-bulk-and-native-drag",
+          "value": {
+            "mode": "comparison",
+            "layout": "integrated",
+            "units": [
+              {
+                "id": "group-1",
+                "label": "Lajeado",
+                "cities": [
+                  "Lajeado"
+                ]
+              },
+              {
+                "id": "group-2",
+                "label": "Vale do Taquari",
+                "cities": [
+                  "Estrela",
+                  "Taquari",
+                  "Teutônia",
+                  "Bom Retiro do Sul"
+                ]
+              }
+            ]
+          },
+          "errors": []
+        },
+        {
+          "width": 390,
+          "height": 844,
+          "n": 5,
+          "dark": false,
+          "bounds": {
+            "x": 16,
+            "y": 28.4453125,
+            "width": 358,
+            "height": 787.109375
+          },
+          "overflow": false,
+          "errors": [],
+          "value": {
+            "mode": "comparison",
+            "layout": "integrated",
+            "units": [
+              {
+                "id": "group-1",
+                "label": "Grupo A",
+                "cities": [
+                  "Bom Retiro do Sul",
+                  "Estrela"
+                ]
+              },
+              {
+                "id": "group-2",
+                "label": "Grupo B",
+                "cities": [
+                  "Lajeado",
+                  "Taquari",
+                  "Teutônia"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "width": 390,
+          "height": 844,
+          "n": 15,
+          "dark": true,
+          "bounds": {
+            "x": 16,
+            "y": 28.4453125,
+            "width": 358,
+            "height": 787.109375
+          },
+          "overflow": false,
+          "errors": [],
+          "value": {
+            "mode": "comparison",
+            "layout": "integrated",
+            "units": [
+              {
+                "id": "group-1",
+                "label": "Grupo A",
+                "cities": [
+                  "Bom Retiro do Sul",
+                  "Estrela"
+                ]
+              },
+              {
+                "id": "group-2",
+                "label": "Grupo B",
+                "cities": [
+                  "Lajeado",
+                  "Taquari",
+                  "Teutônia",
+                  "Canela",
+                  "Gramado",
+                  "Canoas",
+                  "Esteio",
+                  "São Leopoldo",
+                  "Novo Hamburgo",
+                  "Sapucaia do Sul",
+                  "Alvorada",
+                  "Cachoeirinha",
+                  "Viamão"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "width": 1440,
+          "height": 900,
+          "n": 15,
+          "dark": true,
+          "bounds": {
+            "x": 384,
+            "y": 87,
+            "width": 672,
+            "height": 726
+          },
+          "overflow": false,
+          "errors": [],
+          "value": {
+            "mode": "comparison",
+            "layout": "integrated",
+            "units": [
+              {
+                "id": "group-1",
+                "label": "Grupo A",
+                "cities": [
+                  "Bom Retiro do Sul",
+                  "Estrela"
+                ]
+              },
+              {
+                "id": "group-2",
+                "label": "Grupo B",
+                "cities": [
+                  "Lajeado",
+                  "Taquari",
+                  "Teutônia",
+                  "Canela",
+                  "Gramado",
+                  "Canoas",
+                  "Esteio",
+                  "São Leopoldo",
+                  "Novo Hamburgo",
+                  "Sapucaia do Sul",
+                  "Alvorada",
+                  "Cachoeirinha",
+                  "Viamão"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "width": 390,
+          "height": 667,
+          "n": 5,
+          "dark": false,
+          "bounds": {
+            "x": 16,
+            "y": 16,
+            "width": 358,
+            "height": 635
+          },
+          "overflow": false,
+          "errors": [],
+          "value": {
+            "mode": "comparison",
+            "layout": "integrated",
+            "units": [
+              {
+                "id": "group-1",
+                "label": "Grupo A",
+                "cities": [
+                  "Bom Retiro do Sul",
+                  "Estrela"
+                ]
+              },
+              {
+                "id": "group-2",
+                "label": "Grupo B",
+                "cities": [
+                  "Lajeado",
+                  "Taquari",
+                  "Teutônia"
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "scope": "UIonly; no numerical/source changes",
+    "mechanism": "nativeHTMLDragAndDrop + click/tap/keyboard destination; exact authorized catalog matching",
+    "externalAcceptance": false
+  },
+  "site_ppt_v2_review_2026_11_06": {
+    "source": ".local-inputs\\panorama-territorial-2026-11-05\\panorama-fiergs-rs-bom-retiro-do-sul-estrela-e-mais-3-c3872334-1T2023-3T2026-editavel (1).pptx",
+    "sha256": "340294f7d1001015af3f34052429a6661d21452e4fe23b911c5bc87f1300165d",
+    "slides": 104,
+    "allSlidesVisuallyReviewed": true,
+    "office": {
+      "originalModified": false,
+      "opened": true,
+      "outside": [],
+      "slides": 104
+    },
+    "confirmed": [
+      "Vale quarterly sales8 + Lajeado20 = consolidated28 at3T2026 (pages27/28/35)",
+      "Vale12month sales69 + Lajeado741 = consolidated810 (pages30/31)",
+      "Visible dashed bridges preserve historical gaps (pages28/31/37/39)",
+      "VENDIDO renders fully; crop37 confirmed unlike apparent degradation in scaled screenshot",
+      "Empty launch distribution removed;105to104pages",
+      "Page50launches total0 and share unavailable, not100%",
+      "Price meter mean Vale6550 and stock104 now plotted"
+    ],
+    "remaining": [
+      {
+        "pages": [
+          37,
+          39
+        ],
+        "issue": "ValeVGV last3T2026 point absent; no extrapolation at end. Last quarterly source observation shown2T2026. Cannot distinguish source coverage vs group mask fromPPT alone."
+      },
+      {
+        "pages": [
+          83
+        ],
+        "issue": "VGV caption shows question mark instead of separator; fixed code text locally, not in receivedPPT"
+      }
+    ],
+    "numericAuditReceived": false,
+    "externalAccepted": false,
+    "uiChange": "Remove grip icon, retain explicit drag/click instruction;5existingdialogtests passed",
+    "needs": "AuditCSV fromsamecompletedgeneration for VGVcoverage; no realAPI authorized now"
+  },
+  "audit_vgv_review_2026_11_06": {
+    "date": "2026-11-06",
+    "audit_sha256": "d6e9c5f7dfc3906c0e565161fa9c4e98528e4190243c98f74e9b5adfd7dac8c1",
+    "record_count": 5781,
+    "status_counts": {
+      "match": 1093,
+      "unavailable": 4351
+    },
+    "confirmed": "API sales standard complete single page17rows; vertical last2026-06-01, no2026Q3 row; horizontal2026-09-01 present. Missing vertical VGV is not a lost graphic point. Units zero reconciled independently, not authority for monetary zero.",
+    "limitations": "Live response sampled later than generated CSV, cannot prove identical original payload; no raw original snapshot. No new numerical assumption.",
+    "scope_deviation": "Reused probe unexpectedly ran four Taquari requests (sales/stock standard/typology), rather than one sales standard authorized. No other cities, building collection, study or further calls.",
+    "raw_sha256": {
+      "sales-standard.json": "43ebd73611e422c649cb4140632933f0e47f03d4996b3b5d57d0ff95d5547f1e",
+      "sales-typology.json": "311fb8147523e1aba0a111107887cdc734d4b21ecadceb43b70a10de57b6d3e1",
+      "stock-standard.json": "a71ff2331cddb207d2856cf7e4b2a7bea7e0e1ee7c4e5833fa61ce69577a5b44",
+      "stock-typology.json": "90bb1f02ebc78bdae9d6bafa806a903b60e674b1996316ed1d9a119e2a402087",
+      "summary.json": "837e0b2800a8981504c28621e7c18d72200add95c146b814818d6ec341e68b2b"
+    }
+  }
+}

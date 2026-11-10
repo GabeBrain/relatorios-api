@@ -70,3 +70,29 @@
 3. Após publicação autorizada, Gabriel gera **FIERGS 1T2023–2T2026** no site. Conferir todas as cidades no CSV, condomínios de casas nas análises horizontais, zero invariantes críticas abertas e PDF baixável. Fazer um segundo ensaio multi-cidade Secovi em ambiente adequado; não declarar o fluxo “verificado em produção” só por testes locais. Juliana ainda precisa dar aceite ao estudo.
 
 **Aceite:** fluxo recupera automaticamente falhas transitórias sem refazer cidades completas, fornece retry manual útil quando necessário, nunca apresenta/baixa relatório de universo incompleto como final e funciona para qualquer `N` selecionado. Observabilidade permite distinguir falha de rede/API, autenticação, contrato e dados vazios. Nenhum número é fixado no runtime.
+
+
+## Retorno de produção — 06/11/2026: Lajeado e Vale do Taquari
+
+**Observado nas capturas de Gabriel:** cinco cidades (Bom Retiro do Sul, Estrela, Lajeado, Taquari, Teutônia), 1T2023–2T2026. Progresso 57/57, 100%, mas apenas 3/5 cidades concluídas. Falha final em Bom Retiro do Sul: `sales` e `stock` com rede/timeout e HTTP 200 sem dados obrigatórios, uma tentativa; botão de recuperação desabilitado. Capturas não provam indisponibilidade do servidor: transporte e limite de 40s do cliente ainda são causas possíveis. Não houve coleta real nem acesso a respostas brutas nesta correção.
+
+**Causas confirmadas no código:** `isTransientCityFailure` e a auditoria liam apenas o primeiro status numérico; o HTTP 200 de uma fonte vazia mascarava o timeout de outra. Isso suprimia as tentativas automáticas e a recuperação manual. O progresso incrementava toda operação novamente a cada tentativa e saturava no total; também estimava 11 operações municipais, embora `harvestCity` execute dez (histórico e nove fontes temporais; IVV tipológico é derivado).
+
+**Correção:** examinar todos os status do erro agregado; autenticação/contrato têm prioridade impeditiva, falhas transitórias mistas são recuperáveis, apenas vazio continua não recuperável automaticamente. Mantidas três tentativas por cidade, espera e `Retry-After`, sessão das cidades completas, coleta municipal inteira atômica e bloqueio de universo incompleto. Progresso deduplicado por cidade/operação, cidades reaproveitadas contabilizadas e duas etapas finais reservadas; arredondamento para baixo impede 100% antecipado em N grande. Sem aumentar timeout, concorrência ou inventar dados. Classificação da auditoria e botão usam a mesma decisão. Sem alteração nas fórmulas, no relatório territorial ou nos indicadores.
+
+Carregamento passa ao `BrainLoadingState` canônico, variante overlay, etapa e tempo real, com barra baseada nas operações. Extensão opcional `children` apenas no overlay para acomodar a barra, sem mudar consumidores existentes. Sem tokens novos.
+
+**Validação local:** 42 testes offline aprovados (progresso, falhas mistas/auditoria, coleta N arbitrário, rota territorial), TypeScript e lint dos arquivos tocados aprovados. Conferência Chromium 1440/390px: três rodadas simuladas permanecem em 50/52 etapas, 96%, sem overflow ou erro JavaScript. O total só chega a 100% após consolidar e preparar. O teste de rota foi adaptado ao logo no overlay compartilhado; seletor antigo específico não se aplica mais. Evidências brutas e capturas em `.local-inputs/panorama-territorial-2026-11-05/integrated-2026-11-06/RECUPERACAO-CARREGAMENTO*`.
+
+**Estado:** validado localmente, aguardando autorização de push/publicação e repetição do recorte no site. Não declarar o timeout de origem resolvido: a correção comprovada é a recuperação indevidamente desabilitada e a contagem. Se persistir após três tentativas, baixar diagnóstico CSV para investigar status, operação e duração; não montar estudo parcial.
+
+
+### Complemento comprovado — 06/11/2026: ausência tipológica horizontal
+
+Nova captura de Gabriel/CSV no período **1T2023–3T2026**, distinto do fechamento 2T da captura anterior, contém somente HTTP200 vazio, sem timeout. Consulta delimitada autorizada (seis chamadas, uma cidade, sem estudo real) confirmou cadastro completo com um Horizontal/nenhum Vertical; vendas e oferta por padrão com seis linhas horizontais cada, tipologia sem linhas. A exigência uniforme de tipologia de dormitórios bloqueava uma dimensão sem aplicação comprovada no recorte.
+
+Contrato de aplicabilidade: só aceitar o vazio tipológico explícito HTTP200 quando o cadastro completo não vazio for exclusivamente Horizontal e **ambas** as fontes por padrão estiverem disponíveis, não vazias e exclusivamente horizontais. Vertical, misto, tipo desconhecido, cadastro vazio ou fonte padrão incompleta conservam a exigência; erro de transporte/acesso/contrato em tipologia também continua impeditivo. Fontes ausentes permanecem indisponíveis, sem síntese de zeros. Não há regra por município/período, alteração de indicadores ou das guardas de reconciliação. Dados completos da cidade continuam atômicos.
+
+Implementado em `unavailableRequiredCitySources`, aplicado por `harvestCity`; 50 testes focados aprovados, TypeScript/lint aprovados. Replay offline dos seis retornos confirma 44 reconciliações críticas match e ausência de bloqueio, com preços/IVV explicitamente indisponíveis simulados (não consultados/não validados). Sem geração de PDF/PPT ou coleta das outras cidades. Evidências e limitações na [evidência de recuperação](EVIDENCIA_RECUPERACAO_COLETA_MULTICIDADES_2026-10-06.md#diagnóstico-delimitado-de-bom-retiro-do-sul--06112026). Precisa reteste completo no site após publicação; não equivale a homologação do conjunto.
+
+Acabamento solicitado: Panorama mostra cronômetro MM:SS sem sufixo, pulso de opacidade discreto reiniciado no tick real e desativado por `prefers-reduced-motion`. Opção `elapsedFormat="clock"` no componente compartilhado preserva o padrão dos outros consumidores. Captura/JSON de conferência em `integrated-2026-11-06/CRONOMETRO-SUTIL.*` na pasta local da frente.

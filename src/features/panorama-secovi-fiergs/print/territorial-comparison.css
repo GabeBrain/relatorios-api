@@ -1,0 +1,53 @@
+.panorama-territorial-slide{height:100%;display:flex;flex-direction:column;gap:1cqw;color:#20231d;min-height:0}.panorama-territorial-slide header h2{font-size:2.5cqw;line-height:1.12;font-weight:700;margin:0;text-transform:uppercase;max-width:95%}.panorama-territorial-slide header>i{display:block;width:6cqw;height:.45cqw;background:var(--gb-amarelo-500,#ffc000);margin-top:.7cqw}.panorama-territorial-legend{display:flex;justify-content:center;gap:2cqw;flex-wrap:wrap;font-size:1cqw}.panorama-territorial-legend span{max-width:30%;text-align:center;overflow-wrap:anywhere}.panorama-territorial-legend i{display:inline-block;width:.8cqw;height:.8cqw;margin-right:.4cqw}.panorama-territorial-slide table{border-collapse:collapse;width:100%;font-size:1.15cqw;margin:auto 0}.panorama-territorial-slide td,.panorama-territorial-slide th{border:1px solid #ddd;padding:.6cqw;text-align:center;overflow-wrap:anywhere}.panorama-territorial-slide thead{background:#d9d9d9}.panorama-territorial-slide tbody tr:last-child{background:#e7ecdf;font-weight:700}.panorama-territorial-slide td[colspan="2"]>span{display:inline-block;width:50%}.panorama-territorial-price-plot{flex:1;min-height:24cqw}.panorama-territorial-averages{display:flex;gap:2cqw;justify-content:center;font-size:1cqw}.panorama-territorial-slide footer{font-size:.65cqw;color:#5d7737;text-align:right;margin-top:auto}.panorama-territorial-editor .text-destructive{overflow-wrap:anywhere}
+
+/* Territorial series extend the approved quarterly composition, not a separate template. */
+.panorama-territorial-quarterly .panorama-territorial-series-chart{flex:1;min-height:0}
+.panorama-territorial-quarterly .panorama-territorial-legend{margin:.35cqw 0 0;font-size:1.05cqw;font-weight:700;color:#5d7737}
+.panorama-territorial-quarterly .panorama-territorial-annual-box{align-self:center;min-width:0}
+.panorama-territorial-annual-box table{width:100%;border-collapse:collapse;table-layout:fixed;text-align:center;font-size:.95cqw}
+.panorama-territorial-annual-box th,.panorama-territorial-annual-box td{padding:.4cqw .35cqw;border:1px solid #fff;overflow-wrap:anywhere}
+.panorama-territorial-annual-box thead{background:#e0e0e0;color:#20231d}
+.panorama-territorial-annual-box tbody td{font-size:1.1cqw;font-weight:800}
+.panorama-territorial-quarterly .panorama-territorial-comparisons{gap:.65cqw}
+.panorama-territorial-comparisons section h3{font-size:.85cqw;margin-bottom:.3cqw;overflow-wrap:anywhere}
+.panorama-territorial-comparisons section span{height:5.3cqw;min-height:0;grid-template-rows:1.4cqw minmax(0,1fr) 1.25cqw}
+.panorama-territorial-comparisons section span b{font-size:1.1cqw}
+.panorama-territorial-comparisons section span i{min-height:0;width:68%}
+.panorama-territorial-comparisons section span small{font-size:.82cqw}
+.panorama-territorial-comparisons section em{font-size:.72cqw}
+.panorama-territorial-quarterly.units-3 .panorama-territorial-comparisons section span{height:3.8cqw;grid-template-rows:1.2cqw minmax(0,1fr) 1.15cqw}
+.panorama-territorial-quarterly.units-3 .panorama-territorial-comparisons section h3{font-size:.75cqw}
+/* Same institutional spacing/type hierarchy for offer, price and annual additions. */
+.panorama-territorial-slide{box-sizing:border-box;padding:2.2cqw 3.2cqw 1.7cqw}
+.panorama-territorial-slide header h2{font-size:3.4cqw;line-height:.98;max-width:85%}
+.panorama-territorial-slide header h2 span{display:block;margin-top:.35cqw;color:#5d7737}
+.panorama-territorial-slide header>i{display:none}
+
+.panorama-territorial-quarterly header h2,.panorama-territorial-slide header h2{text-transform:uppercase}
+.panorama-territorial-quarterly .panorama-territorial-comparisons section span{height:4.5cqw;min-height:0;grid-template-rows:1.4cqw minmax(0,1fr) 1.2cqw}
+.panorama-territorial-quarterly .panorama-territorial-comparisons section span b{font-size:1.15cqw}
+.panorama-territorial-quarterly .panorama-territorial-comparisons section span i{min-height:0}
+.panorama-territorial-quarterly .panorama-territorial-comparisons section span small{font-size:.85cqw}
+.panorama-territorial-quarterly.units-3 .panorama-territorial-comparisons section span{height:3cqw;grid-template-rows:1.1cqw minmax(0,1fr) 1cqw}
+.panorama-territorial-quarterly.units-3 .panorama-territorial-comparisons section span small{font-size:.7cqw}
+.panorama-territorial-quarterly.units-3 .panorama-territorial-comparisons section span b{font-size:.95cqw}
+
+.panorama-territorial-quarterly header h2,.panorama-territorial-slide header h2{font-weight:700}
+
+.panorama-annual-single{height:100%;display:flex;flex-direction:column;justify-content:center;gap:2cqw}
+.panorama-annual-single h3{text-align:center;font-size:2cqw;font-weight:700}
+.panorama-annual-single-band{display:flex;width:100%;height:10cqw}
+.panorama-annual-single-band>div{display:flex;align-items:center;justify-content:center;overflow:hidden;font-size:1.6cqw;font-weight:700}
+.panorama-annual-single-legend{display:flex;flex-wrap:wrap;justify-content:center;gap:1cqw 2cqw;font-size:1.2cqw}
+.panorama-annual-single-legend i{display:inline-block;width:1cqw;height:1cqw;margin-right:.4cqw}
+
+/* Six active comparisons must share the available height, including wrapped group names. */
+.panorama-territorial-quarterly.units-3 .panorama-territorial-comparisons{display:grid;grid-template-rows:repeat(var(--comparison-count),minmax(0,1fr));min-height:0;gap:.4cqw;padding:.5cqw 0}
+.panorama-territorial-quarterly.units-3 .panorama-territorial-comparisons section{display:flex;flex-direction:column;min-height:0}
+.panorama-territorial-quarterly.units-3 .panorama-territorial-comparisons section>div{flex:1;min-height:0}
+.panorama-territorial-quarterly.units-3 .panorama-territorial-comparisons section span{height:100%;min-height:0;grid-template-rows:1.1cqw minmax(0,1fr) 1cqw}
+
+.panorama-territorial-quarterly .panorama-territorial-comparisons.is-dense{display:grid;grid-template-rows:repeat(var(--comparison-count),minmax(0,1fr));min-height:0;gap:.4cqw;padding:.5cqw 0}
+.panorama-territorial-quarterly .panorama-territorial-comparisons.is-dense section{display:flex;flex-direction:column;min-height:0}
+.panorama-territorial-quarterly .panorama-territorial-comparisons.is-dense section>div{flex:1;min-height:0}
+.panorama-territorial-quarterly .panorama-territorial-comparisons.is-dense section span{height:100%;min-height:0}

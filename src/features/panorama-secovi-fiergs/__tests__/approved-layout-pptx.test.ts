@@ -56,4 +56,12 @@ describe('PPT com layout aprovado', () => {
     expect(texts.map(t => t.text).join(' ')).not.toContain('VARIAÇÕES ANUAIS');
     expect(texts.map(t => t.text).join(' ')).not.toContain('+61,4%');
   });
+  it('reserva folga de largura para o título sem deslocar células ou mudar fonte',()=>{
+    const {texts}=approvedLayoutText(page());
+    const title=texts.find(t=>t.text==='Título editável')!;
+    expect(title.w).toBeGreaterThan((10+2)*13.333333/1920);
+    expect(title.x).toBeCloseTo(20*13.333333/1920);
+    expect(texts.find(t=>t.text==='0')!.w).toBeCloseTo((400-6)*13.333333/1920);
+  });
+
 });

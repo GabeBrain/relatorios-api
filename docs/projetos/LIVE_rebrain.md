@@ -385,6 +385,15 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-11-10 — integração autorizada de SP, Panorama e Fortaleza — usuário / Codex
+
+- **Pedido/estado:** usuário autorizou push/sincronização e confirmou a resolução da divergência. Checkout encontrado com merge já iniciado: local `1d601d0`, entrada `6ffb91d` (31 commits remotos), conflito somente no STATUS do handoff. Nenhum histórico publicado reescrito.
+- **Preservação:** STATUS resolvido somando as novas entradas dos dois lados, com novembro09 antes de novembro05. STATUS e LIVE comprovados por contagem de linhas não vazias conforme base+(local−base)+(remoto−base), antes desta nova entrada. Código SP idêntico ao commit local; App/BrainLoadingState/Panorama/Fortaleza idênticos ao remoto. Documentos/escopos paralelos mantidos.
+- **Escopo:** publicação conjunta da personalização da equipe SP e do trabalho remoto já existente, sem nova regra de negócio, consulta autenticada ou homologação. Fortaleza continua somente por rota; não foi acrescentado ao menu. Validações da base integrada registradas no fechamento do handoff.
+- **Validação integrada:** build/tipos aprovados;833casos/100arquivos,829aprovados/2falhas/2ignorados na rodada conjunta. Um timeout SP passou na repetição isolada7/7 sem alterar limite. Falha funcional remanescente de Panorama/firewall-fontes já documentada no remoto; código idêntico, preservado sem ajuste alheio. Suíte não declarada integralmente verde; sem novo ensaio autenticado/deploy.
+- **Etapas/Pendências:** concluir merge, pull com fast-forward e push autorizados. Deploy observado e testes reais da equipe continuam distintos da sincronização Git. Sem escrita no Monday.
+- **Monday:** [Relatório SP Institucional](https://brain381753.monday.com/boards/18398428946/pulses/13452140276) — `13452140276`; referência.
+
 ### 2026-11-05 — SP: personalização de equipe técnica e consultoria — usuário / Codex
 
 - **Entrega:** editor local para nomes, cargos, fotos, visibilidade e restauração das cinco posições do82 e quinze do83. Prévia e PPTX usam a mesma configuração; fotos ficam em memória, sem servidor/localStorage. Nova geração restaura a referência, conforme texto da interface.
@@ -393,6 +402,176 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 - **Etapas/Pendências:** implementação local pronta para publicação; conferência no site e homologação pertencem à equipe. Menu `219ed1c` foi enviado primeiro por pedido explícito, independentemente desta entrega posterior. Sem consulta autenticada nova ou escrita no Monday.
 - **Monday:** [Relatório SP Institucional](https://brain381753.monday.com/boards/18398428946/pulses/13452140276) — `13452140276`.
 
+### 09/11/2026 — Fortaleza: envio da base e dez slides iniciais — Lucas / Codex
+
+- **Ambiente/funcionalidade:** Rebrain — `/rebrain/relatorios-institucionais/fortaleza`, acesso somente por rota.
+- **Pedido/entrega:** Lucas autorizou o push de `c78a7c1`/`574087e`/`5439ffe`, concluído e confirmado 0/0 após fetch; deploy não observado. Depois pediu os dez primeiros slides seguindo o original. Prévia mensal/trimestral com navegação/ampliação, arte nativa, posições/tabelas medidas e fontes locais; integração na sequência automática existente. Novo lote local sobre `5439ffe`.
+- **Dados/limites:** cadastro por município/segmento, paginação/IDs/cobertura conferidos, listas acumuladas e contagem de empreendimentos com classificação explícita. Fotografia atual não prova histórico; amostra/empresas pesquisadas aguardam fonte própria. Falhas não produzem parcial e valores antigos não preenchem novo estudo. [Contrato e retomada](../features/relatorios-institucionais/fortaleza/SLIDES_01_10_2026-11-09.md).
+- **Validação:**63testes Fortaleza, tipos/lint/build, Edge1440/390 claro/escuro e vinte controles contra Office. Arte preservada e nenhum corte nos controles; diferenças dinâmicas ainda impedem afirmar 100% visual. BrainLoadingState/GeoApiScopeEngine/Button/Tabs/Dialog reutilizados, sem novo primitive global. Sem API real, estudo/exportação real ou Monday; motores SP/Panorama e frentes paralelas sem edição.
+- **Arquivos/commits:** componentes/fontes/arte/layout e contrato de dados em Fortaleza; diagnósticos e documentação. Commit isolado `feat(relatorios): add first ten Fortaleza slides`, hash no fechamento. Próximo: refinamento visual e fonte de amostra/data/fases/cobertura, ensaio autenticado delimitado e exportador posterior.
+- **Monday:** [Fortaleza — SINDUSCON](https://brain381753.monday.com/boards/18398638577/pulses/13149406420) — `13149406420`; somente referência.
+
+### 09/11/2026 — Fortaleza: núcleo vertical, referência de período e prévia por etapas — Lucas / Codex
+
+- **Ambiente/funcionalidade:** Rebrain — `/rebrain/relatorios-institucionais/fortaleza`, sem item em painel/menu/busca.
+- **Pedido/entrega:** Lucas autorizou integrar fontes e pediu sequência automática inspirada no SP, com Mensal/Trimestral e mês/trimestre/ano de referência. Uma ação valida recorte, consulta fontes municipais, confere balanços e organiza a prévia; BrainLoadingState com etapa/tempo real/cancelamento e estados de conferência. Alternância preserva ano/período de fechamento e invalida dados anteriores.
+- **Dados:** launches/releases_in_period, sales/liquid_sales e stock por cidade/padrão/mês, apenas vertical; amostra confirma recorte, paginação/janelas limitadas, retries transitórios e recuperação só das cidades faltantes. Sem meses/cidades/grupos completos não há consolidado. Estoque final não é soma trimestral; negativos, ausentes e diferenças compensadas permanecem visíveis. [Contrato e limites](../features/relatorios-institucionais/fortaleza/NUCLEO_VERTICAL_2026-11-09.md).
+- **Padrões/arquivos:** API/modelo/hook/painéis/testes específicos Fortaleza, seletores/tokens/GeoApiScopeEngine existentes, requestWithRetry/collectByCity Panorama reutilizados sem alteração. Matriz/PLAN/DECISOES/EVIDENCIAS e STATUS atualizados. Fonte do núcleo é municipal; método granular e indicadores restantes continuam pendentes. Manifesto60/89 não equivale a todos os slides gerados.
+- **Validação/limites:**49testes Fortaleza aprovados; regressão ampla807aprovados/1falha existente firewall-fontes Panorama/2ignorados, mais2casos de etapas no foco final49. SP/Panorama sem alterações; falha alheia não foi corrigida nesta frente. Build/tipos/lint e Edge1440/390claro/escuro com transporte sintético; ensaio autenticado com token pessoal ainda pendente. Sem coleta/API real, exportação/estudo real, homologação, push/deploy ou escrita Monday. [Evidências](../features/relatorios-institucionais/fortaleza/EVIDENCIAS.md).
+- **Commits/etapas:** base574087e, dois commits locais anteriores preservados; commit isolado `feat(relatorios): integrate Fortaleza vertical preview pipeline`, hash no fechamento. Núcleo implementado localmente; próximo é ensaio autenticado delimitado e reconciliação granular, antes de ampliar segmentos/preços/histórico/exportação.
+- **Monday:** [Fortaleza — SINDUSCON](https://brain381753.monday.com/boards/18398638577/pulses/13149406420) — `13149406420`; somente referência.
+
+### 09/11/2026 — Fortaleza/SINDUSCON: base navegável apenas por rota — Lucas / Codex
+
+- **Ambiente/funcionalidade:** Rebrain — `/rebrain/relatorios-institucionais/fortaleza`, base estrutural em implementação.
+- **O quê:** Lucas autorizou conferir originais e preparar base usando FIERGS/SP como referências, sem item no painel. Dois PPTX/hashes/89 e60slides reais/49 e47gráficos conferidos; Office renderizou12amostras, seis inspecionadas. [Revisão dos materiais](../features/relatorios-institucionais/fortaleza/REVISAO_REFERENCIAS_2026-11-09.md).
+- **Runtime:** rota lazy, configuração autorizada de município/conjunto completo e mês/trimestre, composição local das posições do estudo, abas de estrutura/referência/metodologia. Sem dados fictícios ou exportação; contratos de fonte permanecem pendentes. GeoApiScopeEngine/BrainLoadingState/Select/Tabs/Alert existentes; mobile usa padrão compacto já existente. Home/menu/busca sem item novo, motores SP/FIERGS e demais domínios intactos.
+- **Arquivos/commit:** `src/features/relatorios-institucionais/fortaleza/`, registro em `App.tsx`, condição mobile em `AppLayout.tsx`, diagnóstico visual, docs Fortaleza/STATUS e este LIVE. Commit isolado `feat(relatorios): prepare Fortaleza route-only foundation`, hash reportado no fechamento; publicação recusada por Lucas nesta rodada.
+- **Validação:** 11testes Fortaleza aprovados; total conjunto771aprovados/1falha/2ignorados (296SP,463Panorama,1scope,11Fortaleza). Falha isolada no teste existente firewall-fontes/loteamento; código/fixtures Panorama sem mudança. Tipos/lint/build aprovados, AppLayout focado aprovado, sete grupos de cenários Edge1440/390 claro/escuro/catálogo lento/erro/vazio/sucesso com rede externa interceptada e zero chamadas de mercado. [Evidências/limites](../features/relatorios-institucionais/fortaleza/EVIDENCIAS.md).
+- **Impacto em Etapas/Pendências:** base de navegação/manifesto pronta localmente; contratos mensais, classificação/preços/INCC/MCMV, cálculo, desenho final e exportação ainda pendentes. Sem coleta, geração real, push/deploy ou homologação. Brutos/capturas ignorados, dependências alinhadas sem alterar package/lock.
+- **Monday:** [Fortaleza — SINDUSCON](https://brain381753.monday.com/boards/18398638577/pulses/13149406420) — `13149406420`; somente referência, nenhuma escrita.
+
+### 09/11/2026 — Fortaleza/SINDUSCON: início do mapa de fontes e indicadores — Lucas / Codex
+
+- **Ambiente/funcionalidade:** Rebrain — relatórios institucionais, Fortaleza/SINDUSCON-CE (`PLANEJADA`, sem runtime novo).
+- **O quê/por quê:** após Lucas informar conclusão do SP e autorizar próximo levantamento, consultados os dois modelos Fortaleza no Drive. Junho/2T2026 principal proposto e julho mensal complementar, 22 contratos iniciais e 89/60 blocos textuais inventariados, sem assumir número real de slides. [Plano e portões](../features/relatorios-institucionais/fortaleza/PLAN.md).
+- **Decisões/lacunas:** separar capital/RM e universos por bloco, mês/trimestre/12 meses, preços por unidade e exclusões explícitas; preservar negativos. MCMV por data/recorte, INCC/ponderação, totais aparentes e revisões entre fotografias precisam de prova. G2 candidato vertical capital junho/2026 depende de contrato e confirmação; sem copiar política SP/FIERGS.
+- **Arquivos/commits:** `docs/features/relatorios-institucionais/fortaleza/{PLAN.md,DECISOES.md,EVIDENCIAS.md,MATRIZ_INDICADORES.csv,MAPA_BLOCOS.md}`, STATUS do handoff e este LIVE. Commit isolado `docs(relatorios): map Fortaleza sources and initial contracts`, hash no fechamento.
+- **Validação/limites:** leitura conector comprovada, fonte PPTX/parent e datas identificados; bruto/hash/visual/caches e API granular ainda pendentes. Preflight offline, validação estrutural de matriz/links e documentação no fechamento. Sem geração/API GeoBrain/publicação/Monday, sem mudar SP/Secovi/FIERGS ou demais domínios. Três commits locais anteriores preservados.
+- **Monday:** [Fortaleza — SINDUSCON](https://brain381753.monday.com/boards/18398638577/pulses/13149406420) — `13149406420`; somente referência.
+- **Impacto em Etapas/Pendências:** G1 iniciado com documentação própria; falta prova visual/mensal/metodológica para encerrar contrato e delimitar G2. Declaração de SP concluído vem de Lucas, sem nova homologação pelo agente.
+
+### 06/11/2026 — Panorama: auditoria real individualiza ausência de VGV em Taquari
+
+- Diagnóstico da sessão de Gabriel: CSV das cinco cidades sem `different`, mas com cobertura indisponível. VGV vertical de Taquari3T2026 ausente; consulta posterior à API confirma última linha vertical emjunho, com setembro horizontal presente. Sem preencher zero ou mudar runtime.
+- Fonte técnica e limites: [I6 — auditoria e lacuna de VGV](../features/Relatorios%20Secovi_FIERGS/PLAN_COMPARACAO_TERRITORIAL_PANORAMA_2026-11-05.md). Brutos/hashes `.local-inputs/panorama-territorial-2026-11-05/taquari-vgv-2026-11-06/`. Probe reutilizado excedeu escopo autorizado (quatro consultasTaquari emvezdeuma), comunicado; semoutrascidades/estudos.
+- Estado: diagnóstico local, I6 parcial; contrato da ausência monetária na origem e aceite externo pendentes. Acabamento37cf69d local; sem publicação.
+
+
+### 06/11/2026 — Panorama: revisão da segunda saída real e cartões sem ícone
+
+PPT real `(1)` deGabriel:104slides Office/read-only,0formasfora, todaspáginas conferidas. Vale8+Lajeado20=28vendasfechamento eVale69+Lajeado741=810em12meses; tracejados, VENDIDOinteiro, omissãovazia e0sem100%confirmados. Falta pontoVGVVale3T2026 naspáginas37/39: pendenteCSVdamesmageração, semextrapolar/numerosmanuais. Fonte ehash no [plano territorial](../features/Relatorios%20Secovi_FIERGS/PLAN_COMPARACAO_TERRITORIAL_PANORAMA_2026-11-05.md), I6nova saída. Removidoíconedos6pontos emcartões, instruçãoexplícita/arraste/cliquepreservados,5testesaprovados; separadortextualVGVcorrigido. Código local,semAPI/push/aceiteexterno; paralelos preservados.
+
+
+### 06/11/2026 — Panorama: envio autorizado das correções I6 e seleção
+
+`0e95c5d`/`dfe2fa4`/`36d0fc3` enviados aorigin/main por autorização explícita, SHA36d0fc34b417cf01e9a73c96b1869413fa747157 confirmado,0/0. Semmerge, ediçõesparalelas preservadas. Gate documentalaprovado; origem dasmudanças e testes na entrada anterior e no [plano territorial](../features/Relatorios%20Secovi_FIERGS/PLAN_COMPARACAO_TERRITORIAL_PANORAMA_2026-11-05.md). Publicado noGit não é conferênciaLovable: próximoGabrielpublicar, testarlista/drag eregerar5cidadescomCSV/PPT paraI6. Semnovoaceiteexterno.
+
+
+### 06/11/2026 — Panorama: arrastar cidades e selecionar lista colada
+
+Gabriel autorizouenvio dascorreçõesanteriores epediu facilidadesnesta rodada. Modal comcartões arrastáveis2/3grupos, nomecompostoobrigatório ealternativatoque/clique/teclado; preservapartição/cancelamentosemcoleta. Buscacomlista(vírgula/e/linhas), matchingexato sócatálogoUF, avisodeausentes euniãocomseleçãoanterior.23testes/tipos/lint/buildaprovados,5cenáriosbrowserclaro/escuro390–1440pxcomdragreal/5–15cidades,semoverflow/erro. Fontetécnica/evidência no [plano territorial](../features/Relatorios%20Secovi_FIERGS/PLAN_COMPARACAO_TERRITORIAL_PANORAMA_2026-11-05.md), seleçãosimplificada06/11. SemAPI/mudançanumérica; aguardapushautorizado/republicação eensaioI6comCSV/PPT. Alteraçõesparalelaspreservadas; semaceiteexterno presumido.
+
+
+### 06/11/2026 — Panorama: correções dirigidas após PPT real
+
+AutorizaçãoGabriel: cobertura distingue segmento municipal inexistente (cadastroconcluído/nãovazio/semrejeições+semevidênciatemporal), preservandovalores deoutrosmembros; preçoausente dispensadoapenascomestoquezeroobservado. Pontes tracejadas entreobservações, seminterpolar números/cobertura/comparativos; doisavisosdinâmicosnovos. Ajustados folga detítuloPPT (VENDIDO), omissão daoficial19totalmentesematividade epercentualtotalcomdenominadorzero.11replayssemrede/indicadoresconservados,40testes+1opcionalignorado, tipos/lint/buildaprovados, extrato3páginasOffice/Chromiumconferido. Fonte [plano territorial](../features/Relatorios%20Secovi_FIERGS/PLAN_COMPARACAO_TERRITORIAL_PANORAMA_2026-11-05.md), correçõesI6. Semcoleta/push; aguardapublicação autorizada eregeraçãorealLajeado/Vale comCSV. Nenhumaceiteexternopresumido; paralelospreservados.
+
+
+### 06/11/2026 — Panorama: revisão do PPT real Lajeado/Vale e espera ao trocar de aba
+
+PPT real deGabriel1T2023–3T2026 aberto/renderizado noOffice105slides, semformasfora, originalpreservado. Estrutura consolidado→territórios egrupos corretos; I6não encerra: Vale ausente em séries apesar deTeutônia8vendas nofechamento, títuloVENDIDO truncado37, vazio21 epercentual100%comtotal0em51. Hipótese de cobertura porsegmento precisa entradas/CSV, nenhuma alteraçãonumérica feita. Fonte/evidência epróximospassos no [plano territorial](../features/Relatorios%20Secovi_FIERGS/PLAN_COMPARACAO_TERRITORIAL_PANORAMA_2026-11-05.md), seçãoI6da saída real. Corrigida apenas espera deexportação autorizada: visibilidade/fallback/limpeza,12testes/tipos/lint aprovados; semAPIreal/push/aceiteexterno.
+
+
+### 06/11/2026 — Panorama: completude aplicável ao universo horizontal e cronômetro
+
+CSV de Gabriel semtimeout motivou diagnóstico delimitado autorizado: Bom Retiro do Sul tem um Horizontal/nenhum Vertical, padrão com dados e tipologia HTTP200 vazia. Corrigida exigência da dimensão apenas com cadastro e duas fontes padrão comprovadamente horizontais, sem exceção municipal, síntese de zero ou dispensa de erro HTTP. 50 testes/tipos/lint aprovados; replay offline dos seis retornos com44reconciliações críticas match, sem bloqueio; preços/IVV não validados, sem estudo completo. Cronômetro Panorama sóMM:SS/pulso discreto com movimento reduzido. Fonte/evidências no [plano de recuperação](../features/Relatorios%20Secovi_FIERGS/PLAN_RECUPERACAO_COLETA_MULTICIDADES_PANORAMA_2026-10-06.md). Estado local, publicação e reteste real pendentes; paralelos preservados.
+
+
+### 06/11/2026 — Panorama: recuperação de falhas mistas e progresso
+
+Retorno de Gabriel no recorte Lajeado/Vale 1T2023–2T2026: timeout misturado com HTTP200 vazio em Bom Retiro do Sul era classificado como vazio e impedia retry automático/manual. Corrigida precedência dos erros agregados sem afrouxar completude. Contagem deduplica operação por cidade, dez operações reais, reserva consolidação/preparo; BrainLoadingState overlay/tempo real. 42 testes offline, tipos/lint e tela lenta desktop/celular aprovados. Ainda não enviado; timeout de origem não diagnosticado pelas capturas. Fonte, evidências e próximo passo no [plano de recuperação](../features/Relatorios%20Secovi_FIERGS/PLAN_RECUPERACAO_COLETA_MULTICIDADES_PANORAMA_2026-10-06.md). Próximo autorizar push/publicar e repetir recorte real; sem API nesta sessão ou alteração paralela.
+
+
+### 06/11/2026 — Panorama: relatório único enviado e prévia Lajeado/Vale
+
+Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 após envio. Publicação no Lovable ainda não verificada. Prévia local do componente real confirmou Lajeado individual e Vale do Taquari (Bom Retiro do Sul, Estrela, Taquari e Teutônia), sem perda de membros. Navegadores conectados indisponíveis; captura headless não é estudo numérico nem ensaio de produção, sem API. Fonte/artefatos e próximo passo na seção final do [plano territorial](../features/Relatorios%20Secovi_FIERGS/PLAN_COMPARACAO_TERRITORIAL_PANORAMA_2026-11-05.md). Alterações paralelas preservadas.
+
+
+### 06/11/2026 — Panorama: relatório único e modal de grupos — Gabriel / Codex
+
+- **Contrato corrigido porGabriel:** o consolidado permanece no livro; cada visão territorial vem logo após seu análogo, na mesma seção. Retirado seletor de modos/editor permanente.1cidade municipal,2/3automáticas;4+abrem modal aoGerar para2/3grupos. Nomes individuais automáticos, nome apenas para conjunto, validação de atribuição completa/única e cancelar semcoleta. Coletores/matemática preservados.
+- **Produto:** Dialog/Input/Button existentes e tokens, lista compacta de cidades com seleção1/2/3; reabertura e nomes respeitam grupos confirmados e reaproveitam coleta. Manifesto mantém pais/filhos com vínculo estável, anuais junto da métrica; grupos/membros em subtítulos curtos/página de cidades/metodologia. Capas identificam o consolidado real. Avisos apontam todas as páginas aplicáveis.
+- **Validação:**62testes, incluindo conservação dos indicadores e regressões2T2026/4T2025 das projeções; build/tipos/lint. Chromium1440/390claro/escuro4/8/15cidades semoverflow; extrato6páginas da dupla exata1T2023–3T2026 PDF/PPT/CSV, aberto/renderizado noOffice. [Contrato vigente e evidências](../features/Relatorios%20Secovi_FIERGS/PLAN_COMPARACAO_TERRITORIAL_PANORAMA_2026-11-05.md#relatório-único-e-modal-de-grupos--primeira-versão-em06112026).
+- **Estado:** primeira versão validada localmente, sempush/APIreal/estudocompleto;88425c4publicado anteriormente não contém esta revisão. Próximo revisãoGabriel e autorização de publicação; aceite externo/email aguardam nova conferência. Arquivos paralelos preservados, sem alteraçãoSP/Sinduscon/Corretor.
+- **Monday:** [FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/13149405149) — referência, sem escrita.
+
+
+### 06/11/2026 — Panorama I5: integração e envio autorizados — Gabriel / Codex
+
+- **Integração:** aprovação explícita deGabriel; merge f9810a0 incorporouSP4aed591/219ed1c sem conflito. Apenas edição paralela doLIVE foi guardada/reaplicada; cinco demais documentos locais mantêm hash e delta doLIVE foi conferido, assim como a união do histórico. Alterações paralelas continuam fora do lote; stash de segurança preservado.
+- **Validação:** build pós-merge aprovado27,72s e17testes afetadosSP/Panorama semfalhas. [I5 e evidência](../features/Relatorios%20Secovi_FIERGS/PLAN_COMPARACAO_TERRITORIAL_PANORAMA_2026-11-05.md#i5--integração-e-publicação-com-autorização). Candidata pronta para push já autorizado; confirmação remota guardada na evidência localI5-push.json.
+- **Próximo:** Gabriel publica/confere noLovable egera os arquivosI6. Somente após conferirPDF/PPT/CSV preparar resposta aTeresa/Finoti; aceite desta ampliação depende do retorno deles. Produção ainda não verificada; semAPIreal/estudoreal/envio deemail pela sessão.
+- **Monday:** [FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/13149405149) — referência, sem escrita.
+
+
+### 06/11/2026 — Panorama I3–I4: reconciliação e saídas finais — Gabriel / Codex
+
+- **Resultado:** I0–I4concluídos localmente.79testes/0falhas, tipos/lint/build final aprovados.11replays com9blocos canônicos idênticos;11CSVs equivalentes à candidataGit c547ab7, ignorando apenas a data de geração. Baseline recompilada por overlay de blobs, sem alterar árvore. Expectativa antiga de testeGeoBrain corrigida paraGeobrain; IVV preservado.
+- **Saídas:** R1exato12páginas, complemento12famílias faltantes, R2sintético8com seis painéis/médias próximas e dois estados anuais1+1;34páginasPDF/PPT renderizadas,0objetosfora noOffice, edição de texto/célula persistida emcópia. Gráficos em imagem ePPT híbrido preservados. [Fonte técnica e hashes](../features/Relatorios%20Secovi_FIERGS/PLAN_COMPARACAO_TERRITORIAL_PANORAMA_2026-11-05.md#checkpoint-de-incorporação--06112026).
+- **Estado/pendências:** validado localmente, não publicado; I1em8058949, I2emc32953a. SemAPIreal, estudos completos, merge oupush. I5exige autorização após apresentar divergência; I6gerações humanas/publicação/aceite. Artefatos brutos permanecem na pasta local da frente; árvore paralela preservada.
+- **Monday:** [FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/13149405149) — referência, sem escrita.
+
+
+### 06/11/2026 — Panorama I2: integração da rota e exportação — Gabriel / Codex
+
+- **Validação:**4testes novos da página real, com projeção/paginator/manifesto/avisos reais e coleta simulada: seleção vazia/1/2/3cidades, grupos1+3, carregamentoBrain, erro sem parcial, Secovi e envio do mesmo contexto aoPPT/CSV. Renomear mantém uma única coleta. Nenhum código adicional de integração foi necessário.
+- **Evidência/estado:** [I2 no plano](../features/Relatorios%20Secovi_FIERGS/PLAN_COMPARACAO_TERRITORIAL_PANORAMA_2026-11-05.md#i2--validar-a-integração-da-rota-do-manifesto-e-das-saídas), `territorial-route.test.tsx` e JSONlocal. Validado localmente com entradas geográficas simuladas; não é ensaio autenticado no site. Código de acabamentoI1 em8058949. SemAPIreal, merge oupush; I3/I4registram prova final.
+- **Monday:** [FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/13149405149) — referência, sem escrita.
+
+
+### 06/11/2026 — Panorama I0–I1: médias visuais e estados anuais — Gabriel / Codex
+
+- **Mudança:** candidata congelada sem merge; médias ponderadas identificadas por linhas tracejadas, quadros anuais sem comparação retirados com aviso/auditoria, composição de ano único em faixa100%, lacunas preservadas e janela anual explícita. Altura dos seis painéis laterais ajustada após prova com três grupos ativos; título preto/verde ePPT híbrido preservados.
+- **Validação:**13testes focados/seleção, tipos/lint e conferência em navegador offline; sem mudança dos dados. [Portões e evidências](../features/Relatorios%20Secovi_FIERGS/PLAN_COMPARACAO_TERRITORIAL_PANORAMA_2026-11-05.md#i1--fechar-os-acabamentos-identificados-na-revisão). Regressão e arquivos finais serão registrados nosI3/I4.
+- **Estado:** validado localmente; árvore paralela preservada, semAPIreal, integração oupush. Publicação/gerações humanas seguemI5/I6, sem novo aceite externo.
+- **Monday:** [FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/13149405149) — referência, sem escrita.
+
+
+### 05/11/2026 — Panorama: revisão final e plano de incorporação à versão publicada — Gabriel / Codex
+
+- **Diagnóstico:**17referências relistadas noDrive;15imagens e147páginas dos panoramas revisitadas em pranchas versusR1/R2. Candidata local atende ao pedido central deFinoti/Teresa, sem novo aceite externo. Restam médias visuais, tratamento do quadro anual sem comparação/ano único, janela anual e prova com três unidades ativas.
+- **Planejamento:** [matriz de aderência e portõesI0–I6 na fonte existente](../features/Relatorios%20Secovi_FIERGS/PLAN_COMPARACAO_TERRITORIAL_PANORAMA_2026-11-05.md#incorporação-ao-relatório-publicado--revisão-final-e-plano-i0i6-05112026). Código já conectado à rota/manifesto/exportação local; fechar acabamentos e validar integração real antes de publicar. Sem novo plano paralelo.
+- **Estado/limites:** preparado; somente revisão/documentação nesta rodada, sem código de produto, teste novo, APIreal, merge oupush. Git11locais/2remotosSP na abertura, árvore paralela preservada. PróximoI0–I4;I5exige autorização de integração/push, I6gerações humanas no site.
+- **Monday:** [FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/13149405149) — referência, sem escrita.
+
+
+### 05/11/2026 — Panorama: composição anual em áreas contínuas — Gabriel / Codex
+
+- **Ajuste:** conforme retorno de Gabriel, composição anual usa áreas empilhadas lineares no lugar de colunas separadas, preservando categorias, percentuais, cores, legenda e ano parcial. Anos sem observação continuam como lacunas. Aplica-se às três métricas, sem mudar cálculos.
+- **Validação/estado:**3testes focados, tipos/lint aprovados; R1PDF/PPT/CSVoffline atualizado, gráfico inspecionado no navegador e renderizado noPowerPoint. [Fonte técnica](../features/Relatorios%20Secovi_FIERGS/PLAN_COMPARACAO_TERRITORIAL_PANORAMA_2026-11-05.md#composição-anual-contínua--retorno-de-gabriel-em-0511). Sem API, merge ou push; Gabriel continua os testes antes de decidir incorporação à versão live.
+- **Monday:** [FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/13149405149) — referência, sem escrita.
+
+
+### 05/11/2026 — Panorama: composição territorial alinhada à aparência aprovada — Gabriel / Codex
+
+- **Problema/decisão:** Gabriel comparou o primeiro PPT territorial ao estudo aprovado e rejeitou a nova composição. Restaurada a estrutura trimestral existente (título preto/verde em blocos, quadro anual superior, gráfico à esquerda e barras comparativas à direita), mantendo separação por cidades/grupos e os dados conciliados. Cabeçalhos de oferta/preços/anuais alinhados; marcador compartilhado preserva cor dos trimestres equivalentes. PPT híbrido continua com textos/células editáveis e gráficos em imagem.
+- **Evidências:** [revisão visual na fonte de execução](../features/Relatorios%20Secovi_FIERGS/PLAN_COMPARACAO_TERRITORIAL_PANORAMA_2026-11-05.md#revisão-visual-após-conferência-de-gabriel--05112026), JSON de evidência atualizado, R1/R2offline12/8páginas PDF/PPT/CSV. CSV idêntico byte a byte;15testes focados, tipos/lint; PowerPoint renderizou20páginas sem objetos fora e persistiu edição de texto/célula após reabrir.
+- **Estado/pendências:** validado localmente, conferência visual de Gabriel pendente; G7 exige integração/publicação autorizada e ensaio no site. Sem nova API/coleta, merge ou push. Dois commits remotos SP até219ed1c não integrados; alterações paralelas preservadas. Não antecipar aceite da ampliação.
+- **Monday:** [FIERGS](https://brain381753.monday.com/boards/18398428946/pulses/13149405149) — referência, sem escrita.
+
+
+### 2026-11-05 — Panorama: comparação territorial G0–G6 validada localmente — Gabriel / Codex
+
+- **Mudança:** consolidado ou até3unidades cidade/grupo, partição explícita, coleta reutilizada; curvas/variações, tabelas comparativas, páginas específicas densas/horizontais e três composições anuais. Capas, metodologia, nomes/CSV/avisos rastreiam membros. Zeros/negativos e contratos homologados preservados; classificação de lançamento não é inferida pela classe atual/preço. Gráficos continuam imagens noPPT híbrido.
+- **Evidência:** [plano/execução e roteiroG7](../features/Relatorios%20Secovi_FIERGS/PLAN_COMPARACAO_TERRITORIAL_PANORAMA_2026-11-05.md#g6--evidência-final-local-e-limites-de-g7) e [resumo verificável](../features/Relatorios%20Secovi_FIERGS/EVIDENCIA_COMPARACAO_TERRITORIAL_PANORAMA_2026-11-05.json).78testes aprovados/0falhas/1opcional ignorado;11replaysoffline,30218conferências/0diferenças, campos canônicos intactos;ausências explicitadas. Tipos/build aprovados, lint0erros/4avisos anteriores.0leituras extras ao reagrupar;19–155ms de recomposição local, sem promessa sobreAPI/produção.
+- **Provas locais:** R1exato1T2023–3T2026,12páginas;R2sintético3unidades,8páginas, somente para lacunas. PDF/PPT/CSV conferidos;PowerPoint abriu, editou texto/célula e salvou/reabriu cópia.20páginas sem objetos fora;editor1440/390claro/escuro semoverflow/erro. Brutos em `.local-inputs/panorama-territorial-2026-11-05/`. Não houve coleta real nem estudo real novo.
+- **Integração/limites:** merge autorizado `8d3eaec` trouxe seis commitsSP; documentos paralelos reaplicados e stash mantido. Novo remoto `4aed591` não integrado. Sem push; estado **validado localmente**, G7aguarda autorização, publicaçãoLovable, ensaio autenticado e aceite desta ampliação. A falha de aprovação por créditos na atualização de extratos impediu só aquela tentativa; continuação solicitada foi executada após aprovação normal, sem contorno.
+- **Monday:** [Desafio relatórios automatizados](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — referência somente.
+
+### 2026-11-05 — Panorama: plano de comparação territorial e composições anuais — Gabriel / Codex
+
+- **Plano:** alinhamento de Gabriel convertido em [fonte técnica de execução](../features/Relatorios%20Secovi_FIERGS/PLAN_COMPARACAO_TERRITORIAL_PANORAMA_2026-11-05.md), T01–T07/G0–G7: seleção livre, consolidado ou até três unidades cidade/grupo, partição completa sem sobreposição, projeções com controles independentes e coleta reutilizada. Referências/pedidos permanecem na revisãoFinoti03/11.
+- **Escopo:** curvas/variações e tabelas comparativas, páginas específicas somente nas famílias densas, horizontal incluído e composições anuais de empreendimentos/unidades/VGL. Colunas100% por ano com padrões autoritativos; não equiparar Econômico a MCMV. Vendas anuais e duplicação de maturidade/mapas ficam fora desta rodada. PPT híbrido/aparência e políticas numéricas preservadas.
+- **Validação planejada:** matrizes antes do layout, regressões offline2T2026/4T2025, R1 curto da dupla3T2026 com insumos exatos eR2 somente para lacunas, PDF/CSV/ediçãoOffice; sem coleta real autorizada. Estado: preparado, não executado. G7 depende de publicação autorizada, ensaio no site e aceite externo; sem integração/push nesta preparação.
+- **Monday:** [Desafio relatórios automatizados](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — referência somente.
+
+### 2026-11-05 — Panorama: novas referências territoriais Finoti/Teresa — Gabriel / Codex
+
+- **Diagnóstico:**15imagens e PDFs Lajeado/Vale72páginas eRM75páginas lidos/visualizados. Referências combinam séries/colunas comparativas e páginas específicas; Vale agrupa quatro municípios contra Lajeado. Três e-mails compartilhados confirmam separar poucas cidades e agruparRM. Aceite Finoti da revisão anterior preservado; esta ampliação ainda não implementada.
+- **Proposta:** consolidado disponível para qualquer recorte; até três unidades comparativas, cada uma cidade ou grupo explícito, sem sobreposição/omissão. Reutilizar coleta municipal e recalcular taxas/preços; novas composições anuais mapeadas, sem copiar inconsistências dos exemplos. [Fonte única, inventário e estratégia](../features/Relatorios%20Secovi_FIERGS/REVISAO_FINOTI_GRAMADO_CANELA_2026-11-03.md#referências-territoriais-recebidas-em-05112026).
+- **Evidência/estado:** brutos/hashes/pranchas em `.local-inputs/finoti-comparativos-2026-11-05/`; análise preparada, sem alteração de produto/API/testes/estudo real/push. Fetch:cinco commits remotos novos, sem integração da árvore suja. Próximo fechar contrato e plano antes da implementação; limite de séries não reduz por si as chamadas por cidade.
+- **Monday:** [Desafio relatórios automatizados](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — referência somente.
 ### 2026-11-05 — SP Institucional: acesso pela navegação de relatórios — usuário / Codex
 
 - **Mudança:** entrada ativa SP Institucional em Relatórios Automatizados, busca rápida e jornada de relatórios da página inicial, apontando para a rota lazy existente `/rebrain/relatorios-institucionais/sp`. Sem alterar autenticação, catálogo de municípios ou guardas da geração.
@@ -1034,6 +1213,15 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 **05/11 — SP, equipe/consultoria:** cinco e quinze posições personalizáveis na prévia, com nomes/cargos e retratos separados no PPTX. Validado localmente com Edge/Office; publicar e conferir no site. Navegação do menu já publicada em219ed1c.
 
+- 🟡 **Fortaleza — slides1–10 09/11:** prévia mensal/trimestral implementada/testada localmente; arte original preservada, renderização dinâmica ainda sem aceite de100%. Base anterior enviada até5439ffe; lote novo local. [Estado](../features/relatorios-institucionais/fortaleza/SLIDES_01_10_2026-11-09.md).
+
+- 🟡 **Fortaleza — núcleo vertical09/11:** consulta municipal e prévia em4etapas implementadas/testadas localmente, referência mensal/trimestral explícita. Contrato granular, ensaio real e relatório completo ainda pendentes. [Contrato](../features/relatorios-institucionais/fortaleza/NUCLEO_VERTICAL_2026-11-09.md).
+
+- 🟡 **Fortaleza/SINDUSCON — base09/11:** rota oculta e composição estrutural verificadas localmente, 89/60páginas reais inventariadas; sem indicadores/exportação integrados. [Estado atual](../features/relatorios-institucionais/fortaleza/PLAN.md).
+
+- 🟡 **Fortaleza/SINDUSCON — 09/11:** G1 iniciado, dois modelos legíveis e matriz inicial documentados; sem implementação nova. [Plano](../features/relatorios-institucionais/fortaleza/PLAN.md).
+
+**05/11 — Panorama territorial:** G0–G6validados localmente, sem push; [execução/roteiroG7](../features/Relatorios%20Secovi_FIERGS/PLAN_COMPARACAO_TERRITORIAL_PANORAMA_2026-11-05.md). Aceite anterior permanece, ampliação nova aguarda ensaio/aceite.
 **05/11 — SP, textos institucionais5/7:** competência do perfil acompanha a geração; títulos/percentuais e seis cartões GeoBrain exportam como caixas editáveis. Validados localmente com Edge/Office; fonte editorial continua identificada, publicação/ensaio real pendentes.
 
 **05/11 — SP, geração automática:** fluxo visual em oito etapas substitui os botões de coleta; cancelamento/retomada e insights do analista implementados e validados localmente. Publicação autorizada; teste autenticado e aceite permanecem distintos da implementação.
@@ -1120,6 +1308,15 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 - [ ] **SP — ensaiar personalização no site:** atualizar responsáveis e fotos nos slides82/83, exportar e conferir a cópia. Configuração vale para a prévia atual, sem persistência entre gerações; padrões ainda vêm da referência2T2026. [Contrato](../features/relatorios-institucionais/sp/PERSONALIZACAO_EQUIPE_2026-11-05.md).
 
+- **Fortaleza — slides1–10 09/11:** refinar diferenças visuais dinâmicas, fonte da amostra/empresas e reconciliação de início de vendas/fases/exclusões históricas; ensaio autenticado delimitado e exportador posteriores. Publicação deste lote ainda pendente; base anterior enviada. Sem acesso via painel. CorretorV3/Quanti2026 seguem Gabriel.
+
+- **Fortaleza — núcleo vertical09/11:** ensaio autenticado delimitado, fotografias pareadas e reconciliação de fluxos/data de início de vendas/cobertura. Demais segmentos, preços, INCC, MCMV, histórico completo e exportação pendentes. Preservar rota sem painel e não confundir etapas concluídas com aceite do estudo. Falha existente Panorama/firewall-fontes registrada separadamente.
+
+- **Fortaleza/SINDUSCON — base09/11:** comprovar fonte mensal vertical capital/cobertura antes de integrar lançamentos/vendas/oferta; ponderação/INCC/MCMV e desenho final por modelo ainda abertos. Uma falha no teste existente Panorama/firewall-fontes fica registrada separadamente, sem alteração de regras nesta frente. Sem ensaio real/publicação autorizados.
+
+- **Fortaleza/SINDUSCON — 09/11:** obter/revisar PPTX bruto e hashes/caches, comprovar fonte mensal/unidade e universo por bloco, ponderação/INCC/MCMV e diferenças de fotografia; depois confirmar fatia G2. [Decisões e lacunas](../features/relatorios-institucionais/fortaleza/DECISOES.md). Sem coleta real/publicação autorizadas nesta rodada.
+
+**05/11 — Panorama territorial:** autorizar integração do novoSP `4aed591` e publicação; conferir noLovable dupla comparada, consolidado regional e cidade versus grupo, retornandoPDF/PPT/CSV. Não homologado externamente nesta entrega.
 - [ ] **SP — revisar números editoriais dos slides5/7:** atualizar percentuais e indicadores institucionais com fonte aprovada quando necessário. Textos agora editáveis no PPTX; a API municipal não fornece esses números. Data da geração é dinâmica e não significa atualização automática desses indicadores.
 
 - [ ] **SP — ensaio real do fluxo automático:** após o deploy, selecionar ano/trimestre e Gerar relatório; conferir progresso, cancelamento/retomada, fontes parciais e memória de cálculo nos insights. Fontes reais e latência do provedor não foram exercitadas nesta rodada. [Contrato](../features/relatorios-institucionais/sp/GERACAO_AUTOMATICA_2026-11-05.md).

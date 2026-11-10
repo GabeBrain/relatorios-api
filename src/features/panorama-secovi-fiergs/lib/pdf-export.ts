@@ -55,12 +55,25 @@ export async function waitForSlide(slide: HTMLElement) {
  * justamente quando o usuário foi fazer outra coisa. Nesse caso basta ceder o event loop — o
  * layout, que é o que a captura precisa, continua sendo calculado.
  */
-async function settlePaint() {
-  if (document.visibilityState === 'hidden') {
-    await new Promise<void>((resolve) => setTimeout(resolve, 0));
-    return;
-  }
-  await new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
+export async function settlePaint() {
+  await new Promise<void>((resolve) => {
+    let firstFrame: number | undefined;
+    let secondFrame: number | undefined;
+    const done = () => {
+      clearTimeout(timer);
+      if (firstFrame !== undefined) cancelAnimationFrame(firstFrame);
+      if (secondFrame !== undefined) cancelAnimationFrame(secondFrame);
+      document.removeEventListener('visibilitychange', onVisibility);
+      resolve();
+    };
+    const onVisibility = () => { if (document.visibilityState === 'hidden') done(); };
+    // Se a aba mudar depois do agendamento, não ficar preso aguardando um frame suspenso.
+    // O limite também cobre ambientes que não notificam a visibilidade a tempo.
+    const timer = setTimeout(done, document.visibilityState === 'hidden' ? 0 : 250);
+    document.addEventListener('visibilitychange', onVisibility);
+    if (document.visibilityState !== 'hidden')
+      firstFrame = requestAnimationFrame(() => { secondFrame = requestAnimationFrame(done); });
+  });
 }
 
 /**

@@ -1,3 +1,7 @@
+import { closingTypologyPriceRanges } from './editorial-contracts';
+import { territorialReportView } from './territorial-projections';
+import { territorialPriceRows, territorialTrend, territorialAnnualColumns, temporalGapBridges } from './territorial-selectors';
+import { annualCompositionPublishable } from './annual-composition';
 import type { PanoramaReportModel, ReportGenerationNotice } from '../types';
 import { pointInsideTerritory } from '../lib/municipal-territory';
 import { mcmvActivity } from './editorial-contracts';
@@ -11,11 +15,14 @@ type NoticeInput = Omit<ReportGenerationNotice, 'entity' | 'period' | 'affectedP
 
 function outputPages(report: PanoramaReportModel, officialSlides: number[] = []): number[] {
   if (report.scope.entity !== 'fiergs-rs' || !officialSlides.length) return [];
-  const active = new Map(panoramaManifestFor(report).map((page) => [page.fiergsOfficialSlide, page.page]));
+  const active = new Map<number,number[]>();
+  for(const page of panoramaManifestFor(report))if(page.fiergsOfficialSlide!==undefined)active.set(page.fiergsOfficialSlide,[...(active.get(page.fiergsOfficialSlide)??[]),page.page]);
   const complete = new Map(createFiergsReportManifest(true).map((page) => [page.fiergsOfficialSlide, page.page]));
   return officialSlides.flatMap((slide) => {
-    const page = active.get(slide) ?? complete.get(slide);
-    return page === undefined ? [] : [page];
+    const pages=active.get(slide);
+    if(pages)return pages;
+    const page=complete.get(slide);
+    return page===undefined?[]:[page];
   });
 }
 
@@ -51,6 +58,39 @@ export function buildGenerationNotices(report: PanoramaReportModel): ReportGener
     if (slides.length) add({ code: 'MCMV_ZERO_ACTIVITY_OMITTED', severity: 'info', indicator: 'Páginas MCMV',
       reason: 'Séries MCMV integralmente zeradas no recorte com cobertura disponível.', source: 'Séries classificadas de lançamentos/vendas',
       displayDecision: 'Páginas focadas em MCMV omitidas; zeros pontuais e vendas negativas são preservados.', officialSlides: slides });
+  }
+  if (report.territorial) {
+    const omittedStructures=report.territorial.units.flatMap(({unit,data})=>{
+      const omitted=[];
+      if(!data.granular.offerByTypology.some((r)=>(r.finalUnits??0)>0))omitted.push('matriz de oferta por área/tipologia');
+      if(!closingTypologyPriceRanges(territorialReportView(report,unit.id)).length)omitted.push('extremos de preço');
+      if(data.closingFacts.horizontal.projects===0)omitted.push('quadros horizontais');
+      return omitted.length?[`${unit.label}: ${omitted.join(', ')}`]:[];
+    });
+    if(omittedStructures.length)add({code:'TERRITORIAL_STRUCTURES_OMITTED',severity:'info',indicator:'Páginas específicas dos territórios',reason:omittedStructures.join('; '),source:'Estrutura publicável por unidade territorial',displayDecision:'Famílias sem estrutura/atividade aplicável não geram páginas vazias; membros e fatos continuam na auditoria.'});
+    const notApplicable=report.territorial.nonApplicableSegments??[];
+    if(notApplicable.length)add({code:'TERRITORIAL_SEGMENT_NOT_APPLICABLE',severity:'info',indicator:'Aplicabilidade territorial por segmento',reason:notApplicable.map(({city,segment})=>`${city}: sem universo ${segment==='vertical'?'vertical':'horizontal'} no cadastro completo e sem observações temporais desse segmento`).join('; '),source:'Cubo municipal completo, rejeições e séries observadas',displayDecision:'O segmento inexistente não invalida as observações dos outros membros do grupo. Nenhum valor ausente é preenchido com zero; as reconciliações mantêm seus estados.'});
+    const bridged=panoramaManifestFor(report).filter(p=>p.territorialKind==='trend').flatMap(p=>territorialTrend(report,p).series.flatMap(s=>temporalGapBridges(s.plotted).map(g=>`${p.title} / ${s.unit.label}: ${g.from.quarter}–${g.to.quarter}`)));
+    if(bridged.length)add({code:'TERRITORIAL_GAP_BRIDGES',severity:'info',indicator:'Intervalos sem observação nas séries',reason:bridged.join('; '),source:'Pontos realmente observados das séries territoriais',displayDecision:'Trecho tracejado liga observações separadas por lacuna. Sem interpolação de números, pontos novos, alteração de cobertura ou uso da ponte no cálculo de comparativos.'});
+    const noShares=report.territorial.units.filter(({data})=>!data.closingFacts.vertical.finalUnits);
+    if(noShares.length)add({code:'TERRITORIAL_EMPTY_PERCENTAGES',severity:'info',indicator:'Colunas percentuais territoriais',reason:noShares.map(({unit})=>unit.label).join(', '),source:'Oferta final da unidade territorial',displayDecision:'Colunas sem denominador positivo omitidas nas tabelas comparativas; quantidades e zeros preservados.'});
+    const emptyPrices=[...new Set(['meter-standard','meter-typology','ticket-standard','ticket-typology'].flatMap((kind)=>territorialPriceRows(report,kind).omittedLabels))];
+    if(emptyPrices.length)add({code:'TERRITORIAL_EMPTY_PRICE_CATEGORIES',severity:'info',indicator:'Categorias de preço nos comparativos',reason:emptyPrices.join(', '),source:'Indicadores observados por unidade territorial',displayDecision:'Categorias sem observação em todas as unidades não aparecem no gráfico; zeros observados não são removidos.'});
+    const annualOmissions=panoramaManifestFor(report).filter((p)=>p.territorialKind==='trend').flatMap((p)=>{
+      const model=territorialTrend(report,p);const total=Math.max(0,(model.annual[0]?.values.length??0)-1);const visible=territorialAnnualColumns(model.annual).length;
+      return total>visible?[`${p.title}: ${total-visible} comparação(ões) anual(is) sem base observada/atividade compatível`]:[];
+    });
+    if(annualOmissions.length)add({code:'TERRITORIAL_ANNUAL_COMPARISONS_OMITTED',severity:'info',indicator:'Comparativos anuais territoriais',reason:annualOmissions.join('; '),source:'Cobertura anual por território e regra de comparação observada',displayDecision:'Colunas sem comparação válida e quadros integralmente sem comparação omitidos; séries, zeros observados e negativos preservados na auditoria.'});
+    const missing = report.territorial.checks.filter((r)=>r.status==='unavailable');
+    const differences = report.territorial.checks.filter((r)=>r.status==='different');
+    add({code:'TERRITORIAL_COMPOSITION',severity:'info',indicator:'Territórios comparados',reason:report.territorial.units.map(({unit})=>`${unit.label}: ${unit.cities.join(', ')}`).join('; '),source:'Seleção explícita do estudo',displayDecision:report.scope.presentation?.layout==='integrated'?'Relatório único: consolidado seguido de suas visões por cidade/grupo; membros completos na página de cidades. Mapas, maturidade e composição anual permanecem consolidados.':'Até três séries ou blocos; matrizes densas em páginas específicas. Mapas, maturidade e composição anual permanecem consolidados.'});
+    if(missing.length)add({code:'TERRITORIAL_COVERAGE',severity:'info',indicator:'Cobertura dos comparativos',reason:`${missing.length} conferência(s) sem contraparte dimensional ou observação completa; a ausência não foi convertida em zero.`,source:'Matriz cidade → grupo → consolidado',displayDecision:'Lacunas preservadas nos gráficos e na auditoria; não representam igualdade comprovada.'});
+    if(differences.length)add({code:'TERRITORIAL_DIFFERENCES',severity:'warning',indicator:'Reconciliação territorial',reason:`${differences.length} divergência(s) registrada(s) na matriz territorial.`,source:'Matriz de reconciliação',displayDecision:'Dados e divergências preservados na auditoria e nos alertas de consistência.'});
+  }
+  for(const block of report.annualCompositions??[]) {
+    const omitted=block.years.filter((y)=>y.status!=='ready');
+    if(omitted.length||block.unclassified||!annualCompositionPublishable(block))add({code:`ANNUAL_COMPOSITION_${block.metric.toUpperCase()}`,severity:'info',indicator:block.title,
+      reason:`${block.unclassified} empreendimento(s) sem classificação observada no lançamento; anos não exibidos: ${omitted.map((y)=>`${y.year} (${y.status})`).join(', ')||'nenhum'}.`,source:'Padrão na competência do lançamento; quantidades e VGL do contrato homologado',displayDecision:annualCompositionPublishable(block)?'Categoria Não classificado preservada; anos sem base positiva e completa não são normalizados para100%.':'Família omitida por falta de classificação ou universo suficiente; dados brutos permanecem na auditoria.'});
   }
   const withoutStock = report.cube.projects.filter((p) => p.segment === 'Vertical').flatMap((p) => p.typologies)
     .filter((t) => (t.finalUnits ?? 0) <= 0 && t.averagePricePerMeter !== null && t.averagePricePerMeter > 0).length;
@@ -237,6 +277,7 @@ export function buildGenerationNotices(report: PanoramaReportModel): ReportGener
         if (!quarterProjects.some((project) => project.typologies.some((row) => row.launchedUnits !== null))) missingSlides.push(17);
         if (!quarterProjects.some((project) => project.launchedVgvMillions !== null)) missingSlides.push(21);
       }
+      if(!quarterProjects.length || quarterProjects.every(p=>p.launchedUnits===0)) missingSlides.push(19);
       if (missingSlides.length) add({ code: 'LAUNCH_DIMENSION_PAGES_OMITTED', severity: 'warning', indicator: 'Distribuições de lançamentos',
         reason: `Sem linhas dimensionais observáveis para as lâminas oficiais ${missingSlides.join(', ')} no trimestre final do recorte.`,
         source: 'Cubo granular Geobrain e proveniência municipal',

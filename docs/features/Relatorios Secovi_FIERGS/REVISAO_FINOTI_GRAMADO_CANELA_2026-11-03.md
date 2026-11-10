@@ -5,6 +5,8 @@
 
 ## Origem e método
 
+**Atualização 05/11/2026:** Gabriel compartilhou o aceite de Finoti (“Os ajustes estão OK”) e novos exemplos de comparação territorial. A revisão anterior foi aceita quanto aos ajustes enviados; a ampliação de comparações está em diagnóstico, sem implementação ou aceite presumido. Ver [novas referências e estratégia](#referências-territoriais-recebidas-em-05112026).
+
 - Material informado: `src/features/panorama-secovi-fiergs/revisao_3nov_finoti/panorama-fiergs-rs-canela-gramado-1T2023-3T2026_v2.pptx`. Cópia efetivamente localizada tem sufixo `_v2 (1).pptx`; não foi localizado o nome exato sem `(1)`.
 - SHA-256 da cópia analisada: `df1ca3701fe45743102beb718fa1d7c0238845c51a2961e4ba4cc4a116b69ad5`.
 - 69 slides, proporção 16:9, 13⅓ × 7½ polegadas. **46 caixas amarelas com texto, em 33 slides**, mais 11 marcações vermelhas sem texto. O slide 37 tem apenas marcação vermelha e também integra a revisão.
@@ -216,3 +218,85 @@ A seção abaixo é gerada do inventário da cópia de origem e associa cada cai
 | F46 | 68 | 32.1 / 23.7 / 41.7 / 46.9 | Esse slide do documentário já saiu do material institucional | Lâmina institucional do documentário inteira |
 
 **Marcações vermelhas sem texto (11):** slide 5 rodapé; slides 9/11 rótulo de municípios; slide 24 barra negativa; slides 34/35 total de disponibilidade; slide 37 primeiros dois pontos do IVV; slide 38 total do IVV; slide 52 área mínima e três mínimos de preço/m²; slide 58 total de disponibilidade. Todas associadas acima, incluindo a única página sem caixa amarela (37).
+
+## Referências territoriais recebidas em 05/11/2026
+
+**Orientação vigente deGabriel06/11:** o detalhamento territorial integra o consolidado, sempre depois de seu análogo; não há opção entre dois estudos.1cidade municipal,2/3automáticas,4+modal de2/3grupos. Primeira implementação local e evidências no [contratoT01/T02/T05 e revisão do relatório único](PLAN_COMPARACAO_TERRITORIAL_PANORAMA_2026-11-05.md#relatório-único-e-modal-de-grupos--primeira-versão-em06112026). Interpretações anteriores de substituição das páginas permanecem apenas como histórico.
+
+
+**Execução06/11:** acabamentos e integração localI0–I4concluídos, com79testes/11replays/34páginas de extratos conferidos. [Estado e evidências na fonte de execução](PLAN_COMPARACAO_TERRITORIAL_PANORAMA_2026-11-05.md#checkpoint-de-incorporação--06112026). I5/I6pendentes, sem novo aceite externo.
+
+
+**Revisão final05/11 após os extratos:**17arquivos relistados noDrive e referências revisitadas. Pedido central atendido pela candidata local; médias visuais, estado de ano único, quadros sem comparação válida e ensaio de três unidades ativas precisam fechar antes da publicação. [Parecer, matriz de aderência e plano I0–I6](PLAN_COMPARACAO_TERRITORIAL_PANORAMA_2026-11-05.md#incorporação-ao-relatório-publicado--revisão-final-e-plano-i0i6-05112026) são a fonte atual de execução. Trechos de diagnóstico/proposta abaixo retratam a preparação anterior, não ausência de implementação atual. Sem novo aceite externo.
+
+
+**Continuação após alinhamento de Gabriel:** [plano técnico de comparação territorial](PLAN_COMPARACAO_TERRITORIAL_PANORAMA_2026-11-05.md), com T01–T07, G0–G7, matriz por família e CTA. Este inventário permanece a fonte dos materiais/pedidos; o plano é a fonte da execução. Estado: G0–G6 implementados e validados localmente; evidências e pendências G7 no plano, sem publicação ou aceite externo desta ampliação.
+
+### Proveniência e limites
+
+[Pasta enviada por Gabriel](https://drive.google.com/drive/folders/1PKZkDP2NeXGNbqXjxYlbZe9g2RB8QZyp): 17 arquivos diretos, todos baixados e conferidos: 15 PNG e dois PDFs, Lajeado/Vale do Taquari (72 páginas) e RM de Porto Alegre (75 páginas), ambos4T2025. Originais, hashes, inventário, textos por página e pranchas de todas as páginas em `.local-inputs/finoti-comparativos-2026-11-05/manifest.json` e pasta correspondente. Numeração abaixo é a página física do PDF recebido; nomes PNG não são números garantidos do manifesto atual. Inspeção visual de todas as imagens e de todas as páginas em pranchas; não é auditoria numérica da origem nem validação do recorte3T2026.
+
+E-mails reproduzidos por Gabriel e capturas anexas são a origem das decisões: (1) Finoti aceita ajustes anteriores e pede cidades separadas em gráficos e algumas tabelas, depois envia exemplos; (2) Teresa05/11às14h29 confirma separar poucas cidades e agrupar regiões metropolitanas; (3) Teresaàs14h31 exemplifica Lajeado versus Vale do Taquari e RM agrupada. Limite de três unidades comparativas e configuração de grupos são proposta de Gabriel, ainda sem contrato implementado. Sem leitura adicional da caixa de e-mail ou envio externo.
+
+### Inventário completo das 15 imagens de Finoti
+
+| Arquivo | Conteúdo e implicação |
+|---|---|
+| image.png | Empreendimentos verticais trimestrais: Gramado/Canela como duas curvas, variações identificadas por cidade e comparação semestral empilhada. |
+| image (1).png | Empreendimentos em12meses: duas curvas e quadro de variações; comentário textual específico do estudo fica como acabamento do analista. |
+| image (2).png | Unidades lançadas trimestrais por cidade, variações e semestre. |
+| image (3).png | Unidades lançadas em12meses por cidade. |
+| image (4).png | Vendas trimestrais por cidade e comparação semestral. |
+| image[53].png | Vendas em12meses por cidade. |
+| image (5).png | Oferta final por trimestre, duas curvas; estoque é fotografia, não somatório anual. |
+| image (6).png | Oferta final por padrão: colunas Gramado/Canela e participação dentro de cada município. Faixas monetárias não se tornam contrato de classificação automaticamente. |
+| image[51].png | Oferta final por tipologia: colunas Gramado/Canela e percentuais próprios. |
+| image (7).png | Ticket por padrão de Gramado, com referência da média municipal. |
+| image[67].png | Preço por m² por padrão com linha média. Há cores/identificação territorial visualmente ambíguas; exigir título territorial explícito em vez de inferir cidade pela cor. |
+| image (8).png | Mínimo/média/máximo por tipologia de Gramado. |
+| image (9).png | Mesmo quadro de Canela, em página própria. |
+| image (10).png | VGV e unidades por padrão, página específica de Gramado. |
+| image[27].png | VGV e unidades por padrão, página específica de Canela. |
+
+### Referências adicionais dos dois panoramas
+
+| Família | Lajeado/Vale do Taquari | RM Porto Alegre | Conclusão |
+|---|---|---|---|
+| Território | p2: Lajeado separado de Vale do Taquari (Bom Retiro do Sul, Estrela, Taquari e Teutônia) | p2/7: região como um território | Comparar unidades territoriais, que podem ser uma cidade ou um conjunto nomeado; não inferir composição regional pelo nome. |
+| Lançamentos e VGL | p14/16/17/18/19/24/25: curvas Lajeado/Vale | p9/11/12/14/15/16/20/22: série regional | Substituir série única por até três séries quando solicitada comparação; consolidado continua como modo próprio. |
+| Composição anual por padrão | p15 empreendimentos, p20 unidades, p26 valor lançado | p10 empreendimentos, p13 unidades, p21 valor lançado, p25 vendas | Gráficos100% empilhados são famílias novas a mapear, não apenas pintura de séries existentes. Vendas anuais são candidato adicional, não obrigação derivada dos PNG. |
+| Vendas e oferta temporal | p28/31/33: duas séries | p24/26/32/33/35: regional | Comparar totais e fotografias da mesma competência; não somar preços, estoques ou taxas no tempo. |
+| Preços por padrão/tipologia | p43–48 combinam consolidado e comparação, com médias próprias | p49–52 regional | Barras agrupadas e médias por território, sem média simples de médias municipais. |
+| Oferta atual por ano/padrão/tipologia | p50–52: dois conjuntos de colunas | p54–56: uma região | Comparação em uma tabela, participação calculada dentro de cada território. |
+| Matrizes e extremos | p53/55 Lajeado e p54/56 Vale | p57/58 regional | Algumas tabelas precisam de uma página por unidade comparada para manter legibilidade; apenas nessas famílias. |
+| Maturidade/VGV | p57/58 maturidade consolidada e p59 VGV consolidado | p59–61 regional | Nem tudo é desdobrado nos próprios exemplos. Finoti pede VGV separado nos PNG; maturidade separada não é exigência confirmada. |
+| Horizontal | p62/64/66 Lajeado e p63/65/67 Vale | p63–66 regional | Desdobramento territorial é também aplicável ao horizontal; preservar casas em condomínio e demais políticas homologadas. |
+| Mapas e artes | Artes gerais antigas e contextualização territorial | p67–69 mapas regionais | Não substituir institucional23anos pelo22anos das referências. Mapas não exigem duplicação automática. |
+
+### Avaliação da proposta: até três unidades comparativas
+
+Recomendação, ainda sujeita ao contrato de execução:
+
+1. Separar **recorte de coleta** (qualquer número de cidades autorizadas, uma UF) de **apresentação territorial** (consolidado ou comparação de até três unidades).
+2. Uma cidade: relatório municipal. Duas/três: sugerir comparação por cidade, sem impedir escolher consolidado. Mais de três: manter consolidado disponível e permitir comparação por dois/três grupos nomeados; não obrigar agrupamento para conseguir gerar o relatório.
+3. Cada unidade pode conter uma ou várias cidades: Lajeado sozinho versus quatro cidades do Vale, por exemplo. Para comparar, grupos devem ser não vazios, ter nomes distintos e cobrir o recorte exatamente uma vez, sem cidade duplicada ou silenciosamente descartada. Não criar grupos por proximidade/população ou inferir composição de RM.
+4. Painéis temporais usam até três curvas; tabelas compactas usam blocos de colunas; matrizes extensas, extremos e VGV podem gerar até três páginas específicas da família. Não repetir todo o relatório três vezes ou comparar total com os próprios componentes como se fossem unidades independentes.
+5. Consolidado e grupos partem da mesma coleta e dos mesmos contratos de cálculo. Campos de quantidade/valor somam componentes compatíveis; taxas e preços são recalculados pelos numeradores/pesos corretos. Cada grupo preserva cobertura por competência, sinais, zeros e nulos, deduplicação e controles. Soma de grupos reconcilia quantidades/valores com o consolidado; médias não somam.
+6. Cache/chave do resultado, auditoria, metodologia, nomes/cores, capa e PPT/PDF precisam carregar modo e composição dos grupos. Metadados de grupos são do estudo, não classificação nova da API. Usar identificadores estáveis separados dos nomes editáveis.
+7. O limite de três reduz poluição visual e eventual número de páginas, **não reduz o volume de API correspondente às cidades coletadas**. Reaproveitar respostas municipais, sem recolher as mesmas cidades por gráfico ou grupo. Medir custo de montagem/renderização antes de prometer melhora de desempenho.
+
+### Gráficos novos e regras que não devem ser copiadas
+
+A imagem4 de Gabriel corresponde à composição percentual anual das **unidades lançadas por padrão** (Lajeado p20). As outras duas famílias diretamente relacionadas são empreendimentos (p15) e VGL (p26); RM traz ainda vendas (p25). Recomenda-se incluir primeiro empreendimentos/unidades/VGL, usando os dados já disponíveis quando sua granularidade anual e classificação forem demonstradas. Barras100% empilhadas tornam anos discretos mais explícitos; área100% pode seguir a referência se aprovada, sem alegar observação entre anos. Ano corrente deve indicar corte real e usar comparação equivalente; ano sem cobertura não vira zero ou100%. Vendas líquidas negativas não cabem em normalização100% convencional: manter aviso/tratamento coerente, nunca ocultar sinal.
+
+A taxonomia visual resumida (Luxo/Médio Padrão/MCMV/Compactos) precisa ser mapeada à classificação autoritativa existente, com reconciliação, antes de fundir categorias. A faixa monetária nos PDFs/PNG é referência histórica, não autorização para substituir classificações pelo preço. Não copiar manualmente números, chamar VGL de VGV sem respeitar o contratoD06, transformar maturidade em média contínua ou limitar históricos aos anos2020–2025 dos exemplos.
+
+Há inconsistências nos próprios arquivos: Lajeado p26 tem rodapé “Até06/2025” embora a capa seja4T2025; p25 mistura valores finais407/13, textoR$720mi e variação13486%, sem reconciliação demonstrada. Esses elementos não são valores-alvo. Referências também exibem categorias vazias/preços zero; continuam valendo D01–D14 e preservação de cobertura/atividade, sem regressão ao tratamento antigo. Artes22anos/contatos antigos não substituem ativos atuais.
+
+### O que já existe no motor e estratégia proposta
+
+`api.ts` conserva `harvests`, cubos por cidade e `cityTemporalSources`; a coleta já é municipal. `report/model.ts` agrega grande parte em `marketBlock` e monta `cityComparisons` limitado ao fechamento (vendas, mercado e disponibilidade por padrão). `PanoramaScope` não contém grupos nem modo de comparação. Portanto, não basta trocar legenda: preservar e agregar a dimensão territorial ao longo das séries e tabelas, reutilizando os mesmos contratos, é a mudança central. A existência de dados municipais é confirmada no código, não prova cobertura integral de todos os novos indicadores/anos.
+
+Ordem sugerida: (A) contrato de unidades/grupos e matriz de aplicabilidade por família; (B) projeções territoriais com reconciliação e cobertura, sem nova coleta quando os insumos bastarem; (C) curvas/variações e tabelas comparativas; (D) somente páginas específicas necessárias e novos gráficos anuais; (E) saídas curtas dirigidas, regressões do consolidado e uma comparação cidade versus grupo. Ainda não executar: esta rodada é leitura/análise. Próximo fechar alcance do horizontal, famílias novas e formato dos gráficos anuais no plano de implementação. O consolidado aceito continua baseline.
+
+Estado Git: fetch05/11, origin/main cinco commits à frente da árvore local, sem commits locais exclusivos na abertura; alterações locais paralelas preservadas e nenhum merge. Sem código, testes de produto, consultaAPI Geobrain, geração real ou push nesta análise. Validação:17/17arquivos,72+75páginas e15imagens inventariados com hashes e visualizados; revisão documental não substitui ensaio da futura implementação.

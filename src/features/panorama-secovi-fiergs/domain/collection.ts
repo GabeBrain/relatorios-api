@@ -38,10 +38,15 @@ const DEFAULT_CONCURRENCY = 3;
 export function isTransientCityFailure(error: unknown): boolean {
   if (error instanceof Error && error.name === 'BuildingSourceContractError') return false;
   const message = error instanceof Error ? error.message : String(error);
-  const statusMatch = message.match(/\bHTTP\s+(\d{3})\b/i);
-  if (!statusMatch) return true; // timeout/rede sem resposta HTTP
-  const status = Number(statusMatch[1]);
-  return status === 408 || status === 429 || status >= 500;
+  if (/Contrato da fonte:/i.test(message)) return false;
+  const statuses = [...message.matchAll(/\bHTTP\s+(\d{3})\b/gi)].map((match) => Number(match[1]));
+  // A falha municipal pode reunir várias fontes: um 200 vazio não apaga um timeout.
+  // Acesso/contrato exigem intervenção, mesmo se outra chamada falhou transitoriamente.
+  if (statuses.some((status) => status >= 400 && status < 500 && status !== 408 && status !== 429)) return false;
+  if (statuses.some((status) => status === 408 || status === 429 || status >= 500)
+    || /\brede\b|\btimeout\b|\btimed out\b|\bnetwork\b|\bfetch failed\b/i.test(message)) return true;
+  if (statuses.length || /sem (linhas|dados)|vazio/i.test(message)) return false;
+  return true; // erro de transporte sem status HTTP
 }
 
 function abortableSleep(ms: number, signal?: AbortSignal): Promise<void> {
