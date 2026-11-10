@@ -21,7 +21,7 @@ export function fiergsTemporalTypologyTotal(report: PanoramaReportModel): number
 /** A mesma seleção abastece o gráfico e o aviso de categorias sem R$/m². */
 export function granularPriceChartRows(report: PanoramaReportModel, dimension: PriceChartDimension) {
   const granularRows = dimension === 'pattern' ? report.granular.pricesByStandard : report.granular.pricesByTypology;
-  const temporalTypology = report.scope.entity === 'fiergs-rs' && dimension === 'typology';
+  const temporalTypology = report.scope.entity === 'fiergs-rs' && dimension === 'typology' && !report.granular.marketContract;
   const candidates = granularRows.filter((row) => row.kind !== 'total').map((row) => ({
     label: row.label,
     value: temporalTypology ? fiergsTemporalTypologyMeter(report, row.label) : row.averagePricePerMeter,

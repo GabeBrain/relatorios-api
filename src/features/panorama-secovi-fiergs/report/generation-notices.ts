@@ -50,6 +50,19 @@ export function buildGenerationNotices(report: PanoramaReportModel): ReportGener
   const period = `${report.scope.startQuarter ?? 'histórico'}–${report.scope.endQuarter}`;
   const noticeInputs: NoticeInput[] = [];
   const add = (notice: NoticeInput) => noticeInputs.push(notice);
+  if (report.granular.marketContract) add({ code: 'GEOBRAIN_MARKET_CONTRACT', severity: 'info',
+    indicator: 'Oferta ativa, fluxos e preços por planta',
+    reason: 'Oferta Lançada da seção de mercado considera plantas com status histórico Ativo no fechamento, inclusive anteriores à janela. Vendas somam as observações do trimestre; estoques usam fotografias independentes. Preços usam plantas Padrão com estoque positivo e pesos de quantidade.',
+    source: 'geobrain-market-v1',
+    displayDecision: 'Histórico de lançamentos e capacidade original permanecem separados. Totais de preço são recalculados pelas contribuições primitivas; não são média das médias. Nenhuma ausência é preenchida para coincidir com outra consulta.' });
+  if (report.granular.marketContract && report.granular.areaBands.some((r) => r.kind === 'total' && r.previousUnits === null)) add({
+    code: 'MARKET_PREVIOUS_SNAPSHOT_MISSING', severity: 'warning', indicator: 'Oferta anterior observada',
+    reason: 'Há plantas sem fotografia anterior suficiente. A oferta anterior não foi reconstruída a partir de vendas ou preenchida com zero.',
+    source: 'geobrain-market-v1', displayDecision: 'O IVV por área fica ausente onde falta base; o agregado mantém a identidade vendas ÷ (estoque final + vendas) quando não há fotografia anterior completa; isso não constitui observação da oferta anterior.' });
+  const unpricedMapLocations = report.granular.marketContract ? report.locations.filter((p) => p.averagePricePerMeter == null).length : 0;
+  if (unpricedMapLocations) add({ code: 'MARKET_MAP_PRICE_UNOBSERVED', severity: 'info', indicator: 'Mapa por preço',
+    reason: `${unpricedMapLocations} empreendimento(s) sem preço observado elegível não recebem marcador no mapa por R$/m².`,
+    source: 'geobrain-market-v1', displayDecision: 'Coordenadas e contagens permanecem na auditoria e nos outros mapas; preço ausente não é apresentado como zero.' });
   if (report.scope.entity === 'fiergs-rs' && report.provenance.completedCities.length === report.scope.cities.length) {
     const slides = (['launches', 'sales'] as const).flatMap((kind) => {
       const activity = mcmvActivity(report, kind);
@@ -247,8 +260,9 @@ export function buildGenerationNotices(report: PanoramaReportModel): ReportGener
 
   if (report.scope.entity === 'fiergs-rs') {
     const unknownProducts = report.cube.rejections.filter((item) => item.reason === 'subtipo_horizontal_indefinido' || item.reason === 'segmento_desconhecido');
+    const knownExcludedStock = unknownProducts.reduce((sum, p) => sum + (p.observedClosingStock ?? 0), 0);
     if (unknownProducts.length) add({ code: 'UNCLASSIFIED_PRODUCTS_EXCLUDED', severity: 'warning', indicator: 'Classificação de produtos',
-      reason: `${unknownProducts.length} empreendimento(s) recusado(s) por falta de classificação autoritativa, nas cidades ${[...new Set(unknownProducts.map((item) => item.city))].join(', ')}.`,
+      reason: `${unknownProducts.length} empreendimento(s) recusado(s) por falta de classificação autoritativa, nas cidades ${[...new Set(unknownProducts.map((item) => item.city))].join(', ')}.${knownExcludedStock ? ` Há ${knownExcludedStock} unidade(s) de estoque observadas nesses registros, fora dos produtos classificados.` : ''}`,
       source: 'Política FIERGS e rejeições do cubo', displayDecision: 'Itens não entram em produtos por inferência; IDs e motivos permanecem no CSV para revisão da fonte.' });
     const activeSlides = new Set(panoramaManifestFor(report).map((page) => page.fiergsOfficialSlide));
     const omittedSlides = createFiergsReportManifest(true).filter((page) => !activeSlides.has(page.fiergsOfficialSlide)).map((page) => page.fiergsOfficialSlide!);

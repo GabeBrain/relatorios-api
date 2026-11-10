@@ -1,4 +1,6 @@
 import { buildAnnualCompositions, type AnnualLaunchFact } from './annual-composition';
+import { activeMarketCube, priceContributions, MARKET_OBSERVATION_CONTRACT } from '../domain/market-observations';
+import { marketPriceSeries } from './market-price-series';
 import { panoramaCollectionKey, territorialPresentationErrors } from '../domain/territorial-presentation';
 import { buildTerritorialComparison } from './territorial-projections';
 import { buildLaunchModel, periodToQuarter, safeNumber, launchRecordsFromCube } from '../lib/launches';
@@ -271,7 +273,7 @@ function horizontalSeriesPolicyOf(cube: MarketCube, engineVersion: 'v2' | 'v3' |
     acceptedProjects: accepted,
     reason: accepted
       ? `Há ${accepted} empreendimento(s) horizontal(is) elegível(is); as séries municipais foram filtradas por Padrão antes da agregação.`
-      : 'Nenhum horizontal elegível no cubo; as séries municipais continuam filtradas por Padrão para não introduzir loteamentos.',
+      : 'Nenhum horizontal elegível no cubo; as séries municipais continuam filtradas por Padrão para não introduzir produtos fora do recorte.',
   };
 }
 
@@ -302,12 +304,14 @@ export function buildGranularBlocks(cube: MarketCube, scope?: PanoramaScope): Pa
   // FIERGS descreve a fotografia do mercado no fechamento. Um empreendimento lançado antes do
   // início da série continua compondo vendas e oferta atuais; a janela escolhida limita séries de
   // lançamentos, não o estoque de mercado. No Secovi, a política histórica da janela é preservada.
-  const verticalOfferCube = scope?.entity === 'fiergs-rs' ? cube : launchCube;
+  const currentMarket = activeMarketCube(cube);
+  const verticalOfferCube = scope?.entity === 'fiergs-rs' ? currentMarket : launchCube;
   // O bloco horizontal FIERGS é uma fotografia do universo ativo e possui a coorte editorial
   // "Até 2022". A janela das séries temporais não pode eliminar essa coorte nem criar um delta.
-  const horizontalCube = scope?.entity === 'fiergs-rs' ? cube : launchCube;
+  const horizontalCube = scope?.entity === 'fiergs-rs' ? currentMarket : launchCube;
   const matrix = buildCohortMatrix(verticalOfferCube, 'Vertical');
   return {
+    ...(currentMarket !== cube ? { marketContract: MARKET_OBSERVATION_CONTRACT } : {}),
     ...(scope?.entity === 'fiergs-rs' ? { launchWindow: {
       offerByStandard: offerByStandard(launchCube, 'Vertical'),
       offerByTypology: offerByTypology(launchCube, 'Vertical'),
@@ -341,7 +345,7 @@ function closingSegment(projects: MarketCube['projects'], segment: 'Vertical' | 
   const selected = segment === 'Total' ? projects : projects.filter((project) => project.segment === segment);
   if (!selected.length) return { projects: 0, launchedUnits: 0, finalUnits: 0, availability: null };
   return {
-    projects: new Set(selected.map((project) => project.key)).size,
+    projects: new Set(selected.filter((p) => p.marketActive !== false).map((project) => project.key)).size,
     launchedUnits: selected.reduce<number | null>((sum, project) => project.launchedUnits === null ? sum : (sum ?? 0) + project.launchedUnits, null),
     finalUnits: selected.reduce<number | null>((sum, project) => project.finalUnits === null ? sum : (sum ?? 0) + project.finalUnits, null),
     availability: null,
@@ -410,7 +414,7 @@ function mapLocationsOf(cube: MarketCube, records: LaunchRecord[]): PanoramaRepo
         longitude: project.longitude!,
         standard: project.standard,
         finalUnits: project.finalUnits,
-        averagePricePerMeter: project.averagePricePerMeter,
+        averagePricePerMeter: project.marketObservations ? priceContributions([project]).averagePricePerMeter : project.averagePricePerMeter,
       });
     }
     return [...unique.values()];
@@ -430,12 +434,8 @@ function normalizeTemporalSource(scope: PanoramaScope, harvests: CityTemporalSou
   };
 }
 
-/**
- * FIERGS 2T2026: o endpoint temporal publica fotografias acumuladas em mais de um mês do mesmo
- * trimestre. Somá-las como fluxo duplicava 41 vendas em Canoas e 5 em Novo Hamburgo. No fechamento,
- * padrão e tipologia passam a usar o mesmo fato granular já consumido pela lâmina de área; a série
- * anterior permanece temporal até que cada trimestre histórico seja reconciliado da mesma forma.
- */
+/** Closing dimensions share deduplicated quarterly flows. Future pre-launch reservations are
+ * retained in the audit, but enter market sales only once the plant is commercialized. */
 function reconcileFiergsClosingSales(source: SourceResult, cube: MarketCube, scope: PanoramaScope, dimension: 'pattern' | 'typology'): SourceResult {
   if ((scope.entity ?? 'secovi-sp') !== 'fiergs-rs') return source;
   const granularRows: Record<string, unknown>[] = cube.projects.filter((project) => project.segment === 'Vertical').flatMap<Record<string, unknown>>((project) => {
@@ -450,7 +450,7 @@ function reconcileFiergsClosingSales(source: SourceResult, cube: MarketCube, sco
   return {
     rows: [...historicalAndHorizontal, ...granularRows],
     available: true,
-    source: `${source.source} · fechamento vertical reconciliado pelo cubo granular (última fotografia por empreendimento/tipologia)`,
+    source: `${source.source} · fechamento vertical reconciliado pelo cubo granular (${cube.projects.some((p) => p.marketObservations) ? 'fluxo trimestral por planta, independente das fotografias de estoque' : 'última fotografia por empreendimento/tipologia'})`,
   };
 }
 
@@ -514,17 +514,17 @@ function buildCityComparisons(scope: PanoramaScope, cube: MarketCube, provenance
     return { city, liquidSales: nullableSum(values) };
   });
   const market = selected.flatMap((city) => (['Vertical', 'Horizontal'] as const).map((segment) => {
-    const projects = cube.projects.filter((project) => project.city === city && project.segment === segment);
+    const projects = activeMarketCube(cube).projects.filter((project) => project.city === city && project.segment === segment);
     const launchedUnits = nullableSum(projects.map((project) => project.launchedUnits));
     const finalUnits = nullableSum(projects.map((project) => project.finalUnits));
-    return { city, segment, projects: new Set(projects.map((project) => project.key)).size, launchedUnits, finalUnits, availability: availability(launchedUnits, finalUnits) };
+    return { city, segment, projects: new Set(projects.filter((p) => p.marketActive !== false).map((project) => project.key)).size, launchedUnits, finalUnits, availability: availability(launchedUnits, finalUnits) };
   }));
-  const standards = [...new Set(cube.projects.filter((project) => project.segment === 'Vertical').map((project) => project.standard))]
+  const standards = [...new Set(activeMarketCube(cube).projects.filter((project) => project.segment === 'Vertical').map((project) => project.standard))]
     .sort((a, b) => semanticGroupOrder(a, b));
   const availabilityByStandard = standards.map((standard) => ({
     standard,
     values: selected.map((city) => {
-      const projects = cube.projects.filter((project) => project.city === city && project.segment === 'Vertical' && project.standard === standard);
+      const projects = activeMarketCube(cube).projects.filter((project) => project.city === city && project.segment === 'Vertical' && project.standard === standard);
       const launchedUnits = nullableSum(projects.map((project) => project.launchedUnits));
       const finalUnits = nullableSum(projects.map((project) => project.finalUnits));
       return { city, availability: availability(launchedUnits, finalUnits) };
@@ -553,7 +553,7 @@ function buildNumericalReport(
   const failedCities = provenance.failedCities.length > 0;
   const granular = buildGranularBlocks(cube, scope);
   const launchCube = scope.startQuarter ? cubeInLaunchWindow(cube, scope) : cube;
-  const closingFacts = closingFactsOf(entity === 'fiergs-rs' ? cube : launchCube, granular);
+  const closingFacts = closingFactsOf(entity === 'fiergs-rs' ? activeMarketCube(cube) : launchCube, granular);
   const cityComparisons = buildCityComparisons(scope, cube, provenance, options.citySalesSources ?? []);
   const temporal = {
     sales: filterEntityPatternSource(normalizeTemporalSource(scope, options.cityTemporalSources, 'sales', 'flow', sources.sales), entity),
@@ -640,7 +640,19 @@ function buildNumericalReport(
     reconciliation: reconcilePanoramaReport({ scope, cube, sales, stock, granular, cityComparisons, locations }),
     notices: [],
   };
-  if (entity === 'fiergs-rs') report.ivv = reconcileAggregateIvv(report.ivv, report.sales.units, report.stock.units);
+  if (entity === 'fiergs-rs') {
+    report.ivv = reconcileAggregateIvv(report.ivv, report.sales.units, report.stock.units);
+    const areaClosing = granular.areaBands.find((r) => r.kind === 'total');
+    if (granular.marketContract && areaClosing?.ivv != null) report.ivv = { ...report.ivv,
+      source: `${report.ivv.source} · fechamento: vendas trimestrais ÷ (oferta anterior observada + lançamentos)`,
+      series: report.ivv.series.map((r) => r.quarter === scope.endQuarter
+        ? { ...r, vertical: areaClosing.ivv!, observed: { ...r.observed, vertical: true }, source: 'geobrain-market-v1 / fotografias e fluxo trimestral independentes' } : r),
+    };
+    report.prices.meter = marketPriceSeries(report.prices.meter, cube, scope, 'averagePricePerMeter', 'standard');
+    report.prices.ticket = marketPriceSeries(report.prices.ticket, cube, scope, 'averageTicket', 'standard');
+    report.prices.meterByTypology = marketPriceSeries(report.prices.meterByTypology, cube, scope, 'averagePricePerMeter', 'typology');
+    report.prices.ticketByTypology = marketPriceSeries(report.prices.ticketByTypology, cube, scope, 'averageTicket', 'typology');
+  }
   report.notices = buildGenerationNotices(report);
   return report;
 }

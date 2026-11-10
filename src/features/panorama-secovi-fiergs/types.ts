@@ -299,6 +299,7 @@ export interface PanoramaReportModel {
  * todas derivam do mesmo `cube` e por isso fecham entre si.
  */
 export interface PanoramaGranularBlocks {
+  marketContract?: 'geobrain-market-v1';
   /** Fluxo de lançamentos na janela editorial, separado da fotografia integral de fechamento. */
   launchWindow?: {
     offerByStandard: OfferRow[];

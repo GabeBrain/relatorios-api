@@ -2,6 +2,7 @@ import type { PanoramaReportModel, ReportMarketBlock } from '../types';
 import { quarterLabel } from '../lib/launches';
 import { panoramaScopeIdentity } from '../scope-identity';
 import { orderTypologies } from '../domain/taxonomy';
+import { closingPlants, pricePlant, priceContributions } from '../domain/market-observations';
 
 /** Finoti D09: categories have equal weight; observed zero is not absence. */
 export function meanCategoryRates(rows: { kind?: string; value: number | null | undefined }[]): number | null {
@@ -65,6 +66,19 @@ export function mcmvActivity(report: Pick<PanoramaReportModel, 'launches' | 'sal
 
 /** D10: extremes and weighted averages use the same observed closing-stock universe. */
 export function closingTypologyPriceRanges(report: PanoramaReportModel) {
+  if (report.granular.marketContract) {
+    const projects = report.cube.projects.filter((p) => p.segment === 'Vertical');
+    const plants = projects.flatMap((p) => closingPlants(p).filter(pricePlant));
+    return orderTypologies(new Set(plants.map((p) => p.typology))).map((label) => {
+      const rows = plants.filter((p) => p.typology === label);
+      const areas = rows.map((p) => p.area).filter((n): n is number => n !== null && n > 0);
+      const meters = rows.flatMap((p) => p.ticket !== null && p.area !== null && p.area > 0 ? [p.ticket / p.area] : []);
+      const average = priceContributions(projects, (p) => p.typology === label);
+      return { label, areaMin: areas.length ? Math.min(...areas) : null, areaMax: areas.length ? Math.max(...areas) : null,
+        areaAverage: average.averageArea, meterMin: meters.length ? Math.min(...meters) : null, meterMax: meters.length ? Math.max(...meters) : null,
+        meterAverage: average.averagePricePerMeter, offer: rows.reduce((s, p) => s + p.stock!, 0) };
+    });
+  }
   const grouped = new Map<string, { meter: number | null; area: number | null; weight: number }[]>();
   for (const p of report.cube.projects.filter((p) => p.segment === 'Vertical')) for (const t of p.typologies) {
     if (t.finalUnits === null || !Number.isFinite(t.finalUnits) || t.finalUnits <= 0) continue;
