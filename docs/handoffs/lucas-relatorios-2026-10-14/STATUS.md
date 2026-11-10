@@ -1,5 +1,9 @@
 # Estado do handoff
 
+## 10/11/2026 — Fortaleza retomada com prioridade mensal
+
+Lucas pediu continuação priorizando mensal. Main03d3301/origin, fetch atualizado,0–0 e árvore limpa antes das edições; Windows/Codex Test. [Fatia e retomada](../../features/relatorios-institucionais/fortaleza/MENSAL_LANCAMENTOS_2026-11-10.md): mensal padrão,11/13/15 integrados,25meses de lançamentos verticais automáticos, insights.13composições mensais, não relatório completo.12/14casas/comercial e demais conteúdos/INCC/exportação pendentes. Original Drive baixado/hash conferido/Office leitura; GeoBrain real não consultado.105testes distintos incluindo regressões2T2026/4T2025 aprovados após rechecagem de uma asserção; tipos/build/lint e Edge sintético1440/390claro/escuro. SP e motores paralelos sem mudanças. Sem Monday, homologação ou push desta fatia; commit local isolado e contadores no fechamento.
+
 ## 10/11/2026 — integração autorizada para sincronização e publicação
 
 Usuário autorizou resolver a divergência e enviar. Checkout continha merge em curso entre local `1d601d0` e remoto `6ffb91d` (31 commits), com conflito somente neste STATUS. Registros de ambos os lados preservados integralmente e em ordem09/11 antes05/11; conferência aditiva de três pontos comprovou STATUS e LIVE antes desta nova entrada. SP permanece byte a byte no estado local; App/BrainLoadingState/Panorama/Fortaleza preservam o remoto. Main, único origin; Codex Test/Windows. Sem nova API autenticada ou escrita no Monday. Validação integrada e publicação registradas no fechamento desta seção; deploy não observado.

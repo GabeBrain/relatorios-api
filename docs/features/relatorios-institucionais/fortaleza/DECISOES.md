@@ -1,5 +1,9 @@
 # Fortaleza — fatos, propostas e pendências
 
+## 10/11 — prioridade mensal e contratos de lançamentos
+
+Pedido do Lucas prioriza mensal; trimestral permanece disponível. [Contrato desta fatia](MENSAL_LANCAMENTOS_2026-11-10.md):11 por IDs verticais,13/15 por releases_in_period, Econômico/demais e comparativos mensais/acumulados separados. Não inferir casas/comercial a partir do vertical nem perpetuar teto editorial MCMV de abril/2026. Sete padrões explícitos por mês/cidade são uma guarda conservadora, sem novo aceite da fonte real.12/14/valores/INCC e demais conteúdos continuam pendentes.
+
 ## Complemento — slides 1–10
 
 Lucas autorizou envio da base e pediu dez slides iniciais seguindo integralmente o original. Base enviada até `5439ffe`; novo lote compõe slides mensais/trimestrais com arte nativa extraída, geometria medida e fonte local. [Contrato/limites](SLIDES_01_10_2026-11-09.md). O raster ainda registra diferenças em textos/gráficos: fidelidade de 100% não homologada.

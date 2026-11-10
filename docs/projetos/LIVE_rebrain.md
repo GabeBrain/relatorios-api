@@ -385,6 +385,17 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-11-10 — Fortaleza: prioridade mensal e lançamentos verticais — Lucas / Codex
+
+- **Ambiente/funcionalidade:** Rebrain — `/rebrain/relatorios-institucionais/fortaleza`, somente rota, sem menu/painel.
+- **O quê:** mensal como padrão, competência inicial pelo calendário;11/13/15 com25meses e comparativos mês/ano/acumulado, fontes automáticas na mesma geração e insights de cálculo/proveniência.13composições mensais, sem renumerar nem preencher12/14com universo vertical incompleto.
+- **Contrato/evidência:** [mensal Fortaleza](../features/relatorios-institucionais/fortaleza/MENSAL_LANCAMENTOS_2026-11-10.md). Cadastro por ID no11; releases_in_period municipal nos13/15; sete padrões explícitos/mês/cidade, falta não vira zero. Histórico limitado, cancelamento e retry por sessão/janela. Arte original sem cifras antigas; fonte mensal recuperada/Office leitura. Sem API real ou aceite.
+- **Validação:**105casos distintos Fortaleza/Secovi/FIERGS aprovados após rechecagem de asserção de mensagem duplicada; tipos/build/lint, Edge1440/390claro/escuro lento/vazio/incompleto/cancelamento. Padrões BrainLoadingState/GeoApiScopeEngine e primitives existentes. SP/motores compartilhados intactos.
+- **Arquivos/commits:** módulo Fortaleza, scripts diagnósticos e documentos; commit isolado `feat(relatorios): extend Fortaleza monthly launch analysis`, base03d3301. Local até autorização própria de push.
+- **Monday:** [Fortaleza — SINDUSCON](https://brain381753.monday.com/boards/18398638577/pulses/13149406420) — `13149406420`; somente referência.
+- **Impacto em Etapas/Pendências:** mensal em andamento; próximos12/14/segmentos e16–60, INCC/preços/IVV/exportação, ensaio autenticado/homologação. Base anterior publicada em03d3301; nenhuma publicação desta fatia.
+- **Ordem oficial:** reforço posterior do Lucas aplicado à navegação1–15sem saltos.12/14mantêm posições/arte com fonte em preparação. Prioridade de conclusão dessas lacunas antes de avançar ao próximo bloco.
+
 ### 2026-11-10 — integração autorizada de SP, Panorama e Fortaleza — usuário / Codex
 
 - **Pedido/estado:** usuário autorizou push/sincronização e confirmou a resolução da divergência. Checkout encontrado com merge já iniciado: local `1d601d0`, entrada `6ffb91d` (31 commits remotos), conflito somente no STATUS do handoff. Nenhum histórico publicado reescrito.
@@ -1211,6 +1222,8 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 
 ## 2. Etapas
 
+- 🟡 **Fortaleza mensal —10/11:**1–10e11/13/15 implementados localmente, histórico vertical automático25meses e insights;13composições, restante ainda pendente. [Estado atual](../features/relatorios-institucionais/fortaleza/MENSAL_LANCAMENTOS_2026-11-10.md), que atualiza os registros históricos de09/11 abaixo.
+
 **05/11 — SP, equipe/consultoria:** cinco e quinze posições personalizáveis na prévia, com nomes/cargos e retratos separados no PPTX. Validado localmente com Edge/Office; publicar e conferir no site. Navegação do menu já publicada em219ed1c.
 
 - 🟡 **Fortaleza — slides1–10 09/11:** prévia mensal/trimestral implementada/testada localmente; arte original preservada, renderização dinâmica ainda sem aceite de100%. Base anterior enviada até5439ffe; lote novo local. [Estado](../features/relatorios-institucionais/fortaleza/SLIDES_01_10_2026-11-09.md).
@@ -1305,6 +1318,8 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 ---
 
 ## 3. Pendências
+
+- **Fortaleza mensal —10/11:** priorizar12/14com casas/comercial/loteamentos e valores/INCC; depois vendas/oferta/preços/IVV/tabelas e exportação. Fonte da amostra, ensaio real e homologação continuam pendentes. Fatia11/13/15local; publicação exige autorização. Estados09/11abaixo preservados como histórico; base anterior já enviada em03d3301.
 
 - [ ] **SP — ensaiar personalização no site:** atualizar responsáveis e fotos nos slides82/83, exportar e conferir a cópia. Configuração vale para a prévia atual, sem persistência entre gerações; padrões ainda vêm da referência2T2026. [Contrato](../features/relatorios-institucionais/sp/PERSONALIZACAO_EQUIPE_2026-11-05.md).
 

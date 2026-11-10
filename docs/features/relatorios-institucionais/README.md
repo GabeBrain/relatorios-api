@@ -4,6 +4,8 @@
 
 ## Onde trabalhar
 
+**Fortaleza — prioridade mensal,10/11:** [estado atual e próximos blocos](fortaleza/MENSAL_LANCAMENTOS_2026-11-10.md). Treze composições mensais:1–10 e11/13/15; histórico vertical25meses automático e insights.12/14 e16–60 pendentes; mensal completo/exportação/ensaio real ainda não concluídos. Rota oculta preservada. Descrições datadas abaixo são estados anteriores.
+
 **Fortaleza — núcleo municipal vertical:** [fluxo automático e limites](fortaleza/NUCLEO_VERTICAL_2026-11-09.md), com seletor Mensal/Trimestral e referência mês/trimestre/ano. Integração local das fontes de lançamentos/vendas/oferta, ainda sem ensaio autenticado ou relatório completo. Acesso somente por rota; sem publicação.
 
 **Fortaleza/SINDUSCON-CE — 09/11/2026:** [plano e estado da base](fortaleza/PLAN.md), [revisão dos originais](fortaleza/REVISAO_REFERENCIAS_2026-11-09.md). Base estrutural acessível somente em `/rebrain/relatorios-institucionais/fortaleza`, sem item no painel/menu. Ainda sem integração de indicadores, estudo real ou exportação.

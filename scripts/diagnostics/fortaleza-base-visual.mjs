@@ -56,6 +56,9 @@ try {
   await loaded.page.screenshot({ path: resolve(folder, 'loading-desktop.png') });
   await loaded.page.getByText('Conferindo municípios autorizados', { exact: true }).waitFor({ state: 'hidden' });
   await chooseCity(loaded.page);
+  await choose(loaded.page, 'fortaleza-periodicity', 'Trimestral');
+  await choose(loaded.page, 'fortaleza-position', '2º trimestre');
+  await choose(loaded.page, 'fortaleza-year', '2026');
   await loaded.page.getByRole('button', { name: 'Preparar estrutura', exact: true }).click();
   await loaded.page.getByRole('tab', { name: 'Estrutura', exact: true }).click();
   await loaded.page.getByRole('region', { name: 'Estrutura preparada', exact: true }).waitFor();

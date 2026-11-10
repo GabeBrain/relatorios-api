@@ -1,5 +1,9 @@
 # Fortaleza — evidências da abertura
 
+## 10/11/2026 — continuação mensal
+
+[Implementação, fontes e validações desta fatia](MENSAL_LANCAMENTOS_2026-11-10.md). Base03d3301, main/origin0–0 após fetch, Windows/Codex Test. PPTX mensal recuperado pelo Drive e SHA256 conferido; Office somente leitura. Novos11/13/15, coleta mensal limitada e seleção mensal padrão.105testes distintos aprovados após correção/rechecagem de uma asserção de mensagem duplicada; tipos/build/lint e Edge1440/390claro/escuro com fontes interceptadas. Sem API real, exportação nova, homologação ou Monday. Commit local; publicação separada.
+
 ## 09/11/2026 — envio da base e slides iniciais
 
 `git push origin main` autorizado por Lucas enviou `c78a7c1`/`574087e`/`5439ffe`; fetch confirmou 0/0. Não houve observação do deploy. Na sequência, composição dos dez slides iniciais em ambos os modelos, detalhada em [SLIDES_01_10](SLIDES_01_10_2026-11-09.md). PowerPoint leu os originais sem salvar; vinte fundos nativos e posições medidas, conteúdos variáveis removidos dos fundos.

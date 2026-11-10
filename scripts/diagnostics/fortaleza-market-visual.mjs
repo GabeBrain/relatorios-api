@@ -56,6 +56,9 @@ async function scenario({ mode = 'success', slow = false } = {}) {
   await page.getByRole('combobox').first().click(); await page.getByRole('option', { name: 'CE', exact: true }).click();
   await page.getByRole('combobox').nth(1).click(); await page.getByRole('option', { name: 'Fortaleza', exact: true }).click();
   assert.equal(calls.length, 0, 'No market query before an explicit action.');
+  await page.locator('#fortaleza-periodicity').click(); await page.getByRole('option', { name: 'Trimestral', exact: true }).click();
+  await page.locator('#fortaleza-position').click(); await page.getByRole('option', { name: '2º trimestre', exact: true }).click();
+  await page.locator('#fortaleza-year').click(); await page.getByRole('option', { name: '2026', exact: true }).click();
   return { context, page, calls, state };
 }
 async function consult(page) {
@@ -63,14 +66,14 @@ async function consult(page) {
   await page.getByRole('region', { name: 'Dados verticais consultados' }).waitFor();
 }
 async function inspectSlides(page, label) {
-  await page.getByRole('tab', { name: 'Slides 1\u201310', exact: true }).click();
-  const region = page.getByRole('region', { name: 'Primeiros dez slides Fortaleza', exact: true });
+  await page.getByRole('tab', { name: 'Slides', exact: true }).click();
+  const region = page.getByRole('region', { name: 'Slides implementados Fortaleza', exact: true });
   for (const width of [1440, 390]) {
     await page.setViewportSize({ width, height: 1100 });
     for (const dark of [false, true]) {
       await page.evaluate(value => document.documentElement.classList.toggle('dark', value), dark);
       for (let number = 1; number <= 10; number++) {
-        await region.getByRole('navigation', { name: 'Primeiros dez slides', exact: true }).getByRole('button', { name: String(number), exact: true }).click();
+        await region.getByRole('navigation', { name: 'Slides implementados', exact: true }).getByRole('button', { name: String(number), exact: true }).click();
         await region.getByRole('img', { name: `Fortaleza \u00b7 slide ${number}`, exact: true }).waitFor();
         await page.evaluate(() => document.fonts.ready);
         assert.equal(await page.locator('main').evaluate(main => main.scrollWidth > main.clientWidth), false);

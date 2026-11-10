@@ -1,5 +1,11 @@
 # Fortaleza / SINDUSCON-CE — plano inicial
 
+## 10/11 — prioridade: mensal
+
+Reforço do Lucas durante a implementação: seguir a ordem oficial no site e no desenvolvimento. Navegação1–15sem saltos,12/14identificados como fontes pendentes. Fechar12/14antes de avançar ao próximo bloco; não renumerar13/15nem simular universo completo com dados apenas verticais.
+
+Lucas direcionou a continuação primeiro ao mensal. [Fatia, contratos e evidências](MENSAL_LANCAMENTOS_2026-11-10.md): mensal padrão pelo calendário, slides11/13/15 e histórico vertical de25meses integrado à geração, com insights. Treze composições mensais;12/14 e16–60 pendentes. Próximo: casas/comercial/loteamentos e valores/INCC, depois vendas/oferta/preços/IVV e exportação. Sem nova API autenticada/homologação. Base anterior publicada em03d3301; fatia atual local até autorização própria de push. Entradas abaixo preservam o histórico.
+
 ## 09/11 — push da base e dez slides iniciais
 
 Push explicitamente autorizado e concluído para `c78a7c1`, `574087e` e `5439ffe`; origem confirmada em 0/0 depois do fetch, sem deploy observado. Pedido seguinte implementa prévia dos slides 1–10 mensal/trimestral com arte original e campos variáveis, preservando rota oculta e sequência automática. [Contrato, reprodução, validações e diferenças visuais restantes](SLIDES_01_10_2026-11-09.md). Novo lote local, sem exportador/estudo real.
