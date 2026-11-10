@@ -77,8 +77,16 @@ try {
     await page.getByRole('button', { name: 'Gerar prévia mensal', exact: true }).waitFor({ state: 'visible' });
     await page.waitForFunction(() => !document.querySelector('button') || ![...document.querySelectorAll('button')].find(button => button.textContent === 'Gerar prévia mensal')?.disabled);
     mode = 'success';
+    const diagnosticButton=page.getByRole('button',{name:'Baixar diagnóstico JSON',exact:true});
+    await diagnosticButton.waitFor();
+    const [diagnosticDownload]=await Promise.all([page.waitForEvent('download'),diagnosticButton.click()]);
+    const diagnosticPath=resolve(folder,`diagnostic-${width}-${dark}.json`);await diagnosticDownload.saveAs(diagnosticPath);
+    const diagnostic=JSON.parse(await (await import('node:fs/promises')).readFile(diagnosticPath,'utf8'));
+    assert.equal(diagnostic.slides.length,60);assert.equal(diagnostic.homologated,false);assert.ok(diagnostic.slides.every((slide,index)=>slide.number===index+1));assert.equal(diagnostic.selection.territory,'capital-rm');
+    assert.equal(JSON.stringify(diagnostic).includes('synthetic-fortaleza-monthly'),false);assert.equal(JSON.stringify(diagnostic).includes('typologies_history'),false);assert.equal(JSON.stringify(diagnostic).includes('data:image'),false);
+    assert.equal(diagnostic.slides[1].status,'source-pending');assert.equal(diagnostic.slides[56].status,'editorial-review');
     const count = calls.length;
-    for (const number of Array.from({ length:45 },(_,index) => index+11)) {
+    for (const number of Array.from({ length:50 },(_,index) => index+11)) {
       await page.getByRole('navigation', { name: 'Slides implementados', exact: true }).getByRole('button', { name: String(number), exact: true }).click();
       await page.evaluate(() => document.fonts.ready);
       const slide = page.getByRole('img', { name: `Fortaleza · slide ${number}`, exact: true });
@@ -90,8 +98,23 @@ try {
       assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth), false);
     }
     assert.equal(calls.length, count, 'Slide navigation must not issue queries.');
+    if(width===1440&&!dark){
+      await page.getByRole('navigation',{name:'Slides implementados',exact:true}).getByRole('button',{name:'57',exact:true}).click();
+      await page.getByText('Personalizar equipe e fotos',{exact:true}).click();
+      await page.getByLabel('Nome',{exact:true}).fill('Analista Teste');
+      assert.ok((await page.getByRole('img',{name:'Fortaleza · slide 57',exact:true}).textContent()).includes('Analista Teste'));
+      await page.locator('#fort-person-photo').setInputFiles(resolve('src/features/relatorios-institucionais/fortaleza/assets/monthly/people/57-1.png'));
+      await page.waitForFunction(()=>document.querySelector('svg[aria-label="Fortaleza · slide 57"] g[aria-label="Integrante 1"] image')?.getAttribute('href')?.startsWith('data:image'));
+      await page.getByRole('button',{name:'Restaurar referência',exact:true}).click();
+      assert.equal(await page.getByLabel('Nome',{exact:true}).inputValue(),'Fábio Tadeu Araújo');
+      await page.getByRole('button',{name:'Ocultar integrante',exact:true}).click();
+      assert.equal(await page.getByRole('img',{name:'Fortaleza · slide 57',exact:true}).getByLabel('Integrante 1',{exact:true}).count(),0);
+      await page.getByRole('button',{name:'Restaurar referência',exact:true}).click();
+      assert.equal(calls.length,count,'Editorial edits must not query API.');
+    }
+
     await page.getByRole('navigation', { name: 'Slides implementados', exact: true }).getByRole('button', { name: '11', exact: true }).click();
-    for (let number = 12;number <= 55;number++) {
+    for (let number = 12;number <= 60;number++) {
       await page.getByRole('navigation', { name: 'Slides implementados', exact: true }).getByRole('button', { name: 'Próximo', exact: true }).click();
       await page.getByRole('img', { name: `Fortaleza · slide ${number}`, exact: true }).waitFor();
       if (number === 12 || number === 14) {
@@ -113,7 +136,7 @@ try {
       await page.getByRole('button', { name: 'Cancelar consulta', exact: true }).click();
       await page.getByText('Prévia cancelada', { exact: true }).waitFor();
     }
-    results.push({ width, dark, calls: calls.length, slides: Array.from({ length:45 },(_,index) => index+11), officialSequence: '11–55 sem saltos', offline: true });
+    results.push({ width, dark, calls: calls.length, slides: Array.from({ length:50 },(_,index) => index+11), officialSequence: '11–60 sem saltos', offline: true });
     await context.close();
   }
 } finally { await browser.close(); }

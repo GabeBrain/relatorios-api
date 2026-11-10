@@ -1,5 +1,12 @@
 # Rebrain (Plataforma) — Documento Vivo
 
+## 10/11/2026 — Relatório São Paulo: correções editoriais — Lovable
+
+- **Mudança:** Tahoma nos slides/textos de exportação, sumário simplificado, remoção da casinha nas divisórias, período consolidado compacto e identificação preservada para parciais. Linhas suavizadas, rótulos sem caixas escuras, valores monetários em milhões inteiros e fonte FGV. Manchete de lançamentos deriva do volume da janela de 12 meses, sem alegar recorde histórico sem prova.
+- **Mapas:** visão ampla enquadra o núcleo urbano com percentis e mantém totais geocodificados; calor normalizado por visão e escala de concentração relativa com maior contraste, sem alterar valores de VGV. Contagem de empreendimentos visíveis explicitada.
+- **Validação:** 304 testes SP aprovados; conferência de tipos sem erros SP; navegador em desktop e largura móvel com amostra sintética nos slides 6, 12, 18, 46, 63 e 80. Padrão de slides existente e BrainLoadingState preservados. Não representa geração real autenticada ou aceite de indicadores.
+- **Etapas/pendências:** preços ponderados e escoamento existentes preservados; conciliação de 2T2026 e lacunas históricas aguarda resposta real/referência manual autorizada. Fotos HD aguardam originais. Exportação real e geração autenticada ainda não verificadas. Sem consulta de IA, alteração do Banco Quanti, Corretor, Empresas ou motores Secovi/FIERGS; sem push/publicação manual ou escrita no Monday.
+
 > **Rotação 27/10/2026:** entradas anteriores a 20/10/2026 foram movidas sem edição para [historico/LIVE_rebrain_ate_2026-10-19.md](historico/LIVE_rebrain_ate_2026-10-19.md). Este documento mantém o estado atual e o registro recente. Novas entradas seguem o `README.md` desta pasta: topo de **1. Desenvolvimentos**.
 
 
@@ -385,6 +392,14 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 10/11/2026 — Integração autorizada: Relatório API Excel e atualizações upstream — Edgar / Codex
+
+- **Autorização/escopo:** usuário autorizou merge, validação e sincronização de origin/main e upstream/main, preservando ambos os históricos. Merge de15ab9f88 (quatro commits locais VGL/quantidade lançada/preço médio) com0aa49380 (28commits upstream, incluindo SP/Fortaleza/Lovable). Sem rebase/reset/push forçado ou edição das regras recebidas. Documento vivo é a única sobreposição de arquivos.
+- **Preservação:** merge automático via union, conferido antes desta entrada pela identidade base+(local−base)+(upstream−base): zero linhas não vazias perdidas/extras. Oito arquivos exclusivos locais e85exclusivos upstream comparados contra seus blobs originais: zero divergência. Arquivo PROTOCOLO-SESSAO-v3-AUDITORIA-2026-08-28.md mantido externo ao índice/publicação, hashB0CC263B122D461DE0E87304B09419113DE2CC7DF9326E5D060F2C56DA82FA3A.
+- **Validação:**335 testes em30arquivos (Relatório API Excel, Fortaleza, personalização e correções SP), TypeScript completo e diff/index sem erros. Testes executados com recurso experimental webstorage do Node desativado no ambiente, sem alterar código. Build e check-live-docs aprovados. Nenhuma API autenticada, deploy Lovable ou aceite externo observado nesta integração.
+- **Etapas/Pendências:** integração técnica validada para envio autorizado; confirmar runtime publicado e artefatos reais separadamente. Esta entrada sucede os estados locais anteriores de VGL; não apaga seus registros. Origem das funcionalidades preservada nas entradas respectivas. Sem escrita no Monday.
+- **Monday:** —
+
 ### 10/11/2026 — Relatório API Excel: preço médio usado no VGL — Edgar / Codex
 
 - **Mudança exclusiva:** coluna selecionável Preço Médio para VGL. Por empreendimento: soma(qty lançado × preço escolhido) / soma(qty lançado), com as mesmas tipologias do VGL (inclusive Garden/Cobertura). Por tipologia expõe preço individual. Não usa média geral nem filtro Padrão/MCMV; não renomeia Preço de Lançamento para um valor que poderia ser atual. Tabular por período; horizontal posição final/série. Valor em reais sem escala VGV/VGL, precisão interna e duas casas no Excel/prévia. Ausências/pesos zerados geram vazio; total_units não substitui pesos. VGL permanece soma dos produtos.
@@ -414,6 +429,25 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 - **Validação:** testes de disponibilidade na interface, valores mensais25000/40000 nos modos período/atual, trimestre40000 sem somar meses e leitura de retorno XLSX com escala25/40. Tipos/lint e regressões da feature no fechamento. Sem consulta autenticada ou nova conferência visual de produção.
 - **Etapas/Pendências:** correção local, publicação aguarda autorização. Base atualizada por fast-forward d9b2448→fbe9742 (12 commits de Fortaleza/Panorama); entradas recebidas conferidas. Arquivo de auditoria local preservado. Sem push/Monday.
 - **Monday:** —
+### 2026-11-10 — Fortaleza: integração autorizada do fechamento mensal — usuário / Codex
+
+- **Ambiente/funcionalidade:** Rebrain / Fortaleza mensal1–60e diagnóstico JSON. Usuário autorizou integrar/publicar; merge b6c6488 preserva0ec2dcbe nove commits remotos atée7a00db, sem conflito/rebase/reset/force. Fortaleza permaneceu idêntico ao commit local.
+- **Remoto preservado:** mapa/CSV, armazenamento de autenticação de preview e configurações/dependências Lovable. Nenhuma nova regra de mercado introduzida pela integração. Comportamento CSV remoto do Corretor registrado no seu live conforme protocolo, com autoria original preservada.
+- **Validação:**214testes Fortaleza/18arquivos aprovados na integração. Build e tipagem integrados aprovados; avisos anteriores de Browserslist/chunks preservados. Validações visuais/JSON do lote anterior não foram apresentadas como novo ensaio autenticado; sem API real/homologação/deploy observado/Monday.
+- **Monday:** [Fortaleza — SINDUSCON](https://brain381753.monday.com/boards/18398638577/pulses/13149406420) — `13149406420`.
+- **Impacto em Etapas/Pendências:** envio autorizado do mensal60e JSON; aguardar teste real/diagnóstico do usuário. Exportação/homologação continuam pendentes; próxima frente indicada é SP estética/diagnóstico.
+
+
+### 2026-11-10 — Fortaleza mensal60slides e diagnóstico JSON — usuário / Codex
+
+- **Ambiente/funcionalidade:** Rebrain / Fortaleza mensal, cinco posições finais56–60; não há mensal61. Basefbe9742atualizada porFF limpo após fetch, com dois commits do time lidos e preservados.
+- **Entrega:** [contrato e evidências](../features/relatorios-institucionais/fortaleza/MENSAL_SLIDES_56_60_DIAGNOSTICO_2026-11-10.md). Equipes57/58editáveis, quadro59substituível, arte original e competência variável. Pedido posterior atendido: JSON preparado automaticamente ao concluir, com download,60situações/valores/fontes; sem token, fotos ou históricos brutos. Worker cancelável, sem API extra.
+- **Validação:**214testes Fortaleza +31contratos/regressões selecionados, tipos/build/lint e Edge1440/390claro/escuro com fontes sintéticas e download JSON conferidos no fechamento. Não equivale a homologação, estudo real, exportador ou deploy observado; sem Monday.
+- **Commits:** fatia isolada `feat(relatorios): finish Fortaleza monthly preview and diagnostic`, basefbe9742; permanece local até autorização própria de push.
+- **Fechamento Git:** fetch encontrou9remotos novos atée7a00db(mapa/segurança/auth), sem diff de Fortaleza. Não integrados com árvore suja; testes/build desta fatia na basefbe9742. Pedir autorização para integrar antes do envio.
+- **Monday:** [Fortaleza — SINDUSCON](https://brain381753.monday.com/boards/18398638577/pulses/13149406420) — `13149406420`.
+- **Impacto em Etapas/Pendências:** mensal1–60implementado como prévia; receber JSON real e revisar fontes/estética/metodologia/exportação. Trimestral89mantém dez iniciais. Usuário indicou depois refinamentos estéticos/diagnóstico SP; SP e motores paralelos não alterados nesta fatia.
+
 
 ### 10/11/2026 — Panorama: somente consolidado e ressalvas acessíveis — Gabriel / Codex
 
@@ -1331,6 +1365,10 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 
 ## 2. Etapas
 
+- **Fortaleza mensal60/JSON:** integrado em b6c6488,214testes e build aprovados; publicação autorizada. Próxima validação é o teste real/diagnóstico do usuário.
+
+- 🟡 **Fortaleza mensal1–60:** todas as posições da prévia implementadas; diagnóstico JSON e editor final disponíveis localmente. Publicação/revisão real/homologação/exportação ainda pendentes.
+
 - **Fortaleza46–55:** integrado ao remoto em c0441be com recortes automáticos, preservando Panorama; envio autorizado nesta sessão. Sem aceite remoto presumido.
 
 - 🟡 **Fortaleza mensal46–55:** prévia1–55, IVV RM e tabelas implementadas;198testes +16regressões e visual sintético. Novo lote local; homologação/exportação pendentes.
@@ -1437,6 +1475,8 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 ---
 
 ## 3. Pendências
+
+- **Fortaleza mensal após60:** autorizar envio, gerar teste real e analisar JSON; revisar fontes/INCC/preços/IVV/capacidade/amostra/equipe e exportação. Não há outros slides mensais. Depois, correções estéticas/diagnóstico SP indicadas pelo usuário. Trimestral segue separado.
 
 - **Fortaleza mensal após46–55:** implementar56–60, revisar conjunto/exportação e homologar fontes/metodologia; validar capacidade histórica/universo ativo, bairro, preço/IVV e diferenças entre fontes. Estados abaixo são históricos, sem retirar amostra/empresas do2da fila.
 

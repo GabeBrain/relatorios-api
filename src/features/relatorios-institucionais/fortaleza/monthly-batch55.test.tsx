@@ -88,6 +88,6 @@ describe('Fortaleza mensal46–55',()=>{
   });
   it('navega46–55 na ordem oficial e encerra a prévia no55',()=>{
     render(<FortalezaIntroSlides selection={selection} cities={cities} data={null} monthlyLaunches={{sources:[],issues:[],market:monthlyMarketFixture(),prices:fixture()}}/>);
-    fireEvent.click(screen.getByRole('button',{name:'45'}));for(let page=46;page<=55;page++){fireEvent.click(screen.getByRole('button',{name:'Próximo'}));expect(screen.getByRole('img',{name:`Fortaleza · slide ${page}`})).toBeTruthy();}expect((screen.getByRole('button',{name:'Próximo'})as HTMLButtonElement).disabled).toBe(true);
+    fireEvent.click(screen.getByRole('button',{name:'45'}));for(let page=46;page<=55;page++){fireEvent.click(screen.getByRole('button',{name:'Próximo'}));expect(screen.getByRole('img',{name:`Fortaleza · slide ${page}`})).toBeTruthy();}expect((screen.getByRole('button',{name:'Próximo'})as HTMLButtonElement).disabled).toBe(false);
   });
 });

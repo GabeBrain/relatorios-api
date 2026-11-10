@@ -4,6 +4,8 @@
 
 ## Onde trabalhar
 
+**Fortaleza mensal1–60 e JSON,10/11:** [estado atual](fortaleza/MENSAL_SLIDES_56_60_DIAGNOSTICO_2026-11-10.md). Prévia completa em posições editoriais, com equipes editáveis57/58e diagnóstico automático para baixar. Pendentes: fontes reais/revisão/homologação e exportação; nenhum slide mensal após60. Novo lote local.
+
 **Fortaleza mensal46–55:** [estado atual](fortaleza/MENSAL_SLIDES_46_55_2026-11-10.md). Prévia1–55dos60originais, IVV da RM e tabelas. Próximo56–60; fontes/metodologia/homologação/exportação pendentes. Novo lote local.
 
 **Fortaleza mensal36–45:** [estado atual](fortaleza/MENSAL_SLIDES_36_45_2026-11-10.md). Prévia1–45dos60slides; preços/IVV candidatos e insights, carregamento local. Próximo46–55; homologação/API real/exportação pendentes. Novo lote local.

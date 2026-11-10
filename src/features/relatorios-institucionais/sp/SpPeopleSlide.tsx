@@ -17,7 +17,7 @@ export function SpPeopleSlide({page,people=createSpPeople()}:{page:82|83;people?
         {person.photo===null?<svg viewBox="0 0 100 100" className="h-full w-full"><rect width="100" height="100" fill="#e4e8df"/><circle cx="50" cy="34" r="17" fill="#8b9b75"/><path d="M15 96V82a35 35 0 0 1 70 0v14Z" fill="#8b9b75"/></svg>:person.photo?<img src={person.photo} alt={`Foto de ${person.name}`} className="h-full w-full object-cover"/>:<img src={SP_INSTITUTIONAL_ASSETS[page]} alt={`Foto de referência de ${person.name}`} style={{position:'absolute',maxWidth:'none',width:`${960/w*100}%`,height:`${540/h*100}%`,left:`${-x/w*100}%`,top:`${-y/h*100}%`}}/>}
       </div>;
     })}
-    <svg role="img" aria-label={page===82?'Equipe técnica personalizada':'Consultoria personalizada'} viewBox="0 0 1280 720" className="pointer-events-none absolute inset-0 h-full w-full" style={{fontFamily:'Arial, sans-serif'}}>
+    <svg role="img" aria-label={page===82?'Equipe técnica personalizada':'Consultoria personalizada'} viewBox="0 0 1280 720" className="pointer-events-none absolute inset-0 h-full w-full" style={{fontFamily:'Tahoma, sans-serif'}}>
       {people[group].map((person,index)=>{
         const [x,y,w,h]=rects[index];if(!person.visible)return null;
         const names=lines(person.name,page===82?28:19),roles=lines(person.role,page===82?31:29),available=page===82?(index<3?58:55):(index<3?38:58),step=Math.min(page===82?16:12,available/Math.max(1,names.length+roles.length)),size=Math.min(page===82?14:11.4,step-1),padding=page===82?23:14;

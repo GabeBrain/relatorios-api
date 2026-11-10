@@ -1,5 +1,16 @@
 # Estado do handoff
 
+## 10/11/2026 — fechamento mensal integrado com autorização
+
+Merge b6c6488integrou0ec2dcb(mensal1–60e diagnóstico) com nove remotos atée7a00db, sem conflito e preservando Fortaleza integralmente.214testes/18arquivos aprovados; build/tipagem integrados aprovados para o push autorizado. Sem API real/homologação/deploy observado/Monday. Usuário enviará JSON do teste; SP estética/diagnóstico indicado como próxima frente, sem alteração de SP nesta integração.
+
+## 10/11/2026 — mensal1–60 e diagnóstico JSON
+
+[Entrega e contrato](../../features/relatorios-institucionais/fortaleza/MENSAL_SLIDES_56_60_DIAGNOSTICO_2026-11-10.md): cinco posições finais implementadas; mensal original termina no60. Equipes57/58editáveis e quadro59substituível como imagem, sem presumir equipe atual. Diagnóstico JSON preparado automaticamente ao terminar a geração, download disponível para enviar ao Codex; sem credenciais/fotos/históricos brutos.214testes Fortaleza +31regressões/contratos, build/lint e Edge sintético conferidos no fechamento. Basefbe9742porFF limpo; nova fatia local. Restam revisão real/fontes/homologação/exportação, não outros slides mensais. Trimestral89segue com dez iniciais. SP estética/diagnóstico é a próxima frente indicada pelo usuário, sem alteração nesta fatia. Estados abaixo são históricos.
+
+
+Fetch de fechamento:9remotos novos atée7a00db(mapa/segurança/auth), sem alterar Fortaleza; não integrados com árvore suja. Fatia local isolada e validação na basefbe9742; integração/envio dependem de autorização.
+
 ## 10/11/2026 — integração e publicação autorizadas
 
 73b14dc(46–55e geografia automática) integrado ao remoto a1db2ba(quatro commits Panorama) em c0441be, sem conflito e sem reescrever histórico. Fortaleza preservado; LIVE conferido pela identidade de três pontos.228testes/20arquivos aprovados, tipagem/build integrados aprovados para o push autorizado. Sem API real/homologação/deploy observado/Monday. Próximo56–60, exportação e validação de fontes continuam pendentes.

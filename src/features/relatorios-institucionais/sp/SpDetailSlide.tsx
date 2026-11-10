@@ -1,4 +1,4 @@
-import { spPeriodLabel, type SpPreview } from './model';
+import { spSlidePeriod, type SpPreview } from './model';
 import type { SpAreaRow, SpPricePoint } from './granular-details';
 import { priorMonth } from './temporal';
 
@@ -15,7 +15,7 @@ export function SpDetailSlide({ report, slide }: { report: SpPreview; slide: num
     <text x="62" y="62" fontSize={standards ? 28 : 30} fontWeight="bold">{title}</text>
     {area ? <text x="62" y="102" fontSize="27" fill="#5b7638" fontWeight="bold">PERÍODO DISPONÍVEL</text> : !standards ? <><rect x="840" y="85" width="370" height="38" fill={slide === 55 || slide === 57 ? '#59a6ce' : '#ffcf00'} /><text x="1025" y="111" textAnchor="middle" fontSize="20">{labels[slide]}</text></> : null}
     <rect x="62" y="119" width="85" height="9" rx="4" fill="#ffcf00" />
-    <text x="62" y="159" fontSize="17">{report.quarter} · {spPeriodLabel(report)}</text>
+    <text x="62" y="159" fontSize="17">{spSlidePeriod(report)}</text>
     {!ready ? <Pending text={problem} /> : area ? <AreaTable rows={[...details.area.rows,details.area.total!]} report={report} /> : standards ? <StandardChart report={report} ticket={ticket} /> : <PriceHistory rows={details.prices.series[slide] ?? []} annualChange={details.prices.annualChanges[slide] ?? null} />}
   </svg>;
 }

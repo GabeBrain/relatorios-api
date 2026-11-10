@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { spPeriodLabel, type SpPreview } from './model';
+import { spPeriodLabel, spSlidePeriod, type SpPreview } from './model';
 import { SP_ORIGINAL_SLIDES } from './original-slides';
 import { SpTrendSlide } from './SpTrendSlide';
 import { SpComparisonSlide } from './SpComparisonSlide';
@@ -39,12 +39,11 @@ const templates: Record<number, string> = { 1: cover, 2: aboutTemplate, 13: proj
 
 export function SpSlideContent({report,page,onNavigate,people}:{report:SpPreview;page:number;onNavigate?:(page:number)=>void;people?:SpPeople}) {
   const definition=SP_ORIGINAL_SLIDES[page-1];
-  if(page===82||page===83)return <article aria-label={`Slide ${page}: ${definition.title}`} className="relative h-full w-full" style={{fontFamily:'Arial, sans-serif',background:'#f8f8f8'}}><SpPeopleSlide page={page} people={people}/></article>;
+  if(page===82||page===83)return <article aria-label={`Slide ${page}: ${definition.title}`} className="relative h-full w-full" style={{fontFamily:'Tahoma, sans-serif',background:'#f8f8f8'}}><SpPeopleSlide page={page} people={people}/></article>;
   return <article aria-label={`Slide ${page}: ${definition.title}`} className="relative h-full w-full text-[#262626]" style={{ fontFamily: 'Tahoma, sans-serif', background: '#f8f8f8' }}>
     <img key={`template-${page}`} src={SP_DIVIDER_ASSETS[page] ?? SP_INSTITUTIONAL_ASSETS[page] ?? templates[page] ?? (page >= 32 && page <= 44 ? salesTemplate : projectsTemplate)} alt={page === 1 ? 'Capa original Brain Inteligência Estratégica' : SP_DIVIDER_ASSETS[page] ? definition.title : SP_INSTITUTIONAL_ASSETS[page] ? `Referência institucional: ${definition.title}` : `Layout: ${definition.title}`} className="absolute inset-0 h-full w-full" />
     {SP_DIVIDER_ASSETS[page] && <span className="sr-only">{definition.title.toLocaleUpperCase('pt-BR')}</span>}
     {SP_INSTITUTIONAL_ASSETS[page] && <SpInstitutionalText page={page} report={report}/>}
-    {SP_DIVIDER_ASSETS[page] && <button type="button" data-sp-target-slide={6} onClick={()=>onNavigate?.(6)} aria-label="Voltar ao sumário" className="absolute right-0 top-0 z-10 h-[65px] w-[65px] bg-transparent"><span className="sr-only">Voltar ao sumário</span></button>}
     {SP_INSTITUTIONAL_ASSETS[page] || SP_DIVIDER_ASSETS[page] ? null : [9,10,11].includes(page) ? <SpHighlightsSlide key={page} report={report} slide={page}/> : [67,68,70,71,74,75,79,80].includes(page) ? <SpStockMapSlide key={page} report={report} slide={page}/> : (SP_MARKET_SLIDES as readonly number[]).includes(page) ? <SpMarketStateSlide key={page} report={report} slide={page}/> : (SP_DETAIL_SLIDES as readonly number[]).includes(page) ? <SpDetailSlide key={page} report={report} slide={page} /> : page >= 13 && page <= 22 || page >= 26 && page <= 30 || page >= 32 && page <= 36 || page >= 40 && page <= 44 ? <SpTrendSlide key={page} report={report} number={page} /> : [23, 24, 37, 38, 47, 48].includes(page) ? <SpComparisonSlide key={page} report={report} number={page} /> : [25,39].includes(page) ? <SpNeighborhoodSlide key={page} report={report} sales={page === 39} /> : [46,50].includes(page) ? <SpMarketSlide key={page} report={report} number={page} /> : page > 1 ? <OriginalTextSlide number={page} title={definition.title} report={report} onNavigate={onNavigate} /> : null}
   </article>;
 }
@@ -90,17 +89,17 @@ export function SpReportPages({ report, onSelectSlide }: { report: SpPreview; on
 }
 
 function OriginalTextSlide({ number, title, report, onNavigate }: { number: number; title: string; report: SpPreview;onNavigate?:(page:number)=>void }) {
-  if(number===2)return <svg role="img" aria-label="Sobre este relatório" viewBox="0 0 1280 720" className="absolute inset-0 h-full w-full"><title>São Paulo capital · Empreendimentos residenciais verticais</title><text x="132" y="542" fontSize="20" fontWeight="bold" fill="#3d582e">{report.quarter[0]}º TRIMESTRE {report.quarter.slice(2)}</text><text x="132" y="563" fontSize="14" fill="#3d582e">{spPeriodLabel(report)}</text></svg>;
+  if(number===2)return <svg role="img" aria-label="Sobre este relatório" viewBox="0 0 1280 720" className="absolute inset-0 h-full w-full"><title>São Paulo capital · Empreendimentos residenciais verticais</title><text x="132" y="542" fontSize="20" fontWeight="bold" fill="#3d582e">{report.quarter[0]}º TRIMESTRE {report.quarter.slice(2)}</text></svg>;
   const divider = title.startsWith('Divisória:');
   const text = number === 2 ? [`São Paulo capital · Empreendimentos residenciais verticais`, report.quarter, spPeriodLabel(report)] : number === 6 ? SP_ORIGINAL_SLIDES.filter(item => item.title.startsWith('Divisória:')).map(item => `${item.number}. ${item.title.replace('Divisória: ', '')}`) : number >= 26 && number <= 30 ? ['Metodologia do INCC em definição', 'Aguardando série do índice, mês-base e critério de atualização.', 'Valores nominais não são exibidos como corrigidos.'] : divider ? [] : ['Conteúdo pendente', 'Esta posição segue o modelo original.', 'Os dados ou a revisão editorial ainda não foram concluídos.'];
-  const words = title.replace('Divisória: ', '').split(' '), lines = [''];
+  const words = (number === 6 ? 'SUMÁRIO' : title.replace('Divisória: ', '')).split(' '), lines = [''];
   for (const word of words) { if (`${lines.at(-1)} ${word}`.length > 58) lines.push(''); lines[lines.length - 1] += `${lines.at(-1) ? ' ' : ''}${word}`; }
   return <svg role="img" aria-label={divider ? title : number === 2 ? 'Sobre este relatório' : number === 6 ? 'Sumário original' : `Conteúdo pendente: slide ${number}`} viewBox="0 0 1280 720" className="absolute inset-0 h-full w-full">
     <rect x="40" y="10" width="1000" height="130" fill="#f8f8f8" />
     {lines.map((line, i) => <text key={i} x="62" y={62 + i * 36} fontSize="28" fontWeight="bold">{line.toLocaleUpperCase('pt-BR')}</text>)}
     <rect x="62" y="120" width="85" height="9" rx="4" fill="#ffcf00" />
-    <text x="62" y="165" fontSize="18">{report.quarter} · {spPeriodLabel(report)}</text>
-    {text.map((line, i) => number===6?<g key={i} role="button" tabIndex={0} aria-label={`Ir para ${line}`} data-sp-target-slide={Number(line.split('.')[0])} onClick={()=>onNavigate?.(Number(line.split('.')[0]))} onKeyDown={event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();onNavigate?.(Number(line.split('.')[0]));}}} style={{cursor:'pointer'}}><rect x="90" y={198+i*38} width="1100" height="34" fill="transparent"/><text x="100" y={223+i*38} fontSize="22" textDecoration="underline">{line.replace(/^\d+\. /,'')}</text></g>:<text key={i} x="640" y={320+i*45} textAnchor="middle" fontSize="26" fontWeight={i === 0 ? 'bold' : undefined}>{line}</text>)}
+    <text x="62" y="165" fontSize="18">{spSlidePeriod(report)}</text>
+    {text.map((line, i) => number===6?<g key={i} role="button" tabIndex={0} aria-label={`Ir para ${line}`} data-sp-target-slide={Number(line.split('.')[0])} onClick={()=>onNavigate?.(Number(line.split('.')[0]))} onKeyDown={event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();onNavigate?.(Number(line.split('.')[0]));}}} style={{cursor:'pointer'}}><rect x="90" y={198+i*38} width="1100" height="34" fill="transparent"/><text x="100" y={223+i*38} fontSize="22" textDecoration="underline">{sentenceCase(line.replace(/^\d+\. /,''))}</text></g>:<text key={i} x="640" y={320+i*45} textAnchor="middle" fontSize="26" fontWeight={i === 0 ? 'bold' : undefined}>{line}</text>)}
     {divider && <text x="640" y="365" textAnchor="middle" fontSize="40" fill="#5b7638" fontWeight="bold">{title.replace('Divisória: ', '').toLocaleUpperCase('pt-BR')}</text>}
   </svg>;
 }
@@ -119,3 +118,5 @@ function wrapGroup(label: string, limit: number): string[] {
   }
   return lines;
 }
+
+function sentenceCase(value: string) { return value.charAt(0).toLocaleUpperCase('pt-BR') + value.slice(1).toLocaleLowerCase('pt-BR'); }

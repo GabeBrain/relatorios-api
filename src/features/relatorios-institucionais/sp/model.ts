@@ -86,6 +86,12 @@ export function spPeriodLabel(report: SpPreview): string {
   return report.status === 'quarter-closed' ? `Trimestre completo até ${month}` : `Parcial até ${month}`;
 }
 
+/** Slide subtitle: consolidated quarters show only the quarter (e.g. 2T 2026). */
+export function spSlidePeriod(report: SpPreview): string {
+  const quarter = `${report.quarter.slice(0, 2)} ${report.quarter.slice(2)}`;
+  return report.throughMonth && report.status !== 'quarter-closed' ? `${quarter} · ${spPeriodLabel(report)}` : quarter;
+}
+
 const emptyMetrics = (): SpMetrics => ({ projects: null, launches: null, sales: null, stock: null });
 const normalized = (value: unknown) => String(value ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim().toLowerCase();
 

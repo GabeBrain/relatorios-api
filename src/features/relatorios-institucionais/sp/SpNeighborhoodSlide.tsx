@@ -1,11 +1,11 @@
-import { spPeriodLabel, type SpPreview } from './model';
+import { spSlidePeriod, type SpPreview } from './model';
 export function SpNeighborhoodSlide({ report, sales = false }: { report: SpPreview; sales?: boolean }) {
   const data = sales ? report.salesNeighborhoods : report.projects?.neighborhoods;
   const signed = data?.rows.some(row => row.units < 0) ?? false;
   const start = signed ? 595 : 345, span = signed ? 230 : 500;
   const maximum = Math.max(1, ...data?.rows.map(row => Math.abs(row.units)) ?? []);
   return <svg role="img" aria-label={`Top 10 bairros por ${sales ? 'vendas líquidas' : 'unidades lançadas'}`} viewBox="0 0 1280 720" className="absolute inset-0 h-full w-full">
-    <rect x="40" y="10" width="1000" height="140" fill="#f8f8f8" /><text x="62" y="62" fontSize="31" fontWeight="bold">{`UNIDADES VERTICAIS ${sales ? 'VENDIDAS' : 'LANÇADAS'} POR BAIRRO`}</text><rect x="62" y="112" width="85" height="9" rx="4" fill="#ffcf00" /><text x="62" y="158" fontSize="17">{report.quarter} · {spPeriodLabel(report)}</text>
+    <rect x="40" y="10" width="1000" height="140" fill="#f8f8f8" /><text x="62" y="62" fontSize="31" fontWeight="bold">{`UNIDADES VERTICAIS ${sales ? 'VENDIDAS' : 'LANÇADAS'} POR BAIRRO`}</text><rect x="62" y="112" width="85" height="9" rx="4" fill="#ffcf00" /><text x="62" y="158" fontSize="17">{spSlidePeriod(report)}</text>
     {data?.status === 'ready' ? <>
       {data.rows.map((row, i) => <g key={row.neighborhood}><text x="330" y={208 + i * 36} textAnchor="end" fontSize="17">{row.neighborhood.length > 29 ? `${row.neighborhood.slice(0, 27)}…` : row.neighborhood}<title>{row.neighborhood}</title></text><rect x={row.units < 0 ? start + row.units / maximum * span : start} y={188 + i * 36} width={Math.abs(row.units) / maximum * span} height="24" fill={i === 0 ? '#ffcf00' : i % 2 ? '#5b7638' : '#83a83d'} /><text x={row.units < 0 ? start + 10 : start + row.units / maximum * span + 10} textAnchor="start" y={208 + i * 36} fontSize="16" fontWeight="bold">{row.share === null ? `${row.units.toLocaleString('pt-BR')} un.` : `${row.share.toLocaleString('pt-BR', { maximumFractionDigits: 1 })}%`}</text></g>)}
       <rect x="940" y="300" width="270" height="170" rx="24" fill="#5b7638" /><text x="1075" y="342" textAnchor="middle" fontSize="34" fontWeight="bold" fill="#fff">{data.topShare === null ? '—' : `${data.topShare.toLocaleString('pt-BR', { maximumFractionDigits: 1 })}%`}</text>{[sales ? 'das vendas líquidas da cidade' : 'dos lançamentos da cidade', 'concentrados no Top 10', `${data.topTotal!.toLocaleString('pt-BR')} de ${data.cityTotal!.toLocaleString('pt-BR')} unidades`].map((line, i) => <text key={i} x="1075" y={378 + i * 28} textAnchor="middle" fontSize="18" fill="#fff">{line}</text>)}
