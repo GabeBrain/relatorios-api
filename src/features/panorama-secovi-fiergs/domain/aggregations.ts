@@ -1,6 +1,8 @@
 import type { CubeProject, MarketCube } from './cube';
 import { addNullable, horizontalProjects, verticalProjects, weightedAverage } from './cube';
 import { FIERGS_HORIZONTAL_PRODUCT_LABELS, SECOVI_HORIZONTAL_LABEL } from './entity-policy';
+import { closingPlants, priceContributions, pricePlant, plantSnapshot, previousQuarter, sumObserved } from './market-observations';
+import { quarterEndMonth } from './quarters';
 import {
   COHORT_SUBTOTAL_LABEL,
   COHORT_TOTAL_LABEL,
@@ -92,7 +94,7 @@ export interface VgvRow {
 /* Helpers                                                                     */
 /* -------------------------------------------------------------------------- */
 
-const distinctProjects = (projects: CubeProject[]) => new Set(projects.map((project) => project.key)).size;
+const distinctProjects = (projects: CubeProject[]) => new Set(projects.filter((p) => p.marketActive !== false).map((project) => project.key)).size;
 const sumOf = (projects: CubeProject[], pick: (project: CubeProject) => number | null): number | null =>
   projects.reduce<number | null>((sum, project) => addNullable(sum, pick(project)), null);
 
@@ -388,6 +390,11 @@ export function maturityByTypology(cube: MarketCube): MaturityRow[] {
 /** Slides 38/39: ticket, área e R$/m² por padrão, universo vertical, ordem canônica. */
 export function pricesByStandard(cube: MarketCube, segment: 'Vertical' | 'Horizontal' = 'Vertical'): PriceRow[] {
   const universe = segment === 'Vertical' ? verticalProjects(cube) : horizontalProjects(cube);
+  if (cube.entity === 'fiergs-rs' && universe.some((p) => p.marketObservations)) {
+    const labels = orderStandards(new Set(universe.flatMap((p) => closingPlants(p).filter(pricePlant).map((r) => r.standard))));
+    return [...labels.map((label) => ({ label, kind: 'row' as const, ...priceContributions(universe, (r) => r.standard === label) })),
+      { label: 'Média Geral', kind: 'total' as const, ...priceContributions(universe) }];
+  }
   const groups = groupBy(universe, (project) => project.standard);
   const rows = orderStandards(groups.keys()).map((label) => priceRow(label, 'row', groups.get(label) ?? []));
   // Média geral ponderada pelo universo inteiro — nunca média simples das linhas acima.
@@ -397,6 +404,11 @@ export function pricesByStandard(cube: MarketCube, segment: 'Vertical' | 'Horizo
 /** Slides 36/37: ticket, área e R$/m² por tipologia canônica, universo vertical. */
 export function pricesByTypology(cube: MarketCube): PriceRow[] {
   const universe = verticalProjects(cube);
+  if (cube.entity === 'fiergs-rs' && universe.some((p) => p.marketObservations)) {
+    const labels = orderTypologies(new Set(universe.flatMap((p) => closingPlants(p).filter(pricePlant).map((r) => r.typology))));
+    return [...labels.map((label) => ({ label, kind: 'row' as const, ...priceContributions(universe, (r) => r.typology === label) })),
+      { label: 'Média Geral', kind: 'total' as const, ...priceContributions(universe) }];
+  }
   const groups = projectsByTypology(universe);
   const rows = orderTypologies(groups.keys()).map((label) => {
     const entries = (groups.get(label) ?? []).flatMap((project) => project.typologies.filter((item) => item.typology === label));
@@ -421,8 +433,11 @@ export function horizontalPricesByStandard(cube: MarketCube): PriceRow[] {
   if (cube.entity === 'fiergs-rs') {
     const universe = horizontalProjects(cube);
     const groups = groupBy(universe, (project) => project.horizontalSubtype ?? 'indefinido');
-    const rows = [...groups.entries()].map(([subtype, projects]) => priceRow(FIERGS_HORIZONTAL_PRODUCT_LABELS[subtype as keyof typeof FIERGS_HORIZONTAL_PRODUCT_LABELS] ?? 'Não classificado', 'row', projects));
-    return [...rows, priceRow('Média Horizontal', 'total', universe)];
+    const atomic = universe.some((p) => p.marketObservations);
+    const price = (label: string, kind: RowKind, projects: CubeProject[]) => atomic
+      ? { label, kind, ...priceContributions(projects) } : priceRow(label, kind, projects);
+    const rows = [...groups.entries()].map(([subtype, projects]) => price(FIERGS_HORIZONTAL_PRODUCT_LABELS[subtype as keyof typeof FIERGS_HORIZONTAL_PRODUCT_LABELS] ?? 'Não classificado', 'row', projects));
+    return [...rows, price('Média Horizontal', 'total', universe)];
   }
   return pricesByStandard(cube, 'Horizontal');
 }
@@ -461,6 +476,7 @@ export interface AreaBandRow {
  */
 export function offerByAreaBand(cube: MarketCube): AreaBandRow[] {
   const universe = verticalProjects(cube);
+  if (cube.entity === 'fiergs-rs' && universe.length && universe.every((p) => p.marketObservations)) return observedAreaBands(cube);
   const buckets = new Map<AreaBandLabel, { final: number | null; launched: number | null; sold: number | null }>();
   for (const project of universe) {
     const launchedInPeriod = project.releaseQuarter === cube.endQuarter;
@@ -527,6 +543,44 @@ export function offerByAreaBand(cube: MarketCube): AreaBandRow[] {
   }];
 }
 
+/** Flows use all deduplicated observations of the quarter; stocks use independent snapshots. */
+function observedAreaBands(cube: MarketCube): AreaBandRow[] {
+  type Facts = { previous: (number | null)[]; final: (number | null)[]; sold: (number | null)[]; launched: (number | null)[] };
+  const bands = new Map<string, Facts>();
+  const bucket = (area: number | null) => {
+    const label = areaBandOf(area);
+    if (!label) return null;
+    if (!bands.has(label)) bands.set(label, { previous: [], final: [], sold: [], launched: [] });
+    return bands.get(label)!;
+  };
+  const end = quarterEndMonth(cube.endQuarter), previous = quarterEndMonth(previousQuarter(cube.endQuarter));
+  const start = `${end.slice(0, 4)}-${String(Number(end.slice(5)) - 2).padStart(2, '0')}`;
+  for (const p of verticalProjects(cube)) {
+    for (const r of closingPlants(p, cube.endQuarter)) {
+      const b = bucket(r.area);
+      if (!b) continue;
+      b.final.push(r.stock);
+      b.launched.push(p.releaseQuarter === cube.endQuarter ? r.quantity : 0);
+      // A launch after the previous close had no previous offer, by release-date evidence.
+      if (p.releaseQuarter === cube.endQuarter) b.previous.push(0);
+      else if (!plantSnapshot(p.marketObservations!, previous).some((prior) => prior.id === r.id)) b.previous.push(null);
+    }
+    if (p.releaseQuarter !== cube.endQuarter) for (const r of plantSnapshot(p.marketObservations!, previous)) bucket(r.area)?.previous.push(r.stock);
+    for (const r of p.marketObservations!.filter((r) => r.month >= start && r.month <= end && r.status !== 'futuro')) bucket(r.area)?.sold.push(r.sold);
+  }
+  const make = (label: string, kind: RowKind, b: Facts): AreaBandRow => {
+    const previousUnits = b.previous.some((n) => n === null) ? null : sumObserved(b.previous), launchedUnits = sumObserved(b.launched), soldUnits = sumObserved(b.sold);
+    const base = previousUnits === null || launchedUnits === null ? null : previousUnits + launchedUnits;
+    return { label, kind, previousUnits, finalUnits: sumObserved(b.final), launchedUnits, soldUnits,
+      ivv: soldUnits !== null && base !== null && base > 0 ? soldUnits / base * 100 : null };
+  };
+  const labels = orderAreaBands(bands.keys() as Iterable<AreaBandLabel>);
+  const rows = labels.map((label) => make(label, 'row', bands.get(label)!));
+  const all: Facts = { previous: [], final: [], sold: [], launched: [] };
+  for (const b of bands.values()) for (const key of ['previous','final','sold','launched'] as const) all[key].push(...b[key]);
+  return [...rows, make('Total', 'total', all)];
+}
+
 /* -------------------------------------------------------------------------- */
 /* Slide 51 — VGV geral                                                        */
 /* -------------------------------------------------------------------------- */
@@ -540,7 +594,7 @@ function vgvRow(label: string, kind: RowKind, segment: VgvRow['segment'], projec
     kind,
     segment,
     projects: distinctProjects(projects),
-    averageTicket: weightedAverage(projects.map((project) => ({ value: project.averageTicket, weight: project.finalUnits ?? project.launchedUnits }))),
+    averageTicket: projects.some((p) => p.marketObservations) ? priceContributions(projects).averageTicket : weightedAverage(projects.map((project) => ({ value: project.averageTicket, weight: project.finalUnits ?? project.launchedUnits }))),
     launchedUnits: sumOf(projects, (project) => project.launchedUnits),
     finalUnits: sumOf(projects, (project) => project.finalUnits),
     soldUnits,

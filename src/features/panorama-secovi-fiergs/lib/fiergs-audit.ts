@@ -1,9 +1,10 @@
+import { isActivePlant } from '../domain/market-observations';
 import type { PanoramaReportModel } from '../types';
 import { scopeExportPeriod, scopeFileSlug } from '../types';
 import { panoramaScopeIdentity } from '../scope-identity';
 
 const columns = ['tipo_registro','cidade','building_id','empreendimento','segmento','subtipo_horizontal','padrao','trimestre_lancamento','unidades_lancadas','unidades_vendidas','oferta_final','vgv_lancado_milhoes','ticket_medio','area_media','preco_m2','cobertura','motivo_rejeicao','metrica','fonte','formula','universo','periodo_observado','total_canonico','total_dimensional','delta','tolerancia','status','critico','codigo_aviso','severidade','paginas_afetadas','slides_oficiais_afetados','decisao_exibicao','operacao_coleta','tentativas','requisicoes','duracao_ms','gerado_em','uf_recorte','modo_recorte','preset_id','cidades_recorte','inicio_recorte','fim_recorte',
-  'classe_verificacao','contrato_identidade','contrato_capacidade','competencia_cadastro','competencia_fechamento','unidades_lancamento_original','capacidade_derivada','total_cadastral','controle_cadastral_compativel','linhas_recebidas','linhas_conservadas','duplicatas_removidas','identidade_historica','indices_origem','codigo_integridade','modo_identidade','modo_apresentacao','territorio_id','territorio_nome','cidades_territorio','valores_municipais','valores_territoriais','classificacao_composicao','percentual_composicao','unidade_composicao'] as const;
+  'classe_verificacao','contrato_identidade','contrato_capacidade','competencia_cadastro','competencia_fechamento','unidades_lancamento_original','capacidade_derivada','total_cadastral','controle_cadastral_compativel','linhas_recebidas','linhas_conservadas','duplicatas_removidas','identidade_historica','indices_origem','codigo_integridade','modo_identidade','modo_apresentacao','territorio_id','territorio_nome','cidades_territorio','valores_municipais','valores_territoriais','classificacao_composicao','percentual_composicao','unidade_composicao','planta_id','tipo_planta','status_planta','oferta_ativa'] as const;
 
 function cell(value: unknown): string {
   if (value === null || value === undefined) return '';
@@ -20,6 +21,14 @@ export function buildFiergsAuditCsv(report: PanoramaReportModel): string {
     periodo_observado: `${report.scope.startQuarter ?? 'histórico'}–${report.scope.endQuarter}`,
     status: identity.mode, cobertura: report.dataState,
     formula: 'Seleção explícita de municípios em uma única UF; modo oficial somente por igualdade do conjunto.' }] : [];
+  const plantRows = report.cube.projects.flatMap((project) => (project.marketObservations ?? []).map((r) => ({
+    tipo_registro: 'observacao_planta', cidade: project.city, building_id: project.buildingId, empreendimento: project.name,
+    segmento: project.segment, subtipo_horizontal: project.horizontalSubtype, planta_id: r.id, tipo_planta: r.kind, status_planta: r.status,
+    padrao: r.standard, periodo_observado: r.month, unidades_lancadas: r.quantity, oferta_ativa: r.status === null ? null : isActivePlant(r) ? r.quantity : 0,
+    oferta_final: r.stock, unidades_vendidas: r.sold, ticket_medio: r.ticket, area_media: r.area,
+    preco_m2: r.ticket !== null && r.area !== null && r.area > 0 ? r.ticket / r.area : null,
+    fonte: 'geobrain-market-v1 / planta e competência; capacidade não é fluxo de lançamento',
+  })));
   const projectRows = report.cube.projects.map((project) => ({
     tipo_registro: 'empreendimento', cidade: project.city, building_id: project.buildingId, empreendimento: project.name,
     segmento: project.segment, subtipo_horizontal: project.horizontalSubtype, padrao: project.standard,
@@ -36,8 +45,8 @@ export function buildFiergsAuditCsv(report: PanoramaReportModel): string {
   }));
   const rejectionRows = report.cube.rejections.map((rejection) => ({
     tipo_registro: 'rejeicao', cidade: rejection.city, building_id: rejection.buildingId, empreendimento: '', segmento: '',
-    subtipo_horizontal: '', padrao: '', trimestre_lancamento: '', unidades_lancadas: '', unidades_vendidas: '', oferta_final: '',
-    vgv_lancado_milhoes: '', ticket_medio: '', area_media: '', preco_m2: '', cobertura: '', motivo_rejeicao: rejection.reason,
+    subtipo_horizontal: '', padrao: '', trimestre_lancamento: '', unidades_lancadas: '', unidades_vendidas: '', oferta_final: rejection.observedClosingStock ?? '',
+    vgv_lancado_milhoes: '', ticket_medio: '', area_media: '', preco_m2: '', cobertura: '', motivo_rejeicao: rejection.reason, fonte: rejection.productEvidence ? `Rótulo recebido: ${rejection.productEvidence}` : '',
   }));
   const reconciliationRows = (report.reconciliation?.rows ?? []).map((item) => ({
     tipo_registro: 'reconciliacao', metrica: item.metricId, fonte: item.source, formula: item.formula,
@@ -71,7 +80,7 @@ export function buildFiergsAuditCsv(report: PanoramaReportModel): string {
   const territoryRows: Record<string,unknown>[] = (report.territorial?.units??[]).map(({unit})=>({tipo_registro:'territorio_geracao',territorio_id:unit.id,territorio_nome:unit.label,cidades_territorio:unit.cities.join(', ')}));
   const territorialChecks: Record<string,unknown>[] = (report.territorial?.checks??[]).map((r)=>({tipo_registro:'reconciliacao_territorial',metrica:r.metric,periodo_observado:r.period,universo:r.dimension,fonte:r.source,total_canonico:r.canonical,total_dimensional:r.grouped,delta:r.delta,status:r.status,tolerancia:1e-6,valores_municipais:JSON.stringify(r.cities),valores_territoriais:JSON.stringify(r.units)}));
   const annualRows: Record<string,unknown>[] = (report.annualCompositions??[]).flatMap((b)=>b.years.flatMap((y)=>y.values.map((v)=>({tipo_registro:'composicao_anual',metrica:b.metric,padrao:v.label,periodo_observado:`${y.from}–${y.through}`,total_canonico:y.total,total_dimensional:v.value,percentual_composicao:v.share,unidade_composicao:b.metric==='vgl'?'R$ milhões':b.metric==='projects'?'empreendimentos':'unidades',status:y.status,formula:'Numerador da categoria / universo anual ×100',classificacao_composicao:'Padrão observado na competência do lançamento',fonte:'Cubo homologado; fonte histórica de padrão no lançamento',decisao_exibicao:v.share===null?'Não normalizado':`${v.share}%`}))));
-  const rows: Record<string, unknown>[] = [...territoryRows, ...territorialChecks, ...annualRows, ...scopeRows, ...projectRows, ...rejectionRows, ...reconciliationRows, ...historyRows, ...noticeRows, ...recoveredRows, ...collectionMetricRows];
+  const rows: Record<string, unknown>[] = [...territoryRows, ...territorialChecks, ...annualRows, ...scopeRows, ...projectRows, ...plantRows, ...rejectionRows, ...reconciliationRows, ...historyRows, ...noticeRows, ...recoveredRows, ...collectionMetricRows];
   const context = identity ? { modo_apresentacao:report.scope.presentation?.layout??report.scope.presentation?.mode??'consolidated', gerado_em: report.generatedAt, uf_recorte: identity.uf, modo_recorte: identity.mode,
     preset_id: identity.presetId, cidades_recorte: identity.cityList, inicio_recorte: report.scope.startQuarter, fim_recorte: report.scope.endQuarter } : {};
   return `\uFEFF${columns.join(';')}\r\n${rows.map((row) => columns.map((column) => cell(({ ...context, ...row } as Record<string, unknown>)[column])).join(';')).join('\r\n')}`;

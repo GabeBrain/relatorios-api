@@ -92,6 +92,21 @@ export async function buildPanoramaApprovedPptx(slides: HTMLElement[], metadata:
     try {
       const frame = clone.getBoundingClientRect(), scaleX = W / frame.width, scaleY = H / frame.height;
       const { texts, parents } = approvedLayoutText(clone);
+      // foreignObject may reflow an invisible heading with different font metrics. Preserve
+      // its measured pseudo-element decoration independently, just as we do for table grids.
+      const accents = [...clone.querySelectorAll<HTMLElement>('.panorama-market-slide header h2')].flatMap((heading) => {
+        const s = getComputedStyle(heading, '::after'), r = heading.getBoundingClientRect();
+        const w = parseFloat(s.width), h = parseFloat(s.height);
+        const color = s.backgroundColor.match(/[\d.]+/g)?.slice(0, 3).map((n) => Math.round(Number(n)).toString(16).padStart(2, '0')).join('');
+        return s.content !== 'none' && s.display !== 'none' && w > 0 && h > 0 && color
+          ? [{ x: (r.left - frame.left) * scaleX, y: (r.bottom - frame.top - h) * scaleY, w: w * scaleX, h: h * scaleY, color }] : [];
+      });
+      if (accents.length) {
+        clone.setAttribute('data-panorama-native-accents', 'true');
+        const style = document.createElement('style');
+        style.textContent = '[data-panorama-native-accents] .panorama-market-slide header h2::after{visibility:hidden!important}';
+        clone.append(style);
+      }
       const graphics = [...clone.querySelectorAll<HTMLElement>(GRAPHICS)].filter(e => !e.parentElement?.closest(GRAPHICS));
       const images: { data: string; x: number; y: number; w: number; h: number }[] = [];
       const snapshot = { fontEmbedCSS, pixelRatio: 1, cacheBust: false };
@@ -115,6 +130,8 @@ export async function buildPanoramaApprovedPptx(slides: HTMLElement[], metadata:
       const background = await toPng(clone, snapshot); check(signal);
       const slide = pptx.addSlide();
       slide.addImage({ data: background, x: 0, y: 0, w: W, h: H, objectName: 'Arte e decoração do layout aprovado' });
+      for (const accent of accents) slide.addShape(pptx.ShapeType.roundRect, { x: accent.x, y: accent.y, w: accent.w, h: accent.h,
+        fill: { color: accent.color }, line: { transparency: 100 }, objectName: 'Faixa do título: posição aprovada' });
       for (const image of images) slide.addImage({ ...image, objectName: 'Gráfico: aparência aprovada' });
       for (const t of texts) slide.addText(t.runs ?? t.text, { x: t.x, y: t.y, w: t.w, h: t.h, fontSize: t.size, fontFace: t.face,
         color: t.color, bold: t.bold, italic: t.italic, charSpacing: t.spacing, margin: 0, breakLine: false,

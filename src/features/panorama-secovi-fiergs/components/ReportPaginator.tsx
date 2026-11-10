@@ -10,7 +10,7 @@ import { Component, useEffect, useMemo, useRef, useState, type CSSProperties, ty
 import { AlertTriangle, ChevronLeft, ChevronRight, Download, FileText, ListTree, LoaderCircle, Presentation } from 'lucide-react';
 import { Bar, BarChart, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis } from 'recharts';
 import { Button } from '@/components/ui/button';
-import { scopeCityLabel, type LaunchSeries, type PanoramaReportModel, type ReportMarketBlock } from '../types';
+import { scopeCityLabel, type LaunchSeries, type PanoramaReportModel, type ReportMarketBlock, type ReportSeries } from '../types';
 import { quarterLabel, variation } from '../lib/launches';
 import { compactQuarterLabel, visibleBarLabelIndexes, visiblePointLabelIndexes, visibleQuarterTickIndexes } from '../lib/chart-labels';
 import { downloadFiergsAudit } from '../lib/fiergs-audit';
@@ -250,9 +250,10 @@ function TimeChart({ page, report }: { page: number; report: PanoramaReportModel
         `2022 · R$ 17.173/m²` impresso em destaque, e o portão da matriz proíbe somar preços. */}
     <div className="panorama-annual-strip">{years.map((annualYear) => {
       const rows = data.filter((item) => year(item.quarter) === annualYear);
-      const observed = rows.filter((row) => Number.isFinite(row.total));
+      const observed = rows.filter((row) => (!series.single || !('observed' in row) || (row as ReportSeries).observed?.vertical !== false) && Number.isFinite(series.single ? row.vertical : row.total));
+      if (!observed.length) return null;
       const isRate = series.unit === 'sqm';
-      const total = observed.reduce((sum, row) => sum + row.total, 0);
+      const total = observed.reduce((sum, row) => sum + (series.single ? row.vertical : row.total), 0);
       const average = observed.length ? total / observed.length : 0;
       const headline = isRate ? average : total;
       const isClosingYear = annualYear === year(report.scope.endQuarter);

@@ -1,4 +1,5 @@
 import type { MarketCube } from './cube';
+import { activeMarketCube, closingPlants, pricePlant } from './market-observations';
 import { quarterIndex } from './quarters';
 import type { PanoramaCityComparisons, PanoramaGranularBlocks, PanoramaReconciliation, PanoramaReconciliationRow, PanoramaScope, ReportMarketBlock } from '../types';
 
@@ -38,11 +39,14 @@ export function reconcilePanoramaReport(input: ReconciliationInput): PanoramaRec
   const period = input.scope.endQuarter;
   const vertical = input.cube.projects.filter((project) => project.segment === 'Vertical');
   const horizontal = input.cube.projects.filter((project) => project.segment === 'Horizontal');
+  const market = activeMarketCube(input.cube);
+  const marketVertical = market.projects.filter((p) => p.segment === 'Vertical');
+  const marketHorizontal = market.projects.filter((p) => p.segment === 'Horizontal');
   // Zero só representa universo vazio quando o cubo comprova coleta de todas as cidades.
   // Não altera valores ausentes de projetos existentes nem preços sem observação.
   const completeCube = input.scope.cities.length > 0 && input.scope.cities.every((city) => input.cube.cities?.includes(city));
   const canonicalSales = nullableSum(vertical.map((project) => project.soldUnits));
-  const canonicalLaunched = nullableSum(vertical.map((project) => project.launchedUnits));
+  const canonicalLaunched = nullableSum(marketVertical.map((project) => project.launchedUnits));
   const canonicalStock = nullableSum(vertical.map((project) => project.finalUnits));
   const negativeTypologyResidual = (metric: 'launchedUnits' | 'finalUnits' | 'soldUnits') => vertical.reduce((magnitude, project) => {
     const projectTotal = project[metric];
@@ -57,8 +61,9 @@ export function reconcilePanoramaReport(input: ReconciliationInput): PanoramaRec
   const priceTypologyTotal = totalOf(input.granular.pricesByTypology);
   const cohortTotal = totalOf(input.granular.cohortsHorizontal);
   const horizontalVgvSubtotal = input.granular.vgv.find((item) => item.kind === 'subtotal' && item.segment === 'Horizontal');
-  const horizontalProjects = new Set(horizontal.map((project) => project.key)).size;
-  const horizontalLaunched = nullableSum(horizontal.map((project) => project.launchedUnits));
+  const horizontalProjects = new Set(marketHorizontal.filter((p) => p.marketActive !== false).map((project) => project.key)).size;
+  const horizontalLaunched = nullableSum(marketHorizontal.map((project) => project.launchedUnits));
+  const priceProjects = input.granular.marketContract ? vertical.filter((p) => closingPlants(p).some(pricePlant)).length : vertical.length;
   const horizontalFinal = nullableSum(horizontal.map((project) => project.finalUnits));
   const inWindow = (project: MarketCube['projects'][number]) => !input.scope.startQuarter || (quarterIndex(project.releaseQuarter) >= quarterIndex(input.scope.startQuarter) && quarterIndex(project.releaseQuarter) <= quarterIndex(input.scope.endQuarter));
   const windowVertical = vertical.filter(inWindow);
@@ -85,6 +90,13 @@ export function reconcilePanoramaReport(input: ReconciliationInput): PanoramaRec
     tolerance: 0, critical: true,
   });
   const rows = [
+    ...(input.granular.marketContract ? [row({ metricId: 'stock_flow.vertical.independent',
+      source: 'Fotografias por planta e fluxos trimestrais independentes',
+      formula: 'Oferta anterior observada + lançamentos do trimestre − vendas líquidas; diferença pode sinalizar revisões na origem e não é imputada.',
+      universe, period, canonicalTotal: areaTotal?.finalUnits ?? null,
+      dimensionalTotal: areaTotal?.previousUnits == null || areaTotal.launchedUnits == null || areaTotal.soldUnits == null ? null : areaTotal.previousUnits + areaTotal.launchedUnits - areaTotal.soldUnits,
+      tolerance: 0, critical: false, checkKind: 'independent_comparison' as const,
+    })] : []),
     countRow('sales.vertical.pattern', input.sales.units.source, 'Soma do fechamento vertical por padrão.', canonicalSales, closingVertical(input.sales.units, period)),
     countRow('sales.vertical.typology', input.sales.unitsByTypology.source, 'Soma do fechamento vertical por tipologia.', canonicalSales, closingVertical(input.sales.unitsByTypology, period)),
     countRow('sales.vertical.city', 'agregado municipal derivado do cubo granular', 'Soma das vendas verticais das cidades concluídas, inclusive cidade única.', canonicalSales, nullableSum(input.cityComparisons.sales.map((item) => item.liquidSales))),
@@ -115,13 +127,13 @@ export function reconcilePanoramaReport(input: ReconciliationInput): PanoramaRec
     countRow('residual.vertical.typology.launched.negative', 'cubo granular / tipologia', 'Magnitude da sobrecobertura tipológica por empreendimento na oferta lançada; esperado zero.', 0, negativeTypologyResidual('launchedUnits')),
     countRow('residual.vertical.typology.final.negative', 'cubo granular / tipologia', 'Magnitude da sobrecobertura tipológica por empreendimento na oferta final; esperado zero.', 0, negativeTypologyResidual('finalUnits')),
     countRow('residual.vertical.typology.sold.negative', 'cubo granular / tipologia', 'Magnitude da sobrecobertura tipológica por empreendimento nas vendas; esperado zero.', 0, negativeTypologyResidual('soldUnits')),
-    countRow('projects.vertical.price_pattern', 'cubo granular / preços por padrão', 'Empreendimentos usados na ponderação de preços por padrão.', vertical.length, priceStandardTotal?.projects ?? null),
-    countRow('projects.vertical.price_typology', 'cubo granular / preços por tipologia', 'Empreendimentos usados na ponderação de preços por tipologia.', vertical.length, priceTypologyTotal?.projects ?? null),
+    countRow('projects.vertical.price_pattern', 'cubo granular / preços por padrão', 'Empreendimentos usados na ponderação de preços por padrão.', priceProjects, priceStandardTotal?.projects ?? null),
+    countRow('projects.vertical.price_typology', 'cubo granular / preços por tipologia', 'Empreendimentos usados na ponderação de preços por tipologia.', priceProjects, priceTypologyTotal?.projects ?? null),
     countRow('horizontal.projects.cohort', 'cubo granular / coortes horizontais', 'Empreendimentos distintos por coorte.', horizontalProjects, cohortTotal?.projects ?? null, horizontalUniverse, horizontal),
     countRow('horizontal.launched.cohort', 'cubo granular / coortes horizontais', 'Soma da oferta lançada horizontal por coorte.', horizontalLaunched, cohortTotal?.launchedUnits ?? null, horizontalUniverse, horizontal),
     countRow('horizontal.final.cohort', 'cubo granular / coortes horizontais', 'Soma da oferta final horizontal por coorte.', horizontalFinal, cohortTotal?.finalUnits ?? null, horizontalUniverse, horizontal),
-    countRow('horizontal.projects.consolidated', 'cubo granular / consolidado VGV', 'Empreendimentos distintos no subtotal horizontal consolidado.', horizontalProjects, horizontalVgvSubtotal?.projects ?? null, horizontalUniverse, horizontal),
-    countRow('horizontal.launched.consolidated', 'cubo granular / consolidado VGV', 'Oferta lançada no subtotal horizontal na janela selecionada.', window ? (windowHorizontal.length ? windowLaunchHorizontal : 0) : horizontalLaunched, horizontalVgvSubtotal?.launchedUnits ?? null, horizontalUniverse, horizontal),
+    countRow('horizontal.projects.consolidated', 'cubo granular / consolidado VGV', 'Empreendimentos distintos no subtotal horizontal consolidado.', horizontal.length, horizontalVgvSubtotal?.projects ?? null, horizontalUniverse, horizontal),
+    countRow('horizontal.launched.consolidated', 'cubo granular / consolidado VGV', 'Oferta lançada no subtotal horizontal na janela selecionada.', window ? (windowHorizontal.length ? windowLaunchHorizontal : 0) : nullableSum(horizontal.map((p) => p.launchedUnits)), horizontalVgvSubtotal?.launchedUnits ?? null, horizontalUniverse, horizontal),
     ...(window ? ['Vertical', 'Horizontal', 'Total'].map((segment) => {
       const projects = [...windowVertical, ...windowHorizontal].filter((project) => segment === 'Total' || project.segment === segment);
       const displayed = input.granular.vgv.filter((item) => item.kind === 'row' && (segment === 'Total' || item.segment === segment));

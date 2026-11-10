@@ -31,6 +31,8 @@ export interface UniverseCandidate {
   segment: Segment | null;
   /** Texto bruto de subtipo/tipo do empreendimento, como devolvido pela API. */
   rawSubtype?: unknown;
+  /** Explicit product label provided by the internal building endpoint. */
+  rawWork?: unknown;
   rawType?: unknown;
   rawName?: unknown;
   /** Campos oficiais do contrato v2; V3 não usa nome para inferir tipologia. */
@@ -201,7 +203,7 @@ export const SECOVI_SP_V3_POLICY: EntityPolicy = {
     if (candidate.segment === 'Vertical') return { accepted: true, segment: 'Vertical', horizontalSubtype: null, reason: null };
     if (candidate.segment !== 'Horizontal') return { accepted: false, segment: null, horizontalSubtype: null, reason: 'segmento_desconhecido' };
     // O nome comercial nunca entra: é a heurística que a PRE-026 substituiu.
-    const labels = [candidate.rawSubtype, candidate.rawType, candidate.standard, ...(candidate.historicalPatterns ?? [])]
+    const labels = [candidate.rawSubtype, candidate.rawWork, candidate.rawType, candidate.standard, ...(candidate.historicalPatterns ?? [])]
       .map(normalizeText).filter((label) => label && !SEGMENT_ONLY.test(label));
     if (!labels.length) return { accepted: false, segment: 'Horizontal', horizontalSubtype: 'indefinido', reason: 'subtipo_horizontal_indefinido' };
     const axes = labels.map(classifyHorizontalLabel);
@@ -225,7 +227,7 @@ export const FIERGS_RS_POLICY: EntityPolicy = {
   classify(candidate) {
     if (candidate.segment === 'Vertical') return { accepted: true, segment: 'Vertical', horizontalSubtype: null, reason: null };
     if (candidate.segment !== 'Horizontal') return { accepted: false, segment: null, horizontalSubtype: null, reason: 'segmento_desconhecido' };
-    const labels = [candidate.rawSubtype, candidate.rawType, candidate.standard, ...(candidate.historicalPatterns ?? [])]
+    const labels = [candidate.rawSubtype, candidate.rawWork, candidate.rawType, candidate.standard, ...(candidate.historicalPatterns ?? [])]
       .map(normalizeText).filter((label) => label && !SEGMENT_ONLY.test(label));
     for (const label of labels) {
       const subtype = FIERGS_HORIZONTAL_PRODUCTS.get(label);

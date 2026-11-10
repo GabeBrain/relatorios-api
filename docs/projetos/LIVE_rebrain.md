@@ -385,6 +385,14 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 10/11/2026 — Panorama FIERGS: paridade por planta implementada — Gabriel / Codex
+
+- **Entrega:** oferta ativa no fechamento separada dos lançamentos históricos; vendas trimestrais sem duplicar reservas Futuro; estoques/áreas por planta; preços Padrão por contribuições de quantidade, valor e área. Tabelas, série, faixas, coortes/produtos e mapas usam a base correspondente. Campo `work` explícito recupera produtos sem exceções por ID. Metodologia, avisos, CSV e cache atualizados. PPT híbrido mantido; faixa do título ancorada ao DOM.
+- **Resultado:** São Leopoldo3T2026:2.923ofertaativa/891estoque/370vendas, anterior781, lançamentos480, IVV29,3418%. Onze controles offline2T2026/4T2025 e Canela+Gramado3T2026 com zero diferenças críticas e de estoque/fluxo.478testes aprovados/2opcionais preexistentes ignorados,14novos decontrato; tipos/lint/build verificados. Extrato13páginasPDF/PPT conferido, Office sem objetosfora e edição real de cabeçalho salva/reaberta em cópia, original intacto.
+- **Fonte única:** [execução e ressalvas](../features/Relatorios%20Secovi_FIERGS/EVIDENCIAS_CONTRATOS_HISTORICO_FIERGS_2026-10-27.md#10112026--implementação-da-paridade-e-verificação-para-publicação); matriz JSON e brutos ignorados vinculados nela. Nenhuma coleta nova durante a implementação; respostas SãoLeopoldo jácongeladas reutilizadas.
+- **Estado e pendências:** validado offline, push autorizado; publicação/ensaio no Lovable e aceite externo pendentes. Total de preço/área dos prints e classificação de dois horizontais(121estoques) ainda precisam de contrato da origem; não anunciar paridade integral. Demais preços seguem a API atual, que difere de algumas capturas. E-mail não enviado. Merge autorizado preservou SP/Fortaleza e alterações paralelas.
+
+
 ### 10/11/2026 — Panorama: São Leopoldo, paridade com Geobrain mapeada — Gabriel / Codex
 
 - **Diagnóstico:** OfertaLançada4591versus2923 integralmente explicada por janela e statusAtivo histórico porplanta; vendas168versus370 explicadas por último mês versus fluxo trimestral. Plantas preservadas reproduzem todas as faixas e781/891/480/370 doGeobrain. Preços atuais porgrupo reproduzidos por contratos diferentes dos agregadores doPanorama. Horizontal perde126unidades por rejeições deproduto, incluindo5comrótulo explícito emwork ignorado.

@@ -5,7 +5,7 @@
     "end": "3T2026",
     "launchWindowReplayed": "1T2020–3T2026"
   },
-  "status": "diagnosis-only, no product changes",
+  "status": "implemented and verified offline; authorized push; live publication and external acceptance pending",
   "checks": [
     {
       "name": "active offer Standard",
@@ -797,5 +797,566 @@
     "integration": "not authorized or performed on dirty tree",
     "publication": "none"
   },
-  "verification": "81offline assertions passed on8bounded API responses, 177atomicrows,90buildings; not an implementation regression or external acceptance."
+  "verification": "81offline assertions passed on8bounded API responses, 177atomicrows,90buildings; not an implementation regression or external acceptance.",
+  "implementation": {
+    "contract": "geobrain-market-v1",
+    "scope": "FIERGS identified history; Secovi numerical policy retained. Explicit work label supported without subtype guesses.",
+    "saoLeopoldo": {
+      "activeOfferByStandard": [
+        {
+          "label": "Compacto",
+          "kind": "row",
+          "projects": 1,
+          "launchedUnits": 220,
+          "finalUnits": 35,
+          "soldUnits": 5,
+          "availability": 15.909090909090908
+        },
+        {
+          "label": "Econômico",
+          "kind": "row",
+          "projects": 7,
+          "launchedUnits": 1918,
+          "finalUnits": 648,
+          "soldUnits": 357,
+          "availability": 33.7851929092805
+        },
+        {
+          "label": "Standard",
+          "kind": "row",
+          "projects": 13,
+          "launchedUnits": 735,
+          "finalUnits": 193,
+          "soldUnits": 9,
+          "availability": 26.258503401360546
+        },
+        {
+          "label": "Médio",
+          "kind": "row",
+          "projects": 2,
+          "launchedUnits": 50,
+          "finalUnits": 15,
+          "soldUnits": -1,
+          "availability": 30
+        },
+        {
+          "label": "Total",
+          "kind": "total",
+          "projects": 23,
+          "launchedUnits": 2923,
+          "finalUnits": 891,
+          "soldUnits": 370,
+          "availability": 30.482381115292505
+        }
+      ],
+      "activeOfferByTypology": [
+        {
+          "label": "1 Dormitório",
+          "kind": "row",
+          "projects": 5,
+          "launchedUnits": 260,
+          "finalUnits": 51,
+          "soldUnits": 5,
+          "availability": 19.615384615384617
+        },
+        {
+          "label": "2 Dormitórios",
+          "kind": "row",
+          "projects": 19,
+          "launchedUnits": 2374,
+          "finalUnits": 752,
+          "soldUnits": 363,
+          "availability": 31.676495366470093
+        },
+        {
+          "label": "3 Dormitórios",
+          "kind": "row",
+          "projects": 11,
+          "launchedUnits": 289,
+          "finalUnits": 88,
+          "soldUnits": 2,
+          "availability": 30.44982698961938
+        },
+        {
+          "label": "Total",
+          "kind": "total",
+          "projects": 23,
+          "launchedUnits": 2923,
+          "finalUnits": 891,
+          "soldUnits": 370,
+          "availability": 30.482381115292505
+        }
+      ],
+      "areaBands": [
+        {
+          "label": "Até 44m²",
+          "kind": "row",
+          "previousUnits": 85,
+          "finalUnits": 203,
+          "launchedUnits": 480,
+          "soldUnits": 362,
+          "ivv": 64.070796460177
+        },
+        {
+          "label": "45–49m²",
+          "kind": "row",
+          "previousUnits": 300,
+          "finalUnits": 299,
+          "launchedUnits": 0,
+          "soldUnits": 1,
+          "ivv": 0.33333333333333337
+        },
+        {
+          "label": "50–59m²",
+          "kind": "row",
+          "previousUnits": 229,
+          "finalUnits": 226,
+          "launchedUnits": 0,
+          "soldUnits": 3,
+          "ivv": 1.3100436681222707
+        },
+        {
+          "label": "60–69m²",
+          "kind": "row",
+          "previousUnits": 47,
+          "finalUnits": 47,
+          "launchedUnits": 0,
+          "soldUnits": 0,
+          "ivv": 0
+        },
+        {
+          "label": "70–84m²",
+          "kind": "row",
+          "previousUnits": 65,
+          "finalUnits": 62,
+          "launchedUnits": 0,
+          "soldUnits": 3,
+          "ivv": 4.615384615384616
+        },
+        {
+          "label": "85–99m²",
+          "kind": "row",
+          "previousUnits": 26,
+          "finalUnits": 24,
+          "launchedUnits": 0,
+          "soldUnits": 2,
+          "ivv": 7.6923076923076925
+        },
+        {
+          "label": "100–150m²",
+          "kind": "row",
+          "previousUnits": 20,
+          "finalUnits": 21,
+          "launchedUnits": 0,
+          "soldUnits": -1,
+          "ivv": -5
+        },
+        {
+          "label": "151–200m²",
+          "kind": "row",
+          "previousUnits": 5,
+          "finalUnits": 5,
+          "launchedUnits": 0,
+          "soldUnits": 0,
+          "ivv": 0
+        },
+        {
+          "label": "201–250m²",
+          "kind": "row",
+          "previousUnits": 3,
+          "finalUnits": 3,
+          "launchedUnits": 0,
+          "soldUnits": 0,
+          "ivv": 0
+        },
+        {
+          "label": "Acima de 250m²",
+          "kind": "row",
+          "previousUnits": 1,
+          "finalUnits": 1,
+          "launchedUnits": 0,
+          "soldUnits": 0,
+          "ivv": 0
+        },
+        {
+          "label": "Total",
+          "kind": "total",
+          "previousUnits": 781,
+          "finalUnits": 891,
+          "launchedUnits": 480,
+          "soldUnits": 370,
+          "ivv": 29.34179222839017
+        }
+      ],
+      "prices": [
+        {
+          "label": "Compacto",
+          "kind": "row",
+          "projects": 1,
+          "averageTicket": 320900,
+          "averageArea": 25.31,
+          "averagePricePerMeter": 12678.783089687871
+        },
+        {
+          "label": "Econômico",
+          "kind": "row",
+          "projects": 7,
+          "averageTicket": 255246.81527936147,
+          "averageArea": 45.874521094640826,
+          "averagePricePerMeter": 5564.021360632363
+        },
+        {
+          "label": "Standard",
+          "kind": "row",
+          "projects": 11,
+          "averageTicket": 482273.1810223642,
+          "averageArea": 62.63164536741215,
+          "averagePricePerMeter": 7700.151867210815
+        },
+        {
+          "label": "Médio",
+          "kind": "row",
+          "projects": 2,
+          "averageTicket": 1421126.0322916666,
+          "averageArea": 135.91020833333334,
+          "averagePricePerMeter": 10456.359751919541
+        },
+        {
+          "label": "Média Geral",
+          "kind": "total",
+          "projects": 21,
+          "averageTicket": 335505.2775188821,
+          "averageArea": 49.759520392749245,
+          "averagePricePerMeter": 6742.534390821231
+        }
+      ],
+      "horizontal": {
+        "label": "Total geral",
+        "kind": "total",
+        "projects": 9,
+        "launchedUnits": 1716,
+        "finalUnits": 608,
+        "soldUnits": 22,
+        "availability": 35.43123543123543
+      },
+      "unclassified": [
+        {
+          "buildingId": "89337",
+          "city": "São Leopoldo",
+          "reason": "subtipo_horizontal_indefinido",
+          "observedClosingStock": 120,
+          "productEvidence": "Standard"
+        },
+        {
+          "buildingId": "66909",
+          "city": "São Leopoldo",
+          "reason": "subtipo_horizontal_indefinido",
+          "observedClosingStock": 0,
+          "productEvidence": "Econômico"
+        },
+        {
+          "buildingId": "42187",
+          "city": "São Leopoldo",
+          "reason": "subtipo_horizontal_indefinido",
+          "observedClosingStock": 0,
+          "productEvidence": "Econômico"
+        },
+        {
+          "buildingId": "16845",
+          "city": "São Leopoldo",
+          "reason": "subtipo_horizontal_indefinido",
+          "observedClosingStock": 0,
+          "productEvidence": "Fechado"
+        },
+        {
+          "buildingId": "16844",
+          "city": "São Leopoldo",
+          "reason": "subtipo_horizontal_indefinido",
+          "observedClosingStock": 0,
+          "productEvidence": "Fechado"
+        },
+        {
+          "buildingId": "16842",
+          "city": "São Leopoldo",
+          "reason": "subtipo_horizontal_indefinido",
+          "observedClosingStock": 1,
+          "productEvidence": "Médio"
+        },
+        {
+          "buildingId": "16841",
+          "city": "São Leopoldo",
+          "reason": "subtipo_horizontal_indefinido",
+          "observedClosingStock": 0,
+          "productEvidence": "Fechado"
+        }
+      ],
+      "exportBlock": null,
+      "criticalDifferences": []
+    },
+    "regressions": [
+      {
+        "case": "porto-alegre",
+        "period": "2T2026",
+        "criticalFailures": 0,
+        "stockFlow": {
+          "metricId": "stock_flow.vertical.independent",
+          "source": "Fotografias por planta e fluxos trimestrais independentes",
+          "formula": "Oferta anterior observada + lançamentos do trimestre − vendas líquidas; diferença pode sinalizar revisões na origem e não é imputada.",
+          "universe": "fiergs-rs · RS · Porto Alegre · Vertical",
+          "period": "2T2026",
+          "canonicalTotal": 8358,
+          "dimensionalTotal": 8358,
+          "tolerance": 0,
+          "critical": false,
+          "checkKind": "independent_comparison",
+          "delta": 0,
+          "status": "match"
+        },
+        "priceOptimizationEquivalent": true
+      },
+      {
+        "case": "gramado-canela",
+        "period": "2T2026",
+        "criticalFailures": 0,
+        "stockFlow": {
+          "metricId": "stock_flow.vertical.independent",
+          "source": "Fotografias por planta e fluxos trimestrais independentes",
+          "formula": "Oferta anterior observada + lançamentos do trimestre − vendas líquidas; diferença pode sinalizar revisões na origem e não é imputada.",
+          "universe": "fiergs-rs · RS · Gramado, Canela · Vertical",
+          "period": "2T2026",
+          "canonicalTotal": 1645,
+          "dimensionalTotal": 1645,
+          "tolerance": 0,
+          "critical": false,
+          "checkKind": "independent_comparison",
+          "delta": 0,
+          "status": "match"
+        },
+        "priceOptimizationEquivalent": true
+      },
+      {
+        "case": "gramado",
+        "period": "2T2026",
+        "criticalFailures": 0,
+        "stockFlow": {
+          "metricId": "stock_flow.vertical.independent",
+          "source": "Fotografias por planta e fluxos trimestrais independentes",
+          "formula": "Oferta anterior observada + lançamentos do trimestre − vendas líquidas; diferença pode sinalizar revisões na origem e não é imputada.",
+          "universe": "fiergs-rs · RS · Gramado · Vertical",
+          "period": "2T2026",
+          "canonicalTotal": 1284,
+          "dimensionalTotal": 1284,
+          "tolerance": 0,
+          "critical": false,
+          "checkKind": "independent_comparison",
+          "delta": 0,
+          "status": "match"
+        },
+        "priceOptimizationEquivalent": true
+      },
+      {
+        "case": "canela",
+        "period": "2T2026",
+        "criticalFailures": 0,
+        "stockFlow": {
+          "metricId": "stock_flow.vertical.independent",
+          "source": "Fotografias por planta e fluxos trimestrais independentes",
+          "formula": "Oferta anterior observada + lançamentos do trimestre − vendas líquidas; diferença pode sinalizar revisões na origem e não é imputada.",
+          "universe": "fiergs-rs · RS · Canela · Vertical",
+          "period": "2T2026",
+          "canonicalTotal": 361,
+          "dimensionalTotal": 361,
+          "tolerance": 0,
+          "critical": false,
+          "checkKind": "independent_comparison",
+          "delta": 0,
+          "status": "match"
+        },
+        "priceOptimizationEquivalent": true
+      },
+      {
+        "case": "baseline-conjunto",
+        "period": "2T2026",
+        "criticalFailures": 0,
+        "stockFlow": {
+          "metricId": "stock_flow.vertical.independent",
+          "source": "Fotografias por planta e fluxos trimestrais independentes",
+          "formula": "Oferta anterior observada + lançamentos do trimestre − vendas líquidas; diferença pode sinalizar revisões na origem e não é imputada.",
+          "universe": "fiergs-rs · RS · Canoas, Esteio, São Leopoldo · Vertical",
+          "period": "2T2026",
+          "canonicalTotal": 2495,
+          "dimensionalTotal": 2495,
+          "tolerance": 0,
+          "critical": false,
+          "checkKind": "independent_comparison",
+          "delta": 0,
+          "status": "match"
+        },
+        "priceOptimizationEquivalent": true
+      },
+      {
+        "case": "porto-alegre",
+        "period": "4T2025",
+        "criticalFailures": 0,
+        "stockFlow": {
+          "metricId": "stock_flow.vertical.independent",
+          "source": "Fotografias por planta e fluxos trimestrais independentes",
+          "formula": "Oferta anterior observada + lançamentos do trimestre − vendas líquidas; diferença pode sinalizar revisões na origem e não é imputada.",
+          "universe": "fiergs-rs · RS · Porto Alegre · Vertical",
+          "period": "4T2025",
+          "canonicalTotal": 7918,
+          "dimensionalTotal": 7918,
+          "tolerance": 0,
+          "critical": false,
+          "checkKind": "independent_comparison",
+          "delta": 0,
+          "status": "match"
+        },
+        "priceOptimizationEquivalent": true
+      },
+      {
+        "case": "gramado-canela",
+        "period": "4T2025",
+        "criticalFailures": 0,
+        "stockFlow": {
+          "metricId": "stock_flow.vertical.independent",
+          "source": "Fotografias por planta e fluxos trimestrais independentes",
+          "formula": "Oferta anterior observada + lançamentos do trimestre − vendas líquidas; diferença pode sinalizar revisões na origem e não é imputada.",
+          "universe": "fiergs-rs · RS · Gramado, Canela · Vertical",
+          "period": "4T2025",
+          "canonicalTotal": 1875,
+          "dimensionalTotal": 1875,
+          "tolerance": 0,
+          "critical": false,
+          "checkKind": "independent_comparison",
+          "delta": 0,
+          "status": "match"
+        },
+        "priceOptimizationEquivalent": true
+      },
+      {
+        "case": "gramado",
+        "period": "4T2025",
+        "criticalFailures": 0,
+        "stockFlow": {
+          "metricId": "stock_flow.vertical.independent",
+          "source": "Fotografias por planta e fluxos trimestrais independentes",
+          "formula": "Oferta anterior observada + lançamentos do trimestre − vendas líquidas; diferença pode sinalizar revisões na origem e não é imputada.",
+          "universe": "fiergs-rs · RS · Gramado · Vertical",
+          "period": "4T2025",
+          "canonicalTotal": 1405,
+          "dimensionalTotal": 1405,
+          "tolerance": 0,
+          "critical": false,
+          "checkKind": "independent_comparison",
+          "delta": 0,
+          "status": "match"
+        },
+        "priceOptimizationEquivalent": true
+      },
+      {
+        "case": "canela",
+        "period": "4T2025",
+        "criticalFailures": 0,
+        "stockFlow": {
+          "metricId": "stock_flow.vertical.independent",
+          "source": "Fotografias por planta e fluxos trimestrais independentes",
+          "formula": "Oferta anterior observada + lançamentos do trimestre − vendas líquidas; diferença pode sinalizar revisões na origem e não é imputada.",
+          "universe": "fiergs-rs · RS · Canela · Vertical",
+          "period": "4T2025",
+          "canonicalTotal": 470,
+          "dimensionalTotal": 470,
+          "tolerance": 0,
+          "critical": false,
+          "checkKind": "independent_comparison",
+          "delta": 0,
+          "status": "match"
+        },
+        "priceOptimizationEquivalent": true
+      },
+      {
+        "case": "baseline-conjunto",
+        "period": "4T2025",
+        "criticalFailures": 0,
+        "stockFlow": {
+          "metricId": "stock_flow.vertical.independent",
+          "source": "Fotografias por planta e fluxos trimestrais independentes",
+          "formula": "Oferta anterior observada + lançamentos do trimestre − vendas líquidas; diferença pode sinalizar revisões na origem e não é imputada.",
+          "universe": "fiergs-rs · RS · Canoas, Esteio, São Leopoldo · Vertical",
+          "period": "4T2025",
+          "canonicalTotal": 2953,
+          "dimensionalTotal": 2953,
+          "tolerance": 0,
+          "critical": false,
+          "checkKind": "independent_comparison",
+          "delta": 0,
+          "status": "match"
+        },
+        "priceOptimizationEquivalent": true
+      },
+      {
+        "case": "gramado-canela",
+        "period": "3T2026",
+        "criticalFailures": 0,
+        "stockFlow": {
+          "metricId": "stock_flow.vertical.independent",
+          "source": "Fotografias por planta e fluxos trimestrais independentes",
+          "formula": "Oferta anterior observada + lançamentos do trimestre − vendas líquidas; diferença pode sinalizar revisões na origem e não é imputada.",
+          "universe": "fiergs-rs · RS · Gramado, Canela · Vertical",
+          "period": "3T2026",
+          "canonicalTotal": 1571,
+          "dimensionalTotal": 1571,
+          "tolerance": 0,
+          "critical": false,
+          "checkKind": "independent_comparison",
+          "delta": 0,
+          "status": "match"
+        },
+        "priceOptimizationEquivalent": true
+      }
+    ],
+    "futureReservations": {
+      "rule": "Explicit Futuro observations retained in audit, excluded from commercialized flow/price calculations; no city exceptions.",
+      "diagnosedResiduals": {
+        "Porto Alegre2T2026": 5,
+        "Porto Alegre4T2025": 172
+      },
+      "stockFlowDifferencesAfter": 0
+    },
+    "tests": {
+      "featurePassed": 478,
+      "featureSkippedExisting": 2,
+      "newContractTests": 14,
+      "types": "passed",
+      "build": "passed",
+      "lint": "zero errors, existing FastRefresh warnings"
+    },
+    "exports": {
+      "pages": 13,
+      "browserErrors": 0,
+      "powerPoint": {
+        "readOnly": true,
+        "outside": [],
+        "slides": 13
+      },
+      "editing": {
+        "copy": "TESTE-EDICAO-NAO-ENVIAR.pptx",
+        "nativeTableHeaderEditPersisted": true,
+        "sourceSHA256": "702D90AA72583F9EF54E658A0AE041677D153F85A42FEE6D3056CA8072A05625",
+        "sourceUnchanged": true
+      },
+      "notes": "Internal excerpt of saved real inputs, not a new API study; optional uncollected temporal sources explicitly unavailable. PDF and hybrid PPT verified; no external acceptance.",
+      "pdfPages": 13
+    },
+    "remaining": [
+      "Screenshot general meter6603 and generalarea48 require exact formula/denominators and dated source payload.",
+      "ScreenshotEconomic5577 vs currentAPI5564.0214; bedroom2=5965 vs currentAPI6025.4323 cannot be attributed to base update without source snapshots.",
+      "Need authoritative product field for89337/16842 and historical esgotados; do not infer from name."
+    ],
+    "outputHashes": {
+      "EXTRATO-SAO-LEOPOLDO-INTERNO.pdf": "1f3a0a757b3d84e4f181c78fd727b228f46aeb3ffa101f4862466a8557649a1a",
+      "EXTRATO-SAO-LEOPOLDO-INTERNO.pptx": "702d90aa72583f9ef54e658a0ae041677d153f85a42fee6d3056ca8072a05625"
+    },
+    "operations": "Authorized main merge of9remoteSP/Fortaleza commits; only parallel LIVE temporarily stashed and reapplied; original parallel files untouched, safety stash retained. No new live collection during implementation."
+  }
 }
