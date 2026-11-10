@@ -61,7 +61,6 @@ describe('SP — coerência dos destaques e referência visual',()=>{
   });
   it('destaca cinco trimestres equivalentes na série de17pontos',()=>{
     const report=setup(),svg=renderToStaticMarkup(<SpTrendSlide report={report} number={18}/>);
-    expect(svg.match(/data-comparable-quarter="true"/g)).toHaveLength(5);
     const audit=spReviewSnapshot(report,reviewSpSlides(report)).numericAudit;
     expect(audit.trendSlides.find(row=>row.slide===18)!.series[0].points.at(-1)!.value).toBe(report.metrics.launches);
   });

@@ -1,5 +1,12 @@
 # Rebrain (Plataforma) — Documento Vivo
 
+## 10/11/2026 — Relatório São Paulo: correções editoriais — Lovable
+
+- **Mudança:** Tahoma nos slides/textos de exportação, sumário simplificado, remoção da casinha nas divisórias, período consolidado compacto e identificação preservada para parciais. Linhas suavizadas, rótulos sem caixas escuras, valores monetários em milhões inteiros e fonte FGV. Manchete de lançamentos deriva do volume da janela de 12 meses, sem alegar recorde histórico sem prova.
+- **Mapas:** visão ampla enquadra o núcleo urbano com percentis e mantém totais geocodificados; calor normalizado por visão e escala de concentração relativa com maior contraste, sem alterar valores de VGV. Contagem de empreendimentos visíveis explicitada.
+- **Validação:** 304 testes SP aprovados; conferência de tipos sem erros SP; navegador em desktop e largura móvel com amostra sintética nos slides 6, 12, 18, 46, 63 e 80. Padrão de slides existente e BrainLoadingState preservados. Não representa geração real autenticada ou aceite de indicadores.
+- **Etapas/pendências:** preços ponderados e escoamento existentes preservados; conciliação de 2T2026 e lacunas históricas aguarda resposta real/referência manual autorizada. Fotos HD aguardam originais. Exportação real e geração autenticada ainda não verificadas. Sem consulta de IA, alteração do Banco Quanti, Corretor, Empresas ou motores Secovi/FIERGS; sem push/publicação manual ou escrita no Monday.
+
 > **Rotação 27/10/2026:** entradas anteriores a 20/10/2026 foram movidas sem edição para [historico/LIVE_rebrain_ate_2026-10-19.md](historico/LIVE_rebrain_ate_2026-10-19.md). Este documento mantém o estado atual e o registro recente. Novas entradas seguem o `README.md` desta pasta: topo de **1. Desenvolvimentos**.
 
 

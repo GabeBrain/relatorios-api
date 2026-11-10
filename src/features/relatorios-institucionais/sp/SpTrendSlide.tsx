@@ -1,4 +1,5 @@
-import { spPeriodLabel, type SpPreview } from './model';
+import { spSmoothPath } from './chart-path';
+import { spSlidePeriod, type SpPreview } from './model';
 import type { SpAnnualSegments, SpProjectComparison } from './project-trends';
 
 const colors: Record<string, string> = { Compactos: '#4f6529', MCMV: '#ffcf00', 'Médio Padrão': '#1d6288', Luxo: '#dce9c8' };
@@ -10,7 +11,7 @@ export function SpTrendSlide({ report, number }: { report: SpPreview; number: nu
   const sales = number >= 32 && number <= 36;
   const vgv = number >= 40 && number <= 44;
   const monetary = number >= 26 && number <= 30 || vgv;
-  const format = monetary ? (value: number) => (value / 1e6).toLocaleString('pt-BR', { maximumFractionDigits: 1 }) : fmt;
+  const format = monetary ? (value: number) => (value / 1e6).toLocaleString('pt-BR', { maximumFractionDigits: 0 }) : fmt;
   const projects = number < 18, index = number - (projects ? 13 : sales ? 32 : vgv ? 40 : monetary ? 26 : 18);
   const source = projects ? report.projects : sales ? report.salesSeries : vgv ? report.vgvSeries : monetary ? report.vglSeries : report.launchSeries;
   const mcmv = index === 2 || index === 3, rolling = index === 1 || index === 3, annual = index === 4;
@@ -30,22 +31,21 @@ export function SpTrendSlide({ report, number }: { report: SpPreview; number: nu
     <text x="62" y="62" fontSize="32" fontWeight="bold">{metric}</text>
     <text x="62" y="100" fontSize="27" fontWeight="bold" fill={rolling ? '#c79f00' : '#5b7638'}>{subtitle}</text>
     <rect x="62" y="116" width="85" height="9" rx="4" fill="#ffcf00" />
-    <text x="62" y="157" fontSize="17">{report.quarter} · {spPeriodLabel(report)}</text>
+    <text x="62" y="157" fontSize="17">{spSlidePeriod(report)}</text>
     {!ready ? <><text x="640" y="335" textAnchor="middle" fontSize="28" fontWeight="bold">Dados em conferência</text>{wrap(message, 88).map((line, i) => <text key={i} x="640" y={380 + i * 28} textAnchor="middle" fontSize="19">{line}</text>)}</> : annual ? <AnnualChart rows={source!.breakdown!.annual!} throughMonth={report.throughMonth!} format={format} /> : <>
       <text x="90" y="202" fontSize="16">{rolling ? 'Acumulado nos últimos 12 meses' : `${sales ? 'Vendas líquidas' : vgv ? 'VGV vendido corrigido' : monetary ? 'VGL corrigido' : 'Lançamentos'} no trimestre selecionado`}</text>
       <text x="90" y="240" fontSize="32" fontWeight="bold" fill="#5b7638">{format(points.at(-1)!.value)}{!rolling && points.at(-1)!.partial ? '*' : ''}</text>
       <ComparisonTable rows={rolling?comparisons:comparisons.slice(-2)} />
       <line x1="75" x2="1205" y1="530" y2="530" stroke="#d9d9d9" />
       {minimum < 0 && <line x1="75" x2="1205" y1={y(0)} y2={y(0)} stroke="#aaa" strokeDasharray="5 4" />}
-      <polyline points={plotted.map(row => `${row.x},${row.y}`).join(' ')} fill="none" stroke="#5b7638" strokeWidth="3" />
+      <path d={spSmoothPath(plotted)} fill="none" stroke="#5b7638" strokeWidth="3" />
       {plotted.map((row, i) => <g key={i}>
-        {highlighted(i)&&<rect data-comparable-quarter="true" x={row.x-Math.max(64,format(row.value).length*14+12)/2} y={row.y-48} width={Math.max(64,format(row.value).length*14+12)} height="33" fill="#5b7638"/>}
-        {(!rolling || highlighted(i)) && <><circle cx={row.x} cy={row.y} r="4" fill="#5b7638" /><text x={row.x} y={highlighted(i)?row.y-23:row.value < 0 ? row.y + 18 : row.y - 16} textAnchor="middle" fontSize={highlighted(i)?23:16} fontWeight={highlighted(i)?'bold':'normal'} fill={highlighted(i)?'#fff':'#aaa'}>{format(row.value)}</text></>}
+                {(!rolling || highlighted(i)) && <><circle cx={row.x} cy={row.y} r="4" fill="#5b7638" /><text x={row.x} y={highlighted(i)?row.y-16:row.value < 0 ? row.y + 18 : row.y - 16} textAnchor="middle" fontSize={highlighted(i)?23:16} fontWeight={highlighted(i)?'bold':'normal'} fill={highlighted(i)?'#5b7638':'#aaa'}>{format(row.value)}</text></>}
         {(!rolling || i % 4 === 0 || i === points.length - 1) && <text x={row.x} y="552" textAnchor="middle" fontSize={rolling ? 16 : 14}>{row.label.split(' ').map((part, j) => <tspan key={j} x={row.x} dy={j ? 18 : 0}>{part}</tspan>)}</text>}
       </g>)}
-      <text x="62" y="588" fontSize="14">{rolling ? 'Cada ponto reúne 12 meses completos, incluindo o mês indicado.' : '* Trimestre atual parcial quando indicado; comparações anuais usam os mesmos meses.'} Base anterior zero: variação —.</text>
+      <text x="62" y="588" fontSize="14">{rolling ? 'Cada ponto reúne 12 meses completos, incluindo o mês indicado.' : points.some(row => row.partial) ? '* Trimestre atual parcial; comparações anuais usam os mesmos meses.' : 'Comparações anuais usam os mesmos meses.'} Base anterior zero: variação —.</text>
     </>}
-    {monetary&&<text x="62" y="606" fontSize="12">Valores corrigidos pelo INCC-DI para {report.throughMonth}. Fonte do índice: SindusconPR/FGV.</text>}
+    {monetary&&<text x="62" y="606" fontSize="12">Valores corrigidos pelo INCC-DI para {report.throughMonth}. Fonte do índice: FGV.</text>}
   </svg>;
 }
 

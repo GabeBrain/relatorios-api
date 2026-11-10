@@ -63,7 +63,6 @@ describe('SP — correções da comparação dos85slides',()=>{
     expect(screen.getByRole('article').querySelectorAll('[data-sp-target-slide]')).toHaveLength(9);
     fireEvent.click(within(screen.getByRole('article')).getByRole('button',{name:'Ir para 12. lançamentos verticais'}));
     expect(screen.getByRole('article')).toHaveAttribute('aria-label','Slide 12: Divisória: lançamentos verticais');
-    fireEvent.click(screen.getByRole('button',{name:'Voltar ao sumário'}));
-    expect(screen.getByRole('article')).toHaveAttribute('aria-label','Slide 6: Sumário e navegação');
+    expect(screen.queryByRole('button',{name:'Voltar ao sumário'})).not.toBeInTheDocument();
   });
 });
