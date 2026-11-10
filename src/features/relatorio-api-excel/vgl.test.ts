@@ -68,3 +68,35 @@ it('zero explícito no lançamento é preservado e a soma reconciliada não soma
   const zero = { ...building, typologies_history: building.typologies_history.map((r) => r.period === '2026-01-15' ? { ...r, qty: 0 } : r) };
   expect(buildReport([zero], { ...options, level: 'building' }).rows[0].VGL).toBe(0);
 });
+it.each(['launch', 'current'] as const)('preço médio VGL %s pondera quantidades lançadas e conserva reais no Excel', async (vglPriceMode) => {
+  const field = 'Preço Médio para VGL';
+  const expected = vglPriceMode === 'launch' ? 2500 / 15 : 4000 / 15;
+  for (const granularity of ['month', 'quarter'] as const) for (const layout of ['rows', 'columns'] as const) {
+    const report = buildReport([building], { ...options, vglPriceMode, level: 'building', layout, granularity, buildingAverageMode: 'simple-standard' });
+    expect(report.rows[0][field]).toBeCloseTo(expected, 10);
+    const label = granularity === 'month' ? 'jan/2026' : '1T/2026';
+    if (layout === 'columns') expect(report.rows[0][`${field} ${label}`]).toBeCloseTo(expected, 10);
+    const selected = selectReportFields(report, [field]);
+    const workbook = await createWorkbook(selected);
+    const reopened = read(write(workbook, { bookType: 'xlsx', type: 'array' }), { type: 'array', cellNF: true });
+    const cell = reopened.Sheets[reopened.SheetNames[0]].A2;
+    expect(cell.v).toBeCloseTo(expected, 10); expect(cell.t).toBe('n'); expect(cell.z).toBe('0.00');
+    const col = layout === 'rows' ? 'VGL' : `VGL ${label}`;
+    expect(report.rows[0][col]).toBe(vglPriceMode === 'launch' ? 2500 : 4000);
+  }
+});
+it('preço médio VGL acompanha tipologias presentes por período sem retroagir ou somar médias', () => {
+  const data = { ...building, release_date: '2025-12-15', typologies_history: building.typologies_history
+    .filter((r) => !(r.typology_id === 2 && r.period === '2026-01-31'))
+    .map((r) => r.period === '2026-01-15' ? { ...r, period: '2025-12-15' } : r) };
+  const rows = buildReport([data], { ...options, level: 'building' }).rows;
+  expect(rows[0]['Preço Médio para VGL']).toBe(200);
+  expect(rows[1]['Preço Médio para VGL']).toBeCloseTo(4000 / 15, 10);
+  const wide = buildReport([data], { ...options, level: 'building', layout: 'columns' }).rows[0];
+  expect(wide['Preço Médio para VGL jan/2026']).toBe(200);
+  expect(wide['Preço Médio para VGL fev/2026']).toBeCloseTo(4000 / 15, 10);
+  const noLaunch = { ...building, release_date: '2026-01-16' };
+  expect(buildReport([noLaunch], { ...options, level: 'building' }).rows[0]['Preço Médio para VGL']).toBeNull();
+  const zero = { ...building, typologies_history: building.typologies_history.map((r) => r.period === '2026-01-15' ? { ...r, qty: 0 } : r) };
+  expect(buildReport([zero], { ...options, level: 'building' }).rows[0]['Preço Médio para VGL']).toBeNull();
+});

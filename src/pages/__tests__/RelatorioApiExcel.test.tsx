@@ -86,6 +86,8 @@ describe('Relatório API Excel — geração explícita', () => {
     expect(within(columns).getByText('Vendas Brutas', { exact: true })).toBeVisible();
     expect(within(columns).getByText('VGV Estoque', { exact: true })).toBeVisible();
     expect(within(columns).getByText('VGL', { exact: true })).toBeVisible();
+    expect(within(columns).getByText('Preço Médio para VGL', { exact: true })).toBeVisible();
+    expect(within(columns).queryByText('Preço de Lançamento', { exact: true })).not.toBeInTheDocument();
     expect(within(columns).getByText('Faixa MCMV', { exact: true })).toBeVisible();
     expect(screen.getByRole('button', { name: 'Baixar Excel' })).toBeDisabled();
     expect(engine.buildReport).toHaveBeenCalledTimes(1);

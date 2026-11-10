@@ -185,7 +185,7 @@ describe('Relatório API Excel — regras posteriores à coleta', () => {
       'Preço Médio Empreendimento', 'Preço m²', 'VGL', 'VGV Vendas Brutas', 'VGV Distratos', 'VGV Vendas Líquidas', 'VGV Estoque'];
     expect([...MEASURES]).toEqual(expected);
     const wide = report({ granularity });
-    expect(wide.columns.slice(FIXED_COLUMNS.length + 2 * wide.periods.length)).toEqual(expected.flatMap((metric) => wide.periods.map(({ label }) => `${metric} ${label}`)));
+    expect(wide.columns.slice(FIXED_COLUMNS.length + 3 * wide.periods.length)).toEqual(expected.flatMap((metric) => wide.periods.map(({ label }) => `${metric} ${label}`)));
     const tabular = report({ granularity, layout: 'rows' });
     expect(tabular.columns.slice(FIXED_COLUMNS.length)).toEqual(['Período', ...expected]);
     expect(FIXED_COLUMNS).not.toContain('VGL');
@@ -366,7 +366,7 @@ describe('Relatório API Excel — regras posteriores à coleta', () => {
     expect(after('Cidade/UF', 1)).toEqual(['Tipo']);
     expect(after('Padrão', 3)).toEqual(['Faixa MCMV', 'Preço Médio para Faixa MCMV', 'Tipologia']);
     expect(after('Unidades por Tipologia', 1)).toEqual(['Unidades Totais do Empreendimento']);
-    expect(after('Tipologia', 3)).toEqual(['Preço de Lançamento', 'M² Lançado', 'R$/m² Lançado']);
+    expect(after('Tipologia', 4)).toEqual(['Preço de Lançamento', 'Preço Médio para VGL', 'M² Lançado', 'R$/m² Lançado']);
     expect(after('Data de Entrega', 2)).toEqual(['Quartos', 'Garagem']);
     for (const obsolete of ['Urbanizadora', 'Lançamento', 'Entrega', 'Oferta por Lotes', 'm² Lançado']) expect(FIXED_COLUMNS).not.toContain(obsolete);
   });

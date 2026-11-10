@@ -385,6 +385,13 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 10/11/2026 — Relatório API Excel: preço médio usado no VGL — Edgar / Codex
+
+- **Mudança exclusiva:** coluna selecionável Preço Médio para VGL. Por empreendimento: soma(qty lançado × preço escolhido) / soma(qty lançado), com as mesmas tipologias do VGL (inclusive Garden/Cobertura). Por tipologia expõe preço individual. Não usa média geral nem filtro Padrão/MCMV; não renomeia Preço de Lançamento para um valor que poderia ser atual. Tabular por período; horizontal posição final/série. Valor em reais sem escala VGV/VGL, precisão interna e duas casas no Excel/prévia. Ausências/pesos zerados geram vazio; total_units não substitui pesos. VGL permanece soma dos produtos.
+- **Validação:**92 testes em sete arquivos aprovados: média lançada/atual com pesos10+5 mesmo após qty20+5, exclusão de escala, independência da média geral, visões/layouts, períodos sem uma tipologia, ausências/zero e XLSX reaberto. Tipos/lint/build aprovados. Navegador1440/390 claro/escuro com rede simulada e downloads: preço médio atual400.000 e lançamento233.333,333… com pesos10+20, independente de qty posterior100+200, VGL12/7milhões preservado, quatro chamadas de coleta e zero erro de página. Evidência ignorada verify-vgl-average.cjs. Nenhuma API autenticada ou alteração no coletor/AELO/Dashboard.
+- **Etapas/Pendências:** implementação local; integração upstream continua adiada conforme escolha do usuário. Base969e8501; commit desta entrada. Sem merge/push/Monday. Padrões de seleção/descrições/tabela existentes reutilizados, sem novo carregamento.
+- **Monday:** —
+
 ### 10/11/2026 — Relatório API Excel: quantidade lançada fixa no VGL — Edgar / Codex
 
 - **Regra confirmada:** quantidade lançada por tipologia = qty onde period = release_date exato; soma teoricamente igual a total_units. VGL passa a usar essa quantidade fixa em ambos modos de preço/níveis/layouts/visões, sem usar qty posterior. Mantém preço de lançamento ou atual conforme combobox. Sem correspondência/qty, valor vazio inclusive em preço atual; total por empreendimento não publica soma parcial. Tipologia criada depois sem registro de lançamento não recebe fallback ou retroação. Cadastro total_units não é corrigido/rateado nem tratado como automaticamente errado em divergência.

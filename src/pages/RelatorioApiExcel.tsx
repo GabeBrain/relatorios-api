@@ -29,7 +29,7 @@ function display(column: string, value: Cell, scale: VgvScale = 'standard') {
   if (result === null) return '';
   if (typeof result !== 'number') return result;
   if (PERCENT_COLUMNS.has(column)) return result.toLocaleString('pt-BR', { style: 'percent', minimumFractionDigits: 2 });
-  return result.toLocaleString('pt-BR', { maximumFractionDigits: 2, minimumFractionDigits: isScaledMonetary(column) || column.startsWith('Preço Médio para Faixa MCMV') ? 2 : 0 });
+  return result.toLocaleString('pt-BR', { maximumFractionDigits: 2, minimumFractionDigits: isScaledMonetary(column) || column.startsWith('Preço Médio para Faixa MCMV') || column.startsWith('Preço Médio para VGL') ? 2 : 0 });
 }
 
 export default function RelatorioApiExcel() {
@@ -214,6 +214,7 @@ export default function RelatorioApiExcel() {
           {!validDates && <p role="alert" className="text-sm text-destructive">Informe datas válidas, com a data inicial anterior ou igual à final.</p>}
           <p className="text-xs text-muted-foreground">{monetaryHelp(priceMode)} A escala escolhida para VGV/VGL será aplicada à prévia, aos gráficos e ao Excel. Vendas Brutas = gross_sales; Distratos = distractions; Vendas Líquidas = Vendas Brutas − Distratos.</p>
           <p className="text-xs text-muted-foreground">{vglHelp(vglPriceMode)}</p>
+          <p className="text-xs text-muted-foreground">Preço Médio para VGL: média dos preços escolhidos em Cálculo VGL ponderada pela quantidade de lançamento de cada tipologia, incluindo Garden e Cobertura. Por empreendimento, corresponde à base do VGL; por tipologia, mostra o próprio preço escolhido. Em reais com duas casas, sem escala VGV/VGL e independente do filtro geral de preço médio. Sem quantidade/preço válido, fica vazio. O VGL continua calculado pela soma das tipologias, sem recomputar pela média arredondada.</p>
           <p className="text-xs text-muted-foreground">Preço Médio Empreendimento considera o último fechamento de cada tipologia no período e se repete nas linhas do mesmo empreendimento. {buildingAverageMode.startsWith('simple') ? 'Média simples dos preços válidos.' : buildingAverageMode.startsWith('quantity') ? 'Soma de preço × quantidade, dividida pela soma das quantidades.' : 'Soma de preço × estoque, dividida pela soma dos estoques.'} {buildingAverageMode.endsWith('-standard') ? 'Somente tipologias Padrão participam desta média; Garden, Cobertura e demais tipologias continuam nas linhas do relatório.' : 'Inclui todas as tipologias com dados válidos, inclusive Garden e Cobertura.'} Pesos ausentes ou não positivos são excluídos; sem base válida, o valor fica vazio.</p>
           <p className="text-xs text-muted-foreground">Preço Atual e Preço m² mostram a posição de cada período; a opção Valor atual/Valor do período governa os VGV. As datas filtram os meses de typologies_history[].period, incluindo o mês final inteiro; o dia exibido é sempre 01. VGL usa a quantidade lançada na data exata de lançamento, com preço próprio selecionado; não representa novos lançamentos do período. A soma das quantidades lançadas das tipologias é a referência para conferir total_units; divergências não são corrigidas automaticamente.</p>
         </section>
