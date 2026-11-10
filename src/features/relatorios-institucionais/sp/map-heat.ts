@@ -13,10 +13,13 @@ export function spVgvHeat(points:{left:number;top:number;value:number|null}[],co
     }
   }
   const maximum=density.reduce((a,b)=>Math.max(a,b),0);
+  // Rank-based colour: one dominant cluster no longer leaves every other cell green.
+  const ranked=Array.from(density).filter(value=>value>maximum*.03).sort((a,b)=>a-b);
+  const rank=(value:number)=>{if(ranked.length<2)return value>0?1:0;let low=0,high=ranked.length-1;while(low<high){const mid=(low+high+1)>>1;if(ranked[mid]<=value)low=mid;else high=mid-1;}return low/(ranked.length-1);};
   const color=(ratio:number)=>{
     const start=ratio<.5?[62,163,69]:[255,235,0],end=ratio<.5?[255,235,0]:[235,40,30],t=ratio<.5?ratio*2:(ratio-.5)*2;
     return `rgb(${start.map((v,i)=>Math.round(v+(end[i]-v)*t)).join(',')})`;
   };
-  const cells=Array.from(density,(value,index)=>({x:index%columns/columns*100,y:Math.floor(index/columns)/rows*100,ratio:maximum>0?value/maximum:0})).filter(c=>c.ratio>.03).map(cell=>({...cell,color:color(cell.ratio),opacity:.18+.52*Math.sqrt(cell.ratio)}));
+  const cells=Array.from(density,(value,index)=>({x:index%columns/columns*100,y:Math.floor(index/columns)/rows*100,ratio:maximum>0?value/maximum:0,value})).filter(c=>c.ratio>.03).map(({value,...cell})=>{const level=Math.max(cell.ratio,rank(value));return {...cell,level,color:color(level),opacity:.3+.45*level};});
   return {cells,columns,rows,maximum,contributors:valid.length};
 }
