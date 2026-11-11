@@ -1,0 +1,173 @@
+{
+  "scope": "SP capital; 2T2026; supplied artifacts, not a new API extraction",
+  "manualSha256": "1350f82cb1d9386487ca1a9aee110fb19cf3d6ea7cb40d4a0205025802d9939b",
+  "generatedSha256": "6e9eaa58d7a91dfa909f3faec4a5cfb4d3dc7b114cd19cbdba18bca843403832",
+  "generatedAt": "2026-11-05T19:22:37.971Z",
+  "rows": [
+    {
+      "pattern": "Média Mercado",
+      "manualStock": 118362,
+      "generatedStock": 127840,
+      "generatedQuarterSales": 38658,
+      "generatedMonthlySales": 12886.0,
+      "generatedMonthsExact": 9.92084432717678,
+      "generatedDisplayedCeil": 10,
+      "manualMonthsExact": 8.8347889,
+      "manualDisplayedNearest": 9,
+      "manualImpliedMonthlySales": 13397.2640817711,
+      "manualImplied12MonthSales": 160767.1689812532
+    },
+    {
+      "pattern": "Compacto",
+      "manualStock": 21060,
+      "generatedStock": 22321,
+      "generatedQuarterSales": 5658,
+      "generatedMonthlySales": 1886.0,
+      "generatedMonthsExact": 11.835100742311772,
+      "generatedDisplayedCeil": 12,
+      "manualMonthsExact": 10.492353,
+      "manualDisplayedNearest": 10,
+      "manualImpliedMonthlySales": 2007.1760833818687,
+      "manualImplied12MonthSales": 24086.113000582423
+    },
+    {
+      "pattern": "Econômico",
+      "manualStock": 62520,
+      "generatedStock": 68986,
+      "generatedQuarterSales": 26443,
+      "generatedMonthlySales": 8814.333333333334,
+      "generatedMonthsExact": 7.8265703588851485,
+      "generatedDisplayedCeil": 8,
+      "manualMonthsExact": 7.0486767,
+      "manualDisplayedNearest": 7,
+      "manualImpliedMonthlySales": 8869.749977325531,
+      "manualImplied12MonthSales": 106436.99972790637
+    },
+    {
+      "pattern": "Standard",
+      "manualStock": 20313,
+      "generatedStock": 21740,
+      "generatedQuarterSales": 3890,
+      "generatedMonthlySales": 1296.6666666666667,
+      "generatedMonthsExact": 16.76606683804627,
+      "generatedDisplayedCeil": 17,
+      "manualMonthsExact": 13.693868,
+      "manualDisplayedNearest": 14,
+      "manualImpliedMonthlySales": 1483.364670960754,
+      "manualImplied12MonthSales": 17800.37605152905
+    },
+    {
+      "pattern": "Médio",
+      "manualStock": 7595,
+      "generatedStock": 7774,
+      "generatedQuarterSales": 1610,
+      "generatedMonthlySales": 536.6666666666666,
+      "generatedMonthsExact": 14.485714285714288,
+      "generatedDisplayedCeil": 15,
+      "manualMonthsExact": 15.765439,
+      "manualDisplayedNearest": 16,
+      "manualImpliedMonthlySales": 481.7499848878296,
+      "manualImplied12MonthSales": 5780.999818653955
+    },
+    {
+      "pattern": "Médio-Alto",
+      "manualStock": 2371,
+      "generatedStock": 2403,
+      "generatedQuarterSales": 515,
+      "generatedMonthlySales": 171.66666666666666,
+      "generatedMonthsExact": 13.998058252427185,
+      "generatedDisplayedCeil": 14,
+      "manualMonthsExact": 10.4757,
+      "manualDisplayedNearest": 10,
+      "manualImpliedMonthlySales": 226.33332378743188,
+      "manualImplied12MonthSales": 2715.9998854491823
+    },
+    {
+      "pattern": "Alto",
+      "manualStock": 2201,
+      "generatedStock": 2205,
+      "generatedQuarterSales": 158,
+      "generatedMonthlySales": 52.666666666666664,
+      "generatedMonthsExact": 41.86708860759494,
+      "generatedDisplayedCeil": 42,
+      "manualMonthsExact": 14.177134,
+      "manualDisplayedNearest": 14,
+      "manualImpliedMonthlySales": 155.24999622631768,
+      "manualImplied12MonthSales": 1862.9999547158122
+    },
+    {
+      "pattern": "Luxo",
+      "manualStock": 2302,
+      "generatedStock": 2411,
+      "generatedQuarterSales": 384,
+      "generatedMonthlySales": 128.0,
+      "generatedMonthsExact": 18.8359375,
+      "generatedDisplayedCeil": 19,
+      "manualMonthsExact": 14.701437,
+      "manualDisplayedNearest": 15,
+      "manualImpliedMonthlySales": 156.58333263612258,
+      "manualImplied12MonthSales": 1878.999991633471
+    }
+  ],
+  "originalWorkbook": {
+    "path": "ppt/embeddings/Planilha_do_Microsoft_Excel32.xlsx",
+    "formulaCount": 0,
+    "cacheMatchesWorkbook": true
+  },
+  "originalSales": {
+    "marketLast4Quarters": [
+      36052.0,
+      42175.0,
+      39640.0,
+      42275.0
+    ],
+    "marketRolling12": 160142.0,
+    "mcmvLast4Quarters": [
+      22590.0,
+      29225.0,
+      25557.0,
+      29065.0
+    ],
+    "mcmvRolling12": 106437.0
+  },
+  "economicRolling12ReproducedMonths": 7.04867668198089,
+  "marketRolling12RecomputedMonths": 8.869278515317657,
+  "supportWorkbookReproductions": [
+    {
+      "pattern": "Compacto",
+      "supportStock": 20753,
+      "supportRolling12Sales": 23735,
+      "months": 10.492353065093743
+    },
+    {
+      "pattern": "Standard",
+      "supportStock": 20025,
+      "supportRolling12Sales": 17548,
+      "months": 13.693868247093686
+    }
+  ],
+  "supportMarketReproduction": {
+    "stock": 117767,
+    "rolling12Sales": 159959.0,
+    "currentQuarterSales": 42092,
+    "months": 8.834788914659383
+  },
+  "highMixedSourceReproduction": {
+    "manualPrior3QuarterSales": [
+      707,
+      500,
+      498
+    ],
+    "generatedCurrentQuarterSales": 158,
+    "rolling12Sales": 1863,
+    "warning": "Current 158 is observed in generated audit, not the stale manual support cell, which contains 190."
+  },
+  "limits": [
+    "The source workbook contains pasted values, not formulas.",
+    "Economic reproduces rolling12 exactly within cache precision; this alone does not prove every row formula.",
+    "Other implied denominators are algebraic reconstructions, not observed sales.",
+    "Displayed market stock/sales do not reproduce exactly; embedded support stock/sales do reproduce it.",
+    "Manual support sheets contain legacy pattern names and multiple numeric versions; individual classification provenance remains incomplete."
+  ],
+  "analystApproval": false
+}

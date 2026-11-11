@@ -392,6 +392,12 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 11/11/2026 — SP: origem dos meses de escoamento — Lucas / Codex
+
+- **Diagnóstico:** leitura do original no Drive,51planilhas embutidas, caches e auditoria do gerado. [Contas, fontes e limites](../features/relatorios-institucionais/sp/INVESTIGACAO_ESCOAMENTO_2026-11-11.md). Econômico, Compacto, Standard e mercado reproduzem média móvel de12meses; Alto reproduz com históricos originais e158vendas atuais do gerado. Sistema usa média do trimestre, explicando41,87contra14,177meses no Alto. Original contém bases de apoio diferentes dos totais finais, além de arredondamento diferente.
+- **Validação/estado:** script offline compara Excel/cache, totais trimestrais/móveis e reproduções numéricas, com hashes/JSON. Nenhuma fórmula de produção alterada ou nova coleta. Etapa de conciliação em andamento; pendem memória nominal e diferenças individuais de classificação/atualização. Não homologado, não publicado; trabalho anterior7685cd57preservado.
+- **Monday:** [Desafio relatórios automatizados](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`; somente referência.
+
 ### 11/11/2026 — SP Institucional: revisão do analista, Top10 e nitidez do PPTX — Lucas / Codex
 
 - **Ambiente/funcionalidade:** Rebrain — `/rebrain/relatorios-institucionais/sp`. Base608009b7recebida porFF limpo de49commits; correções Lovable e entregas paralelas preservadas.

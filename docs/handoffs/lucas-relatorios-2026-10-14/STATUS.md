@@ -1,5 +1,9 @@
 # Estado do handoff
 
+## 11/11/2026 — investigação da origem do escoamento SP
+
+Lucas pediu rastrear os números do original no Drive. [Investigação e retomada](../../features/relatorios-institucionais/sp/INVESTIGACAO_ESCOAMENTO_2026-11-11.md): inspecionadas as51planilhas embutidas, caches, colunas de apoio e auditoria do gerado. Econômico, Compacto, Standard e mercado reproduzidos com média de12meses; Alto reproduz com707+500+498históricos originais e158atuais da auditoria do sistema. Original contém versões distintas: escoamento do mercado usa117.767/159.959, enquanto totais finais exibem118.362/160.142. Sistema usa3meses e teto; original arredonda ao inteiro mais próximo. Restam linhagem nominal, atualização/classificação e distribuições individuais; não afirmar homologação integral. Script offline com asserções e JSON versionados. Ambiente main/origin,1commit anterior local na abertura; nenhuma fórmula runtime alterada, nova consulta GeoBrain, coleta longa, geração real, publicação ou escrita Monday.
+
 ## 11/11/2026 — SP: revisão do analista sem bloquear demais correções
 
 Lucas forneceu MD/PPTX anotado e depois adiou expressamente o escoamento para avançar os demais itens. [Contrato, hashes, diagnóstico e retomada](../../features/relatorios-institucionais/sp/CORRECOES_ANALISTA_2026-11-11.md). Sessão Windows/PowerShell, main, único remoto origin; FF limpo incorporou49commits até608009b7. Recuperado original manual do RAR local, hash coincide com catálogo. Sem token pessoal lido, API real, coleta longa, geração real, publicação ou escrita Monday.
