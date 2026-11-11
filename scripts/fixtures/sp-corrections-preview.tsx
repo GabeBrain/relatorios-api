@@ -11,6 +11,7 @@ import { buildSpGranularDetails } from '../../src/features/relatorios-institucio
 import { buildSpSalesNeighborhoods } from '../../src/features/relatorios-institucionais/sp/sales-neighborhoods';
 import { buildSpProjects } from '../../src/features/relatorios-institucionais/sp/projects';
 import { buildSpEditablePptx } from '../../src/features/relatorios-institucionais/sp/pptx-export';
+import { buildSpMunicipalPrices, spPricePeriods } from '../../src/features/relatorios-institucionais/sp/municipal-prices';
 import '../../src/index.css';
 
 // Local diagnostic only. Replays and invented histories are not a market baseline.
@@ -24,6 +25,14 @@ report.vglSeries=buildSpVglSeries(syntheticLaunchSeries(input),report);
 report.vgvSeries=buildSpVgvSeries(syntheticSalesSeries(input),report);
 report.granularDetails=buildSpGranularDetails(buildings,report);
 report.projects=buildSpProjects(buildings,report);
+// Invented native responses for offline UI QA, never market observations.
+const priceMode=new URLSearchParams(location.search).get('native-prices');
+if(priceMode){
+  const sources=(['medium-prices','medium-prices-meter'] as const).flatMap(metric=>(['overall','Padrão','Tipologia'] as const).map(grouping=>({metric,grouping,rows:spPricePeriods(report).flatMap((period,index)=>(grouping==='overall'?['Geral']:grouping==='Tipologia'?['1 Quarto','2 Quartos','3 Quartos','4+ Quartos']:['Compacto','Econômico','Standard','Médio','Médio-Alto','Alto','Luxo']).map(group=>({period:`${period.month}-01`,building_type:'Vertical',group,[metric==='medium-prices'?'average_price':'average_price_per_meter']:(metric==='medium-prices'?800000:18000)+index*100}))),...(priceMode==='error'?{issue:'Fonte de preços temporariamente indisponível.'}:{})})));
+  if(priceMode==='empty')sources.forEach(source=>{source.rows=[];});
+  if(priceMode==='gap')sources.forEach(source=>{source.rows=source.rows.filter(row=>!row.period.startsWith('2024-06'));});
+  report.municipalPrices=buildSpMunicipalPrices(sources,report);
+}
 // Exercise the signed denominator on its own reconciled synthetic city.
 const first=report.monthly![0].month;
 const amounts=[1377,1135,1032,993,962,888,842,775,768,741,...Array.from({length:41},()=>700),449,-4];

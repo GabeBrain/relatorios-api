@@ -1,5 +1,9 @@
 # Decisões e pontos abertos — SP
 
+## 11/11/2026 — fonte municipal dos preços
+
+[Contrato e limites](CORRECAO_FONTE_PRECOS_2026-11-11.md). Nova geração usa observações `medium-prices`/`medium-prices-meter` por competência/grupo, separadas do cálculo por estoque. Total geral exige observação explícita, sem média dos padrões; resposta sem agrupamento ainda não validada autenticada. Série municipal não depende de conciliação granular. Séries sem MCMV conservam método granular candidato; MCMV/MAP nos cards municipais fica indisponível até comprovar o cruzamento equivalente, preservando o granular na auditoria. Esta decisão substitui a exclusividade do cálculo granular descrita nas entradas antigas; não homologa pesos/metodologia da API nem seus valores reais. Escoamento preservado até retorno do analista.
+
 ## 11/11/2026 — correções do analista
 
 Aplicar o MD pelo conteúdo, pois a numeração diverge do PPTX anotado. [Entrega e limites](CORRECOES_ANALISTA_2026-11-11.md). Com saldo municipal positivo e reconciliado, a participação líquida por bairro é válida mesmo com bairros negativos: conservar sinais e eventuais percentuais acima de100%. Base não positiva segue sem percentual; total/mês continuam impeditivos em divergência. Esta decisão substitui a guarda anterior que suprimia todas as participações quando qualquer bairro era negativo.

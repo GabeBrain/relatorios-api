@@ -23,7 +23,8 @@ vi.mock('./api', async () => {
   const { syntheticTypologyInput, syntheticPreviousTypology } = await import('./__tests__/typology');
   const { syntheticHistoryBatch } = await import('./__tests__/history-batch');
   const { syntheticLaunchSeries, syntheticSalesSeries, syntheticVglInput, syntheticStockSeries } = await import('./__tests__/launch-series');
-  return { fetchSpTemporalInput: async (_quarter: string, options: { signal: AbortSignal; groupBy?: 'Padrão' | 'Tipologia' }) => {
+  const { buildSpMunicipalPrices } = await import('./municipal-prices');
+  return { fetchSpMunicipalPrices: async (report: import('./model').SpPreview) => buildSpMunicipalPrices([], report), fetchSpTemporalInput: async (_quarter: string, options: { signal: AbortSignal; groupBy?: 'Padrão' | 'Tipologia' }) => {
     if (access.apiMode === 'error') throw new Error('private API diagnostic');
     if (access.apiMode === 'pending') return new Promise((_resolve, reject) => { options.signal.addEventListener('abort', () => { access.aborted = true; reject(new DOMException('cancelled', 'AbortError')); }); });
     if (options.groupBy === 'Tipologia') {

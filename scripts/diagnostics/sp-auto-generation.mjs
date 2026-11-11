@@ -29,6 +29,7 @@ try {
   const context = await browser.newContext();
   await context.addInitScript(() => { if(location.protocol==='http:')localStorage.setItem('brain-auth', JSON.stringify({ state: { token: 'synthetic-only', email: 'fixture@example.invalid', issuedAt: Date.now(), expiresAt: Date.now() + 3600000 }, version: 0 })); });
   let closing = '07', slow = false, failure = false, empty = false, granularFailure = false, slowNeighborhood = false, slowStock = false, negativeSales = false, detailsCase = 'normal', neighborhoodCalls = 0, calls = 0, granularCalls = 0, slowMapbox = false, mapboxFailure = false, historyFailure=false;
+  let priceDelaySeen=false,nativePriceCalls=0;
   await context.route('**/*', async route => {
     const url = new URL(route.request().url());
     const reply = data => route.fulfill({ contentType: 'application/json', body: JSON.stringify({ data, meta: { current_page: 1, last_page: 1, total: data.length }, links: { next: null } }) });
@@ -91,6 +92,18 @@ try {
       if(historyFailure&&url.searchParams.get('start_period')==='2021-01-01')return route.fulfill({status:429,headers:{'Retry-After':'0'},body:'{}'});
       if (slowStock && url.pathname.endsWith('/stock') && /-01-01$/.test(url.searchParams.get('start_period')??'')) await new Promise(done => setTimeout(done, 5000));
       const metric = url.pathname.split('/').at(-1);
+      if(['medium-prices','medium-prices-meter'].includes(metric)){
+        nativePriceCalls++;
+        if(slowNeighborhood&&!priceDelaySeen){priceDelaySeen=true;await new Promise(done=>setTimeout(done,1800));}
+        const start=url.searchParams.get('start_period').slice(0,7),end=url.searchParams.get('end_period').slice(0,7),grouping=url.searchParams.get('group_by');
+        const rows=[],groups=grouping==='Tipologia'?['1 Quarto','2 Quartos','3 Quartos','4+ Quartos']:grouping==='Padrão'?recorded.groups:['Geral'];
+        for(let year=2022;year<=2026;year++)for(let m=1;m<=12;m++){
+          const month=`${year}-${String(m).padStart(2,'0')}`;
+          if(month<start||month>end||month>`2026-${closing}`)continue;
+          for(const group of groups)rows.push({period:`${month}-01`,group,building_type:'Vertical',[metric==='medium-prices'?'average_price':'average_price_per_meter']:metric==='medium-prices'?800000:18000+m*10});
+        }
+        return reply(rows);
+      }
       const field = { sales: 'liquid_sales', releases: 'releases_in_period', stock: 'stock' }[metric];
       const months = Object.fromEntries(Object.entries(recorded[metric]).filter(([month]) => month < '2026-09').map(([month, values]) => [month, [...values]]));
       months['2026-09'] = metric === 'stock' ? observed.septemberStock : metric === 'sales' ? observed.septemberSales : observed.septemberReleases;
@@ -133,6 +146,7 @@ try {
   const generate=()=>page.getByRole('button',{name:'Gerar relatório',exact:true}).click();
   const finish=async()=>{try{await page.getByRole('heading',{name:/Relatório gerado/}).waitFor({timeout:60000});}catch(error){await writeFile(resolve(output,'failure-dom.txt'),await page.locator('main').innerText());throw error;}};
   const setup=async(width,dark)=>{
+    priceDelaySeen=false;
     await page.setViewportSize({width,height:1000});
     await page.goto('about:blank');
     await page.goto(`${base}/rebrain/relatorios-institucionais/sp`);
@@ -154,6 +168,7 @@ try {
     await page.getByRole('button',{name:/Recolher menu|Expandir menu/}).first().click({trial:true});
     await page.screenshot({path:resolve(output,`${width}-${dark}-initial.png`)});
     await page.locator('[data-step="details"][data-status="running"]').waitFor({timeout:60000});
+    await page.getByText(/Conferindo preços gerais/).first().waitFor();
     await page.getByRole('heading',{name:'Gerando seu relatório'}).scrollIntoViewIfNeeded();
     await page.getByRole('region',{name:'Etapas de geração'}).screenshot({path:resolve(output,`${width}-${dark}-progress.png`)});
     await finish();
@@ -189,5 +204,5 @@ try {
   results.push({emptyStopsHeavyCalls:true});
   assert.deepEqual(errors,[]);
   await writeFile(resolve(output,'results.json'),JSON.stringify({results,errors,source:'synthetic intercepted business API; no real authentication'},null,2));
-  console.log(JSON.stringify({results,errors}));
+  console.log(JSON.stringify({results,errors,nativePriceCalls}));
 }finally{await browser?.close();server.kill();}

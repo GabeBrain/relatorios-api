@@ -392,6 +392,13 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 11/11/2026 — SP: fonte municipal de preços e recuperação do histórico — Lucas / Codex
+
+- **Mudança:** observações de preço municipal integradas à geração, independentes da reconciliação granular, com auditoria/insights distinguindo preço informado e cálculo por estoque. Média geral exige total explícito; sem média de padrões. [Contrato e retomada](../features/relatorios-institucionais/sp/CORRECAO_FONTE_PRECOS_2026-11-11.md). Preservados recortes sem MCMV/MAP candidatos, escoamento e demais motores.
+- **Validação:** suíte SP/tipos/build/lint e Edge offline:40casos de slides mais sete cenários de geração lenta/cancelamento/recuperação/vazio/erro, sem erros de página. Fontes simuladas, nenhuma nova medição de mercado.
+- **Etapas/pendências:** implementação local para ensaio; autenticação real, retorno geral sem agrupamento, valores2T2026 e metodologia integral ainda pendentes. Não declarar o preço corrigido/homologado antes do retorno real. Nova fatia local sobre f0d5b408; sem push, publicação ou escrita Monday.
+- **Monday:** [Desafio relatórios automatizados](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`; somente referência.
+
 ### 11/11/2026 — SP: origem dos meses de escoamento — Lucas / Codex
 
 - **Diagnóstico:** leitura do original no Drive,51planilhas embutidas, caches e auditoria do gerado. [Contas, fontes e limites](../features/relatorios-institucionais/sp/INVESTIGACAO_ESCOAMENTO_2026-11-11.md). Econômico, Compacto, Standard e mercado reproduzem média móvel de12meses; Alto reproduz com históricos originais e158vendas atuais do gerado. Sistema usa média do trimestre, explicando41,87contra14,177meses no Alto. Original contém bases de apoio diferentes dos totais finais, além de arredondamento diferente.

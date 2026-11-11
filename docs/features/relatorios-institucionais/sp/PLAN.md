@@ -1,5 +1,9 @@
 # SP capital — primeiro mapeamento
 
+## 11/11/2026 — prioridade: fonte dos preços e histórico
+
+[Implementação, limites e ensaio seguinte](CORRECAO_FONTE_PRECOS_2026-11-11.md): observações municipais de preços independentes das fotografias granulares; fonte aplicada e cálculo por estoque separados na auditoria/insights. Integração automática, paginação delimitada e recuperação local implementadas. Valor real de2T2026 e resposta geral sem agrupamento ainda não observados; não homologado. Sem MCMV/MAP continua candidato. Alterações anteriores7685cd57/f0d5b408já publicadas por autorização de Lucas; nova fatia permanece local. Escoamento aguarda retorno metodológico do analista.
+
 ## 11/11/2026 — revisão do analista e entrega visual
 
 [Escopo, evidências e retomada](CORRECOES_ANALISTA_2026-11-11.md). Base atualizada por FF até608009b7; preservadas correções Lovable. Complementados Tahoma nativo nas artes/divisórias/rodapés, sumário30pt, trimestre no subtítulo, fotos originais/densidade no PPTX e percentuais Top10 sobre saldo municipal positivo.308testesSP, tipos/lint/build e86casosEdge/PPTX85posições sintéticas/Office aprovados. Lote local, sem push.

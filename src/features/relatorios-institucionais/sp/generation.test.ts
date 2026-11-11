@@ -1,3 +1,4 @@
+import { buildSpMunicipalPrices } from './municipal-prices';
 import { describe,it,expect,vi } from 'vitest';
 import { createSpGeneration,runSpGeneration,type SpGenerationServices,type SpGenerationSession } from './generation';
 import { recordedInput } from './__tests__/recorded';
@@ -10,6 +11,7 @@ import { buildSpGranularDetailsAsync } from './granular-details';
 function services() {
   const input=syntheticVglInput(recordedInput());
   return {
+    fetchSpMunicipalPrices:vi.fn<SpGenerationServices['fetchSpMunicipalPrices']>(async report=>buildSpMunicipalPrices([],report)),
     fetchSpTemporalInput:vi.fn<SpGenerationServices['fetchSpTemporalInput']>(async(quarter,options)=>options?.groupBy==='Tipologia'?(quarter==='3T2025'?syntheticPreviousTypology(input):syntheticTypologyInput(input)):input),
     fetchSpProjects:vi.fn<SpGenerationServices['fetchSpProjects']>(async report=>buildSpProjects([{building_id:1,city:'São Paulo',state:'SP',building_type:'Vertical',release_date:'2026-07-01',standard:'Econômico'}],report)),
     fetchSpLaunchSeriesRows:vi.fn(async()=>syntheticLaunchSeries(input)),
@@ -20,6 +22,22 @@ function services() {
   };
 }
 describe('Orquestração automática SP',()=>{
+  it('preserva preços nativos quando a coleta detalhada falha',async()=>{
+    const api=services();api.fetchSpBuildingRecords.mockRejectedValueOnce(new Error('offline'));
+    const result=await runSpGeneration(createSpGeneration('3T2026'),{signal:new AbortController().signal,services:api,onUpdate:()=>{}});
+    expect(result.state.report?.municipalPrices?.method).toBe('geobrain-reported-prices-v1');
+    expect(result.state.report?.granularDetails?.status).toBe('blocked');
+    expect(api.fetchSpMunicipalPrices.mock.invocationCallOrder[0]).toBeLessThan(api.fetchSpBuildingRecords.mock.invocationCallOrder[0]);
+  });
+  it('retoma falha de preço sem repetir históricos já coletados',async()=>{
+    const api=services();
+    api.fetchSpMunicipalPrices.mockImplementationOnce(async report=>buildSpMunicipalPrices([{metric:'medium-prices-meter',grouping:'overall',rows:[],issue:'Falha temporária'}],report));
+    const options={signal:new AbortController().signal,services:api,onUpdate:()=>{}};
+    const first=await runSpGeneration(createSpGeneration('3T2026'),options);
+    expect(first.state.steps.find(step=>step.id==='details')?.status).toBe('failed');
+    await runSpGeneration(first,{...options,retry:true});
+    expect(api.fetchSpMunicipalPrices).toHaveBeenCalledTimes(2);expect(api.fetchSpBuildingRecords).toHaveBeenCalledOnce();
+  });
   it('executa as fontes uma vez, mantém parcial e confere 85 slides',async()=>{
     const api=services(),updates:SpGenerationSession[]=[];
     const result=await runSpGeneration(createSpGeneration('3T2026'),{signal:new AbortController().signal,services:api,onUpdate:s=>updates.push(s)});

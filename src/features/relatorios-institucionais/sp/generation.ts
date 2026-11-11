@@ -1,5 +1,5 @@
 import type { Quarter } from '@/features/panorama-secovi-fiergs/types';
-import { fetchSpTemporalInput,fetchSpLaunchSeriesRows,fetchSpSalesSeriesRows,fetchSpStockSeriesRows } from './api';
+import { fetchSpTemporalInput,fetchSpLaunchSeriesRows,fetchSpSalesSeriesRows,fetchSpStockSeriesRows,fetchSpMunicipalPrices } from './api';
 import { blockedSpProjects,fetchSpProjects,fetchSpBuildingRecords } from './projects';
 import { buildSpTemporalPreview } from './temporal';
 import { buildSpLaunchSeries,buildSpSalesSeries,blockedSpLaunchSeries } from './launch-series';
@@ -37,7 +37,7 @@ export interface SpGenerationSession {state:SpGenerationState;buildings?:Record<
 export function createSpGeneration(quarter:Quarter):SpGenerationSession {
   return {state:{quarter,phase:'running',startedAt:Date.now(),steps:SP_GENERATION_STEPS.map(step=>({id:step.id,status:'waiting'})),report:null}};
 }
-const defaults={fetchSpTemporalInput,fetchSpProjects,fetchSpLaunchSeriesRows,fetchSpSalesSeriesRows,fetchSpStockSeriesRows,fetchSpBuildingRecords,buildSpGranularDetailsAsync};
+const defaults={fetchSpTemporalInput,fetchSpProjects,fetchSpLaunchSeriesRows,fetchSpSalesSeriesRows,fetchSpStockSeriesRows,fetchSpMunicipalPrices,fetchSpBuildingRecords,buildSpGranularDetailsAsync};
 export type SpGenerationServices=typeof defaults;
 export function cancelSpGeneration(session:SpGenerationSession):SpGenerationSession {
   return {...session,state:{...session.state,phase:'cancelled',finishedAt:Date.now(),steps:session.state.steps.map(step=>step.status==='running'?{...step,status:'cancelled',message:'Etapa interrompida. Os resultados anteriores foram preservados.',finishedAt:Date.now()}:step)}};
@@ -101,13 +101,16 @@ export async function runSpGeneration(seed:SpGenerationSession,options:{signal:A
             status=blocked?'failed':'succeeded';message=blocked?blocked.issues[0]:'Tipologias dos dois anos conferidas.';
           }else{status='failed';message=typologies.issues[0];}
         }else if(id==='details'){
+          // Prices settle before the shared heavy collection, and survive its failure.
+          const municipalPrices=await api.fetchSpMunicipalPrices(report,progress);check();patchReport({municipalPrices});
           progress.onProgress(session.buildings?'Reaproveitando os históricos desta geração…':'Consultando os históricos detalhados…');
           const buildings=session.buildings??await api.fetchSpBuildingRecords(report,progress);check();session.buildings=buildings;
           const granularDetails=await api.buildSpGranularDetailsAsync(buildings,report,progress);check();
           const salesNeighborhoods=buildSpSalesNeighborhoods(buildings,report);patchReport({granularDetails,salesNeighborhoods});
           const reviews=reviewSpSlides(session.state.report!).filter(slide=>[39,51,...Array.from({length:28},(_,i)=>i+53)].includes(slide.number));
-          status=granularDetails.status!=='ready'||salesNeighborhoods.status!=='ready'?'failed':reviews.some(slide=>['partial','blocked','pending'].includes(slide.state))?'warning':'succeeded';
-          message=granularDetails.status!=='ready'?granularDetails.issues[0]:salesNeighborhoods.status!=='ready'?salesNeighborhoods.issues[0]:status==='warning'?'Detalhamentos preparados; há observações de cobertura nos insights.':'Bairros, áreas, preços, oferta e mapas preparados.';
+          const priceFailure=municipalPrices.sources.find(source=>source.issue);
+          status=granularDetails.status!=='ready'||salesNeighborhoods.status!=='ready'||priceFailure?'failed':reviews.some(slide=>['partial','blocked','pending'].includes(slide.state))?'warning':'succeeded';
+          message=granularDetails.status!=='ready'?granularDetails.issues[0]:salesNeighborhoods.status!=='ready'?salesNeighborhoods.issues[0]:priceFailure?'Uma fonte de preços não foi concluída. Os demais dados foram preservados; tente novamente.':status==='warning'?'Detalhamentos preparados; há observações de cobertura nos insights.':'Bairros, áreas, preços, oferta e mapas preparados.';
         }else if(id==='slides'){
           const reviews=reviewSpSlides(report);check();
           progress.onWorkProgress({completed:reviews.length,total:85,unit:'slides'});

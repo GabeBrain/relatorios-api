@@ -1,5 +1,9 @@
 # Estado do handoff
 
+## 11/11/2026 — SP: implementação da fonte de preços e histórico
+
+Lucas priorizou e autorizou correções. [Contrato, verificações e limites](../../features/relatorios-institucionais/sp/CORRECAO_FONTE_PRECOS_2026-11-11.md). Main/origin0–0eárvore limpa na abertura, basef0d5b408, fetch atualizado. Fonte municipal de preços integrada antes da coleção pesada; cálculo granular preservado em separado, com recuperação sem recoleta. Testes locais e Edge com respostas interceptadas passaram; valor real2T2026 e agregado geral sem agrupamento ainda não observados. Sem MCMV/MAP e metodologia integral continuam candidatos; não declarar preço real corrigido por plausibilidade. Nova fatia local; sem coleta longa/geração real/publicação/Monday. Escoamento e domínios paralelos preservados.
+
 ## 11/11/2026 — investigação da origem do escoamento SP
 
 Lucas pediu rastrear os números do original no Drive. [Investigação e retomada](../../features/relatorios-institucionais/sp/INVESTIGACAO_ESCOAMENTO_2026-11-11.md): inspecionadas as51planilhas embutidas, caches, colunas de apoio e auditoria do gerado. Econômico, Compacto, Standard e mercado reproduzidos com média de12meses; Alto reproduz com707+500+498históricos originais e158atuais da auditoria do sistema. Original contém versões distintas: escoamento do mercado usa117.767/159.959, enquanto totais finais exibem118.362/160.142. Sistema usa3meses e teto; original arredonda ao inteiro mais próximo. Restam linhagem nominal, atualização/classificação e distribuições individuais; não afirmar homologação integral. Script offline com asserções e JSON versionados. Ambiente main/origin,1commit anterior local na abertura; nenhuma fórmula runtime alterada, nova consulta GeoBrain, coleta longa, geração real, publicação ou escrita Monday.

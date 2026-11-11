@@ -1,3 +1,4 @@
+import { spDisplayPrices, spDisplayMarket } from './municipal-prices';
 import type { SpPreview } from './model';
 import { SP_ORIGINAL_SLIDES } from './original-slides';
 import { SP_INSTITUTIONAL_ASSETS } from './institutional-assets';
@@ -63,17 +64,20 @@ export function reviewSpSlides(report:SpPreview, mapToken=import.meta.env.VITE_M
     }
     if(number===46)return source(report.stockSeries,'a oferta histórica');
     if(number===50){const inputs=[report.stockSeries,report.launchSeries,report.salesSeries],failed=inputs.find(input=>input?.status==='blocked');if(failed)return source(failed,'as séries do IVV');if(inputs.some(input=>!input))return pending('O IVV aguarda as séries de oferta, lançamentos e vendas.');const result=spQuarterlyIvv(report),state=source(result,'as séries de oferta, lançamentos e vendas');return state.state==='available'&&result.rows.some(row=>row.value===null)?partial('Há trimestre sem base disponível para o IVV; não representa índice zero.'):state;}
+    const prices=spDisplayPrices(report);
+    if(prices){
+      if(number>=53&&number<=59){
+        const points=prices.series[number]??[],valid=points.filter(row=>row.value!==null).length;
+        const gap=points.find(row=>row.value===null||row.partial),incomplete=points.filter(row=>row.value===null||row.partial).length;
+        return !valid?blocked(gap?.issue??'Nenhuma fotografia com preços completos.'):incomplete?partial(`${incomplete} fotografia(s) com cobertura parcial ou medição indisponível. Primeira ocorrência ${gap!.month}: ${gap!.issue??'medição indisponível'} Os valores observados foram preservados; variações envolvendo parciais não são calculadas.`):available;
+      }
+      if(number===61||number===62){const field=number===61?'ticket':'meter',values=prices.standards.map(row=>row[field]),gap=prices.standards.find(row=>row[field]===null),reason=gap?.issues[0]??prices.overall.issues[0]??'Há padrão ou média geral sem cobertura, classificação ou preço completos.';return !values.some(v=>v!==null)&&prices.overall[field]===null?blocked(reason):values.some(v=>v===null)||prices.overall[field]===null?partial(reason):available;}
+    }
     const details=report.granularDetails;
     const detailState=source(details,'os históricos detalhados');
     if(detailState.state!=='available')return detailState;
     if(number===51)return source(details!.area,'os fluxos e estoques por área');
-    if(number>=53&&number<=59){
-      const points=details!.prices.series[number]??[],valid=points.filter(row=>row.value!==null).length;
-      const gap=points.find(row=>row.value===null||row.partial),incomplete=points.filter(row=>row.value===null||row.partial).length;
-      return !valid?blocked(gap?.issue??'Nenhuma fotografia com preços completos.'):incomplete?partial(`${incomplete} fotografia(s) com cobertura parcial ou medição indisponível. Primeira ocorrência ${gap!.month}: ${gap!.issue??'medição indisponível'} Os valores observados foram preservados; variações envolvendo parciais não são calculadas.`):available;
-    }
-    if(number===61||number===62){const field=number===61?'ticket':'meter',values=details!.prices.standards.map(row=>row[field]),gap=details!.prices.standards.find(row=>row[field]===null),reason=gap?.issues[0]??details!.prices.overall.issues[0]??'Há padrão ou média geral sem cobertura, classificação ou preço completos.';return !values.some(v=>v!==null)&&details!.prices.overall[field]===null?blocked(reason):values.some(v=>v===null)||details!.prices.overall[field]===null?partial(reason):available;}
-    const market=details!.market;
+    const market=spDisplayMarket(report);
     const state=source(market,'a fotografia atual dos históricos');
     if(state.state!=='available')return state;
     const classificationIssue=spMarketSlideIssue(market,number);if(classificationIssue)return blocked(classificationIssue);
