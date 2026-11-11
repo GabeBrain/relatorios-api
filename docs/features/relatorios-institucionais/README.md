@@ -4,6 +4,8 @@
 
 ## Onde trabalhar
 
+**SP — revisão do analista,11/11:** [correções, comparação dos artefatos e retomada](sp/CORRECOES_ANALISTA_2026-11-11.md). Tahoma nativo, sumário30pt, trimestre no subtítulo, Top10 percentual e fotos/exportação revisados localmente. Escoamento adiado por Lucas; preços/histórico dependem de conciliação de método e base, sem travar os demais ajustes. Sem publicação deste lote.
+
 **Fortaleza mensal1–60 e JSON,10/11:** [estado atual](fortaleza/MENSAL_SLIDES_56_60_DIAGNOSTICO_2026-11-10.md). Prévia completa em posições editoriais, com equipes editáveis57/58e diagnóstico automático para baixar. Pendentes: fontes reais/revisão/homologação e exportação; nenhum slide mensal após60. Novo lote local.
 
 **Fortaleza mensal46–55:** [estado atual](fortaleza/MENSAL_SLIDES_46_55_2026-11-10.md). Prévia1–55dos60originais, IVV da RM e tabelas. Próximo56–60; fontes/metodologia/homologação/exportação pendentes. Novo lote local.

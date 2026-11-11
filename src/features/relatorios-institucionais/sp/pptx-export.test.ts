@@ -42,7 +42,7 @@ describe('SP — PowerPoint para conferência',()=>{
     for(const page of [5,7])source[page-1].innerHTML=renderToStaticMarkup(createElement(SpInstitutionalText,{page,report}));
     await buildSpEditablePptx(source,'3T2026',new AbortController().signal,()=>{});
     expect(captured.slides[4].texts).toContain('+12.500');expect(captured.slides[4].texts).toContain('R$ 434 Bi');
-    expect(captured.slides[4].texts).toHaveLength(18);
+    expect(captured.slides[4].texts).toHaveLength(22);
     expect(captured.slides[6].texts).toContain('SETEMBRO DE 2026');
     expect(captured.slides[6].texts.join(' ')).toContain('25,6% da população do estado');
     expect(captured.slides[6].texts).not.toContain('JUNHO DE 2026');

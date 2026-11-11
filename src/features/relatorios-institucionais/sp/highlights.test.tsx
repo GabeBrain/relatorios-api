@@ -56,7 +56,7 @@ describe('SP — coerência dos destaques e referência visual',()=>{
   it('mantém as nove divisórias da arte original sem o placeholder genérico',()=>{
     for(const page of [8,12,31,45,49,52,60,65,81]){
       const html=renderToStaticMarkup(<SpSlideContent report={setup()} page={page}/>);
-      expect(html).toContain(`divider-${String(page).padStart(2,'0')}.png`);expect(html).not.toContain('<svg');expect(html).not.toContain('Estrutura do relatório original');
+      expect(html).toContain(`divider-${String(page).padStart(2,'0')}.png`);expect(html).toContain('Título da seção');expect(html).not.toContain('Estrutura do relatório original');
     }
   });
   it('destaca cinco trimestres equivalentes na série de17pontos',()=>{

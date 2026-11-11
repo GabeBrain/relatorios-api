@@ -40,7 +40,10 @@ export async function buildSpEditablePptx(slides:HTMLElement[],quarter:string,si
       for(const photo of clone.querySelectorAll<HTMLElement>('[data-sp-editable-photo]')){
         check(signal);const r=photo.getBoundingClientRect();
         if(!r.width||!r.height)continue;
-        photos.push({data:await toPng(photo,{fontEmbedCSS,pixelRatio:1,cacheBust:false,width:r.width,height:r.height,style:{position:'relative',inset:'0',insetInline:'0',insetBlock:'0',insetInlineStart:'0',insetInlineEnd:'auto',insetBlockStart:'0',insetBlockEnd:'auto',left:'0',top:'0',right:'auto',bottom:'auto',margin:'0',transform:'none'}}),x:(r.left-frame.left)*W/frame.width,y:(r.top-frame.top)*H/frame.height,w:r.width*W/frame.width,h:r.height*H/frame.height,name:photo.dataset.spEditablePhoto??''});
+        const portrait=photo.querySelector('img'), imageFrame=portrait?.getBoundingClientRect();
+        if(portrait?.decode)await portrait.decode();check(signal);
+        const pixelRatio=portrait&&imageFrame?.width&&imageFrame.height?Math.max(1,Math.min(4,portrait.naturalWidth/imageFrame.width,portrait.naturalHeight/imageFrame.height)):1;
+        photos.push({data:await toPng(photo,{fontEmbedCSS,pixelRatio,cacheBust:false,width:r.width,height:r.height,style:{position:'relative',inset:'0',insetInline:'0',insetBlock:'0',insetInlineStart:'0',insetInlineEnd:'auto',insetBlockStart:'0',insetBlockEnd:'auto',left:'0',top:'0',right:'auto',bottom:'auto',margin:'0',transform:'none'}}),x:(r.left-frame.left)*W/frame.width,y:(r.top-frame.top)*H/frame.height,w:r.width*W/frame.width,h:r.height*H/frame.height,name:photo.dataset.spEditablePhoto??''});
       }
       const html=approvedLayoutText(clone),texts=[...html.texts,...spSvgTexts(clone)];
       html.parents.forEach(parent=>parent.style.setProperty('-webkit-text-fill-color','transparent','important'));

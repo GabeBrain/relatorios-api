@@ -1,5 +1,11 @@
 # Evidências do mapeamento — 15/10/2026
 
+## 11/11/2026 — revisão do analista, Top10 e exportação
+
+[Registro completo, hashes e reprodução](CORRECOES_ANALISTA_2026-11-11.md).85slides/47observações em32slides do PPTX anotado lidos,13renders de referência e auditoria embutida conferidos; original manual recuperado do RAR local com hash do catálogo. FF limpo de49commits até608009b7; alterações paralelas preservadas.
+
+308testesSP/35arquivos aprovados após atualização das expectativas da regra assinada e dos novos textos nativos. Tipos/lint/build aprovados.86casosEdge com rede externa bloqueada, desktop/celular/temas; PPTX sintético85posições com Tahoma/30pt e percentuais,20retratos nativos e13renders finais noOffice. Não representa ensaio autenticado ou estudo real. Escoamento adiado explicitamente e preços/histórico em diagnóstico separado. Nenhum push, API de negócio, envio de email ou Monday.
+
 ## 05/11/2026 — comparação dos 85 pares e correções autorizadas
 
 - **Integração autorizada:** `2d6c018` reúne `785cae6`/`9f0ab00` com os seis commits remotos até `e5bc2c2`, sem conflito.126arquivos SP idênticos ao lado local; LIVE conferido por base+(local−base)+(remoto−base), ignorando somente separadores vazios, sem perda/duplicação de entradas. Preservados FIERGS, Finoti e menu escuro. Nova publicação continua separada da integração.

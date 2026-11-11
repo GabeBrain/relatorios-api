@@ -392,6 +392,15 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 11/11/2026 — SP Institucional: revisão do analista, Top10 e nitidez do PPTX — Lucas / Codex
+
+- **Ambiente/funcionalidade:** Rebrain — `/rebrain/relatorios-institucionais/sp`. Base608009b7recebida porFF limpo de49commits; correções Lovable e entregas paralelas preservadas.
+- **Entrega:** complemento Tahoma em textos antes incorporados às artes, divisórias e rodapés; sumário30pt, trimestre no subtítulo e notas condicionais. Top10 agora calcula participação sobre saldo municipal positivo mesmo com bairros negativos, preservando sinais e reconciliação mensal. Cinco fotos originais e referência1920×1080 da consultoria; exportador mede densidade sem inventar detalhe. [Contrato, fontes e retomada](../features/relatorios-institucionais/sp/CORRECOES_ANALISTA_2026-11-11.md).
+- **Dados/decisão:** escoamento adiado explicitamente por Lucas, sem mudança de fórmula ou unidade e sem bloquear demais páginas. Preços/histórico em diagnóstico separado; comparação dos artefatos mostra diferenças de universo/método a confirmar. Não impor14meses ou15mil/m² nem preencher ausência por zero. Nenhuma alteração de coletores ou política Secovi/FIERGS.
+- **Validação:**308testesSP/35arquivos, tipos/lint/build e86casosEdge locais; PPTX sintético85slides, textos nativos Tahoma/sumário30pt,20retratos e13rendersOffice. Geometria/cores de mapas verificadas, sem cartografia externa real. Não é geração autenticada ou homologação de indicadores. Sem publicação/envio de email/Monday.
+- **Arquivos/commits:** componentes/exportador/testes/artes SP, diagnósticos e docs específicos; commit isolado `fix(sp): complete analyst presentation corrections`, hash no fechamento. Próximo: revisão/publicação autorizada; dados de preço/histórico e escoamento permanecem separados.
+- **Monday:** [Relatório SP Institucional](https://brain381753.monday.com/boards/18398428946/pulses/13452140276) — `13452140276`; referência, sem escrita.
+
 ### 10/11/2026 — Integração autorizada: Relatório API Excel e atualizações upstream — Edgar / Codex
 
 - **Autorização/escopo:** usuário autorizou merge, validação e sincronização de origin/main e upstream/main, preservando ambos os históricos. Merge de15ab9f88 (quatro commits locais VGL/quantidade lançada/preço médio) com0aa49380 (28commits upstream, incluindo SP/Fortaleza/Lovable). Sem rebase/reset/push forçado ou edição das regras recebidas. Documento vivo é a única sobreposição de arquivos.
@@ -1365,6 +1374,8 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 
 ## 2. Etapas
 
+- 🟡 **SP Institucional — revisão11/11:** correções visuais/Top10/fotos/exportação verificadas localmente; publicação pendente. Escoamento adiado por Lucas, preços/histórico aguardam conciliação de método/base. [Entrega](../features/relatorios-institucionais/sp/CORRECOES_ANALISTA_2026-11-11.md).
+
 - **Fortaleza mensal60/JSON:** integrado em b6c6488,214testes e build aprovados; publicação autorizada. Próxima validação é o teste real/diagnóstico do usuário.
 
 - 🟡 **Fortaleza mensal1–60:** todas as posições da prévia implementadas; diagnóstico JSON e editor final disponíveis localmente. Publicação/revisão real/homologação/exportação ainda pendentes.
@@ -1475,6 +1486,8 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 ---
 
 ## 3. Pendências
+
+- **SP — revisão11/11:** publicar o lote com autorização e conferir nova saída no ambiente do usuário; conciliar preços/cobertura histórica com a mesma fotografia e critério do analista. Escoamento fica separado para retomada posterior, conforme Lucas. Fotos melhoradas apenas até a resolução disponível no original; não declarar todas HD. [Contrato](../features/relatorios-institucionais/sp/CORRECOES_ANALISTA_2026-11-11.md).
 
 - **Fortaleza mensal após60:** autorizar envio, gerar teste real e analisar JSON; revisar fontes/INCC/preços/IVV/capacidade/amostra/equipe e exportação. Não há outros slides mensais. Depois, correções estéticas/diagnóstico SP indicadas pelo usuário. Trimestral segue separado.
 

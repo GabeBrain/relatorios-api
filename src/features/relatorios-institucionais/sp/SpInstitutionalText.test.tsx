@@ -18,7 +18,7 @@ describe('Textos institucionais editáveis',()=>{
   });
   it('expõe números e legendas dos seis cartões GeoBrain como texto SVG nativo',()=>{
     const {container}=render(<SpSlideContent report={report()} page={5}/>);
-    expect(container.querySelectorAll('svg text')).toHaveLength(18);
+    expect(container.querySelectorAll('svg text')).toHaveLength(22);
     for(const value of ['+12.500','+18.000','+650.000','6,6M','+45.000','R$ 434 Bi'])expect(screen.getByText(value).tagName.toLowerCase()).toBe('text');
     expect(screen.getByText('empresas pesquisadas')).toBeInTheDocument();
     expect(reviewSpSlides(report()).find(s=>s.number===5)?.state).toBe('reference');

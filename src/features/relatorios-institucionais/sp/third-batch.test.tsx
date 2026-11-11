@@ -105,11 +105,13 @@ describe('SP — terceiro lote original39–44/46–48/50', () => {
     expect(result.topShare).toBeCloseTo(result.topTotal! / report.metrics.sales! * 100);
     for (const row of result.rows) expect(row.share).toBeCloseTo(row.units / report.metrics.sales! * 100);
   });
-  it('ranking preserva distratos negativos e suprime percentuais incompatíveis', () => {
+  it('ranking preserva distratos negativos nas participações sobre saldo municipal positivo', () => {
     const data = input(); data.sales[0].liquid_sales = -10000;
     const report = buildSpTemporalPreview(data, '3T2026'), result = buildSpSalesNeighborhoods(syntheticSalesBuildings(data), report);
     expect(result.status).toBe('ready'); expect(result.rows.some(row => row.units < 0)).toBe(true);
-    expect(result.topShare).toBeNull(); expect(result.rows.every(row => row.share === null)).toBe(true);
+    expect(result.topShare).toBe(100);
+    expect(result.rows.every(row => row.share !== null && Math.abs(row.share - row.units / result.cityTotal! * 100) < 1e-9)).toBe(true);
+    expect(result.rows.find(row => row.units < 0)!.share).toBeLessThan(0);
   });
   it('coleta granular sob demanda pagina a fonte documentada e mantém filtros e escopo', async () => {
     const buildings = syntheticSalesBuildings();

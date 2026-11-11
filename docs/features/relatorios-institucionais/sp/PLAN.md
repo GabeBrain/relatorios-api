@@ -1,5 +1,11 @@
 # SP capital — primeiro mapeamento
 
+## 11/11/2026 — revisão do analista e entrega visual
+
+[Escopo, evidências e retomada](CORRECOES_ANALISTA_2026-11-11.md). Base atualizada por FF até608009b7; preservadas correções Lovable. Complementados Tahoma nativo nas artes/divisórias/rodapés, sumário30pt, trimestre no subtítulo, fotos originais/densidade no PPTX e percentuais Top10 sobre saldo municipal positivo.308testesSP, tipos/lint/build e86casosEdge/PPTX85posições sintéticas/Office aprovados. Lote local, sem push.
+
+Escoamento adiado explicitamente por Lucas, sem mudança de fórmula/unidade e sem travar demais páginas. Preços/histórico têm diagnóstico de fonte/metodologia, não substituição por alvos do manual. Retomar pelos dados da mesma geração e pela comparação agregada documentada; demais domínios preservados.
+
 ## 03/11/2026 — seleção geral de período e correção do transporte histórico
 
 Após falha das três séries no teste real2T2026, substituído início fixo3T2026 por último trimestre concluído e separados Ano/Trimestre. Calendário SãoPaulo com anos desde2021 e entrada automática de2027; consultas e comparativos seguem o período escolhido. Históricos divididos por ano e paginados sem teto global de seis páginas; mensagens preservam motivo seguro e janela.221 testes SP+359 regressões Panorama, tipos/lint/build e ensaio local dirigido aprovados, conformeEVIDENCIAS. O print não permite confirmar a causa original; retestar autenticado antes de declarar solução no acesso real. SnapshotINCC, revisão metodológica/editorial e exportação integral mantêm suas pendências.

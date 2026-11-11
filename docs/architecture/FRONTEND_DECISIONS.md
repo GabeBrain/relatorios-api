@@ -1,3 +1,7 @@
+## 11/11/2026 — SP: tipografia editorial nativa e densidade dos retratos
+
+Mantidos rota lazy, SpSlideContent e exportador existentes. Textos editoriais antes rasterizados recebem camadasSVG Tahoma nas medidas da arte, com fundos locais medidos da referência; logos/QR/screenshots permanecem ilustrações. Sumário40px equivale a30pt noPPTX. Retratos separados preservam arquivos/crop originais e densidade efetiva até4×; sem novo primitive, fonte instalada, biblioteca ou token global. Tema da plataforma preservado; [contrato e verificação](../features/relatorios-institucionais/sp/CORRECOES_ANALISTA_2026-11-11.md).
+
 ## 10/11/2026 — Fortaleza: diagnóstico local e editorial final
 
 Ao concluir a geração, worker de módulo prepara o JSON de situação/valores agregados dos slides; snapshot disponível por Button, sem nova consulta. Chave de sessão excluída do payload do worker; credenciais/fotos/históricos brutos fora do JSON. BrainLoadingState de campo com tempo e botão irmão de cancelamento, worker encerrado em cancelamento/troca/desmontagem; não muda o primitive compartilhado. Editor final usa Input/Textarea/Select/Button e fotos em memória, guardas contra conclusões tardias. Quadro59é substituído inteiro por ser imagem no original. Rota e slides continuam lazy, sem dependência/biblioteca global nova. [Contrato e limites](../features/relatorios-institucionais/fortaleza/MENSAL_SLIDES_56_60_DIAGNOSTICO_2026-11-10.md).

@@ -1,5 +1,11 @@
 # Estado do handoff
 
+## 11/11/2026 — SP: revisão do analista sem bloquear demais correções
+
+Lucas forneceu MD/PPTX anotado e depois adiou expressamente o escoamento para avançar os demais itens. [Contrato, hashes, diagnóstico e retomada](../../features/relatorios-institucionais/sp/CORRECOES_ANALISTA_2026-11-11.md). Sessão Windows/PowerShell, main, único remoto origin; FF limpo incorporou49commits até608009b7. Recuperado original manual do RAR local, hash coincide com catálogo. Sem token pessoal lido, API real, coleta longa, geração real, publicação ou escrita Monday.
+
+Complementados Tahoma nativo, sumário30pt, trimestre no subtítulo, percentuais Top10 com sinais preservados e retratos originais/densidade de exportação.308testesSP/35arquivos, tipos/lint/build,86casosEdge com rede externa bloqueada e PPTX85posições sintéticas/Office aprovados. Escoamento continua em meses e inalterado; preços/histórico têm divergências documentadas, sem alvos fixos ou preenchimento sem fonte. Lote local até autorização de envio; Fortaleza/Secovi/FIERGS e frentes Gabriel preservados. Férias de outubro seguem registro histórico, sem presumir disponibilidade futura.
+
 ## 10/11/2026 — fechamento mensal integrado com autorização
 
 Merge b6c6488integrou0ec2dcb(mensal1–60e diagnóstico) com nove remotos atée7a00db, sem conflito e preservando Fortaleza integralmente.214testes/18arquivos aprovados; build/tipagem integrados aprovados para o push autorizado. Sem API real/homologação/deploy observado/Monday. Usuário enviará JSON do teste; SP estética/diagnóstico indicado como próxima frente, sem alteração de SP nesta integração.

@@ -1,5 +1,11 @@
 # Decisões e pontos abertos — SP
 
+## 11/11/2026 — correções do analista
+
+Aplicar o MD pelo conteúdo, pois a numeração diverge do PPTX anotado. [Entrega e limites](CORRECOES_ANALISTA_2026-11-11.md). Com saldo municipal positivo e reconciliado, a participação líquida por bairro é válida mesmo com bairros negativos: conservar sinais e eventuais percentuais acima de100%. Base não positiva segue sem percentual; total/mês continuam impeditivos em divergência. Esta decisão substitui a guarda anterior que suprimia todas as participações quando qualquer bairro era negativo.
+
+Tahoma deve alcançar texto antes incorporado às artes, mantendo logos/QR/screenshots ilustrativos. Sumário40px corresponde a30pt no exportador. Retratos usam bytes originais e densidade efetiva, sem alegar HD onde a referência não fornece detalhe. Escoamento permanece em meses e adiado pelo usuário. Preço geral do manual não é reproduzido pela ponderação unitária de seus agregados por padrão; confirmar método/universo antes de alterar a fórmula ou preencher histórico sem cobertura.
+
 ## 04/11/2026 — fechamento dos bloqueios do checklist (4)
 
 Usuário pediu corrigir todos os slides pendentes. O checklist real de03/11 registra51 bloqueado por124044×124045 em março/2026,78 por preço ausente54845/73369/junho e53–59 parciais. Aplicar [política atualizada](TRATAMENTO_FONTE_2026-11-03.md): tentar soma assinada e, apenas com conciliação municipal exata, projetar oferta não negativa no modelo derivado; manter valores originais auditáveis. Em78, capacidade/oferta válidas permitem contagens; preço ausente torna somente valores monetários dependentes e seus totais indisponíveis, com checklist parcial. Não preencher preço zero nem usar total monetário subestimado. Jun2023/64094 continua lacuna real; artes institucionais continuam referências editoriais. Implementação local validada, não aceite da fonte ou publicação observada.
