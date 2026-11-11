@@ -30,7 +30,6 @@ export default function FortalezaMonthlyLaunchSlide({ page, selection, series }:
   const projects = page === 11;
   return <svg className="fortaleza-intro-slide block aspect-video h-auto w-full" viewBox="0 0 1280 720" role="img" aria-label={`Fortaleza · slide ${page}`}>
     <image href={artwork[`./assets/monthly/${page}.png`]} width={1280} height={720} aria-hidden="true" />
-    <text x={43} y={187} fill="#1B4059" fontSize={24} fontWeight={700}>Residencial Vertical</text>
     <text x={43} y={217} fill="#1B4059" fontSize={15}>{introMonth(selection.position)} de {selection.year}</text>
     <g fill="#1B4059" fontSize={22} fontWeight={700} textAnchor="middle"><text x={860} y={144}>{percentage(series.changes.total)}</text><text x={1042} y={144}>{percentage(series.changes.economic)}</text><text x={1180} y={144} fill="#42CCA2">{percentage(series.changes.other)}</text></g>
     <g fontSize={13} fill="black" textAnchor="middle"><text x={860} y={164}>em relação</text><text x={860} y={182}>a {introMonth(selection.position)} de {selection.year - 1}</text><text x={1042} y={166}>Padrão econômico</text><text x={1180} y={166}>Demais padrões</text><text x={1110} y={190}>acumulado no ano</text></g>

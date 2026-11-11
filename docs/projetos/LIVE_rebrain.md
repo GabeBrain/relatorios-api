@@ -392,6 +392,13 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 11/11/2026 — Fortaleza mensal: PDF/PPTX de conferência e revisão — Lucas / Codex
+
+- **Mudança:** revisão mensal encontrou exportação ausente. Implementados PDF e PPTX fiel/editável com60páginas, diagnóstico da mesma geração, equipe da prévia, cancelamento/recuperação e guardas de acesso/competência/excesso de lançamentos. Mesmo componente nas prévias e nos arquivos; removido subtítulo duplicado11/13/15. [Contrato e retomada](../features/relatorios-institucionais/fortaleza/MENSAL_EXPORTACAO_2026-11-11.md).
+- **Validação:**225casos Fortaleza distintos +7regressões SP; tipos/build/lint, Edge1440/390claro/escuro/cancelamento/erro/retry, três arquivos de60páginas e auditoria sem credenciais. Office em leitura gerou16renders; PDF renderizado/inspecionado. Dados sintéticos, sem comprovação de valores reais.
+- **Etapas/pendências:** mensal60+exportação implementados para conferência, não homologados; revisar fonte/amostra/capacidade/preços/IVV/INCC/equipe com geração real/analista. Trimestral continua10/89; próximo11–20. Basee23c6692, nova fatia local. SP apenas reutiliza rotina de auditoria extraída sem mudar namespace/parte; fórmulas e demais motores preservados. Sem publicação/coleta real/Monday.
+- **Monday:** [Desafio relatórios automatizados](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`; somente referência.
+
 ### 11/11/2026 — SP: fonte municipal de preços e recuperação do histórico — Lucas / Codex
 
 - **Mudança:** observações de preço municipal integradas à geração, independentes da reconciliação granular, com auditoria/insights distinguindo preço informado e cálculo por estoque. Média geral exige total explícito; sem média de padrões. [Contrato e retomada](../features/relatorios-institucionais/sp/CORRECAO_FONTE_PRECOS_2026-11-11.md). Preservados recortes sem MCMV/MAP candidatos, escoamento e demais motores.
@@ -1387,6 +1394,8 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 
 ## 2. Etapas
 
+- 🟡 **Fortaleza mensal —11/11:**60posições e PDF/PPTX de conferência implementados localmente; ensaios sintéticos/Office/PDF aprovados. Sem homologação real. Trimestral10/89, próximo11–20. [Estado atual](../features/relatorios-institucionais/fortaleza/MENSAL_EXPORTACAO_2026-11-11.md); supera pendências de implementação mensal nas entradas históricas abaixo.
+
 - 🟡 **SP Institucional — revisão11/11:** correções visuais/Top10/fotos/exportação verificadas localmente; publicação pendente. Escoamento adiado por Lucas, preços/histórico aguardam conciliação de método/base. [Entrega](../features/relatorios-institucionais/sp/CORRECOES_ANALISTA_2026-11-11.md).
 
 - **Fortaleza mensal60/JSON:** integrado em b6c6488,214testes e build aprovados; publicação autorizada. Próxima validação é o teste real/diagnóstico do usuário.
@@ -1499,6 +1508,8 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 ---
 
 ## 3. Pendências
+
+- **Fortaleza —11/11:** autorizar envio da exportação mensal, gerar/inspecionar dados reais e diagnostico pareado; fechar amostra/empresas, universo/capacidade, preços/IVV/INCC e equipe. PDF/PPTX mensal não é mais pendência de implementação. Próxima fatia trimestral11–20, com janela/fonte próprias; demais estados abaixo são históricos.
 
 - **SP — revisão11/11:** publicar o lote com autorização e conferir nova saída no ambiente do usuário; conciliar preços/cobertura histórica com a mesma fotografia e critério do analista. Escoamento fica separado para retomada posterior, conforme Lucas. Fotos melhoradas apenas até a resolução disponível no original; não declarar todas HD. [Contrato](../features/relatorios-institucionais/sp/CORRECOES_ANALISTA_2026-11-11.md).
 

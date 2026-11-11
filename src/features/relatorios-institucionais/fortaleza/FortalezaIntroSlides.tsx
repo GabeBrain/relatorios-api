@@ -1,11 +1,12 @@
-import FortalezaClosingSlide from './FortalezaClosingSlide';
+import FortalezaReportSlide from './FortalezaReportSlide';
+import FortalezaPptxExport from './FortalezaPptxExport';
+import type { FortalezaGenerationState } from './useFortalezaMarket';
 import FortalezaClosingEditor from './FortalezaClosingEditor';
 import { createFortalezaEditorial } from './monthly-closing';
 import { buildOfferTable } from './monthly-tables';
-import FortalezaMonthlyTableSlide, { FortalezaTableInsights } from './FortalezaMonthlyTableSlide';
+import { FortalezaTableInsights } from './FortalezaMonthlyTableSlide';
 import { buildPriceSlide } from './monthly-prices';
 import { buildMonthlyIvv } from './monthly-ivv';
-import FortalezaMonthlyAnalysisSlide from './FortalezaMonthlyAnalysisSlide';
 import { FortalezaPriceInsights } from './FortalezaPriceInsights';
 import { useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
@@ -13,12 +14,9 @@ import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/compone
 import { FORTALEZA_CITIES, FORTALEZA_REFERENCES, type FortalezaSelection } from './model';
 import type { IntroData } from './intro-data';
 import { buildIntroView } from './intro-view';
-import FortalezaIntroSlide from './FortalezaIntroSlide';
 import { INTRO_LAYOUTS } from './intro-layout';
-import FortalezaMonthlyLaunchSlide from './FortalezaMonthlyLaunchSlide';
 import { monthlyProjectLaunches, monthlyUnitLaunches, type MonthlyLaunchData, type LaunchSeries } from './monthly-launches';
 import { buildMonthlySlide } from './monthly-market';
-import FortalezaMonthlyMarketSlide from './FortalezaMonthlyMarketSlide';
 import { FortalezaMonthlyInsights } from './FortalezaMonthlyInsights';
 
 function MonthlyLaunchInsights({ page, series, sources }: { page: number; series: LaunchSeries | null; sources: MonthlyLaunchData | null }) {
@@ -33,7 +31,7 @@ function MonthlyLaunchInsights({ page, series, sources }: { page: number; series
   </>;
 }
 
-export default function FortalezaIntroSlides({ selection, cities, data, monthlyLaunches = null }: { selection: FortalezaSelection; cities: string[]; data: IntroData | null; monthlyLaunches?: MonthlyLaunchData | null }) {
+export default function FortalezaIntroSlides({ selection, cities, data, monthlyLaunches = null, generation = null }: { selection: FortalezaSelection; cities: string[]; data: IntroData | null; monthlyLaunches?: MonthlyLaunchData | null; generation?:FortalezaGenerationState|null }) {
   const [editorial,setEditorial]=useState(createFortalezaEditorial);
   const [requestedPage, setPage] = useState(1), [expanded, setExpanded] = useState(false);
   const page = Math.min(requestedPage,selection.periodicity === 'monthly' ? 60 : 10);
@@ -53,6 +51,9 @@ export default function FortalezaIntroSlides({ selection, cities, data, monthlyL
   const pending = tableData?.issue ?? analysisData?.issue ?? monthlyData?.issue ?? (series ? series.issue : page === 2 ? 'Amostra histórica e empresas pesquisadas aguardam fonte própria; não são copiadas da edição antiga.' : page >= 3 && page <= 4 && cities.length && !cities.includes('Fortaleza') ? 'Fortaleza não integra o recorte escolhido; a lista da capital permanece indisponível.' : page >= 5 && page <= 7 && cities.length === 1 && cities[0] === 'Fortaleza' ? 'Municípios da região metropolitana não integram o recorte escolhido.' : page >= 3 && page <= 7 && data?.status !== 'ready' ? 'Lista de lançamentos ainda indisponível. Gere a prévia para conferir o cadastro.' : page === 10 && !view.history ? 'Gráfico de empreendimentos indisponível. Exige o conjunto completo de cinco cidades, cadastro conferido e classificação horizontal explícita.' : null);
   const navigation = <nav className="flex flex-wrap gap-2" aria-label="Slides implementados"><Button variant="outline" disabled={page === 1} onClick={() => setPage(pages[pages.indexOf(page) - 1])}>Anterior</Button>{pages.map(number => <Button key={number} variant={page === number ? 'default' : 'outline'} aria-pressed={page === number} onClick={() => setPage(number)}>{number}</Button>)}<Button variant="outline" disabled={page === pages.at(-1)} onClick={() => setPage(pages[pages.indexOf(page) + 1])}>Próximo</Button></nav>;
   const closing=model === 'julho' && page>=56;
-  const slide = <div className="overflow-hidden border bg-white shadow-sm">{closing ? <FortalezaClosingSlide page={page} selection={selection} editorial={editorial} /> : tableData ? <FortalezaMonthlyTableSlide page={page} selection={selection} data={tableData} /> : analysis ? <FortalezaMonthlyAnalysisSlide page={page} selection={selection} data={analysisData} /> : extended ? <FortalezaMonthlyMarketSlide page={page} selection={selection} cities={cities} data={monthlyData} /> : series ? <FortalezaMonthlyLaunchSlide page={page as 11 | 13 | 15} selection={selection} series={series} /> : <FortalezaIntroSlide model={model} page={page} view={view} />}</div>;
-  return <section className="space-y-4" aria-label="Slides implementados Fortaleza"><header><h2 className="text-lg font-semibold">Slides do relatório · {selection.periodicity === 'monthly' ? 'Mensal' : 'Trimestral'}</h2><p className="text-sm text-muted-foreground">Arte, tabelas e medidas extraídas do original {source.label}. Os campos variáveis usam o recorte escolhido; números do original não são usados como dados novos.</p></header>{navigation}{closing&&<><p className="text-sm text-muted-foreground">Conteúdo editorial da referência de julho/2026; revise os responsáveis desta edição.</p><FortalezaClosingEditor page={page} value={editorial} onChange={setEditorial}/></>}<MonthlyLaunchInsights page={page} series={series} sources={monthlyLaunches} /><FortalezaTableInsights page={page} data={tableData} /><FortalezaPriceInsights page={page} data={analysisData} prices={monthlyLaunches?.prices ?? null} /><FortalezaMonthlyInsights page={page} data={monthlyData} market={monthlyLaunches?.market ?? null} /><p className="text-sm">Slide {page} · {source.slides[page - 1].title}</p>{pending && <p role="status" className="text-sm text-muted-foreground">{pending}</p>}{overflow > 0 && <p className="text-sm text-muted-foreground">{overflow} lançamento(s) adicionais não cabem nas páginas iniciais deste lote; precisam de continuação antes da exportação.</p>}<Button variant="outline" onClick={() => setExpanded(true)}>Ampliar slides</Button>{!expanded && slide}<Dialog open={expanded} onOpenChange={setExpanded}><DialogContent className="max-h-[95dvh] w-[96vw] max-w-7xl overflow-auto"><DialogTitle>Fortaleza · slides implementados</DialogTitle><DialogDescription>Modelo {source.label}; fontes pendentes são identificadas fora da lâmina.</DialogDescription>{navigation}{slide}</DialogContent></Dialog>{data?.issues.map((issue, index) => <p className="text-xs text-muted-foreground" key={index}>{issue}</p>)}</section>;
+  const renderSlide=(number:number)=><FortalezaReportSlide page={number} selection={selection} cities={cities} data={data} monthlyLaunches={monthlyLaunches} editorial={editorial}/>;
+  const slide = <div className="overflow-hidden border bg-white shadow-sm">{renderSlide(page)}</div>;
+  const cityKey=cities.join('|');
+  const exportRevision=useMemo(()=>({periodicity:selection.periodicity,year:selection.year,position:selection.position,cityKey,data,monthlyLaunches,editorial,finishedAt:generation?.finishedAt}),[selection.periodicity,selection.year,selection.position,cityKey,data,monthlyLaunches,editorial,generation?.finishedAt]);
+  return <section className="space-y-4" aria-label="Slides implementados Fortaleza"><header><h2 className="text-lg font-semibold">Slides do relatório · {selection.periodicity === 'monthly' ? 'Mensal' : 'Trimestral'}</h2><p className="text-sm text-muted-foreground">Arte, tabelas e medidas extraídas do original {source.label}. Os campos variáveis usam o recorte escolhido; números do original não são usados como dados novos.</p></header>{navigation}{model==='julho'&&<FortalezaPptxExport selection={selection} generation={generation} renderSlide={renderSlide} overflow={overflow} revision={exportRevision}/>}{closing&&<><p className="text-sm text-muted-foreground">Conteúdo editorial da referência de julho/2026; revise os responsáveis desta edição.</p><FortalezaClosingEditor page={page} value={editorial} onChange={setEditorial}/></>}<MonthlyLaunchInsights page={page} series={series} sources={monthlyLaunches} /><FortalezaTableInsights page={page} data={tableData} /><FortalezaPriceInsights page={page} data={analysisData} prices={monthlyLaunches?.prices ?? null} /><FortalezaMonthlyInsights page={page} data={monthlyData} market={monthlyLaunches?.market ?? null} /><p className="text-sm">Slide {page} · {source.slides[page - 1].title}</p>{pending && <p role="status" className="text-sm text-muted-foreground">{pending}</p>}{overflow > 0 && <p className="text-sm text-muted-foreground">{overflow} lançamento(s) adicionais não cabem nas páginas iniciais deste lote; precisam de continuação antes da exportação.</p>}<Button variant="outline" onClick={() => setExpanded(true)}>Ampliar slides</Button>{!expanded && slide}<Dialog open={expanded} onOpenChange={setExpanded}><DialogContent className="max-h-[95dvh] w-[96vw] max-w-7xl overflow-auto"><DialogTitle>Fortaleza · slides implementados</DialogTitle><DialogDescription>Modelo {source.label}; fontes pendentes são identificadas fora da lâmina.</DialogDescription>{navigation}{slide}</DialogContent></Dialog>{data?.issues.map((issue, index) => <p className="text-xs text-muted-foreground" key={index}>{issue}</p>)}</section>;
 }

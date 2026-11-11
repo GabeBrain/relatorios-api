@@ -1,5 +1,9 @@
 # Fortaleza — fatos, propostas e pendências
 
+## 11/11/2026 — exportação mensal antes de ampliar o trimestral
+
+A revisão solicitada por Lucas encontrou o mensal com60prévia, mas sem arquivos. [Contrato e limites](MENSAL_EXPORTACAO_2026-11-11.md): PDF e PPTX de conferência passam a usar exatamente a composição atual, sem nova consulta GeoBrain; diagnóstico da mesma geração anexado. Modo fiel em imagem é padrão; editável preserva textos/células, exigindo Montserrat e mantendo gráficos/fotos/artes em imagem. Excesso de lançamentos impede exportação, sem corte silencioso. Não tratar disponibilidade do arquivo como homologação dos indicadores. Trimestral10/89mantido; próximo11–20. Nenhuma transferência automática dos critérios de preços SP para Fortaleza.
+
 ## 10/11/2026 — mensal1–60 e diagnóstico JSON
 
 [Entrega e contrato](MENSAL_SLIDES_56_60_DIAGNOSTICO_2026-11-10.md): cinco posições finais implementadas; mensal original termina no60. Equipes57/58editáveis e quadro59substituível como imagem, sem presumir equipe atual. Diagnóstico JSON preparado automaticamente ao terminar a geração, download disponível para enviar ao Codex; sem credenciais/fotos/históricos brutos.214testes Fortaleza +31regressões/contratos, build/lint e Edge sintético conferidos no fechamento. Basefbe9742porFF limpo; nova fatia local. Restam revisão real/fontes/homologação/exportação, não outros slides mensais. Trimestral89segue com dez iniciais. SP estética/diagnóstico é a próxima frente indicada pelo usuário, sem alteração nesta fatia. Estados abaixo são históricos.

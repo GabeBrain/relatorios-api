@@ -1,5 +1,9 @@
 # Estado do handoff
 
+## 11/11/2026 — Fortaleza mensal: revisão e arquivos de conferência
+
+Lucas pediu revisar o mensal antes de avançar ao trimestral. [Entrega e retomada](../../features/relatorios-institucionais/fortaleza/MENSAL_EXPORTACAO_2026-11-11.md): faltava exportação, agora PDF/PPTX60posições com diagnóstico pareado, modo fiel ou textos/células editáveis, equipe da prévia e cancelamento. Corrigido subtítulo duplicado11/13/15. Testes/Edge offline, arquivos sintéticos reais, Office em leitura e PDF renderizado conferidos; não homologação dos números de mercado. Amostra/fontes/INCC/preços/IVV/capacidade/equipe continuam pendentes de geração real/analista. Basee23c6692, main/origin0–0eárvore limpa na abertura, fetch atualizado. Nova fatia local, sem publicação/coleta longa/Monday; demais domínios preservados. Trimestral10/89mantido, próximo11–20.
+
 ## 11/11/2026 — SP: implementação da fonte de preços e histórico
 
 Lucas priorizou e autorizou correções. [Contrato, verificações e limites](../../features/relatorios-institucionais/sp/CORRECAO_FONTE_PRECOS_2026-11-11.md). Main/origin0–0eárvore limpa na abertura, basef0d5b408, fetch atualizado. Fonte municipal de preços integrada antes da coleção pesada; cálculo granular preservado em separado, com recuperação sem recoleta. Testes locais e Edge com respostas interceptadas passaram; valor real2T2026 e agregado geral sem agrupamento ainda não observados. Sem MCMV/MAP e metodologia integral continuam candidatos; não declarar preço real corrigido por plausibilidade. Nova fatia local; sem coleta longa/geração real/publicação/Monday. Escoamento e domínios paralelos preservados.

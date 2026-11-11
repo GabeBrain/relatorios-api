@@ -1,5 +1,9 @@
 # Fortaleza / SINDUSCON-CE — plano inicial
 
+## 11/11/2026 — revisão mensal e exportação
+
+[Entrega, evidências e retomada](MENSAL_EXPORTACAO_2026-11-11.md). A revisão encontrou a exportação ainda ausente: PDF e dois modos PPTX de conferência agora implementados para as60posições, com diagnóstico da mesma geração, captura da equipe editada, cancelamento e guardas de acesso/competência/excesso de lançamentos. Corrigido subtítulo sobreposto em11/13/15. Fontes reais/metodologia/amostra/equipe continuam pendentes; nenhum valor novo foi inventado ou homologado. Trimestral permanece10/89; próxima fatia11–20, com janela e referências próprias. Nova fatia local; sem push, coleta real ou Monday. Registros anteriores abaixo descrevem o histórico.
+
 ## 10/11/2026 — mensal1–60 e diagnóstico JSON
 
 [Entrega e contrato](MENSAL_SLIDES_56_60_DIAGNOSTICO_2026-11-10.md): cinco posições finais implementadas; mensal original termina no60. Equipes57/58editáveis e quadro59substituível como imagem, sem presumir equipe atual. Diagnóstico JSON preparado automaticamente ao terminar a geração, download disponível para enviar ao Codex; sem credenciais/fotos/históricos brutos.214testes Fortaleza +31regressões/contratos, build/lint e Edge sintético conferidos no fechamento. Basefbe9742porFF limpo; nova fatia local. Restam revisão real/fontes/homologação/exportação, não outros slides mensais. Trimestral89segue com dez iniciais. SP estética/diagnóstico é a próxima frente indicada pelo usuário, sem alteração nesta fatia. Estados abaixo são históricos.
