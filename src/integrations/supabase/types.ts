@@ -1505,6 +1505,256 @@ export type Database = {
           },
         ]
       }
+      slide_maker_arquivos: {
+        Row: {
+          bytes: number
+          created_at: string
+          id: string
+          job_id: string
+          mime: string
+          nome: string
+          origem: string
+          storage_path: string
+        }
+        Insert: {
+          bytes: number
+          created_at?: string
+          id?: string
+          job_id: string
+          mime: string
+          nome: string
+          origem: string
+          storage_path: string
+        }
+        Update: {
+          bytes?: number
+          created_at?: string
+          id?: string
+          job_id?: string
+          mime?: string
+          nome?: string
+          origem?: string
+          storage_path?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "slide_maker_arquivos_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "slide_maker_jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      slide_maker_fases: {
+        Row: {
+          colaborador_email: string
+          criada_em: string
+          erro: string | null
+          fase: string
+          finalizada_em: string | null
+          id: string
+          iniciada_em: string | null
+          ip: unknown
+          job_id: string
+          status: string
+          tarefa_nome: string | null
+        }
+        Insert: {
+          colaborador_email: string
+          criada_em?: string
+          erro?: string | null
+          fase: string
+          finalizada_em?: string | null
+          id?: string
+          iniciada_em?: string | null
+          ip?: unknown
+          job_id: string
+          status?: string
+          tarefa_nome?: string | null
+        }
+        Update: {
+          colaborador_email?: string
+          criada_em?: string
+          erro?: string | null
+          fase?: string
+          finalizada_em?: string | null
+          id?: string
+          iniciada_em?: string | null
+          ip?: unknown
+          job_id?: string
+          status?: string
+          tarefa_nome?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "slide_maker_fases_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "slide_maker_jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      slide_maker_jobs: {
+        Row: {
+          arquivos_expurgados_em: string | null
+          colaborador_email: string
+          contexto: string | null
+          created_at: string
+          erro: string | null
+          erro_fase: string | null
+          estado: string
+          fase_em_curso: string | null
+          id: string
+          responsavel: string | null
+          titulo: string | null
+          token_acesso_hash: string
+          updated_at: string
+          versao_atual: number
+        }
+        Insert: {
+          arquivos_expurgados_em?: string | null
+          colaborador_email: string
+          contexto?: string | null
+          created_at?: string
+          erro?: string | null
+          erro_fase?: string | null
+          estado?: string
+          fase_em_curso?: string | null
+          id?: string
+          responsavel?: string | null
+          titulo?: string | null
+          token_acesso_hash: string
+          updated_at?: string
+          versao_atual?: number
+        }
+        Update: {
+          arquivos_expurgados_em?: string | null
+          colaborador_email?: string
+          contexto?: string | null
+          created_at?: string
+          erro?: string | null
+          erro_fase?: string | null
+          estado?: string
+          fase_em_curso?: string | null
+          id?: string
+          responsavel?: string | null
+          titulo?: string | null
+          token_acesso_hash?: string
+          updated_at?: string
+          versao_atual?: number
+        }
+        Relationships: []
+      }
+      slide_maker_mensagens: {
+        Row: {
+          autor: string
+          conteudo: Json
+          created_at: string
+          id: string
+          job_id: string
+          tipo: string
+        }
+        Insert: {
+          autor: string
+          conteudo: Json
+          created_at?: string
+          id?: string
+          job_id: string
+          tipo: string
+        }
+        Update: {
+          autor?: string
+          conteudo?: Json
+          created_at?: string
+          id?: string
+          job_id?: string
+          tipo?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "slide_maker_mensagens_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "slide_maker_jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      slide_maker_relatorios: {
+        Row: {
+          created_at: string
+          fontes: Json | null
+          job_id: string
+          markdown: string
+          versao: number
+        }
+        Insert: {
+          created_at?: string
+          fontes?: Json | null
+          job_id: string
+          markdown: string
+          versao: number
+        }
+        Update: {
+          created_at?: string
+          fontes?: Json | null
+          job_id?: string
+          markdown?: string
+          versao?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "slide_maker_relatorios_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "slide_maker_jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      slide_maker_versoes: {
+        Row: {
+          created_at: string
+          deck_spec: Json | null
+          id: string
+          job_id: string
+          mudancas: string[]
+          qa: Json | null
+          storage_path: string
+          versao: number
+        }
+        Insert: {
+          created_at?: string
+          deck_spec?: Json | null
+          id?: string
+          job_id: string
+          mudancas?: string[]
+          qa?: Json | null
+          storage_path: string
+          versao: number
+        }
+        Update: {
+          created_at?: string
+          deck_spec?: Json | null
+          id?: string
+          job_id?: string
+          mudancas?: string[]
+          qa?: Json | null
+          storage_path?: string
+          versao?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "slide_maker_versoes_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "slide_maker_jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       slides: {
         Row: {
           cost: number
