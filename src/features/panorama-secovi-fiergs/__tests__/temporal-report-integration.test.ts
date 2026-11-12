@@ -64,7 +64,7 @@ describe('Panorama Secovi/FIERGS — integração de frequência temporal', () =
     expect(model.ivv.series[0]?.vertical).toBe(20);
   });
 
-  it('no FIERGS calcula IVV como o Dashboard GeoBrain e ignora percentual anômalo pronto', () => {
+  it('no FIERGS calcula IVV como o Dashboard Geobrain e ignora percentual anômalo pronto', () => {
     const empty = source([]);
     const citySources = (city: string, sold: number, stock: number, endpointIvv: number) => ({
       city,

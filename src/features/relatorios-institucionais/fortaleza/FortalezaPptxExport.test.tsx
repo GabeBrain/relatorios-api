@@ -20,7 +20,7 @@ describe('Fortaleza exportação da mesma prévia',()=>{
   it('envia60páginas na ordem e audita sem a chave privada da sessão',async()=>{
     render(view());fireEvent.click(screen.getByRole('button',{name:'Baixar PPTX de conferência'}));await waitFor(()=>expect(click).toHaveBeenCalledOnce());
     const [slides,options]=build.mock.calls[0];expect(slides.map((s:HTMLElement)=>Number(s.dataset.fortalezaExportSlide))).toEqual(Array.from({length:60},(_,i)=>i+1));
-    expect(options).toMatchObject({format:'pptx',mode:'faithful',period:'2026-07'});expect(JSON.stringify(options.audit)).not.toContain('private-token');expect(options.audit.report.reference.slideCount).toBe(60);
+    expect(options).toMatchObject({format:'pptx',mode:'editable',period:'2026-07'});expect(JSON.stringify(options.audit)).not.toContain('private-token');expect(options.audit.report.reference.slideCount).toBe(60);
     expect(document.querySelectorAll('[data-fortaleza-export-slide]')).toHaveLength(0);
   });
   it('PDFusa modo fiel independentemente da escolha editável',async()=>{

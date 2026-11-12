@@ -13,7 +13,7 @@ import {
 // A ata é um print de página inteira: grande em bytes E em pixels. Tabela típica
 // vai até ~500 KB; a ata costuma passar disso ou ter dimensões de página cheia.
 // Até o 5º slide: decks reais colocam a ata depois de capa + institucionais
-// (Grupo Brain, GeoBrain) — o print de e-mail da Housi cai no s1, mas há decks
+// (Grupo Brain, Geobrain) — o print de e-mail da Housi cai no s1, mas há decks
 // que abrem com 3–4 slides de marca antes.
 const MAX_ATA_SLIDE = 5;
 const MIN_KB = 20;

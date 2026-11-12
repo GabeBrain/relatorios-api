@@ -6,7 +6,7 @@ import assert from 'node:assert/strict';
 import {unzipSync} from 'fflate';
 import { spGranularFixture } from './sp-granular-fixture.mjs';
 
-// Own local app, synthetic authentication and mixed-date replays, GeoBrain calls intercepted; only Mapbox basemap requests allowed.
+// Own local app, synthetic authentication and mixed-date replays, Geobrain calls intercepted; only Mapbox basemap requests allowed.
 const output = resolve('.local-inputs/relatorios-lucas/sp/people-editable');
 await mkdir(output, { recursive: true });
 const recorded = JSON.parse(await readFile('src/features/relatorios-institucionais/sp/__tests__/fixtures/sp-municipal-2026.json', 'utf8'));

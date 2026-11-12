@@ -7,7 +7,7 @@ const folder=resolve('.local-inputs/relatorios-lucas/fortaleza/quarterly-visual'
 await mkdir(folder,{recursive:true});
 await writeFile(resolve(folder,'preview.html'),'<html><body style="margin:0"><div id="root"></div><script type="module" src="/scripts/fixtures/fortaleza-quarterly-preview.tsx"></script></body></html>');
 const base='http://127.0.0.1:4186';
-const server=spawn(process.execPath,[resolve('node_modules/vite/bin/vite.js'),'--host','127.0.0.1','--port','4186','--strictPort'],{windowsHide:true,stdio:'ignore'});
+const server=spawn(process.execPath,[resolve('scripts/diagnostics/report-preview-server.mjs'),'4186'],{windowsHide:true,stdio:'ignore'});
 let browser;
 try{
   let ready=false;for(let i=0;i<80&&!ready;i++){try{ready=(await fetch(base)).ok;}catch{}if(!ready)await new Promise(done=>setTimeout(done,250));}assert.ok(ready);

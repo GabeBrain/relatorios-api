@@ -16,7 +16,7 @@ describe('Textos institucionais editáveis',()=>{
     expect(screen.getByText('39,6% do potencial de consumo do estado').tagName.toLowerCase()).toBe('text');
     if(throughMonth!=='2026-06')expect(screen.queryByText('JUNHO DE 2026')).not.toBeInTheDocument();
   });
-  it('expõe números e legendas dos seis cartões GeoBrain como texto SVG nativo',()=>{
+  it('expõe números e legendas dos seis cartões Geobrain como texto SVG nativo',()=>{
     const {container}=render(<SpSlideContent report={report()} page={5}/>);
     expect(container.querySelectorAll('svg text')).toHaveLength(22);
     for(const value of ['+12.500','+18.000','+650.000','6,6M','+45.000','R$ 434 Bi'])expect(screen.getByText(value).tagName.toLowerCase()).toBe('text');

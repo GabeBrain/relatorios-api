@@ -7,7 +7,7 @@ import { unzipSync } from 'fflate';
 import assert from 'node:assert/strict';
 const folder=resolve('.local-inputs/relatorios-lucas/fortaleza/complete-2026-11-12');await mkdir(folder,{recursive:true});
 await writeFile(resolve(folder,'preview.html'),'<html><body style="margin:0"><div id="root"></div><script type="module" src="/scripts/fixtures/fortaleza-complete-preview.tsx"></script></body></html>');
-const port=process.argv.includes('--export')?'4191':'4189',base=`http://127.0.0.1:${port}`,server=spawn(process.execPath,[resolve('node_modules/vite/bin/vite.js'),'--host','127.0.0.1','--port',port,'--strictPort'],{windowsHide:true,stdio:'ignore'});
+const port=process.argv.includes('--export')?'4191':'4189',base=`http://127.0.0.1:${port}`,server=spawn(process.execPath,[resolve('scripts/diagnostics/report-preview-server.mjs'),port],{windowsHide:true,stdio:'ignore'});
 let browser;
 try{
   let ready=false;for(let i=0;i<80&&!ready;i++){try{ready=(await fetch(base)).ok;}catch{}if(!ready)await new Promise(done=>setTimeout(done,250));}assert.ok(ready);
@@ -37,7 +37,7 @@ try{
     assert.equal(names.length,86);assert.equal(new Set(names).size,86);
     if(process.argv.includes('--export')){
       for(const format of ['pptx','pdf']){
-        if(format==='pptx'){await page.getByRole('combobox',{name:'PowerPoint para conferência',exact:true}).click();await page.getByRole('option',{name:'Textos e células editáveis',exact:true}).click();}
+
         const downloadPending=page.waitForEvent('download',{timeout:300000});downloadPending.catch(()=>{});
         await page.getByRole('button',{name:format==='pdf'?'Baixar PDF de conferência':'Baixar PPTX de conferência',exact:true}).click();
         const failure=page.getByRole('region',{name:'Exportar Fortaleza mensal'}).getByRole('alert').waitFor({timeout:300000}).then(async()=>{throw new Error(await page.getByRole('alert').innerText());});failure.catch(()=>{});
@@ -45,7 +45,7 @@ try{
         let download;try{download=await Promise.race([downloadPending,failure]);}finally{clearInterval(timer);}
         const path=resolve(folder,`complete.${format}`);await download.saveAs(path);const bytes=await readFile(path);
         if(format==='pdf')assert.equal((await PDFDocument.load(bytes)).getPageCount(),60);
-        else{const files=unzipSync(bytes);assert.equal(Object.keys(files).filter(name=>/^ppt\/slides\/slide\d+\.xml$/.test(name)).length,60);const all=[3,4,5,6,7].map(number=>new TextDecoder().decode(files[`ppt/slides/slide${number}.xml`])).join(' ');for(let i=1;i<=86;i++)assert.ok(all.includes(`Projeto sintético ${String(i).padStart(2,'0')}`),`Nome${i} fora do PPTX`);const audit=new TextDecoder().decode(files['customXml/fortaleza-audit.xml']);assert.ok(audit.includes('fortaleza-diagnostic-v1'));assert.ok(!audit.includes('synthetic-complete-fixture'));}
+        else{const files=unzipSync(bytes);assert.equal(Object.keys(files).filter(name=>/^ppt\/slides\/slide\d+\.xml$/.test(name)).length,60);for(const number of [3,4,5,6,7])assert.ok(new TextDecoder().decode(files[`ppt/slides/slide${number}.xml`]).includes('<a:tbl>'));const all=[3,4,5,6,7].map(number=>new TextDecoder().decode(files[`ppt/slides/slide${number}.xml`])).join(' ');for(let i=1;i<=86;i++)assert.ok(all.includes(`Projeto sintético ${String(i).padStart(2,'0')}`),`Nome${i} fora do PPTX`);const audit=new TextDecoder().decode(files['customXml/fortaleza-audit.xml']);assert.ok(audit.includes('fortaleza-diagnostic-v1'));assert.ok(!audit.includes('synthetic-complete-fixture'));}
         results.push({format,pages:60});console.log(JSON.stringify({completed:format}));
       }
     }

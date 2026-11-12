@@ -10,6 +10,7 @@ vi.mock('html-to-image',()=>({toPng:capture,toJpeg:async()=>jpg,getFontEmbedCSS:
 let holder:HTMLDivElement,slides:HTMLDivElement[];
 beforeEach(()=>{
   vi.stubGlobal('Blob',BrowserCompatibleBlob);capture.mockReset().mockResolvedValue(png);Object.defineProperty(document,'fonts',{configurable:true,value:{ready:Promise.resolve()}});
+  vi.spyOn(Element.prototype,'getBoundingClientRect').mockReturnValue({left:0,top:0,right:1280,bottom:720,width:1280,height:720,x:0,y:0,toJSON:()=>({})});
   holder=document.createElement('div');document.body.append(holder);slides=Array.from({length:60},(_,i)=>{const slide=document.createElement('div');slide.dataset.fortalezaExportSlide=String(i+1);holder.append(slide);return slide;});
 });
 afterEach(()=>{holder.remove();vi.restoreAllMocks();vi.unstubAllGlobals();});
@@ -31,7 +32,7 @@ describe('Fortaleza exportação mensal offline',()=>{
     expect(strFromU8(files[FORTALEZA_PPTX_AUDIT_PART])).toContain('&lt;&amp;&gt; teste');
     expect(strFromU8(files['ppt/_rels/presentation.xml.rels'])).toContain('../customXml/fortaleza-audit.xml');
     expect(strFromU8(files['ppt/notesSlides/notesSlide1.xml'])).not.toContain('fortaleza-pptx-review-v1');
-    expect(capture).toHaveBeenCalledTimes(60);expect(settings.onProgress).toHaveBeenLastCalledWith(60,60);expect(holder.children).toHaveLength(60);
+    expect(capture).not.toHaveBeenCalled();expect(settings.onProgress).toHaveBeenLastCalledWith(60,60);expect(holder.children).toHaveLength(60);
   });
   it('geraPDFcom60páginas16:9eJSONanexado',async()=>{
     const blob=await buildFortalezaMonthlyExport(slides,{...options(),format:'pdf'}),pdf=await PDFDocument.load(Buffer.from(await blob.arrayBuffer()).toString('base64'));
@@ -45,13 +46,13 @@ describe('Fortaleza exportação mensal offline',()=>{
     await expect(buildFortalezaMonthlyExport([...slides].reverse(),options())).rejects.toThrow('ordem original');expect(capture).not.toHaveBeenCalled();
   });
   it('cancelamento durante a captura não retorna arquivo e limpa clone',async()=>{
-    const controller=new AbortController();capture.mockImplementationOnce(async()=>{controller.abort();return png;});
-    await expect(buildFortalezaMonthlyExport(slides,{...options(),signal:controller.signal})).rejects.toMatchObject({name:'AbortError'});
-    expect(capture).toHaveBeenCalledOnce();expect(holder.children).toHaveLength(60);
+    const controller=new AbortController();
+    await expect(buildFortalezaMonthlyExport(slides,{...options(),signal:controller.signal,onProgress:()=>controller.abort()})).rejects.toMatchObject({name:'AbortError'});
+    expect(capture).not.toHaveBeenCalled();expect(holder.children).toHaveLength(60);
   });
   it('falha de captura é recuperável e limpa clone',async()=>{
-    capture.mockRejectedValueOnce(new Error('Captura indisponível'));
-    await expect(buildFortalezaMonthlyExport(slides,options())).rejects.toThrow('Captura indisponível');expect(holder.children).toHaveLength(60);
+    vi.spyOn(slides[0],'getBoundingClientRect').mockReturnValueOnce({width:0,height:0} as DOMRect);
+    await expect(buildFortalezaMonthlyExport(slides,options())).rejects.toThrow('sem dimensões');expect(holder.children).toHaveLength(60);
     await expect(buildFortalezaMonthlyExport(slides,options())).resolves.toBeInstanceOf(Blob);
   });
   it('respeita recorte de célula e preserva rótulo inclinado no desenho',()=>{

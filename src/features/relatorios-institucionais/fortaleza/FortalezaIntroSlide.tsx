@@ -70,13 +70,15 @@ export default function FortalezaIntroSlide({ model, page, view }: { model: 'jun
       if (shape.slot === 'chart') { const first = chartIndex++ === 0; return <Plot key={shapeIndex} shape={shape} bins={first ? view.history : view.accumulated} monthly={view.monthly} legend={first} />; }
       if (shape.slot === 'table') {
         const projects = page < 5 ? view.capital : view.rm,plan=introTablePlan(model,page,projects?.length??0),offset=plan.offset;
-        const header=shape.cells.filter(cell=>cell.row===0),headerHeight=Math.max(...header.map(cell=>cell.height)),rowHeight=(610-shape.y-headerHeight)/plan.rows;
-        const cells=plan.expanded?[...header,...Array.from({length:plan.rows},(_,index)=>shape.cells.filter(cell=>cell.row===1).map(cell=>({...cell,row:index+1,y:shape.y+headerHeight+index*rowHeight,height:rowHeight,font:{...cell.font,size:Math.min(cell.font.size,rowHeight*.55)}}))).flat()]:shape.cells;
-        return <g key={shapeIndex}>{cells.map((cell, cellIndex) => {
+        const header=shape.cells.filter(cell=>cell.row===0),headerHeight=Math.max(...header.map(cell=>cell.height));
+        const nativeRow=shape.cells.find(cell=>cell.row===1)!.height;
+        const tableHeight=Math.min(480,headerHeight+nativeRow*plan.rows),tableTop=Math.max(130,Math.min(610-tableHeight,shape.y+shape.height/2-tableHeight/2)),rowHeight=(tableHeight-headerHeight)/plan.rows;
+        const cells=plan.expanded?[...header.map(cell=>({...cell,y:tableTop})),...Array.from({length:plan.rows},(_,index)=>shape.cells.filter(cell=>cell.row===1).map(cell=>({...cell,row:index+1,y:tableTop+headerHeight+index*rowHeight,height:rowHeight,font:{...cell.font,size:Math.min(cell.font.size,rowHeight*.55)}}))).flat()]:shape.cells;
+        return <g key={shapeIndex} data-native-table="launches" aria-label="Tabela de lançamentos editável">{cells.map((cell, cellIndex) => {
           const value = cell.row === 0 ? cell.text : projects === null ? cell.column === 0 ? '—' : '' : projectValues(projects[offset + cell.row - 1], offset + cell.row - 1, shape.columns)[cell.column];
           const align = cell.align === 2 ? 'center' : cell.align === 3 ? 'right' : 'left';
           const fontSize=plan.expanded&&cell.row>0?introCellFont(value,cell.width-cell.marginLeft-cell.marginRight-4,cell.height-4,cell.font.size):cell.font.size;
-          return <g key={cellIndex}><rect x={cell.x} y={cell.y} width={cell.width} height={cell.height} fill={cell.row===0?'white':'none'} stroke="white" strokeWidth={.7}/><foreignObject x={cell.x} y={cell.y} width={cell.width} height={cell.height}><div className="fortaleza-intro-cell" style={{ paddingLeft: cell.marginLeft, paddingRight: cell.marginRight, fontSize, fontWeight: cell.font.bold ? 700 : 400, color: cell.font.color, textAlign: align }}><span style={plan.expanded?{overflowWrap:'anywhere'}:undefined}>{value}</span></div></foreignObject></g>;
+          return <g key={cellIndex} data-native-cell={`${cell.row}:${cell.column}`}><rect x={cell.x} y={cell.y} width={cell.width} height={cell.height} fill={cell.row===0?'white':'none'} stroke="white" strokeWidth={.7}/><foreignObject x={cell.x} y={cell.y} width={cell.width} height={cell.height}><div className="fortaleza-intro-cell" style={{ paddingLeft: cell.marginLeft, paddingRight: cell.marginRight, fontSize, fontWeight: cell.font.bold ? 700 : 400, color: cell.font.color, textAlign: align }}><span style={{color:cell.font.color,WebkitTextFillColor:cell.font.color,...(plan.expanded?{overflowWrap:'anywhere' as const}:{})}}>{value}</span></div></foreignObject></g>;
         })}</g>;
       }
       return <g key={shapeIndex}>{shape.lines.map((line, index) => {

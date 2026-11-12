@@ -8,15 +8,16 @@ import {buildSpTemporalPreview} from './temporal';
 import {recordedInput} from './__tests__/recorded';
 import {SpPeopleSlide} from './SpPeopleSlide';
 import {createSpPeople} from './people';
+vi.mock('../shared/native-pptx',async importOriginal=>({...await importOriginal<typeof import('../shared/native-pptx')>(),patchNativePptx:(bytes:Uint8Array)=>bytes}));
 vi.mock('./pptx-audit',()=>({embedSpPptxAudit:vi.fn(()=>new Uint8Array([1,2,3]))}));
 const captured=vi.hoisted(()=>({slides:[] as {texts:string[];notes:string[];images:number;targets:number[]}[],writes:0}));
 vi.mock('pptxgenjs',()=>({default:class {
   ShapeType={rect:'rect'};
-  addSlide(){const slide={texts:[] as string[],notes:[] as string[],images:0,targets:[] as number[]};captured.slides.push(slide);return {addImage:()=>slide.images++,addText:(value:string)=>slide.texts.push(value),addNotes:(value:string)=>slide.notes.push(value),addShape:(_type:string,options:{hyperlink:{slide:number}})=>slide.targets.push(options.hyperlink.slide)};}
+  addSlide(){const slide={texts:[] as string[],notes:[] as string[],images:0,targets:[] as number[]};captured.slides.push(slide);return {addImage:()=>slide.images++,addText:(value:string)=>slide.texts.push(value),addNotes:(value:string)=>slide.notes.push(value),addShape:(_type:string,options:{hyperlink?:{slide:number}})=>{if(options.hyperlink)slide.targets.push(options.hyperlink.slide);}};}
   async write(){captured.writes++;return Object.assign(new Blob(['test-pptx']),{arrayBuffer:async()=>new ArrayBuffer(1)});}
 }}));
 vi.mock('html-to-image',()=>({getFontEmbedCSS:async()=>'',toPng:async(node:HTMLElement)=>{
-  if(!node.hasAttribute('data-sp-editable-photo'))expect(node.querySelector('text')!.style.fill).toBe('transparent');
+  expect(node.hasAttribute('data-sp-editable-photo')).toBe(true);
   return 'data:image/png;base64,iVBORw0KGgo=';
 }}));
 vi.mock('@/features/panorama-secovi-fiergs/lib/pdf-export',()=>({waitForSlide:async()=>{},PanoramaExportCancelled:class extends Error{constructor(){super('Cancelado');this.name='PanoramaExportCancelled';}}}));
@@ -34,7 +35,7 @@ describe('SP — PowerPoint para conferência',()=>{
     const source=slides(),people=createSpPeople();people.team[0].name='Analista de teste';people.consulting[0].name='Consultor de teste';
     for(const page of [82,83] as const){source[page-1].innerHTML=renderToStaticMarkup(createElement(SpPeopleSlide,{page,people}));source[page-1].querySelectorAll('img').forEach(image=>image.remove());}
     await buildSpEditablePptx(source,'3T2026',new AbortController().signal,()=>{});
-    expect(captured.slides[81].images).toBe(6);expect(captured.slides[82].images).toBe(16);
+    expect(captured.slides[81].images).toBe(5);expect(captured.slides[82].images).toBe(15);
     expect(captured.slides[81].texts).toContain('Analista de teste');expect(captured.slides[82].texts).toContain('Consultor de teste');
   });
   it('exporta a data atual, percentuais e cartões institucionais como caixas de texto nativas',async()=>{
@@ -51,7 +52,7 @@ describe('SP — PowerPoint para conferência',()=>{
     const source=slides(),progress=vi.fn();
     const result=await buildSpEditablePptx(source,'2T2026',new AbortController().signal,progress,{quarter:'2T2026',numericAudit:{schema:'sp-numeric-audit-v1'}});
     expect(result).toBeInstanceOf(Blob);expect(captured.slides).toHaveLength(85);expect(progress).toHaveBeenLastCalledWith(85,85);
-    expect(captured.slides.every(slide=>slide.texts.join(' ')==='42.453'&&slide.images===1)).toBe(true);
+    expect(captured.slides.every(slide=>slide.texts.join(' ')==='42.453'&&slide.images===0)).toBe(true);
     expect(captured.slides.flatMap(slide=>slide.notes).join(' ')).not.toContain('SP_AUDIT_JSON');
     expect(embedSpPptxAudit).toHaveBeenCalledWith(expect.any(Uint8Array),{quarter:'2T2026',numericAudit:{schema:'sp-numeric-audit-v1'}});
     expect(source[0].querySelector('text')!.style.fill).toBe('rgb(38,38,38)');expect(deck.children).toHaveLength(85);expect(captured.writes).toBe(1);

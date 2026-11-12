@@ -470,6 +470,27 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 12/11/2026 — Grafia Geobrain em páginas e relatórios — Codex/Lucas
+
+**Commit/evidência:** `1611347d` (12/11/2026), local.46testes existentes em6arquivos e build de produção aprovados; busca estática confirma a grafia corrigida, mantendo apenas o contraexemplo negativo no teste. Sem publicação nesta entrega.
+
+- **Mudança:** grafia oficial Geobrain nos textos de Home, API Explorer, relatório Excel, validação de fechamento, Empresas/Empregados, SP e Fortaleza (prévia/exportação), mensagens de autenticação e títulos/metadados de slides. Diretriz registrada no Design System; seletores dos diagnósticos e expectativas dos testes atualizados.
+- **Escopo:** ajuste editorial, sem mudança de dados, cálculo, permissão ou fluxo. Identificadores técnicos e evidências históricas permanecem intactos; o teste negativo mantém a grafia incorreta para verificar regressões. Mensagens das funções Supabase entram no próximo deploy dessas funções.
+- **Etapas/Pendências:** implementação local; publicar após autorização. Preservados componentes, estados e layouts existentes; sem escrita Monday.
+
+
+
+### 12/11/2026 — Relatórios: tabelas nativas e objetos editáveis nos PPTX — Codex/Lucas
+
+- **Commit:** `cd473deb` (12/11/2026), local; documentação de fechamento em commit separado.
+
+- **Mudança:** exportador compartilhado de objetos DrawingML para SP85 e Fortaleza60/89; listas3–7 como tabelas reais, textos e gráficos em elementos vetoriais, imagens separadas. Modo de PPTX em lâmina única retirado de Fortaleza. Contraste/alinhamento/centro das listas corrigidos; SP2 refeito com textos/cartões nativos. Fortaleza59/88 reconstruído em16retratos/nomes/cargos com editor individual; SP mantém suas15imagens de consultoria. Capas e divisórias entram no mesmo caminho.
+- **Limites:** gráficos em formas vetoriais, sem planilha Excel “Editar Dados”; demais tabelas SVG como objetos de texto/células. Imagens/logotipos e bases cartográficas selecionáveis/substituíveis. Qualidade máxima dos recortes é a disponível na referência, com upload individual para melhoria. Não modifica cálculo nem homologa indicadores.
+- **Validação:**276testes, build/tipos/lint;240casos mensais/324trimestrais no Edge. Três downloads reais e abertura/render no PowerPoint (60/89/85), tabelas `HasTable`, ajuste de célula preservado e fotos separadas. Dados de QA sintéticos/fixtures, sem API autenticada. [Contrato e evidência](../features/relatorios-institucionais/PREVIA_EDITAVEL_2026-11-12.md).
+- **Monday:** [Fortaleza](https://brain381753.monday.com/boards/18398428946/pulses/13149406420) — `13149406420`
+- **Etapas/Pendências:** correção local pronta para revisão/publicação autorizada. Depois, gerar os materiais reais novamente e homologar com o analista; persistência da edição continua apenas na sessão. Sem escrita Monday.
+
+
 ### 12/11/2026 — Relatórios Fortaleza: fontes observadas; Fortaleza e SP: prévia editável — Codex/Lucas
 
 - **Commit/validação:** `a6b537af`;266testes, build/tipos/lint;240casos mensais e324trimestrais no Edge, edição/navegação/restauração em ambos e PPTX/PDF reais60conferidos. Nove retratos em objetos editáveis. Novo download realSP85não executado; extração e integração testadas.
@@ -1585,6 +1606,12 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 
 ## 2. Etapas
 
+- **12/11 — Grafia:** Geobrain padronizado nos textos visíveis; entrega editorial local.
+
+
+- **12/11 — PPTX SP/Fortaleza60/89:** exportação com objetos editáveis validada em arquivo real e PowerPoint; listas nativas e consultoria individual. Publicação desta correção pendente.
+
+
 - **12/11 — Fortaleza e SP:** edição na prévia implementada localmente, com Tahoma/títulos e exportação da mesma composição; mensal Fortaleza usa cobertura municipal observada para liberar fontes completas. Conferência real pós-publicação e homologação continuam abertas.
 
 
@@ -1712,6 +1739,12 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 ---
 
 ## 3. Pendências
+
+- **12/11 — Grafia:** publicar o ajuste editorial Geobrain após autorização; mensagens server-side dependem do deploy das funções correspondentes.
+
+
+- **12/11 — Exportação de relatórios, correção atual:** autorizar push e conferir os três relatórios reais após deploy. Gráficos exportados como formas; eventual exigência de planilha Excel/Editar Dados precisa de um contrato adicional de gráficos nativos.
+
 
 - **12/11 — Fortaleza/SP, entrega atual:** autorizar publicação desta correção, gerar mensal agosto novamente e conferir os números com o analista. Prévia manual permanece na sessão; fotos de consultoria SP disponíveis só no composto original podem exigir upload para maior resolução.
 

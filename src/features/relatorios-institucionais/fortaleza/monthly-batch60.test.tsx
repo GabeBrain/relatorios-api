@@ -25,8 +25,14 @@ describe('Fortaleza mensal56–60 e diagnóstico',()=>{
   it('edita nome/cargo, preserva ao navegar e permite restaurar a pessoa',()=>{
     render(<FortalezaIntroSlides selection={selection} cities={cities} data={null}/>);fireEvent.click(screen.getByRole('button',{name:'57'}));fireEvent.click(screen.getByText('Personalizar equipe e fotos'));fireEvent.change(screen.getByLabelText('Nome'),{target:{value:'Analista da edição'}});fireEvent.change(screen.getByLabelText('Cargo'),{target:{value:'Pesquisa de mercado'}});expect(screen.getByRole('img',{name:'Fortaleza · slide 57'}).textContent).toContain('Analista da edição');fireEvent.click(screen.getByRole('button',{name:'58'}));fireEvent.click(screen.getByRole('button',{name:'57'}));expect(screen.getByLabelText('Nome')).toHaveProperty('value','Analista da edição');fireEvent.click(screen.getByRole('button',{name:'Restaurar referência'}));expect(screen.getByLabelText('Nome')).toHaveProperty('value','Fábio Tadeu Araújo');
   });
-  it('59aceita substituir a imagem institucional completa',()=>{
-    const editorial=createFortalezaEditorial();editorial.board='data:image/png;base64,fixture';const {container}=render(<FortalezaClosingSlide page={59} selection={selection} editorial={editorial}/>);expect(container.querySelector('image')?.getAttribute('href')).toBe(editorial.board);
+  it('59tem16retratos e textos separados',()=>{
+    const editorial=createFortalezaEditorial();editorial.consulting[0].name='Consultor editado';const {container}=render(<FortalezaClosingSlide page={59} selection={selection} editorial={editorial}/>);expect(container.querySelectorAll('[data-fortaleza-editable-photo]')).toHaveLength(16);expect(container).toHaveTextContent('Consultor editado');
+  });
+  it.each([{periodicity:'monthly' as const,page:59,other:57},{periodicity:'quarterly' as const,page:88,other:86}])('consultoria$page edita, preserva e restaura integrante individual',({periodicity,page,other})=>{
+    const selected={...selection,periodicity,position:periodicity==='quarterly'?2:selection.position};render(<FortalezaIntroSlides selection={selected} cities={cities} data={null}/>);
+    fireEvent.click(screen.getByRole('button',{name:String(page)}));fireEvent.click(screen.getByText('Personalizar equipe e fotos'));fireEvent.change(screen.getByLabelText('Nome'),{target:{value:'Consultor desta edição'}});
+    expect(screen.getByRole('img',{name:`Fortaleza · slide ${page}`})).toHaveTextContent('Consultor desta edição');fireEvent.click(screen.getByRole('button',{name:String(other)}));fireEvent.click(screen.getByRole('button',{name:String(page)}));expect(screen.getByLabelText('Nome')).toHaveProperty('value','Consultor desta edição');
+    fireEvent.click(screen.getByRole('button',{name:'Ocultar integrante'}));expect(document.querySelectorAll('[data-fortaleza-editable-photo]')).toHaveLength(15);fireEvent.click(screen.getByRole('button',{name:'Restaurar referência'}));expect(screen.getByLabelText('Nome')).toHaveProperty('value','Marcos Kahtalian');expect(document.querySelectorAll('[data-fortaleza-editable-photo]')).toHaveLength(16);
   });
   it('quebras longas respeitam os limites de linhas sem descartar palavras',()=>{
     const text='Nome muito longo de integrante para conferência';const lines=closingLines(text,12,2);expect(lines).toHaveLength(2);expect(lines.join(' ')).toBe(text);

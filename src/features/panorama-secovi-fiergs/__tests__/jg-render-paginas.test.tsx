@@ -48,8 +48,8 @@ function modelOf(buildings: Record<string, unknown>[]): PanoramaReportModel {
   }, [], { cubes: [cube], provenance: { engineVersion: 'v3', completedCities: ['Praia Grande'] } });
 }
 
-describe('JG-36/37/38 · narrativa sem loteamento, sem "API GeoBrain" e com preços separados', () => {
-  it('nenhuma das duas páginas de narrativa menciona loteamento ou API GeoBrain', () => {
+describe('JG-36/37/38 · narrativa sem loteamento, sem "API Geobrain" e com preços separados', () => {
+  it('nenhuma das duas páginas de narrativa menciona loteamento ou API Geobrain', () => {
     const report = modelOf([vertical, condominio, loteamento]);
     for (const continuation of [false, true]) {
       const { container, unmount } = render(<NarrativeSlide report={report} continuation={continuation}/>);
