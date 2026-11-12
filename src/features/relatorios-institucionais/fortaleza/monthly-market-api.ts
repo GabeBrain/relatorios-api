@@ -11,7 +11,7 @@ export async function fetchMonthlyMarket(selection: FortalezaSelection, authoriz
   const scopeKey = JSON.stringify([scope.cities,months,'fortaleza-monthly-v4']);
   const output: MonthlyMarketData = { scopeKey, months, sources: [], issues: [] };
   const check = () => { if (options.signal?.aborted) throw new DOMException('Consulta cancelada.', 'AbortError'); };
-  const tasks = scope.cities.flatMap(city => (['Vertical','Horizontal','Comercial'] as MonthlySegment[]).flatMap(segment => (segment === 'Comercial' ? ['releases','sales'] : ['releases','sales','stock'] as MonthlyMetric[]).map(metric => ({ city, segment, metric:metric as MonthlyMetric }))));
+  const tasks = scope.cities.flatMap(city => (['Vertical','Horizontal','Comercial'] as MonthlySegment[]).flatMap(segment => (segment === 'Comercial'&&selection.periodicity==='monthly' ? ['releases','sales'] : ['releases','sales','stock'] as MonthlyMetric[]).map(metric => ({ city, segment, metric:metric as MonthlyMetric }))));
   const completed = new Map<number, MonthlyMarketSource>(); let nextTask = 0;
   async function worker() {
     while (nextTask < tasks.length) {

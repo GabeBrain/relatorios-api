@@ -34,7 +34,7 @@ function StockChart({ data,page,selection }: { data:MonthlySlideData; page:numbe
     <g fill="black" fontSize={15} fontWeight={700}><rect x={230} y={596} width={8} height={8} fill={palette[0]} /><text x={244} y={605}>Estoque · {data.labels[0]}</text><rect x={610} y={596} width={8} height={8} fill={palette[1]} /><text x={624} y={605}>Estoque · {data.labels[1]}</text><circle cx={1010} cy={600} r={4.5} fill="#AA4EBF" /><text x={1022} y={605}>Total</text></g>
   </g>;
 }
-function Rolling({ data }: { data: NonNullable<MonthlySlideData['rolling']> }) {
+export function Rolling({ data }: { data: NonNullable<MonthlySlideData['rolling']> }) {
   const max = Math.max(1,...data.flatMap(row => [row.launches,row.sales])), min = Math.min(0,...data.map(row => row.sales));
   const x = (index:number) => 58 + index / Math.max(1,data.length - 1) * 1150;
   const y = (value:number) => 520 - (value - min) / (max - min) * 250;

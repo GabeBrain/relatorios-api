@@ -13,7 +13,8 @@ export const priceSourceKey = (source:Pick<PriceSource,'city'|'segment'>) => `${
 export const priceSourceHasIssues = (source:PriceSource) => !source.complete || Object.values(source.frames).some(frame => frame.issues.length>0 || Object.values(frame.productIssues).some(issues=>issues.length>0) || frame.rows.some(row=>row.units>0&&row.meter===null));
 export function priceMonths(selection:FortalezaSelection) {
   const closing = Number(fortalezaPeriod(selection).end.slice(5,7));
-  return Array.from({ length:13 },(_,index) => new Date(Date.UTC(selection.year,closing-13+index,1)).toISOString().slice(0,7));
+  const length=selection.periodicity==='monthly'?13:27;
+  return Array.from({ length },(_,index) => new Date(Date.UTC(selection.year,closing-length+index,1)).toISOString().slice(0,7));
 }
 export function productOf(building:Record<string,unknown>):PriceProduct|null {
   if (normalizeMarketText(building.building_type) === 'vertical') return 'vertical';
@@ -89,7 +90,7 @@ export function buildPriceSlide(page:number,collection:PriceCollection|null,sele
   const rm = page >= 40 && page <= 43, required = rm ? FORTALEZA_CITIES.filter(city => city !== 'Fortaleza') : ['Fortaleza'];
   if (![37,38,40,41,42,43].includes(page)) return blockPrice('Slide sem contrato de preço.');
   if (required.some(city => !cities.some(value => normalizeMarketText(value) === normalizeMarketText(city)))) return blockPrice('O recorte não inclui todos os municípios desta análise.');
-  const months = priceMonths(selection), sourceKeys:string[] = [];
+  const months = priceMonths(selection).filter((_,index)=>selection.periodicity==='monthly'||index%3===2), sourceKeys:string[] = [];
   const getSource = (city:string,segment:'Vertical'|'Horizontal') => {
     const matches = collection?.sources.filter(source => normalizeMarketText(source.city) === normalizeMarketText(city) && source.segment === segment) ?? [];
     if (matches.length !== 1 || !matches[0].complete) throw new Error(`${city}/${segment}: histórico de preços não concluído.`);
@@ -106,9 +107,9 @@ export function buildPriceSlide(page:number,collection:PriceCollection|null,sele
     }
     const products:PriceProduct[] = page === 37 ? ['vertical'] : ['houses','closed-lots'];
     const source = getSource('Fortaleza',page === 37 ? 'Vertical' : 'Horizontal');
-    const series = products.map(product => ({ label:({ vertical:'Residencial Vertical',houses:'Condomínio de Casas', 'closed-lots':'Loteamento Fechado','open-lots':'Loteamento Aberto' })[product],points:months.map(month => ({ month,label:`${new Intl.DateTimeFormat('pt-BR',{ month:'short',timeZone:'UTC' }).format(new Date(`${month}-01T00:00:00Z`)).replace('.','')}/${month.slice(2,4)}`,...framePrice(source,month,product,false) })) }));
+    const series = products.map(product => ({ label:({ vertical:'Residencial Vertical',houses:'Condomínio de Casas', 'closed-lots':'Loteamento Fechado','open-lots':'Loteamento Aberto' })[product],points:months.map(month => ({ month,label:selection.periodicity==='quarterly'?`${Math.ceil(Number(month.slice(5))/3)}T/${month.slice(0,4)}`:`${new Intl.DateTimeFormat('pt-BR',{ month:'short',timeZone:'UTC' }).format(new Date(`${month}-01T00:00:00Z`)).replace('.','')}/${month.slice(2,4)}`,...framePrice(source,month,product,false) })) }));
     if (series.some(line => line.points.some(point => point.value === null))) return blockPrice('Há mês sem oferta positiva elegível. A série de preços não usa zero para informação ausente.');
     const change = (now:number,before:number) => before > 0 ? (now-before)/before*100 : null;
-    return { status:'ready',issue:null,warnings:[],series,changes:series.map(line => ({ month:change(line.points.at(-1)!.value!,line.points.at(-2)!.value!),year:change(line.points.at(-1)!.value!,line.points[0].value!) })),sourceKeys };
+    return { status:'ready',issue:null,warnings:[],series,changes:series.map(line => ({ month:change(line.points.at(-1)!.value!,line.points.at(-2)!.value!),year:change(line.points.at(-1)!.value!,line.points.at(selection.periodicity==='quarterly'?-5:0)!.value!) })),sourceKeys };
   } catch (error) { return blockPrice(error instanceof Error ? error.message : 'Não foi possível conferir os preços históricos.'); }
 }

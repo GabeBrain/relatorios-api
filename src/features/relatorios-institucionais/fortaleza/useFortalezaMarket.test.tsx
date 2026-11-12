@@ -6,11 +6,13 @@ import { useFortalezaMarket } from './useFortalezaMarket';
 import { marketFixture, monthlySelection } from './__tests__/market-fixture';
 import { fetchFortalezaIntro } from './intro-data';
 import { fetchMonthlyLaunches } from './monthly-launch-api';
+import { fetchMonthlyPrices } from './monthly-prices-api';
 import { fetchMonthlyMarket } from './monthly-market-api';
 
 vi.mock('./api', () => ({ collectFortalezaMarket: vi.fn() }));
 vi.mock('./intro-data', () => ({ fetchFortalezaIntro: vi.fn() }));
 vi.mock('./monthly-launch-api', () => ({ fetchMonthlyLaunches: vi.fn() }));
+vi.mock('./monthly-prices-api', () => ({ fetchMonthlyPrices: vi.fn() }));
 vi.mock('./monthly-market-api', () => ({ fetchMonthlyMarket: vi.fn() }));
 const collect = vi.mocked(collectFortalezaMarket);
 type Payload = Awaited<ReturnType<typeof collectFortalezaMarket>>;
@@ -27,7 +29,7 @@ function deferred() {
   const promise = new Promise<Payload>(done => { resolve = done; });
   return { promise, resolve };
 }
-beforeEach(() => { vi.mocked(fetchMonthlyMarket).mockReset(); vi.mocked(fetchMonthlyMarket).mockResolvedValue({scopeKey:"quarterly",months:[],sources:[],issues:[]}); collect.mockReset(); vi.mocked(fetchMonthlyLaunches).mockReset(); vi.mocked(fetchMonthlyLaunches).mockResolvedValue({ sources: [], issues: [] }); vi.mocked(fetchFortalezaIntro).mockResolvedValue({ status: 'ready', projects: [], issues: [], requests: 0, startedAt: '', finishedAt: '' }); });
+beforeEach(() => { vi.mocked(fetchMonthlyPrices).mockReset();vi.mocked(fetchMonthlyPrices).mockResolvedValue({scopeKey:"quarterly",months:[],sources:[],issues:[]}); vi.mocked(fetchMonthlyMarket).mockReset(); vi.mocked(fetchMonthlyMarket).mockResolvedValue({scopeKey:"quarterly",months:[],sources:[],issues:[]}); collect.mockReset(); vi.mocked(fetchMonthlyLaunches).mockReset(); vi.mocked(fetchMonthlyLaunches).mockResolvedValue({ sources: [], issues: [] }); vi.mocked(fetchFortalezaIntro).mockResolvedValue({ status: 'ready', projects: [], issues: [], requests: 0, startedAt: '', finishedAt: '' }); });
 afterEach(cleanup);
 
 describe('Fortaleza — sessão e ciclo da consulta', () => {

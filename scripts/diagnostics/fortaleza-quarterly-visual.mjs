@@ -20,15 +20,18 @@ try{
     await page.goto(`${base}/.local-inputs/relatorios-lucas/fortaleza/quarterly-visual/preview.html`);
     await page.getByRole('heading',{name:'Slides do relatório · Trimestral'}).waitFor();
     await page.evaluate(async dark=>{document.documentElement.classList.toggle('dark',dark);await document.fonts.ready;},dark);
-    assert.equal(await page.getByRole('button',{name:'21',exact:true}).count(),0);
-    for(let number=11;number<=20;number++){
+    assert.equal(await page.getByRole('button',{name:'90',exact:true}).count(),0);
+    for(let number=11;number<=89;number++){
       await page.getByRole('button',{name:String(number),exact:true}).click();
       const slide=page.getByRole('img',{name:`Fortaleza · slide ${number}`,exact:true});
-      await slide.waitFor();assert.ok(!(await slide.textContent()).includes('Aguardando conferência'));
+      await slide.waitFor();
+      await slide.locator('image').evaluateAll(async nodes=>{await Promise.all(nodes.map(node=>new Promise((resolve,reject)=>{const image=new Image();image.onload=resolve;image.onerror=reject;image.src=node.getAttribute('href');if(image.complete&&image.naturalWidth)resolve();})));});
+      await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
+      assert.ok(!(await slide.textContent()).includes('Aguardando conferência'));
       assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1),false);
       assert.equal(await slide.locator('image').evaluateAll(nodes=>nodes.every(node=>Boolean(node.getAttribute('href')))),true);
-      if([16,19].includes(number))assert.equal(await slide.locator('[data-municipal-row]').count(),6);
-      else if(number!==20)assert.equal(await slide.getByLabel('Histórico trimestral').locator('circle').count(),9);
+      if([16,19,31,32].includes(number))assert.equal(await slide.locator('[data-municipal-row]').count(),6);
+      else if(number<=39&&![20,23,26,28,33,36].includes(number))assert.equal(await slide.getByLabel('Histórico trimestral').locator('circle').count(),9);
       await slide.screenshot({path:resolve(folder,`${number}-${width}-${dark}.png`)});results.push({number,width,dark});
     }
     for(const mode of ['missing','empty']){

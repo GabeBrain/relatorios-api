@@ -5,7 +5,7 @@ import { monthlySelection } from './market-fixture';
 export const monthlyMarketSelection = { ...monthlySelection, territory:'capital-rm' as const, position:7 };
 export function monthlyMarketFixture(selection=monthlyMarketSelection): MonthlyMarketData {
   const months = monthlyMarketMonths(selection), sources:MonthlyMarketSource[] = [];
-  for (const city of FORTALEZA_CITIES) for (const segment of ['Vertical','Horizontal','Comercial'] as MonthlySegment[]) for (const metric of (segment === 'Comercial' ? ['releases','sales'] : ['releases','sales','stock']) as MonthlyMetric[]) {
+  for (const city of FORTALEZA_CITIES) for (const segment of ['Vertical','Horizontal','Comercial'] as MonthlySegment[]) for (const metric of (segment === 'Comercial'&&selection.periodicity==='monthly' ? ['releases','sales'] : ['releases','sales','stock']) as MonthlyMetric[]) {
     const groups = segment === 'Horizontal' ? ['Condomínio de Casas/Sobrados','Loteamento Aberto','Loteamento Fechado','Condomínio de Chácaras'] : [...FORTALEZA_STANDARDS];
     const rows = (metric === 'stock' ? monthlyStockMonths(months) : months).flatMap(month => groups.map((group,index) => ({ city,state:'CE',building_type:segment,period:`${month}-01`,group,
       releases_in_period: segment === 'Vertical' ? index === 0 ? 10 : 1 : segment === 'Horizontal' ? index === 0 ? 4 : index === 3 ? 9999 : 3 : index === 0 ? 2 : 0,

@@ -51,11 +51,12 @@ async function waitArtwork(root:HTMLElement,signal:AbortSignal){
   }
 }
 /** No market requests. Exact60 positions; visible SVG/foreignObject composition. */
-export async function buildFortalezaMonthlyExport(slides:HTMLElement[],options:{period:string;mode:FortalezaPptxMode;format?:'pptx'|'pdf';signal:AbortSignal;onProgress:(current:number,total:number)=>void;audit:unknown}){
+export async function buildFortalezaMonthlyExport(slides:HTMLElement[],options:{period:string;periodicity?:'monthly'|'quarterly';mode:FortalezaPptxMode;format?:'pptx'|'pdf';signal:AbortSignal;onProgress:(current:number,total:number)=>void;audit:unknown}){
   const {signal}=options;check(signal);
-  if(slides.length!==60||slides.some((slide,i)=>Number(slide.dataset.fortalezaExportSlide)!==i+1))throw new Error('A exportação exige as 60 páginas mensais na ordem original.');
+  const count=options.periodicity==='quarterly'?89:60,kind=options.periodicity==='quarterly'?'Trimestral':'Mensal';
+  if(slides.length!==count||slides.some((slide,i)=>Number(slide.dataset.fortalezaExportSlide)!==i+1))throw new Error(`A exportação exige as ${count} páginas na ordem original.`);
   const [{default:Pptx},{toPng,toJpeg,getFontEmbedCSS}]=await Promise.all([import('pptxgenjs'),import('html-to-image')]);
-  const pptx=new Pptx();pptx.layout='LAYOUT_WIDE';pptx.author='Brain Inteligência Estratégica';pptx.title=`Fortaleza e RM · Mensal · ${options.period}`;
+  const pptx=new Pptx();pptx.layout='LAYOUT_WIDE';pptx.author='Brain Inteligência Estratégica';pptx.title=`Fortaleza e RM · ${kind} · ${options.period}`;
   pptx.subject=`Versão para conferência, sem homologação. ${options.mode==='editable'?'Textos e células dinâmicos editáveis; gráficos, retratos, rótulos inclinados e artes em imagem. Requer Montserrat instalada.':'Lâminas em imagem para preservar a aparência da prévia.'}`;
   const pdf=options.format==='pdf'?await(await import('pdf-lib')).PDFDocument.create():null;
   if(pdf){pdf.setTitle(pptx.title);pdf.setAuthor(pptx.author);pdf.setSubject('Versão para conferência, sem homologação; diagnóstico anexado.');}
@@ -69,11 +70,11 @@ export async function buildFortalezaMonthlyExport(slides:HTMLElement[],options:{
       const image=await(pdf?toJpeg(clone,{fontEmbedCSS,pixelRatio:2,width:1280,height:720,cacheBust:false,backgroundColor:'#ffffff',quality:.97}):toPng(clone,{fontEmbedCSS,pixelRatio:2,width:1280,height:720,cacheBust:false}));check(signal);
       if(pdf){const page=pdf.addPage([W*72,H*72]),jpg=await pdf.embedJpg(image);check(signal);page.drawImage(jpg,{x:0,y:0,width:W*72,height:H*72});}
       else{
-        const slide=pptx.addSlide();slide.addImage({data:image,x:0,y:0,w:W,h:H,objectName:`Lâmina mensal ${i+1}`});
+        const slide=pptx.addSlide();slide.addImage({data:image,x:0,y:0,w:W,h:H,objectName:`Lâmina ${kind} ${i+1}`});
         for(const text of native.texts){const {size,text:value,...box}=text;slide.addText(value,{...box,fontSize:size,fontFace:'Montserrat',margin:0,breakLine:false,valign:'middle',fit:'shrink',wrap:false,objectName:`Texto editável: ${text.text.slice(0,50)}`} as PptxGenJS.TextPropsOptions);}
-        slide.addNotes(`Fortaleza / SINDUSCON-CE · ${options.period}; posição ${i+1}/60. Versão para conferência; fontes pendentes preservadas. ${pptx.subject}`);
+        slide.addNotes(`Fortaleza / SINDUSCON-CE · ${options.period}; posição ${i+1}/${count}. Versão para conferência; fontes pendentes preservadas. ${pptx.subject}`);
       }
-      options.onProgress(i+1,60);
+      options.onProgress(i+1,count);
     }finally{clone.remove();}
   }
   if(pdf){check(signal);const auditBytes=new TextEncoder().encode(JSON.stringify(options.audit));let binary='';for(let i=0;i<auditBytes.length;i+=8192)binary+=String.fromCharCode(...auditBytes.subarray(i,i+8192));await pdf.attach(btoa(binary),'fortaleza-diagnostico.json',{mimeType:'application/json',description:'Diagnóstico da mesma exportação; sem credenciais ou históricos brutos.'});const bytes=await pdf.save();check(signal);return new Blob([bytes as BlobPart],{type:'application/pdf'});}

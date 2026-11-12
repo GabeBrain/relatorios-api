@@ -1,7 +1,7 @@
 import { describe,it,expect } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { monthlyMarketFixture,monthlyMarketSelection } from './__tests__/monthly-market-fixture';
-import { buildQuarterlyLaunchSlide,buildQuarterlyMunicipalTable } from './quarterly-launches';
+import { buildQuarterlyLaunchSlide,buildQuarterlyMunicipalTable,buildQuarterlyStockTable } from './quarterly-launches';
 import { monthlyLaunchMonths } from './monthly-launches';
 import { FORTALEZA_CITIES } from './model';
 import { buildIntroProject,type IntroData } from './intro-data';
@@ -55,11 +55,35 @@ describe('Fortaleza trimestral — ordem original 11–20',()=>{
   });
   it('renderiza cada posição original e mantém erro visível sem números antigos',()=>{
     const market=fixture();
-    for(let page=11;page<=20;page++){
+    for(let page=11;page<=40;page++){
       const svg=renderToStaticMarkup(<FortalezaReportSlide page={page} selection={selection} cities={cities} data={intro} monthlyLaunches={{sources:[],issues:[],market}} editorial={createFortalezaEditorial()}/>);
       expect(svg).toContain(`Fortaleza · slide ${page}`);expect(svg).toContain('viewBox="0 0 1280 720"');expect(svg).not.toContain('Aguardando conferência');expect(svg).not.toContain('NaN');
     }
     const svg=renderToStaticMarkup(<FortalezaReportSlide page={12} selection={selection} cities={cities} data={null} monthlyLaunches={null} editorial={createFortalezaEditorial()}/>);
     expect(svg).toContain('Aguardando conferência da fonte');
+  });
+  it('vendas preservam negativos; estoque trimestral é fotografia, nunca soma de meses',()=>{
+    const data=fixture();
+    expect(buildQuarterlyLaunchSlide(24,data,intro,selection,cities).history.at(-1)).toMatchObject({first:45,second:180,total:225});
+    expect(buildQuarterlyLaunchSlide(34,data,intro,selection,cities).history.at(-1)!.total).toBe(30);
+    expect(buildQuarterlyLaunchSlide(37,data,intro,selection,cities).history.at(-1)!.total).toBe(1300);
+    expect(buildQuarterlyLaunchSlide(38,data,intro,selection,cities).history.at(-1)!.total).toBe(160);
+    expect(buildQuarterlyLaunchSlide(39,data,intro,selection,cities).history.at(-1)!.total).toBe(640);
+    expect(buildQuarterlyLaunchSlide(37,data,intro,selection,cities).accumulated).toEqual([]);
+    expect(buildQuarterlyMunicipalTable(31,data,selection,cities).rows.at(-1)!.total).toBe(75);
+    expect(buildQuarterlyMunicipalTable(32,data,selection,cities).rows.at(-1)!.total).toBeCloseTo(64,8);
+  });
+  it('26/28 mantêm 13 janelas mensais móveis de 12 meses como no original',()=>{
+    const data=fixture();
+    const capital=buildQuarterlyLaunchSlide(26,data,intro,selection,cities),rm=buildQuarterlyLaunchSlide(28,data,intro,selection,cities);
+    expect(capital.rolling).toHaveLength(13);expect(capital.rolling!.at(-1)).toMatchObject({launches:192,sales:144});
+    expect(rm.rolling!.at(-1)).toMatchObject({launches:768,sales:576});
+  });
+  it('40 fecha o estoque dos três segmentos e não infere faixas de preço editoriais',()=>{
+    const data=fixture(),table=buildQuarterlyStockTable(data,selection,cities);
+    expect(table.status).toBe('ready');expect(table.rows.at(-1)!.total).toBe(2200);
+    expect(table.rows.some(row=>row.label.includes('Chácaras'))).toBe(false);
+    data.sources=data.sources.filter(source=>!(source.segment==='Comercial'&&source.metric==='stock'));
+    expect(buildQuarterlyStockTable(data,selection,cities).status).toBe('blocked');
   });
 });

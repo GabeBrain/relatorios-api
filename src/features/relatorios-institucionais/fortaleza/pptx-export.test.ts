@@ -15,6 +15,16 @@ beforeEach(()=>{
 afterEach(()=>{holder.remove();vi.restoreAllMocks();vi.unstubAllGlobals();});
 const options=()=>({period:'2026-07',mode:'faithful' as const,signal:new AbortController().signal,onProgress:vi.fn(),audit:{schema:'fortaleza-pptx-review-v1',homologated:false,value:'<&> teste'}});
 describe('Fortaleza exportação mensal offline',()=>{
+  it('exporta o trimestral com89posições em PPTX e PDF e rejeita manifesto incompleto',async()=>{
+    for(let index=60;index<89;index++){const slide=document.createElement('div');slide.dataset.fortalezaExportSlide=String(index+1);holder.append(slide);slides.push(slide);}
+    const settings={...options(),periodicity:'quarterly' as const};
+    const pptx=await buildFortalezaMonthlyExport(slides,settings),files=unzipSync(new Uint8Array(await pptx.arrayBuffer()));
+    expect(Object.keys(files).filter(name=>/^ppt\/slides\/slide\d+\.xml$/.test(name))).toHaveLength(89);
+    expect(settings.onProgress).toHaveBeenLastCalledWith(89,89);
+    const blob=await buildFortalezaMonthlyExport(slides,{...settings,format:'pdf'}),pdf=await PDFDocument.load(Buffer.from(await blob.arrayBuffer()).toString('base64'));
+    expect(pdf.getPageCount()).toBe(89);
+    await expect(buildFortalezaMonthlyExport(slides.slice(0,60),settings)).rejects.toThrow('89 páginas');
+  });
   it('preserva60posições e embute auditoria sem colocar JSON nas notas',async()=>{
     const settings=options(),blob=await buildFortalezaMonthlyExport(slides,settings),files=unzipSync(new Uint8Array(await blob.arrayBuffer()));
     expect(Object.keys(files).filter(name=>/^ppt\/slides\/slide\d+\.xml$/.test(name))).toHaveLength(60);
