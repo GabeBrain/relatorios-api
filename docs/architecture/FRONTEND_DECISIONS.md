@@ -1,3 +1,7 @@
+## 12/11/2026 — Relatórios: exportador DrawingML compartilhado
+
+SP e Fortaleza mensal/trimestral reutilizam `shared/native-pptx.ts`: DOM visível → objetos nativos, com tabelas reais para listas, geometrias livres para SVG, gradientes e imagens individuais. Primitives, rota lazy e BrainLoadingState existentes mantidos; sem dependência nova. PDF visual segue separado. Não há rasterização silenciosa de um gráfico sem suporte. Fotos podem ser recortadas em PNG individual para preservar a moldura, continuando objetos de imagem independentes no PPTX. Edição de célula respeita cor/alinhamento e auditoria do ajuste. Consultoria Fortaleza16pessoas usa o mesmo editor de equipe. [Contrato, limites e provas](../features/relatorios-institucionais/PREVIA_EDITAVEL_2026-11-12.md).
+
 ## 12/11/2026 — Edição na prévia de Fortaleza e SP
 
 **Autor/origem:** Codex, pedido de Lucas. Editor compartilhado usa os primitives existentes (Details, Select, Input, Textarea, Checkbox e Button): seleção no slide/lista, texto, cor, tamanho em pt, posição, negrito, ocultar, adicionar e restaurar. Estado por posição original durante a sessão; troca de geração/competência restaura a composição automática. Ajustes não são persistidos no servidor e não recalculam indicadores. PDF/PPTX recebem a mesma camada visual; auditoria de exportação inclui texto original e ajuste manual. Seleção não aparece no arquivo. Dados da API preservados. Não há chamada adicional à API.
