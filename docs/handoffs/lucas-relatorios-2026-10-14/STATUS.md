@@ -1,5 +1,9 @@
 # Estado do handoff
 
+## 12/11/2026 — comparação exploratória dos métodos de preço
+
+Base1c7a4a84,main/origin0–0após fetch. Usuário pediu verificar inclusão de esgotadas. Acrescentados três métodos diagnósticos no mesmo conjunto de observações: estoque positivo,qtyincluindo esgotadas e simples. JSON leva42recortes de competência/slide53/55/57; Insightsmostra fechamento. Sem novas consultas ou mudança dos valores nos slides.26testes focados,build/tipos/lint e4cenáriosEdgeoffline aprovados. Resultado real não medido: sem históricos brutos persistidos; médias do JSON anterior não permitem recalcular. Próximo envio autorizado e nova geração/JSON. Nenhuma escritaMonday ou alteraçãoFortaleza.
+
 ## 12/11/2026 — publicação autorizada de amostras históricas e manchetes SP
 
 Base57e24837,main/origin0–0após fetch; script Fortaleza não rastreado preservado. Usuário autorizou publicar as alterações locais após explicação dos limites. Médias históricas válidas com divergência de população são exibidas como parciais, sem comparações; fechamento e guardas críticas preservados. Manchetes9–11dinâmicas.346testes/38arquivos,build/tipos/lint e24cenáriosEdgeofflineaprovados; sem consultaGeoBrain/geraçãoreal/Monday. Original revisado:51planilhas sem conexão; valores colados não comprovam cálculo. Próximo nova geração/JSON e investigação do método do analista; não declarar séries completas/equivalência homologada. Fortaleza continua pausado.

@@ -1,3 +1,4 @@
+import { SpAnalystInsights } from '../../src/features/relatorios-institucionais/sp/SpAnalystInsights';
 import { createRoot } from 'react-dom/client';
 import { SpSlideContent } from '../../src/features/relatorios-institucionais/sp/SpReportPages';
 import { syntheticWindow } from '../../src/features/relatorios-institucionais/sp/__tests__/synthetic-window';
@@ -49,7 +50,7 @@ report.salesNeighborhoods=buildSpSalesNeighborhoods(amounts.map((units,index)=>(
 const page=Number(new URLSearchParams(location.search).get('page')??6);
 const exporting=new URLSearchParams(location.search).has('deck');
 const scale=Math.min(1,innerWidth/1280);
-createRoot(document.getElementById('root')!).render(<>
+createRoot(document.getElementById('root')!).render(new URLSearchParams(location.search).has('compare-prices')?<div className="p-4"><SpAnalystInsights report={report} state={{quarter:report.quarter,phase:'completed',startedAt:Date.now(),steps:[],report}}/></div>:<>
   <main style={{width:1280*scale,height:720*scale,position:'relative',overflow:'hidden'}}><div data-review-preview style={{width:1280,height:720,transform:`scale(${scale})`,transformOrigin:'top left'}}><SpSlideContent report={report} page={page}/></div></main>
   {exporting&&<div aria-hidden="true" data-review-deck style={{position:'absolute',left:-20000,top:0,width:1280}}>{Array.from({length:85},(_,index)=><div key={index} style={{width:1280,height:720}}><SpSlideContent report={report} page={index+1}/></div>)}</div>}
 </>);

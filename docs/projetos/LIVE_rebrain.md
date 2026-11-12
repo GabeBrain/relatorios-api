@@ -392,6 +392,16 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 12/11/2026 — SP: comparar pesos de preço incluindo tipologias esgotadas — Codex
+
+- **Ambiente/funcionalidade:** SP institucional, diagnóstico e Insights do analista / Memória de cálculo.
+- **Pedido/mudança:** usuário propôs incluir tipologias sem estoque positivo para investigar a diferença de preço geral. Comparação exploratória por competência e slides53/55/57: estoque positivo, qty da fotografia incluindo esgotadas e média simples de todas as tipologias do recorte. Exporta contagens de estoques positivo/zero/negativo/desconhecido, denominadores, medições inválidas e ressalva de cobertura. Sem novas chamadasAPI; reaproveita os históricos em memória. Não altera médias dos slides nem escolhe automaticamente o resultado mais próximo do original.
+- **Validação:**26testes focados/4arquivos, tipos/build/lint aprovados.4cenáriosEdgeoffline1440/390claro/escuro, tabela de3recortes aberta, zero erros/overflow; captura desktop inspecionada. PadrãoTable/details existente reutilizado, carregamento e cancelamento intactos.
+- **Limite/Etapas/Pendências:** não há históricos completos persistidos nesta máquina; JSON recebido traz médias finais, insuficientes para recalcular os pesos. Resultado real da hipótese ainda NÃO medido. Após envio autorizado, usuário gera novamente e envia JSON; comparar os13períodos e a referência antes de mudar método. qty pode representar capacidade na fotografia, não necessariamente quantidade original de lançamento. Fortaleza permanece pausado.
+- **Commits:** commit desta entrada; base `1c7a4a84`.
+- **Monday:** [DESAFIO — Estudos Entidades e Institucionais](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`, referência apenas.
+
+
 ### 12/11/2026 — SP: médias históricas observadas e manchetes — Codex
 
 - **Ambiente/funcionalidade:** SP institucional, séries53/55/57e destaques9–11; regra aplicada a todos os períodos.
@@ -1544,6 +1554,8 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 ---
 
 ## 3. Pendências
+
+- **SP — comparação de médias12/11:** comparação estoque/qty/simples preparada localmente; publicar com autorização e obter novo diagnóstico real. Não alterar o preço geral antes de conferir hipótese nos13períodos.
 
 - **SP — após publicação12/11:** nova geração/JSON para observar pontos recuperados; identificar consulta/universo/ponderação da média geral e recortes semMCMV. Mostrar amostra parcial não resolve divergência com o original. Não declarar falta de dados naAPIapenas pela divergência de conciliação.
 

@@ -6,6 +6,7 @@ import { shiftSpMonth } from './project-trends';
 import { SP_API_PATTERNS, SP_SEGMENT_RULE } from './segments';
 import { buildSpMarketDetails, type SpMarketDetails } from './market-details';
 import { spHistoricalPattern, spHistoricalStage } from './history-fields';
+import { compareSpPriceMethods, type SpPriceMethodComparison } from './price-method-comparison';
 
 export const SP_PRICE_STANDARDS = ['Compacto','Econômico','Standard','Médio','Médio-Alto','Alto','Luxo'] as const;
 export const SP_PRICE_DETAIL_SLIDES = [51,53,54,55,56,57,58,59,61,62] as const;
@@ -21,6 +22,7 @@ export interface SpPriceValue { units: number; ticket: number | null; meter: num
 export interface SpPricePoint { label: string; month: string; value: number | null; variation: number | null; issue?: string; partial?:boolean }
 export interface SpAreaRow { label: string; openingStock: number; stock: number; launches: number; sales: number; stockShare: number | null; launchShare: number | null; salesShare: number | null; ivv: number | null }
 export interface SpGranularDetails {
+  priceMethodComparison?: SpPriceMethodComparison[];
   diagnostics?: { month:string; issueCount:number; samples:string[] }[];
   warnings?: string[];
   status: 'ready' | 'blocked'; issues: string[];
@@ -197,7 +199,11 @@ class DetailBuilder {
       if(month===closing&&market.status==='ready'&&!market.vgv.ready)for(const issue of market.vgv.issues)issues.add(issue);
       return {month,issueCount:issues.size,samples:[...issues].slice(0,5)};
     }).filter(row=>row.issueCount>0).sort((a,b)=>a.month.localeCompare(b.month));
-    return { status: 'ready', issues: [], warnings, diagnostics, prices: { series, annualChanges, standards: SP_PRICE_STANDARDS.map(group => ({ group, ...this.price(closing, row => row.standard === group,[group]) })), overall: this.price(closing) }, area: this.area(), market };
+    const priceMethodComparison=this.quarters.flatMap(({month})=>{
+      const rows=this.frames.get(month)!.rows.map(row=>({...row,stock:row.stock===null?null:this.stock(month,row)}));
+      return [53,55,57].map(slide=>compareSpPriceMethods(rows,month,slide,this.validate(month)));
+    });
+    return { status: 'ready', issues: [], warnings, diagnostics, priceMethodComparison, prices: { series, annualChanges, standards: SP_PRICE_STANDARDS.map(group => ({ group, ...this.price(closing, row => row.standard === group,[group]) })), overall: this.price(closing) }, area: this.area(), market };
   }
   area(): SpGranularDetails['area'] {
     const blocked = (message: string): SpGranularDetails['area'] => ({ status: 'blocked', issues: [message], rows: [], total: null });
