@@ -48,6 +48,28 @@ function isReviewNoteShape(shape: Element): boolean {
   });
 }
 
+// Recado do analista em caixa comum (cor do tema), sem o amarelo/vermelho do
+// template: “Lucas, conforme falei com você…”, “Lucas, aqui eu fiquei na dúvida…”
+// (Rolândia, out/2026 — 3 recados, só 1 visto, por acaso, como “outra cidade”).
+// Vocativo no início + marca de conversa, ou duas marcas: texto de relatório não
+// conversa com ninguém nem fala em 1ª pessoa do singular.
+const VOCATIVE_RX = /^\s*[A-ZÀ-Ú][a-zà-ú]{2,}(?:\s[A-ZÀ-Ú][a-zà-ú]+)?\s*,/;
+const CHAT_RX = /(?<![\p{L}])(?:fiquei|eu\s+(?:fiz|coloquei|deixei|n[ãa]o|achei|acho|vi)|conforme\s+(?:falei|conversamos|combinamos)|na\s+d[úu]vida|n[ãa]o\s+sei\s+se|voc[êe]|te\s+(?:mandei|passei|falei)|me\s+(?:avisa|fala|diz))(?![\p{L}])/giu;
+
+function legacyConversationalNote(text: string): boolean {
+  const marks = text.match(CHAT_RX)?.length ?? 0;
+  return marks >= 2 || (marks >= 1 && VOCATIVE_RX.test(text));
+}
+export function isConversationalNote(text: string): boolean {
+  // Respostas curtas e pedidos editoriais em caixas comuns, preservando os dados em vermelho.
+  const flat = text.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+  if (/^(?:ajustad[oa]s?(?:\b|$)|reajustado\b|ajustei\b|eu retirei\b|nao e o mesmo[.!\s]*$)/.test(flat)) return true;
+  if (/^(?:conseguimos adicionar|me manda|trazer tabela|ajustar tabela|inserir metragem|melhorar (?:o |a )?(?:mapa|qualidade))\b/.test(flat)) return true;
+  if (/^sobre o\b/.test(flat) && /ainda nao|segundo o site|tmb|existe mesmo/.test(flat)) return true;
+  if (/^mapa ajustado\b/.test(flat) || /^[^\n]{3,100}\s[–—-]\s*incluir\s*\(/.test(flat)) return true;
+  return legacyConversationalNote(text);
+}
+
 export function parseNumPtbr(raw: string): number | null {
   let s = raw.trim();
   if (!s) return null;
@@ -133,12 +155,15 @@ function parseSlide(xml: string, num: number, parser: DOMParser): IrSlide {
 
   const shapesParas: string[][] = [];
   const notasRevisao: string[] = [];
+  const legacyShapes: string[][] = [], legacyNotes: string[] = [];
   for (const sp of els(root, NS.p, 'sp')) {
     const tx = els(sp, NS.p, 'txBody')[0];
     if (tx) {
       const paras = txbodyParagraphs(tx);
       if (!paras.length) continue;
-      if (isReviewNoteShape(sp)) notasRevisao.push(paras.join('\n'));
+      if (isReviewNoteShape(sp) || legacyConversationalNote(paras.join(' '))) legacyNotes.push(paras.join('\n'));
+      else legacyShapes.push(paras);
+      if (isReviewNoteShape(sp) || isConversationalNote(paras.join(' '))) notasRevisao.push(paras.join('\n'));
       else shapesParas.push(paras);
     }
   }
@@ -150,9 +175,17 @@ function parseSlide(xml: string, num: number, parser: DOMParser): IrSlide {
   // slides com fonte visível viravam SOURCE_MISSING. Ver CH-4 do sprint.
   const tabelas = els(root, NS.a, 'tbl').map(parseTable);
   const cellParas = tabelas.flatMap((t) => t.linhas.flat()).filter((c) => c.trim());
+  const legacyParas=legacyShapes.flat();
+  const legacySnapshot: IrSlide['legacy_review']=shapesParas.length===legacyShapes.length ? undefined : {
+    titulo:slideTitle(root,legacyShapes),secao_canonica:secaoCanonica(slideTitle(root,legacyShapes)),textos:legacyShapes.map(p=>p.join('\n')),
+    fontes:[...legacyParas,...cellParas].filter(p=>FONTE_RX.test(p)),notas:legacyParas.filter(p=>NOTA_RX.test(p)&&!FONTE_RX.test(p)),
+    notas_edicao:legacyParas.filter(p=>p.length>3&&p.length<80&&LEFTOVER_RX.test(p)),notas_revisao:legacyNotes,
+    flags:{resposta_multipla:MULTI_RESP_RX.test(legacyParas.join(' '))},
+  };
 
   return {
     n: num,
+    ...(legacySnapshot ? {legacy_review:legacySnapshot} : {}),
     titulo: slideTitle(root, shapesParas),
     secao_canonica: secaoCanonica(slideTitle(root, shapesParas)),
     textos: shapesParas.map((paras) => paras.join('\n')),
@@ -195,17 +228,36 @@ export async function pptxToIr(
     bytes = input as Uint8Array;
   }
 
-  // decompacta só os XMLs de slide/rels (ignora as imagens pesadas)
-  const files = unzipSync(bytes, { filter: (f) => /^ppt\/slides\//.test(f.name) });
+  // decompacta só os XMLs de slide/rels e os SVGs (ignora as imagens pesadas)
+  const files = unzipSync(bytes, { filter: (f) => /^ppt\/slides\//.test(f.name) || /^ppt\/media\/[^/]+\.svg$/i.test(f.name) || /^ppt\/(?:presentation.xml|_rels\/presentation.xml.rels)$/.test(f.name) });
   const dec = new TextDecoder('utf-8');
 
   const slideNames = Object.keys(files)
     .filter((n) => /^ppt\/slides\/slide\d+\.xml$/.test(n))
     .sort((a, b) => slideNum(a) - slideNum(b));
 
-  const slides: IrSlide[] = slideNames.map((n) =>
-    parseSlide(dec.decode(files[n]), slideNum(n), parser)
-  );
+  // Os leitores de imagem legados usam slideN.xml como referência. Falhar de
+  // forma explícita é necessário até todos aceitarem o mapa da apresentação.
+  // Não atribuir silenciosamente o texto de uma página à imagem de outra.
+  if (files['ppt/presentation.xml'] && files['ppt/_rels/presentation.xml.rels']) {
+    const presentation = parser.parseFromString(dec.decode(files['ppt/presentation.xml']), 'application/xml');
+    const relationships = parser.parseFromString(dec.decode(files['ppt/_rels/presentation.xml.rels']), 'application/xml');
+    const targets = new Map(Array.from(relationships.getElementsByTagNameNS('http://schemas.openxmlformats.org/package/2006/relationships','Relationship')).map(r => [r.getAttribute('Id'), r.getAttribute('Target') ?? '']));
+    const list = presentation.getElementsByTagNameNS('http://schemas.openxmlformats.org/presentationml/2006/main','sldIdLst')[0];
+    const order = list ? Array.from(list.children).filter(e => e.localName === 'sldId').map(e => {
+      const target = targets.get(e.getAttributeNS('http://schemas.openxmlformats.org/officeDocument/2006/relationships','id')) ?? '';
+      return target.startsWith('/ppt/') ? target.slice(1) : `ppt/${target.replace(/^\.\//,'')}`;
+    }) : [];
+    if (order.length !== slideNames.length || order.some((name,index) => name !== slideNames[index])) {
+      throw new Error('A ordem interna deste PowerPoint exige uma conversão de referências antes da avaliação. Nenhuma análise foi iniciada. Preserve o original e encaminhe este arquivo para conferência.');
+    }
+  }
+
+  const slides: IrSlide[] = slideNames.map((n) => {
+    const slide = parseSlide(dec.decode(files[n]), slideNum(n), parser);
+    const svg = svgTextsOfSlide(files, slideNum(n), dec, parser);
+    return svg.length ? { ...slide, textos_svg: svg } : slide;
+  });
 
   return {
     ir_version: 1,
@@ -214,6 +266,31 @@ export async function pptxToIr(
     n_slides: slides.length,
     slides,
   };
+}
+
+const NS_RELS = 'http://schemas.openxmlformats.org/package/2006/relationships';
+const NS_SVG = 'http://www.w3.org/2000/svg';
+
+/**
+ * Texto dos SVGs do slide. Gráfico colado como SVG (Rolândia s31: verticalização
+ * com o 5,2% que contradiz os s32/s33) era invisível: nem visão (formato não
+ * suportado) nem texto. Sai de graça, sem IA — um item por SVG.
+ */
+function svgTextsOfSlide(files: Record<string, Uint8Array>, num: number, dec: TextDecoder, parser: DOMParser): string[] {
+  const rels = files[`ppt/slides/_rels/slide${num}.xml.rels`];
+  if (!rels) return [];
+  const root = parser.parseFromString(dec.decode(rels), 'application/xml');
+  const out: string[] = [];
+  for (const rel of Array.from(root.getElementsByTagNameNS(NS_RELS, 'Relationship'))) {
+    const target = (rel.getAttribute('Target') ?? '').replace(/^\.\.\//, 'ppt/');
+    if (!/\.svg$/i.test(target) || !files[target]) continue;
+    const svg = parser.parseFromString(dec.decode(files[target]), 'application/xml');
+    const texts = Array.from(svg.getElementsByTagNameNS(NS_SVG, 'text'))
+      .map((t) => (t.textContent ?? '').replace(/\s+/g, ' ').trim())
+      .filter(Boolean);
+    if (texts.length) out.push(texts.join('\n'));
+  }
+  return out;
 }
 
 function slideNum(name: string): number {

@@ -184,7 +184,7 @@ export default function NewProjectForm({ compact = false }: { compact?: boolean 
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              {(Object.entries(MODEL_PRICING) as [ModelId, (typeof MODEL_PRICING)[ModelId]][]).map(
+              {(Object.entries(MODEL_PRICING) as [ModelId, (typeof MODEL_PRICING)[ModelId]][]).filter(([model]) => model !== 'gpt-6-luna').map(
                 ([id, info]) => (
                   <SelectItem key={id} value={id} className="text-xs">
                     {info.label}

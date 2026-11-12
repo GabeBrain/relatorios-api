@@ -107,6 +107,11 @@
   --sidebar-ring: 90 45% 48%;
 }
 
+.dark .rebrain-sidebar-scroll {
+  color-scheme: dark;
+  scrollbar-color: hsl(var(--muted-foreground) / 0.65) hsl(var(--sidebar-background));
+}
+
 @layer base {
   * {
     @apply border-border;

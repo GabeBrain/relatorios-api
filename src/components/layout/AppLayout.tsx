@@ -17,10 +17,12 @@ import {
   Search,
   TrendingUp,
 } from 'lucide-react';
+import { useGeobrainSession } from '@/features/shared/geobrain-session/context';
 import { AuthBlock } from './AuthBlock';
 import { CommandPalette } from './CommandPalette';
 import brainLogo from '../../../assets/logoBrain.png';
 import { cn } from '@/lib/utils';
+import '../../styles/geobrain-tokens.css';
 
 interface NavItem {
   type?: 'item';
@@ -58,10 +60,20 @@ const NAV_GROUPS: NavGroup[] = [
     label: 'Rebrain',
     icon: <BarChart2 className="h-4 w-4" />,
     items: [
-      { path: '/rebrain/secovi', label: 'Relatório Secovi', icon: <Building2 className="h-4 w-4" /> },
-      { path: '/rebrain/sinduscon-curitiba', label: 'Sinduscon - Curitiba', icon: <Building2 className="h-4 w-4" /> },
-      { path: '/rebrain/aelo', label: 'Relatório AELO', icon: <Building2 className="h-4 w-4" /> },
-      { path: '/rebrain/panorama-secovi-fiergs', label: 'Relatório Secovi/FIERGS', icon: <BarChart2 className="h-4 w-4" /> },
+      {
+        type: 'folder',
+        id: 'relatorios-automatizados',
+        label: 'Relatórios Automatizados',
+        icon: <BarChart2 className="h-4 w-4" />,
+        children: [
+          { path: '/rebrain/secovi', label: 'Base de Mercado — Excel', icon: <Building2 className="h-4 w-4" />, standbyLabel: '(antigo Relatório Secovi)' },
+          { path: '/rebrain/sinduscon-curitiba', label: 'Sinduscon — Curitiba', icon: <Building2 className="h-4 w-4" /> },
+          { path: '/rebrain/aelo', label: 'AELO', icon: <Building2 className="h-4 w-4" /> },
+          { path: '/rebrain/relatorio-api-excel', label: 'Relatório API Excel', icon: <Building2 className="h-4 w-4" /> },
+          { path: '/rebrain/panorama-secovi-fiergs', label: 'Panorama de Mercado', icon: <BarChart2 className="h-4 w-4" />, standbyLabel: '(Secovi/FIERGS)' },
+          { path: '/rebrain/relatorios-institucionais/sp', label: 'SP Institucional', icon: <BarChart2 className="h-4 w-4" /> },
+        ],
+      },
       { path: '/rebrain/validacao-fechamento', label: 'Validação do Fechamento', icon: <ClipboardList className="h-4 w-4" /> },
       { path: '/corretor', label: 'Assistente de Projetos', icon: <ClipboardList className="h-4 w-4" /> },
       { path: '/atualizador-vgv', label: 'Atualizador VGV', icon: <TrendingUp className="h-4 w-4" /> },
@@ -81,6 +93,14 @@ const NAV_GROUPS: NavGroup[] = [
     icon: <BarChart2 className="h-4 w-4" />,
     items: [
       { path: '/dash-geobrain', label: 'Dashboard', icon: <BarChart2 className="h-4 w-4" /> },
+    ],
+  },
+  {
+    id: 'estimativas-vendas',
+    label: 'Estimativas de Vendas',
+    icon: <TrendingUp className="h-4 w-4" />,
+    items: [
+      { path: '/rebrain/estimativas-vendas', label: 'Estimativas de Vendas', icon: <TrendingUp className="h-4 w-4" />, standbyLabel: '(em implementação)' },
     ],
   },
   {
@@ -141,17 +161,35 @@ interface AppLayoutProps {
 }
 
 export function AppLayout({ children }: AppLayoutProps) {
-  const [{ collapsed, openGroups, openFolders }, setSidebar] = useState<SidebarState>(loadSidebarState);
+  const [{ collapsed: savedCollapsed, openGroups, openFolders }, setSidebar] = useState<SidebarState>(loadSidebarState);
   const [paletteOpen, setPaletteOpen] = useState(false);
   const { dark, toggle } = useDarkMode();
   const location = useLocation();
+  const session = useGeobrainSession();
+  const [compact, setCompact] = useState(() => window.innerWidth < 768);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const responsiveMobile = (location.pathname.startsWith('/corretor') || location.pathname.startsWith('/rebrain/estimativas-vendas') || location.pathname === '/rebrain/relatorios-institucionais/fortaleza') && compact;
+  const collapsed = responsiveMobile ? !mobileMenuOpen : savedCollapsed;
 
   useEffect(() => {
-    localStorage.setItem(SIDEBAR_STATE_KEY, JSON.stringify({ collapsed, openGroups, openFolders }));
-  }, [collapsed, openGroups, openFolders]);
+    if (!window.matchMedia) return;
+    const media = window.matchMedia('(max-width: 767px)');
+    const update = () => setCompact(media.matches);
+    update(); media.addEventListener('change', update);
+    return () => media.removeEventListener('change', update);
+  }, []);
+  useEffect(() => { setMobileMenuOpen(false); }, [location.pathname]);
+  useEffect(() => {
+    if (session.request) { setMobileMenuOpen(true); setSidebar(s => ({ ...s, collapsed: false })); }
+  }, [session.request]);
+
+  useEffect(() => {
+    localStorage.setItem(SIDEBAR_STATE_KEY, JSON.stringify({ collapsed: savedCollapsed, openGroups, openFolders }));
+  }, [savedCollapsed, openGroups, openFolders]);
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') setMobileMenuOpen(false);
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault();
         setPaletteOpen((v) => !v);
@@ -162,6 +200,7 @@ export function AppLayout({ children }: AppLayoutProps) {
   }, []);
 
   function setCollapsed(fn: (v: boolean) => boolean) {
+    if (responsiveMobile) { setMobileMenuOpen(v => !v); return; }
     setSidebar((s) => ({ ...s, collapsed: fn(s.collapsed) }));
   }
 
@@ -202,10 +241,10 @@ export function AppLayout({ children }: AppLayoutProps) {
       >
         <span className="shrink-0">{item.icon}</span>
         {!collapsed && (
-          <span className="truncate">
-            {item.label}
+          <span className="min-w-0 flex-1">
+            <span className="block truncate">{item.label}</span>
             {item.standbyLabel && (
-              <span className="ml-1.5 text-[10px] text-muted-foreground font-normal">
+              <span className="mt-0.5 block truncate text-[10px] leading-none text-muted-foreground font-normal">
                 {item.standbyLabel}
               </span>
             )}
@@ -258,29 +297,38 @@ export function AppLayout({ children }: AppLayoutProps) {
   return (
     <div className="flex h-screen w-screen overflow-hidden bg-background text-foreground">
       <CommandPalette open={paletteOpen} onOpenChange={setPaletteOpen} />
+      {responsiveMobile && mobileMenuOpen && <button type="button" aria-label="Fechar menu" className="fixed inset-0 z-40 bg-black/40" onClick={() => setMobileMenuOpen(false)} />}
 
       {/* Sidebar */}
       <aside
         className={cn(
           'flex flex-col h-full border-r border-border bg-card transition-all duration-200 shrink-0 print:hidden',
-          collapsed ? 'w-14' : 'w-64'
+          collapsed ? 'w-14' : 'w-64',
+          responsiveMobile && mobileMenuOpen && 'fixed inset-y-0 left-0 z-50 shadow-xl',
+          session.action && 'z-[60]'
         )}
       >
         {/* Logo + collapse toggle */}
         <div className={cn('flex items-center gap-2 px-3 py-3 border-b border-border', collapsed ? 'justify-center px-2' : 'justify-between')}>
-          <div className="flex items-center gap-2 min-w-0">
+          {!collapsed && <div className="flex items-center gap-2 min-w-0">
             <img src={brainLogo} alt="Brain" className="h-7 w-auto shrink-0" />
-            {!collapsed && (
-              <span className="text-xs font-semibold text-muted-foreground uppercase tracking-widest truncate">Rebrain</span>
-            )}
-          </div>
+            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-widest truncate">Rebrain</span>
+          </div>}
           <button
             type="button"
             onClick={() => setCollapsed((v) => !v)}
-            className="shrink-0 rounded-md p-1 text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
+            className={cn('shrink-0 rounded-md p-1 text-muted-foreground hover:bg-accent hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring', collapsed && 'flex h-8 w-8 items-center justify-center text-[color:var(--gb-verde-500)]')}
             title={collapsed ? 'Expandir menu' : 'Recolher menu'}
+            aria-label={collapsed ? 'Expandir menu' : 'Recolher menu'}
+            aria-expanded={!collapsed}
           >
-            {collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+            {collapsed ? (
+              <svg className="h-6 w-6 overflow-hidden" viewBox="650 248 142 100" aria-hidden="true" focusable="false" data-brand="brain-symbol">
+                {/* Enquadramento do símbolo original: mantém pixels e cores do logo. */}
+                <defs><clipPath id="brain-sidebar-symbol-crop"><path d="M650 248H792V348H660V303H650Z" /></clipPath></defs>
+                <image href={brainLogo} width="1024" height="413" clipPath="url(#brain-sidebar-symbol-crop)" />
+              </svg>
+            ) : <ChevronLeft className="h-4 w-4" aria-hidden="true" />}
           </button>
         </div>
 
@@ -306,7 +354,7 @@ export function AppLayout({ children }: AppLayoutProps) {
         </div>
 
         {/* Nav */}
-        <nav className="flex-1 overflow-y-auto py-3 px-2 space-y-0.5">
+        <nav className="rebrain-sidebar-scroll flex-1 overflow-y-auto py-3 px-2 space-y-0.5">
           {TOP_ITEMS.map(renderNavItem)}
 
           {NAV_GROUPS.map((group) => {
@@ -315,7 +363,7 @@ export function AppLayout({ children }: AppLayoutProps) {
             if (group.id === 'rebrain') {
               return (
                 <div key={group.id} className="mt-2 space-y-0.5">
-                  {group.items.map((entry) => (isFolder(entry) ? null : renderNavItem(entry)))}
+                  {group.items.map(renderNavEntry)}
                 </div>
               );
             }
@@ -342,6 +390,10 @@ export function AppLayout({ children }: AppLayoutProps) {
                   })}
                 </div>
               );
+            }
+
+            if (group.id === 'estimativas-vendas') {
+              return <div key={group.id} className="mt-2">{group.items.map(renderNavEntry)}</div>;
             }
 
             if (group.id === 'quanti') {

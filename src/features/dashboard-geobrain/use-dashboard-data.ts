@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { fetchBuildings, type FetchProgress } from './api';
 import type { Building } from './types';
 import { useAuthStore } from '@/store/auth-store';
+import type { GeoLoadRequest } from '@/features/shared/geo-api-scope-engine/GeoApiScopeSelector';
 
 type Status = 'idle' | 'loading' | 'ready' | 'error';
 
@@ -15,14 +16,14 @@ export function useDashboardData() {
   const lastKey = useRef<string>('');
 
   const load = useCallback(
-    async ({ uf, city }: { uf: string; city: string }) => {
-      if (!uf || !city) return;
+    async (request: GeoLoadRequest) => {
+      if (!request.city && !request.uf && !request.ufs?.length) return;
       if (!token) {
         setError('Sessão sem token — faça login no cabeçalho.');
         setStatus('error');
         return;
       }
-      const key = `${uf}|${city}`;
+      const key = request.city ? `city:${request.city}` : `uf:${(request.ufs ?? [request.uf]).join(',')}`;
       abortRef.current?.abort();
       const controller = new AbortController();
       abortRef.current = controller;
@@ -32,7 +33,7 @@ export function useDashboardData() {
       setProgress({ lanesTotal: 3, lanesDone: 0, pagesDone: 0, buildingsFound: 0 });
       try {
         const data = await fetchBuildings({
-          uf, city, token, signal: controller.signal,
+          ...request, token, signal: controller.signal,
           onProgress: (p) => setProgress({ ...p }),
         });
         if (lastKey.current !== key) return;

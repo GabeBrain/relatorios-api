@@ -1,0 +1,547 @@
+[
+ {
+  "entrada": {
+   "padrao": "Loteamento Fechado",
+   "unidades": 300,
+   "meses": 6,
+   "vendidas": 150
+  },
+  "esperado": {
+   "grupo": "Loteamento Fechado",
+   "k": 0.632771,
+   "mes_esgotamento": 67,
+   "esgotamento_central": [
+    26,
+    102
+   ],
+   "esgotamento_amplo": [
+    17,
+    null
+   ],
+   "vendas_12m": 75,
+   "vendas_primeiros_12": [
+    10,
+    9,
+    9,
+    7,
+    7,
+    6,
+    5,
+    5,
+    5,
+    4,
+    4,
+    4
+   ],
+   "linhas_tabela": 61,
+   "acum_n12": 225,
+   "central_n12": [
+    195,
+    281
+   ],
+   "ampla_n12": [
+    150,
+    300
+   ]
+  }
+ },
+ {
+  "entrada": {
+   "padrao": "Loteamento Aberto",
+   "unidades": 500,
+   "meses": 3,
+   "vendidas": 100
+  },
+  "esperado": {
+   "grupo": "Loteamento Aberto",
+   "k": 1.1117,
+   "mes_esgotamento": 37,
+   "esgotamento_central": [
+    22,
+    47
+   ],
+   "esgotamento_amplo": [
+    14,
+    null
+   ],
+   "vendas_12m": 268,
+   "vendas_primeiros_12": [
+    32,
+    31,
+    28,
+    27,
+    25,
+    22,
+    21,
+    20,
+    18,
+    16,
+    15,
+    13
+   ],
+   "linhas_tabela": 34,
+   "acum_n12": 368,
+   "central_n12": [
+    306,
+    465
+   ],
+   "ampla_n12": [
+    176,
+    500
+   ]
+  }
+ },
+ {
+  "entrada": {
+   "padrao": "Loteamento Aberto",
+   "unidades": 500,
+   "meses": 12,
+   "vendidas": 450
+  },
+  "esperado": {
+   "grupo": "Loteamento Aberto",
+   "k": 0.550846,
+   "mes_esgotamento": 25,
+   "esgotamento_central": [
+    21,
+    29
+   ],
+   "esgotamento_amplo": [
+    19,
+    94
+   ],
+   "vendas_12m": 45,
+   "vendas_primeiros_12": [
+    5,
+    4,
+    4,
+    3,
+    3,
+    3,
+    2,
+    2,
+    5,
+    5,
+    5,
+    4
+   ],
+   "linhas_tabela": 13,
+   "acum_n12": 495,
+   "central_n12": [
+    475,
+    500
+   ],
+   "ampla_n12": [
+    456,
+    500
+   ]
+  }
+ },
+ {
+  "entrada": {
+   "padrao": "Loteamento Fechado",
+   "unidades": 200,
+   "meses": 24,
+   "vendidas": 100
+  },
+  "esperado": {
+   "grupo": "Loteamento Fechado",
+   "k": 0.966843,
+   "mes_esgotamento": 116,
+   "esgotamento_central": [
+    69,
+    138
+   ],
+   "esgotamento_amplo": [
+    36,
+    null
+   ],
+   "vendas_12m": 28,
+   "vendas_primeiros_12": [
+    3,
+    2,
+    3,
+    3,
+    2,
+    2,
+    3,
+    2,
+    2,
+    2,
+    2,
+    2
+   ],
+   "linhas_tabela": 92,
+   "acum_n12": 128,
+   "central_n12": [
+    105,
+    169
+   ],
+   "ampla_n12": [
+    100,
+    200
+   ]
+  }
+ },
+ {
+  "entrada": {
+   "padrao": "Loteamento Fechado",
+   "unidades": 200,
+   "meses": 1,
+   "vendidas": 10
+  },
+  "esperado": {
+   "grupo": "Loteamento Fechado",
+   "k": 1.195179,
+   "mes_esgotamento": 37,
+   "esgotamento_central": [
+    22,
+    52
+   ],
+   "esgotamento_amplo": [
+    11,
+    null
+   ],
+   "vendas_12m": 123,
+   "vendas_primeiros_12": [
+    12,
+    13,
+    12,
+    12,
+    12,
+    11,
+    10,
+    10,
+    8,
+    9,
+    7,
+    7
+   ],
+   "linhas_tabela": 36,
+   "acum_n12": 133,
+   "central_n12": [
+    97,
+    180
+   ],
+   "ampla_n12": [
+    23,
+    200
+   ]
+  }
+ },
+ {
+  "entrada": {
+   "padrao": "Loteamento Aberto",
+   "unidades": 1200,
+   "meses": 1,
+   "vendidas": 180
+  },
+  "esperado": {
+   "grupo": "Loteamento Aberto",
+   "k": 0.880718,
+   "mes_esgotamento": 33,
+   "esgotamento_central": [
+    19,
+    53
+   ],
+   "esgotamento_amplo": [
+    9,
+    null
+   ],
+   "vendas_12m": 767,
+   "vendas_primeiros_12": [
+    130,
+    108,
+    90,
+    78,
+    68,
+    59,
+    52,
+    46,
+    40,
+    36,
+    32,
+    28
+   ],
+   "linhas_tabela": 32,
+   "acum_n12": 947,
+   "central_n12": [
+    805,
+    1127
+   ],
+   "ampla_n12": [
+    516,
+    1200
+   ]
+  }
+ },
+ {
+  "entrada": {
+   "padrao": "Loteamento Aberto",
+   "unidades": 80,
+   "meses": 18,
+   "vendidas": 40
+  },
+  "esperado": {
+   "grupo": "Loteamento Aberto",
+   "k": 1.188998,
+   "mes_esgotamento": 67,
+   "esgotamento_central": [
+    43,
+    75
+   ],
+   "esgotamento_amplo": [
+    29,
+    136
+   ],
+   "vendas_12m": 18,
+   "vendas_primeiros_12": [
+    2,
+    2,
+    1,
+    2,
+    1,
+    2,
+    1,
+    2,
+    1,
+    1,
+    1,
+    2
+   ],
+   "linhas_tabela": 49,
+   "acum_n12": 58,
+   "central_n12": [
+    50,
+    71
+   ],
+   "ampla_n12": [
+    40,
+    80
+   ]
+  }
+ },
+ {
+  "entrada": {
+   "padrao": "Loteamento Fechado",
+   "unidades": 450,
+   "meses": 36,
+   "vendidas": 400
+  },
+  "esperado": {
+   "grupo": "Loteamento Fechado",
+   "k": 0.470927,
+   "mes_esgotamento": 76,
+   "esgotamento_central": [
+    54,
+    75
+   ],
+   "esgotamento_amplo": [
+    44,
+    null
+   ],
+   "vendas_12m": 14,
+   "vendas_primeiros_12": [
+    1,
+    2,
+    1,
+    1,
+    1,
+    2,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1
+   ],
+   "linhas_tabela": 40,
+   "acum_n12": 414,
+   "central_n12": [
+    400,
+    428
+   ],
+   "ampla_n12": [
+    400,
+    450
+   ]
+  }
+ },
+ {
+  "entrada": {
+   "padrao": "Condomínio de Casas/Sobrados",
+   "unidades": 60,
+   "meses": 9,
+   "vendidas": 25
+  },
+  "esperado": {
+   "grupo": "Geral",
+   "k": 0.942994,
+   "mes_esgotamento": 61,
+   "esgotamento_central": [
+    32,
+    73
+   ],
+   "esgotamento_amplo": [
+    19,
+    null
+   ],
+   "vendas_12m": 17,
+   "vendas_primeiros_12": [
+    2,
+    2,
+    1,
+    2,
+    2,
+    1,
+    1,
+    2,
+    1,
+    1,
+    1,
+    1
+   ],
+   "linhas_tabela": 52,
+   "acum_n12": 42,
+   "central_n12": [
+    35,
+    55
+   ],
+   "ampla_n12": [
+    25,
+    60
+   ]
+  }
+ },
+ {
+  "entrada": {
+   "padrao": "Loteamento Fechado",
+   "unidades": 120,
+   "meses": 48,
+   "vendidas": 90
+  },
+  "esperado": {
+   "grupo": "Loteamento Fechado",
+   "k": 0.769845,
+   "mes_esgotamento": 137,
+   "esgotamento_central": [
+    76,
+    132
+   ],
+   "esgotamento_amplo": [
+    62,
+    null
+   ],
+   "vendas_12m": 7,
+   "vendas_primeiros_12": [
+    1,
+    0,
+    1,
+    1,
+    0,
+    1,
+    0,
+    1,
+    0,
+    1,
+    0,
+    1
+   ],
+   "linhas_tabela": 89,
+   "acum_n12": 97,
+   "central_n12": [
+    90,
+    107
+   ],
+   "ampla_n12": [
+    90,
+    118
+   ]
+  }
+ },
+ {
+  "entrada": {
+   "padrao": "Loteamento Aberto",
+   "unidades": 300,
+   "meses": 10,
+   "vendidas": 290
+  },
+  "esperado": {
+   "grupo": "Loteamento Aberto",
+   "k": 0.334032,
+   "mes_esgotamento": 15,
+   "esgotamento_central": [
+    15,
+    15
+   ],
+   "esgotamento_amplo": [
+    15,
+    15
+   ],
+   "vendas_12m": 10,
+   "vendas_primeiros_12": [
+    2,
+    2,
+    2,
+    2,
+    2
+   ],
+   "linhas_tabela": 5,
+   "acum_n12": 300,
+   "central_n12": [
+    300,
+    300
+   ],
+   "ampla_n12": [
+    300,
+    300
+   ]
+  }
+ },
+ {
+  "entrada": {
+   "padrao": "Loteamento Fechado",
+   "unidades": 250,
+   "meses": 55,
+   "vendidas": 180
+  },
+  "esperado": {
+   "grupo": "Loteamento Fechado",
+   "k": 0.844377,
+   "mes_esgotamento": 158,
+   "esgotamento_central": [
+    85,
+    153
+   ],
+   "esgotamento_amplo": [
+    70,
+    null
+   ],
+   "vendas_12m": 14,
+   "vendas_primeiros_12": [
+    1,
+    2,
+    1,
+    1,
+    1,
+    2,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1
+   ],
+   "linhas_tabela": 103,
+   "acum_n12": 194,
+   "central_n12": [
+    180,
+    219
+   ],
+   "ampla_n12": [
+    180,
+    244
+   ]
+  }
+ }
+]

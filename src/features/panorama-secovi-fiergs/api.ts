@@ -1,23 +1,39 @@
+import { annualLaunchFacts, type AnnualLaunchFact } from './report/annual-composition';
 import { httpRequest } from '@/lib/http-client';
-import { periodToQuarter, quarterKey, safeNumber } from './lib/launches';
+import { periodToQuarter, quarterKey, safeNumber, launchRecordsFromCube } from './lib/launches';
 import type { CalibrationCell, LaunchAuditBuilding, LaunchRecord, MarketCalibrationCell, MarketCohortRow, PanoramaReference, PanoramaReportModel, PanoramaScope, Quarter, Segment } from './types';
 import { buildPanoramaReportModel } from './report/model';
+import { loadMunicipalTerritory } from './lib/municipal-territory';
+import { buildGenerationNotices } from './report/generation-notices';
 import { aggregateTemporal, buildMarketCells } from './lib/market-calibration';
 import { PIRACICABA_1T26_MARKET_REFERENCE } from './reference/piracicaba-1t26-market';
 import { editorialWindow, quarterEndDate, quarterStartDate } from './domain/quarters';
 import { buildCityCube, type MarketCube } from './domain/cube';
-import { collectByCity, completedValues, type CollectionResult } from './domain/collection';
+import { collectByCity, completedValues, isTransientCityFailure, type CollectionResult } from './domain/collection';
 import { createPanoramaGenerationProgress, type PanoramaProgressListener } from './domain/generation-progress';
 import { requestWithRetry } from './lib/request-with-retry';
+import { useAuthStore } from '@/store/auth-store';
+import type { CollectionFailureAuditRow } from './lib/collection-failure-audit';
+import { BuildingSourceContractError, insertBuilding, readBuildingPage } from './domain/building-source';
+import { HISTORY_CONTRACT_KEY } from './domain/building-history';
 
 const BASE_URL = 'https://geobrain.com.br/public-api';
 const BUILDINGS_V2_BASE_URL = 'https://api.geobrain.com.br/public-api/v2';
+const BUILDINGS_INTERNAL_V2_BASE_URL = 'https://app.geobrain.com.br/public-api/v2';
 const PER_PAGE = 100;
-// Uma cidade abre consultas de prédios e dez séries temporais. Processar três ao mesmo tempo
-// disparava mais de trinta conexões e fazia o navegador abortar inclusive o fallback legado.
-const CITY_CONCURRENCY = 1;
-const REQUEST_CONCURRENCY_PER_CITY = 4;
+// O FIERGS tem dez cidades: duas avançam juntas, mas todas compartilham um teto global. O Secovi
+// mantém uma cidade por vez para preservar o comportamento operacional já validado.
+const SECOVI_CITY_CONCURRENCY = 1;
+const FIERGS_CITY_CONCURRENCY = 2;
+const SECOVI_GLOBAL_REQUEST_CONCURRENCY = 4;
+const FIERGS_GLOBAL_REQUEST_CONCURRENCY = 6;
 const BUILDING_STATUSES = ['Ativo', 'Esgotado'];
+
+export function panoramaConcurrencyPolicy(entity: PanoramaScope['entity']): { cities: number; requests: number } {
+  return entity === 'fiergs-rs'
+    ? { cities: FIERGS_CITY_CONCURRENCY, requests: FIERGS_GLOBAL_REQUEST_CONCURRENCY }
+    : { cities: SECOVI_CITY_CONCURRENCY, requests: SECOVI_GLOBAL_REQUEST_CONCURRENCY };
+}
 
 /** Recorte de uma única cidade; o escopo público continua sendo multi-cidade. */
 type CityScope = { uf: string; city: string; startQuarter?: Quarter; endQuarter: Quarter };
@@ -42,7 +58,8 @@ function temporalWindow(scope: Pick<CityScope, 'startQuarter' | 'endQuarter'>): 
 }
 
 /** Limita a rajada por município sem alterar a ordem nem a semântica das fontes. */
-function createRequestGate(limit: number) {
+export type PanoramaRequestGate = <T>(request: () => Promise<T>) => Promise<T>;
+export function createRequestGate(limit: number): PanoramaRequestGate {
   let active = 0;
   const waiting: (() => void)[] = [];
   const release = () => {
@@ -60,22 +77,73 @@ function createRequestGate(limit: number) {
   };
 }
 
-async function fetchBuildingsV2(scope: CityScope, signal?: AbortSignal): Promise<Record<string, unknown>[]> {
+/**
+ * Normaliza apenas diferenças representacionais comprovadas entre os contratos v2. A rota interna
+ * devolve `number_bedroom` como número (e usa zero como ausência); a pública devolve texto/null.
+ * Manter uma forma canônica na fronteira impede que a escolha da fonte altere a tipologia editorial.
+ */
+export function normalizeInternalBuilding(building: Record<string, unknown>): Record<string, unknown> {
+  if (!Array.isArray(building.typologies_history)) return building;
+  return {
+    ...building,
+    typologies_history: building.typologies_history.map((raw) => {
+      const entry = raw as Record<string, unknown>;
+      const bedroom = entry.number_bedroom;
+      return { ...entry, number_bedroom: bedroom === 0 ? null : bedroom == null ? bedroom : String(bedroom) };
+    }),
+  };
+}
+
+async function fetchBuildingsInternalV2(scope: CityScope, signal?: AbortSignal, gate: PanoramaRequestGate = (request) => request()): Promise<Record<string, unknown>[]> {
   const byId = new Map<string, Record<string, unknown>>();
-  for (const type of ['Vertical', 'Horizontal']) for (const status of BUILDING_STATUSES) {
+  await Promise.all(['Vertical', 'Horizontal'].map(async (type) => {
     let page = 1; let lastPage = 1;
+    let expectedLast: number | null = null; let total: number | null = null; let received = 0;
     do {
-      const response = await requestWithRetry(() => httpRequest<Record<string, unknown>>({ method: 'POST', url: `${BUILDINGS_V2_BASE_URL}/building-with-history`, query: { type, status, city: scope.city, uf: scope.uf, per_page: PER_PAGE, page }, signal }), { signal });
-      if (!response.ok || !response.data) throw new Error(response.error ?? `Falha da API GeoBrain v2 em ${scope.city} (${response.status ?? 'rede'}).`);
-      const entries = Array.isArray(response.data.data) ? response.data.data as Record<string, unknown>[] : [];
-      for (const building of entries) {
+      const response = await gate(() => requestWithRetry(() => httpRequest<Record<string, unknown>>({ method: 'POST', url: `${BUILDINGS_INTERNAL_V2_BASE_URL}/building-with-history-internal`, query: { type, city: scope.city, uf: scope.uf, per_page: PER_PAGE, page }, signal }), { signal }));
+      if (!response.ok || !response.data) throw new Error(response.error ?? `Falha da API Geobrain interna v2 em ${scope.city} (${response.status ?? 'rede'}).`);
+      const payload = readBuildingPage(response.data, scope, page, 'internal-v2');
+      if (expectedLast !== null && (payload.lastPage !== expectedLast || payload.total !== total))
+        throw new BuildingSourceContractError(`Paginação mudou durante a coleta de ${scope.city}/${type}.`);
+      expectedLast = payload.lastPage; total = payload.total; received += payload.buildings.length;
+      const entries = payload.buildings;
+      for (const raw of entries) {
+        const building = normalizeInternalBuilding(raw);
+        if (!BUILDING_STATUSES.includes(String(building.status ?? ''))) continue;
         const id = String(building.building_id ?? building.id ?? '');
-        if (id && !byId.has(id)) byId.set(id, building);
+        if (id) insertBuilding(byId, building);
       }
-      lastPage = Number((response.data.meta as Record<string, unknown> | undefined)?.last_page ?? 1);
+      lastPage = payload.lastPage;
       page += 1;
     } while (page <= lastPage);
-  }
+    if (total !== null && received !== total) throw new BuildingSourceContractError(`Coleta incompleta de ${scope.city}/${type}: ${received} de ${total} registros.`);
+  }));
+  return [...byId.values()];
+}
+
+async function fetchBuildingsPublicV2(scope: CityScope, signal?: AbortSignal, gate: PanoramaRequestGate = (request) => request()): Promise<Record<string, unknown>[]> {
+  const byId = new Map<string, Record<string, unknown>>();
+  const lanes = ['Vertical', 'Horizontal'].flatMap((type) => BUILDING_STATUSES.map((status) => ({ type, status })));
+  await Promise.all(lanes.map(async ({ type, status }) => {
+    let page = 1; let lastPage = 1;
+    let expectedLast: number | null = null; let total: number | null = null; let received = 0;
+    do {
+      const response = await gate(() => requestWithRetry(() => httpRequest<Record<string, unknown>>({ method: 'POST', url: `${BUILDINGS_V2_BASE_URL}/building-with-history`, query: { type, status, city: scope.city, uf: scope.uf, per_page: PER_PAGE, page }, signal }), { signal }));
+      if (!response.ok || !response.data) throw new Error(response.error ?? `Falha da API Geobrain v2 em ${scope.city} (${response.status ?? 'rede'}).`);
+      const payload = readBuildingPage(response.data, scope, page, 'public-v2');
+      if (expectedLast !== null && (payload.lastPage !== expectedLast || payload.total !== total))
+        throw new BuildingSourceContractError(`Paginação mudou durante a coleta de ${scope.city}/${type}.`);
+      expectedLast = payload.lastPage; total = payload.total; received += payload.buildings.length;
+      const entries = payload.buildings;
+      for (const building of entries) {
+        const id = String(building.building_id ?? building.id ?? '');
+        if (id) insertBuilding(byId, building);
+      }
+      lastPage = payload.lastPage;
+      page += 1;
+    } while (page <= lastPage);
+    if (total !== null && received !== total) throw new BuildingSourceContractError(`Coleta incompleta de ${scope.city}/${type}: ${received} de ${total} registros.`);
+  }));
   return [...byId.values()];
 }
 
@@ -86,7 +154,7 @@ async function fetchBuildingsLegacy(scope: CityScope, signal?: AbortSignal): Pro
     let page = 1; let lastPage = 1;
     do {
       const response = await httpRequest<Record<string, unknown>>({ url: `${BASE_URL}/building-with-history`, query: { type, city: scope.city, uf: scope.uf, per_page: PER_PAGE, page }, signal });
-      if (!response.ok || !response.data) throw new Error(response.error ?? `Falha da API GeoBrain legada em ${scope.city} (${response.status ?? 'rede'}).`);
+      if (!response.ok || !response.data) throw new Error(response.error ?? `Falha da API Geobrain legada em ${scope.city} (${response.status ?? 'rede'}).`);
       raw.push(...(Array.isArray(response.data.data) ? response.data.data as Record<string, unknown>[] : []));
       lastPage = Number((response.data.meta as Record<string, unknown> | undefined)?.last_page ?? 1);
       page += 1;
@@ -96,21 +164,31 @@ async function fetchBuildingsLegacy(scope: CityScope, signal?: AbortSignal): Pro
 }
 
 /**
- * O endpoint v2 é preferido, mas a transição não pode transformar indisponibilidade do contrato
- * em um relatório zerado. Enquanto a paridade autenticada não estiver confirmada, preservamos o
- * contrato legado como fallback explícito.
+ * A rota interna v2 é a fonte granular canônica. A pública v2 permanece como fallback com retry;
+ * somente o motor V2 antigo pode recorrer ao contrato legado. Nenhuma falha vira coleção vazia.
  */
-async function fetchBuildings(scope: CityScope, signal?: AbortSignal, engineVersion: 'v2' | 'v3' | 'v4' = 'v4'): Promise<Record<string, unknown>[]> {
+export async function fetchPanoramaBuildings(scope: CityScope, signal?: AbortSignal, engineVersion: 'v2' | 'v3' | 'v4' = 'v4', gate?: PanoramaRequestGate): Promise<Record<string, unknown>[]> {
   try {
-    return await fetchBuildingsV2(scope, signal);
-  } catch (v2Error) {
-    if (engineVersion !== 'v2') throw v2Error;
+    return await fetchBuildingsInternalV2(scope, signal, gate);
+  } catch (internalError) {
+    if (internalError instanceof BuildingSourceContractError) throw internalError;
     try {
-      return await fetchBuildingsLegacy(scope, signal);
-    } catch (legacyError) {
-      const v2Message = v2Error instanceof Error ? v2Error.message : String(v2Error);
-      const legacyMessage = legacyError instanceof Error ? legacyError.message : String(legacyError);
-      throw new Error(`Coleta de empreendimentos falhou em ${scope.city}. v2: ${v2Message}. Legado: ${legacyMessage}.`);
+      return await fetchBuildingsPublicV2(scope, signal, gate);
+    } catch (publicError) {
+      if (publicError instanceof BuildingSourceContractError) throw publicError;
+      if (engineVersion !== 'v2') {
+        const internalMessage = internalError instanceof Error ? internalError.message : String(internalError);
+        const publicMessage = publicError instanceof Error ? publicError.message : String(publicError);
+        throw new Error(`Coleta granular falhou em ${scope.city}. Interna v2: ${internalMessage}. Pública v2: ${publicMessage}.`);
+      }
+      try {
+        return await fetchBuildingsLegacy(scope, signal);
+      } catch (legacyError) {
+        const internalMessage = internalError instanceof Error ? internalError.message : String(internalError);
+        const publicMessage = publicError instanceof Error ? publicError.message : String(publicError);
+        const legacyMessage = legacyError instanceof Error ? legacyError.message : String(legacyError);
+        throw new Error(`Coleta de empreendimentos falhou em ${scope.city}. Interna v2: ${internalMessage}. Pública v2: ${publicMessage}. Legado: ${legacyMessage}.`);
+      }
     }
   }
 }
@@ -122,16 +200,6 @@ function segmentOf(value: unknown): Segment | null {
   return null;
 }
 function standardOf(value: unknown): string { return String(value ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase(); }
-
-/** Firewall V3: números horizontais só atravessam se o cubo oficial os aceitou. */
-function launchRecordsFromCube(cube: MarketCube): LaunchRecord[] {
-  return cube.projects.map((project) => {
-    const economic = standardOf(project.standard).includes('econom');
-    return { quarter: project.releaseQuarter, segment: project.segment, projects: 1, units: project.launchedUnits ?? 0, vgvMillions: project.launchedVgvMillions,
-      economicProjects: economic ? 1 : 0, otherProjects: economic ? 0 : 1, economicUnits: economic ? (project.launchedUnits ?? 0) : 0, otherUnits: economic ? 0 : (project.launchedUnits ?? 0),
-      economicVgvMillions: economic ? project.launchedVgvMillions : 0, otherVgvMillions: economic ? 0 : project.launchedVgvMillions, name: project.name, latitude: project.latitude, longitude: project.longitude };
-  });
-}
 
 /** Promoted launch contract: a release is one building on its release_date, never every history snapshot. */
 export function launchRecordsFrom(data: Record<string, unknown>[], scope: CityScope): LaunchRecord[] {
@@ -154,6 +222,7 @@ export function launchRecordsFrom(data: Record<string, unknown>[], scope: CitySc
 
 /** Tudo o que uma cidade contribui para o consolidado. */
 interface CityHarvest {
+  annualLaunchFacts: AnnualLaunchFact[];
   city: string;
   records: LaunchRecord[];
   cube: MarketCube;
@@ -161,10 +230,69 @@ interface CityHarvest {
   sources: Record<TemporalKey, SourceResult>;
 }
 
+interface CollectionSessionState {
+  scopeKey: string;
+  token: string | null;
+  startedAt: number;
+  harvests: Map<string, CityHarvest>;
+  errors: Map<string, string>;
+  attempts: Map<string, number>;
+  durations: Map<string, number>;
+}
+const collectionSessions = new WeakMap<object, CollectionSessionState>();
+const COLLECTION_SESSION_TTL_MS = 15 * 60_000;
+export function createPanoramaCollectionSession(): object { return {}; }
+function collectionScopeKey(scope: PanoramaScope): string {
+  return JSON.stringify({ ...scope, historyContract: HISTORY_CONTRACT_KEY, cities: [...scope.cities].map((city) => city.trim()).filter(Boolean).sort() });
+}
+function sessionState(handle: object, scope: PanoramaScope): CollectionSessionState {
+  const token = useAuthStore.getState().getToken();
+  const key = collectionScopeKey(scope);
+  let state = collectionSessions.get(handle);
+  if (!state || state.scopeKey !== key || state.token !== token || Date.now() - state.startedAt > COLLECTION_SESSION_TTL_MS) {
+    state = { scopeKey: key, token, startedAt: Date.now(), harvests: new Map(), errors: new Map(), attempts: new Map(), durations: new Map() };
+    collectionSessions.set(handle, state);
+  }
+  return state;
+}
+
+export class PanoramaCollectionError extends Error {
+  readonly retryable: boolean;
+  constructor(readonly failures: CollectionFailureAuditRow[]) {
+    super(`Coleta incompleta para ${failures.map(({ city, error, attempts }) => `${city} (${error}; ${attempts} tentativa(s))`).join('; ')}. Os dados concluídos foram mantidos nesta tentativa.`);
+    this.name = 'PanoramaCollectionError';
+    this.retryable = failures.some(({ failureClass }) => failureClass === 'transient');
+  }
+}
+
+export function collectionFailureRow(city: string, error: string, attempts: number, durationMs: number): CollectionFailureAuditRow {
+  const statuses = [...error.matchAll(/\bHTTP\s+(\d{3})\b/gi)].map((match) => Number(match[1]));
+  const statusCode = statuses.find((status) => status === 401 || status === 403)
+    ?? statuses.find((status) => status >= 400 && status < 500 && status !== 408 && status !== 429)
+    ?? statuses.find((status) => status === 408 || status === 429 || status >= 500)
+    ?? (/HTTP\s+rede\/timeout/i.test(error) ? null : statuses[0] ?? null);
+  const failureClass: CollectionFailureAuditRow['failureClass'] = statusCode === 401 || statusCode === 403 ? 'auth'
+    : /Contrato da fonte:/.test(error) || (statusCode !== null && statusCode >= 400 && statusCode < 500 && statusCode !== 408 && statusCode !== 429) ? 'contract'
+      : isTransientCityFailure(new Error(error)) ? 'transient' : 'empty';
+  const operation = error.match(/^(sales|stock|ivv|medium-prices-meter|medium-prices)\b/i)?.[1]
+    ?? (error.includes('temporal-analysis-city/') ? error.match(/temporal-analysis-city\/([a-z-]+)/)?.[1] : null)
+    ?? 'empreendimentos/histórico';
+  const safeError = error.replace(/Bearer\s+\S+/gi, 'Bearer [redigido]').replace(/https?:\/\/\S+/gi, '[endpoint]');
+  return { city, operation, status: statusCode === null ? 'sem resposta HTTP' : `HTTP ${statusCode}`, failureClass, attempts, durationMs, error: safeError };
+}
+
+function failureLabel(issue: TemporalIssue): string {
+  if (issue.empty || issue.status === 200) return `${issue.endpoint}: resposta sem dados obrigatórios (HTTP 200)`;
+  return `${issue.endpoint}: HTTP ${issue.status ?? 'rede/timeout'}`;
+}
+class RequiredCitySourceError extends Error {
+  constructor(message: string, readonly retryAfterMs?: number | null) { super(message); this.name = 'RequiredCitySourceError'; }
+}
+
 type TemporalKey = 'sales' | 'salesTypology' | 'stock' | 'stockTypology' | 'ivv' | 'ivvTypology' | 'ticket' | 'ticketTypology' | 'meter' | 'meterTypology';
 type TemporalEndpoint = 'sales' | 'stock' | 'ivv' | 'medium-prices' | 'medium-prices-meter';
-export type TemporalIssue = { endpoint: TemporalEndpoint; status: number | null; empty: boolean };
-type SourceResult = { rows: Record<string, unknown>[]; available: boolean; source: string; issue?: TemporalIssue };
+export type TemporalIssue = { endpoint: TemporalEndpoint; status: number | null; empty: boolean; retryAfterMs?: number | null };
+type SourceResult = { rows: Record<string, unknown>[]; available: boolean; source: string; issue?: TemporalIssue; requestCount?: number; durationMs?: number };
 
 /** Circuito por geração, exclusivo para a falha 500 confirmada de IVV por Tipologia. */
 export class PanoramaTemporalCircuit {
@@ -189,25 +317,37 @@ export function describeTemporalFailure(city: string, issues: TemporalIssue[]): 
   const metrics = [...new Set(issues.map((issue) => temporalMetricLabel[issue.endpoint]))].join(', ');
   const statuses = issues.map((issue) => issue.status);
   if (statuses.every((status) => status === 401 || status === 403)) {
-    return `Não foi possível consultar ${metrics} em ${city} porque a sessão de acesso à GeoBrain expirou ou não tem permissão. É uma questão de acesso ao provedor de dados, não do seu filtro nem dos números do relatório. Entre novamente e tente gerar o relatório.`;
+    return `Não foi possível consultar ${metrics} em ${city} porque a sessão de acesso à Geobrain expirou ou não tem permissão. É uma questão de acesso ao provedor de dados, não do seu filtro nem dos números do relatório. Entre novamente e tente gerar o relatório.`;
   }
   if (statuses.every((status) => status === null || status === 408 || status === 429 || (status !== null && status >= 500))) {
-    return `A GeoBrain está indisponível para consultar ${metrics} em ${city}. É uma instabilidade do provedor de dados; o relatório não foi gerado para evitar exibir zeros como se fossem dados reais. Tente novamente em alguns minutos.`;
+    return `A Geobrain está indisponível para consultar ${metrics} em ${city}. É uma instabilidade do provedor de dados; o relatório não foi gerado para evitar exibir zeros como se fossem dados reais. Tente novamente em alguns minutos.`;
   }
   if (statuses.every((status) => status === 400 || status === 404 || status === 405 || status === 422)) {
-    return `A GeoBrain recusou a consulta de ${metrics} em ${city}. Isso indica um ajuste necessário na integração do nosso relatório com a API; você não precisa mudar o filtro. O time técnico deve corrigir a consulta antes de gerar este panorama.`;
+    return `A Geobrain recusou a consulta de ${metrics} em ${city}. Isso indica um ajuste necessário na integração do nosso relatório com a API; você não precisa mudar o filtro. O time técnico deve corrigir a consulta antes de gerar este panorama.`;
   }
   if (issues.every((issue) => issue.empty)) {
-    return `A GeoBrain respondeu à consulta, mas não disponibilizou dados de ${metrics} para ${city} no período selecionado. Não é falha do seu computador nem do layout; o relatório foi interrompido para não apresentar zeros como se fossem informações observadas.`;
+    return `A Geobrain respondeu à consulta, mas não disponibilizou dados de ${metrics} para ${city} no período selecionado. Não é falha do seu computador nem do layout; o relatório foi interrompido para não apresentar zeros como se fossem informações observadas.`;
   }
-  return `Não foi possível consultar ${metrics} em ${city}: a GeoBrain respondeu de formas diferentes entre os indicadores. O relatório foi interrompido para não misturar dados reais com zeros; o time técnico precisa revisar a integração com o provedor.`;
+  return `Não foi possível consultar ${metrics} em ${city}: a Geobrain respondeu de formas diferentes entre os indicadores. O relatório foi interrompido para não misturar dados reais com zeros; o time técnico precisa revisar a integração com o provedor.`;
 }
 
-async function harvestCity(scope: CityScope, entity: PanoramaScope['entity'], engineVersion: 'v2' | 'v3' | 'v4', circuit: PanoramaTemporalCircuit, signal?: AbortSignal, onUnit?: (city: string, operation: string) => void): Promise<CityHarvest> {
-  const gate = createRequestGate(REQUEST_CONCURRENCY_PER_CITY);
+/** Tipologia de dormitórios não se aplica a uma base comprovadamente só horizontal.
+ * Só aceita ausência explícita HTTP 200; falha de transporte/acesso continua impeditiva. */
+export function unavailableRequiredCitySources(buildings: Record<string, unknown>[], sources: Pick<Record<TemporalKey, SourceResult>, 'sales' | 'stock' | 'salesTypology' | 'stockTypology'>): SourceResult[] {
+  const standards = [sources.sales, sources.stock];
+  const horizontalOnly = buildings.length > 0
+    && buildings.every((building) => segmentOf(building.building_type ?? building.type) === 'Horizontal')
+    && standards.every((source) => source.available && source.rows.length > 0
+      && source.rows.every((row) => segmentOf(row.building_type ?? row.type) === 'Horizontal'));
+  const requiredTypology = [sources.salesTypology, sources.stockTypology].filter((source) =>
+    !(horizontalOnly && source.issue?.empty === true && source.issue.status === 200));
+  return [...standards, ...requiredTypology].filter((source) => !source.available);
+}
+
+async function harvestCity(scope: CityScope, entity: PanoramaScope['entity'], engineVersion: 'v2' | 'v3' | 'v4', circuit: PanoramaTemporalCircuit, gate: PanoramaRequestGate, signal?: AbortSignal, onUnit?: (city: string, operation: string) => void): Promise<CityHarvest> {
   const track = <T,>(operation: string, request: () => Promise<T>) => gate(request).finally(() => onUnit?.(scope.city, operation));
   const [buildings, sales, salesTypology, stock, stockTypology, ivv, ticket, ticketTypology, meter, meterTypology] = await Promise.all([
-    track('empreendimentos', () => fetchBuildings(scope, signal, engineVersion)),
+    fetchPanoramaBuildings(scope, signal, engineVersion, gate).finally(() => onUnit?.(scope.city, 'empreendimentos')),
     track('vendas por padrão', () => temporalRows(scope, 'sales', 'Padrão', signal)), track('vendas por tipologia', () => temporalRows(scope, 'sales', 'Tipologia', signal)),
     track('oferta por padrão', () => temporalRows(scope, 'stock', 'Padrão', signal)), track('oferta por tipologia', () => temporalRows(scope, 'stock', 'Tipologia', signal)),
     track('IVV por padrão', () => temporalRows(scope, 'ivv', 'Padrão', signal, circuit)),
@@ -218,6 +358,14 @@ async function harvestCity(scope: CityScope, entity: PanoramaScope['entity'], en
   // pelo cubo granular, que contém estoque, vendas e lançamentos por tipologia.
   const ivvTypology: SourceResult = { rows: [], available: false, source: 'IVV por tipologia calculado pelo histórico granular do recorte' };
   const sources = { sales, salesTypology, stock, stockTypology, ivv, ivvTypology, ticket, ticketTypology, meter, meterTypology };
+  const unavailableMandatory = unavailableRequiredCitySources(buildings, sources);
+  if (unavailableMandatory.length) {
+    const issues = unavailableMandatory.flatMap((source) => source.issue ? [source.issue] : []);
+    const details = issues.map(failureLabel);
+    if (!details.length) details.push('fontes obrigatórias de vendas/oferta indisponíveis');
+    const retryAfterMs = issues.map((issue) => issue.retryAfterMs).find((value) => value != null);
+    throw new RequiredCitySourceError(`${details.join('; ')} em ${scope.city}`, retryAfterMs);
+  }
   if (Object.values(sources).every((source) => !source.available)) {
     const issues = Object.values(sources).flatMap((source) => source.issue ? [source.issue] : []);
     throw new Error(describeTemporalFailure(scope.city, issues));
@@ -225,6 +373,7 @@ async function harvestCity(scope: CityScope, entity: PanoramaScope['entity'], en
   const cube = buildCityCube(buildings, { city: scope.city, uf: scope.uf, endQuarter: scope.endQuarter, entity, engineVersion });
   return {
     city: scope.city,
+    annualLaunchFacts: annualLaunchFacts(buildings, cube),
     records: engineVersion !== 'v2' ? launchRecordsFromCube(cube) : launchRecordsFrom(buildings, scope),
     cube,
     cohorts: engineVersion !== 'v2' ? cube.projects.map((project) => ({ segment: project.segment, releaseYear: String(project.releaseYear), standard: project.standard, stock: project.finalUnits ?? 0 })).filter((row) => row.stock > 0) : cohortRowsFrom(buildings, scope),
@@ -237,30 +386,44 @@ async function harvestCity(scope: CityScope, entity: PanoramaScope['entity'], en
  * uma cidade que falha aparece nomeada na proveniência e o relatório fica `partial`. Só o
  * cancelamento propaga exceção — falha total devolve modelo `unavailable` com as cidades listadas.
  */
-export async function fetchPanoramaReportModel(scope: PanoramaScope, signal?: AbortSignal, onProgress?: PanoramaProgressListener): Promise<PanoramaReportModel> {
+export async function fetchPanoramaReportModel(scope: PanoramaScope, signal?: AbortSignal, onProgress?: PanoramaProgressListener, sessionHandle: object = createPanoramaCollectionSession()): Promise<PanoramaReportModel> {
   const scopes = cityScopes(scope);
   if (!scopes.length) throw new Error('Recorte sem cidade: selecione ao menos um município autorizado.');
   const progress = createPanoramaGenerationProgress(scopes.length, onProgress);
   progress.start();
+  const session = sessionState(sessionHandle, scope);
+  for (const { city } of scopes) if (session.harvests.has(city)) progress.cityReused(city);
   const circuit = new PanoramaTemporalCircuit();
-
+  const concurrency = panoramaConcurrencyPolicy(scope.entity);
+  const requestGate = createRequestGate(concurrency.requests);
+  const missingScopes = scopes.filter(({ city }) => !session.harvests.has(city)
+    && (!session.errors.has(city) || isTransientCityFailure(new Error(session.errors.get(city)!))));
   const collection: CollectionResult<CityHarvest> = await collectByCity(
-    scopes.map((item) => item.city),
+    missingScopes.map((item) => item.city),
     async (city, citySignal) => {
-      const harvest = await harvestCity({ uf: scope.uf, city, startQuarter: scope.startQuarter, endQuarter: scope.endQuarter }, scope.entity, scope.engineVersion ?? 'v4', circuit, citySignal, progress.unit);
+      session.attempts.set(city, (session.attempts.get(city) ?? 0) + 1);
+      const harvest = await harvestCity({ uf: scope.uf, city, startQuarter: scope.startQuarter, endQuarter: scope.endQuarter }, scope.entity, scope.engineVersion ?? 'v4', circuit, requestGate, citySignal, progress.unit);
       progress.cityComplete(city);
       return harvest;
     },
-    { concurrency: CITY_CONCURRENCY, signal },
+    { concurrency: concurrency.cities, attempts: 3, signal, retryDelay: (error, attempt) => {
+      const retryAfter = error instanceof RequiredCitySourceError ? error.retryAfterMs : null;
+      return retryAfter != null ? Math.max(0, retryAfter) : Math.min(5_000, 500 * 2 ** (attempt - 1)) * (0.75 + Math.random() * 0.5);
+    }, onRetry: (city, attempt) => { progress.retry(city, attempt); } },
   );
 
-  collection.failedCities.forEach(({ city }) => progress.cityFailed(city));
-
-  const harvests = completedValues(collection);
-  if (collection.state === 'unavailable') {
-    const details = collection.failedCities.map(({ city, error }) => `${city}: ${error}`).join(' | ');
-    throw new Error(`Nenhuma cidade do recorte foi carregada pela API GeoBrain. ${details}`);
+  for (const outcome of collection.outcomes) {
+    session.durations.set(outcome.city, outcome.durationMs);
+    if (outcome.status === 'completed' && outcome.value) { session.harvests.set(outcome.city, outcome.value); session.errors.delete(outcome.city); }
+    else { session.errors.set(outcome.city, outcome.error ?? 'falha não identificada'); progress.cityFailed(outcome.city); }
   }
+  const failed = scopes.filter(({ city }) => !session.harvests.has(city));
+  if (failed.length) throw new PanoramaCollectionError(failed.map(({ city }) => {
+    const outcome = collection.outcomes.find((item) => item.city === city);
+    return collectionFailureRow(city, session.errors.get(city) ?? 'limite de tentativas atingido', session.attempts.get(city) ?? 0, outcome?.durationMs ?? session.durations.get(city) ?? 0);
+  }));
+  const harvests = scopes.map(({ city }) => session.harvests.get(city)!).filter(Boolean);
+  const collectionRequestedCities = scopes.map(({ city }) => city);
   // Numeradores e denominadores municipais somam ANTES de qualquer percentual ou média.
   const merge = (key: TemporalKey): SourceResult => ({
     rows: harvests.flatMap((harvest) => harvest.sources[key].rows),
@@ -296,14 +459,20 @@ export async function fetchPanoramaReportModel(scope: PanoramaScope, signal?: Ab
     {
       cubes: harvests.map((harvest) => harvest.cube),
       provenance: {
-        requestedCities: collection.requestedCities,
-        completedCities: collection.completedCities,
-        failedCities: collection.failedCities,
+        requestedCities: collectionRequestedCities,
+        completedCities: harvests.map(({ city }) => city),
+        failedCities: [],
+        cityCollectionAttempts: scopes.map(({ city }) => ({ city, attempts: session.attempts.get(city) ?? 1, recovered: (session.attempts.get(city) ?? 1) > 1 })),
+        cityCollectionMetrics: harvests.flatMap(({ city, sources }) => Object.entries(sources).map(([operation, source]) => ({ city, operation, requests: source.requestCount ?? 0, durationMs: source.durationMs ?? 0 }))),
       },
+      annualLaunchFacts: harvests.flatMap((h) => h.annualLaunchFacts),
+      cityLaunchRecords: harvests.map(({ city, records }) => ({ city, records })),
       citySalesSources: harvests.map((harvest) => ({ city: harvest.city, rows: harvest.sources.sales.rows })),
       cityTemporalSources,
     },
   );
+  model.municipalTerritory = await loadMunicipalTerritory(scope, signal);
+  model.notices = buildGenerationNotices(model);
   progress.prepare();
   return model;
 }
@@ -344,7 +513,7 @@ export async function fetchLaunchCalibration(scope: PanoramaScope, reference: Pa
   // Bancada de calibração é mono-cidade por construção: compara contra um gabarito municipal.
   const city = primaryCity(scope);
   const cityScope: CityScope = { uf: scope.uf, city, startQuarter: scope.startQuarter, endQuarter: scope.endQuarter };
-  const raw = await fetchBuildings(cityScope, signal);
+  const raw = await fetchPanoramaBuildings(cityScope, signal);
   const projectValues = new Map<string, number>(); const unitTotalValues = new Map<string, number>(); const unitHistoryValues = new Map<string, number>();
   const seen = new Set<string>();
   for (const building of raw) {
@@ -368,20 +537,21 @@ export async function fetchLaunchCalibration(scope: PanoramaScope, reference: Pa
 }
 
 async function temporalRows(scope: CityScope, endpoint: TemporalEndpoint, groupBy: 'Padrão' | 'Tipologia' = 'Padrão', signal?: AbortSignal, circuit?: PanoramaTemporalCircuit): Promise<SourceResult> {
-  if (circuit?.isOpen(endpoint, groupBy)) { circuit.avoided += 1; return { rows: [], available: false, source: circuit.source(), issue: { endpoint, status: 500, empty: false } }; }
+  if (circuit?.isOpen(endpoint, groupBy)) { circuit.avoided += 1; return { rows: [], available: false, source: circuit.source(), issue: { endpoint, status: 500, empty: false }, requestCount: 0, durationMs: 0 }; }
   const rows: Record<string, unknown>[] = []; let page = 1; let lastPage = 1;
+  const startedAt = Date.now(); let requestCount = 0;
   const window = temporalWindow(scope);
   do {
-    const response = await requestWithRetry(() => httpRequest<Record<string, unknown>>({ url: `${BASE_URL}/temporal-analysis-city/${endpoint}`, query: { city: scope.city, uf: scope.uf, start_period: window.start, end_period: window.end, per_page: PER_PAGE, page, group_by: groupBy, 'type[]': ['Vertical', 'Horizontal'] }, signal }), { signal, attempts: endpoint === 'ivv' && groupBy === 'Tipologia' ? 2 : 1 });
+    const response = await requestWithRetry(() => { requestCount += 1; return httpRequest<Record<string, unknown>>({ url: `${BASE_URL}/temporal-analysis-city/${endpoint}`, query: { city: scope.city, uf: scope.uf, start_period: window.start, end_period: window.end, per_page: PER_PAGE, page, group_by: groupBy, 'type[]': ['Vertical', 'Horizontal'] }, signal }); }, { signal, attempts: endpoint === 'ivv' && groupBy === 'Tipologia' ? 2 : 1 });
     if (!response.ok && endpoint === 'ivv' && groupBy === 'Tipologia' && response.status !== null && response.status >= 500) circuit?.open(scope.city, response.status);
-    if (!response.ok || !response.data) return { rows: [], available: false, source: `temporal-analysis-city/${endpoint} · HTTP ${response.status ?? 'rede'}`, issue: { endpoint, status: response.status, empty: false } };
+    if (!response.ok || !response.data) return { rows: [], available: false, source: `temporal-analysis-city/${endpoint} · HTTP ${response.status ?? 'rede'}`, issue: { endpoint, status: response.status, empty: false, retryAfterMs: response.retryAfterMs }, requestCount, durationMs: Date.now() - startedAt };
     const pageRows = Array.isArray(response.data.data) ? response.data.data as Record<string, unknown>[] : [];
     rows.push(...pageRows);
     lastPage = Number((response.data.meta as Record<string, unknown> | undefined)?.last_page ?? 1); page += 1;
   } while (page <= lastPage);
   return rows.length
-    ? { rows, available: true, source: `temporal-analysis-city/${endpoint} · ${groupBy}` }
-    : { rows, available: false, source: `temporal-analysis-city/${endpoint} · HTTP 200 · sem linhas`, issue: { endpoint, status: 200, empty: true } };
+    ? { rows, available: true, source: `temporal-analysis-city/${endpoint} · ${groupBy}`, requestCount, durationMs: Date.now() - startedAt }
+    : { rows, available: false, source: `temporal-analysis-city/${endpoint} · HTTP 200 · sem linhas`, issue: { endpoint, status: 200, empty: true }, requestCount, durationMs: Date.now() - startedAt };
 }
 
 /** Initial T3/T4 bench: direct temporal endpoints only; it cannot silently promote a report contract. */
@@ -405,8 +575,8 @@ export async function fetchLaunchAuditBuildings(scope: PanoramaScope, signal?: A
   // A curadoria cobre todas as cidades do recorte; a chave de dedupe é por cidade + building_id.
   const collection = await collectByCity(
     cityScopes(scope).map((item) => item.city),
-    (city, citySignal) => fetchBuildings({ uf: scope.uf, city, startQuarter: scope.startQuarter, endQuarter: scope.endQuarter }, citySignal).then((buildings) => ({ city, buildings })),
-    { concurrency: CITY_CONCURRENCY, signal },
+    (city, citySignal) => fetchPanoramaBuildings({ uf: scope.uf, city, startQuarter: scope.startQuarter, endQuarter: scope.endQuarter }, citySignal).then((buildings) => ({ city, buildings })),
+    { concurrency: SECOVI_CITY_CONCURRENCY, signal },
   );
   const harvested = completedValues(collection);
   const seen = new Set<string>(); const rows: LaunchAuditBuilding[] = [];

@@ -1,14 +1,22 @@
+import { annualCompositionManifest, territorialManifest } from './territorial-manifest';
 import type { MethodStatus } from '../types';
 import { buildMapTilePlan, type GeographicPoint } from '../lib/map-tiles';
+import { FIERGS_4T25_SLIDE_MANIFEST } from './fiergs-manifest';
+import { panoramaScopeIdentity } from '../scope-identity';
+import { customTerritoryPages } from './custom-cover-layout';
+import { observedDormitoryPriceGroup, type DormitoryPriceGroup } from './dormitory-price-series';
+import { mcmvActivity } from './editorial-contracts';
+import type { PanoramaReportModel } from '../types';
 
 export type PanoramaVisualFamily = 'cover' | 'static' | 'divider' | 'summary' | 'comparison-table' | 'trend-chart' | 'market-table' | 'participation' | 'price' | 'matrix' | 'narrative' | 'map' | 'closing';
 export type CityComparisonKind = 'sales' | 'market' | 'availability';
-export interface ReportPageDefinition { page: number; referenceSlide: number; sectionId: string; title: string; intention: string; visualFamily: PanoramaVisualFamily; contractKeys: string[]; methodologyStatus: MethodStatus | 'not_applicable'; cityComparison?: CityComparisonKind; }
+export interface ReportPageDefinition { id?: string; territorialParentId?: string; annualCompositionMetric?: 'projects' | 'units' | 'vgl'; territorialKind?: string; territorialUnitId?: string; page: number; referenceSlide: number; sectionId: string; title: string; intention: string; visualFamily: PanoramaVisualFamily; contractKeys: string[]; methodologyStatus: MethodStatus | 'not_applicable'; cityComparison?: CityComparisonKind; fiergsSlide?: 'city-scope' | 'horizontal-offer-products' | 'horizontal-price-range'; fiergsOfficialSlide?: number; contentReferenceSlide?: number; mapMode?: 'standard' | 'stock' | 'price'; scopeCities?: string[]; }
 export interface PanoramaSection { id: string; label: string; start: number; end: number; }
 
 const SECTION_LABELS: Record<string, string> = {
   about: 'Sobre o SECOVI-SP', launches: 'Análise de Lançamentos', sales: 'Análise de Vendas',
   market: 'Análise Geral do Mercado', vertical: 'Análise do Mercado Residencial Vertical',
+  ivv: 'Análise do IVV', prices: 'Análise de Preços',
   horizontal: 'Análise do Mercado Residencial Horizontal', vgv: 'Análise do VGV Geral',
   observations: 'Análises e Observações Sobre o Mercado', location: 'Localização dos Empreendimentos',
   consultants: 'Consultores do Estudo',
@@ -67,11 +75,12 @@ export function createPanoramaReportManifest(options: boolean | { includeCityCom
   return output.map((page, index) => ({ ...page, page: index + 1 }));
 }
 
-export function createPanoramaSections(manifest: ReportPageDefinition[]): PanoramaSection[] {
-  return Object.entries(SECTION_LABELS).flatMap(([id, label]) => {
+export function createPanoramaSections(manifest: ReportPageDefinition[], entity: 'secovi-sp' | 'fiergs-rs' = 'secovi-sp'): PanoramaSection[] {
+  const labels = entity === 'fiergs-rs' ? { ...SECTION_LABELS, about: 'Sobre o estudo FIERGS' } : SECTION_LABELS;
+  return Object.entries(labels).flatMap(([id, label]) => {
     const entries = manifest.filter((page) => page.sectionId === id);
     return entries.length ? [{ id, label, start: entries[0].page, end: entries.at(-1)!.page }] : [];
-  });
+  }).sort((left, right) => left.start - right.start);
 }
 
 export const PANORAMA_REPORT_MANIFEST = createPanoramaReportManifest();
@@ -82,10 +91,21 @@ export const PANORAMA_SECTIONS = createPanoramaSections(PANORAMA_REPORT_MANIFEST
 /* -------------------------------------------------------------------------- */
 
 export interface ManifestSubject {
-  provenance: { engineVersion?: 'v2' | 'v3' | 'v4' };
-  cube: { projects: { segment: string; finalUnits: number | null }[] };
+  annualCompositions?: PanoramaReportModel['annualCompositions'];
+  territorial?: PanoramaReportModel['territorial'];
+  scope?: { presentation?: PanoramaReportModel['scope']['presentation']; entity?: 'secovi-sp' | 'fiergs-rs'; endQuarter?: string; uf?: string; cities?: string[] };
+  annualAreaIvv?: { kind: string; previousUnits: number | null; finalUnits: number | null; launchedUnits: number | null; soldUnits: number | null; ivv: number | null }[];
+  provenance: { engineVersion?: 'v2' | 'v3' | 'v4'; completedCities?: string[] };
+  cube: { projects: { segment: string; finalUnits: number | null; releaseQuarter?: string; launchedUnits?: number | null; launchedVgvMillions?: number | null; typologies?: { launchedUnits: number | null }[] }[] };
   locations: GeographicPoint[];
   cityComparisons: { enabled: boolean };
+  sales?: { units: { dataStatus: string } };
+  prices?: { meter: { dataStatus: string }; meterByTypology: { dataStatus: string; groupSeries?: DormitoryPriceGroup[] } };
+  granular?: {
+    offerByTypology?: { launchedUnits: number | null; finalUnits: number | null; soldUnits?: number | null }[];
+    pricesByTypology?: { averageTicket: number | null; averageArea: number | null; averagePricePerMeter: number | null }[];
+    vgv?: { launchedUnits: number | null; finalUnits: number | null; soldUnits: number | null; launchedVgvMillions: number | null; finalVgvMillions: number | null; soldVgvMillions: number | null }[];
+  };
 }
 
 /**
@@ -97,7 +117,7 @@ export interface ManifestSubject {
 export function panoramaManifestOptions(report: ManifestSubject, mapboxAccessToken = ''): { includeCityComparisons: boolean; includeHorizontal: boolean; includeMap: boolean } {
   const horizontal = report.cube.projects.filter((project) => project.segment === 'Horizontal');
   return {
-    includeCityComparisons: report.cityComparisons.enabled,
+    includeCityComparisons: report.scope?.presentation?.mode !== 'consolidated' && report.cityComparisons.enabled,
     // JG-34: "se não tiver empreendimentos ativos, essa página precisa ser excluída". Existir no
     // histórico não basta — o bloco só entra com oferta ativa no fechamento selecionado.
     includeHorizontal: (report.provenance.engineVersion !== 'v3' && report.provenance.engineVersion !== 'v4') || horizontal.some((project) => (project.finalUnits ?? 0) > 0),
@@ -109,5 +129,131 @@ export function panoramaManifestOptions(report: ManifestSubject, mapboxAccessTok
 
 /** Manifesto efetivo de um relatório — o único caminho que os consumidores devem usar. */
 export function panoramaManifestFor(report: ManifestSubject, mapboxAccessToken = ''): ReportPageDefinition[] {
-  return createPanoramaReportManifest(panoramaManifestOptions(report, mapboxAccessToken));
+  if (report.scope?.entity === 'fiergs-rs') {
+    const annualRows = report.annualAreaIvv ?? [];
+    const annualReady = annualRows.some((row) => row.kind === 'row') && annualRows.some((row) => row.kind === 'total')
+      && annualRows.every((row) => [row.previousUnits, row.finalUnits, row.launchedUnits, row.soldUnits, row.ivv].every((value) => value !== null && Number.isFinite(value)));
+    const omitted = new Set<number>();
+    // Remove the retired documentary by stable official identity, not the output index.
+    omitted.add(74);
+    if ('launches' in report && report.scope?.cities?.length === report.provenance.completedCities?.length) {
+      const complete = report as PanoramaReportModel;
+      if (mcmvActivity(complete, 'launches').known && !mcmvActivity(complete, 'launches').active) [15, 16].forEach((s) => omitted.add(s));
+      if (mcmvActivity(complete, 'sales').known && !mcmvActivity(complete, 'sales').active) [27, 28].forEach((s) => omitted.add(s));
+    }
+    if (report.sales?.units.dataStatus === 'unavailable') [24, 26, 27, 28, 29, 31, 32, 33].forEach((slide) => omitted.add(slide));
+    if (report.prices?.meter.dataStatus === 'unavailable') omitted.add(43);
+    if (report.prices?.meterByTypology.dataStatus === 'unavailable') [44, 45, 46, 47].forEach((slide) => omitted.add(slide));
+    if (report.prices?.meterByTypology.groupSeries) {
+      for (const bedroom of [1, 2, 3, 4]) if (!observedDormitoryPriceGroup(report.prices.meterByTypology, bedroom)) omitted.add(43 + bedroom);
+    }
+    if (report.granular?.offerByTypology && !report.granular.offerByTypology.some((row) => row.launchedUnits !== null || row.finalUnits !== null || row.soldUnits != null)) [36, 57].forEach((slide) => omitted.add(slide));
+    if (report.granular?.pricesByTypology && !report.granular.pricesByTypology.some((row) => [row.averageTicket, row.averageArea, row.averagePricePerMeter].some((value) => value !== null))) omitted.add(58);
+    if (report.granular?.vgv && !report.granular.vgv.some((row) => [row.launchedUnits, row.finalUnits, row.soldUnits, row.launchedVgvMillions, row.finalVgvMillions, row.soldVgvMillions].some((value) => value !== null))) omitted.add(61);
+    if (report.locations.length === 0) [67, 68, 69].forEach((slide) => omitted.add(slide));
+    const launchCoverageKnown = report.cube.projects.some((project) => project.releaseQuarter !== undefined) || (report.provenance.completedCities?.length ?? 0) > 0;
+    if (launchCoverageKnown) {
+      const quarterProjects = report.cube.projects.filter((project) => project.segment === 'Vertical' && project.releaseQuarter === report.scope?.endQuarter);
+      if (!quarterProjects.length) [10, 13, 17, 19].forEach((slide) => omitted.add(slide));
+      else {
+        if (!quarterProjects.some((project) => project.launchedUnits !== null && project.launchedUnits !== undefined)) [13, 17].forEach((slide) => omitted.add(slide));
+        if (!quarterProjects.some((project) => project.typologies?.some((row) => row.launchedUnits !== null))) omitted.add(17);
+      }
+      if (quarterProjects.length && quarterProjects.every((p) => p.launchedUnits === 0)) omitted.add(19);
+      if (!quarterProjects.some((project) => project.launchedVgvMillions !== null && project.launchedVgvMillions !== undefined)) omitted.add(21);
+    }
+    const scope = report.scope;
+    const territory = scope.uf && scope.cities ? panoramaScopeIdentity({ uf: scope.uf, cities: scope.cities, entity: scope.entity }) : null;
+    if (territory?.cities.length === 1 || scope.presentation?.mode === 'consolidated') omitted.add(31);
+    if ((report.provenance.completedCities?.length ?? 0) > 0) {
+      if (!report.cube.projects.some((project) => project.segment === 'Horizontal')) [62, 63, 64, 65, 66].forEach((slide) => omitted.add(slide));
+      if (!report.cube.projects.some((project) => project.segment === 'Vertical')) {
+        for (let slide = 8; slide <= 60; slide += 1) omitted.add(slide);
+      }
+    }
+    const pages = createFiergsReportManifest(annualReady).filter((page) => !omitted.has(page.fiergsOfficialSlide ?? -1)).flatMap((page) => {
+      const official = page.fiergsOfficialSlide;
+      const dynamic = { ...page, title: official === 2 && territory ? `${territory.shortLabel} · Mercado Imobiliário · ${scope.endQuarter}`
+        : official === 7 && territory ? territory.official ? 'Região Metropolitana de Porto Alegre' : `Recorte do estudo · ${territory.shortLabel}`
+        : page.title };
+      // Dividir listas/rankings por página preserva todas as cidades em conjuntos maiores.
+      if (official === 7 && territory && !territory.official) {
+        const scopePages = customTerritoryPages(territory);
+        return scopePages.map((cities, index) => ({ ...dynamic, scopeCities: cities,
+          title: scopePages.length > 1 ? `${dynamic.title} · ${index + 1}/${scopePages.length}` : dynamic.title }));
+      }
+      const chunkSize = official === 19 || official === 31 ? 10 : 0;
+      if (chunkSize && territory && territory.cities.length > chunkSize) {
+        return Array.from({ length: Math.ceil(territory.cities.length / chunkSize) }, (_, index) => ({ ...dynamic,
+          scopeCities: territory.cities.slice(index * chunkSize, (index + 1) * chunkSize), title: `${dynamic.title} · ${index + 1}/${Math.ceil(territory.cities.length / chunkSize)}` }));
+      }
+      return [dynamic];
+    });
+    const withoutOrphanDividers = pages.filter((page) => !FIERGS_DIVIDERS.has(page.fiergsOfficialSlide ?? -1)
+      || pages.some((other) => other.sectionId === page.sectionId && other.visualFamily !== 'divider'));
+    return annualCompositionManifest(territorialManifest(withoutOrphanDividers.map((page, index) => ({ ...page, page: index + 1 })), report), report.annualCompositions, report.scope?.presentation?.layout==='integrated');
+  }
+  return annualCompositionManifest(territorialManifest(createPanoramaReportManifest(panoramaManifestOptions(report, mapboxAccessToken)), report), report.annualCompositions, report.scope?.presentation?.layout==='integrated');
+}
+
+const FIERGS_DIVIDERS = new Set([8, 23, 34, 38, 42, 48, 53, 62, 70]);
+const FIERGS_STATIC = new Set([1, 3, 4, 72, 73, 74, 75]);
+/** Editorial repeats removed after comparing the generated deck: keep the first occurrence. */
+export const FIERGS_REDUNDANT_OFFICIAL_SLIDES = new Set([18, 30, 54, 55, 56]);
+const FIERGS_CONTENT_REFERENCE: Readonly<Record<number, number>> = {
+  9: 14, 10: 15, 11: 14, 12: 16, 13: 17, 14: 16, 15: 16, 16: 16, 20: 18, 21: 19, 22: 18,
+  24: 23, 25: 25, 26: 23, 27: 23, 28: 23, 30: 25, 32: 24, 33: 24,
+  36: 34, 37: 31, 40: 27, 41: 27, 43: 40, 49: 38, 50: 39, 51: 36, 52: 37,
+  54: 33, 55: 31, 56: 34, 57: 27, 58: 36, 59: 45, 60: 43, 61: 51, 64: 48, 65: 49,
+};
+
+function fiergsSectionId(slide: number): string {
+  if (slide === 61) return 'vgv';
+  if (slide <= 7) return 'about';
+  if (slide <= 22) return 'launches';
+  if (slide <= 33) return 'sales';
+  if (slide <= 37) return 'market';
+  if (slide <= 41) return 'ivv';
+  if (slide <= 52) return 'prices';
+  if (slide <= 61) return 'vertical';
+  if (slide <= 66) return 'horizontal';
+  if (slide <= 69) return 'location';
+  return 'consultants';
+}
+
+function fiergsVisualFamily(slide: number): PanoramaVisualFamily {
+  if (slide === 61) return 'market-table';
+  if (FIERGS_DIVIDERS.has(slide)) return 'divider';
+  if (FIERGS_STATIC.has(slide)) return slide === 1 ? 'cover' : slide >= 72 ? 'closing' : 'static';
+  if ([2, 5, 7].includes(slide)) return 'cover';
+  if (slide === 6) return 'summary';
+  if ([67, 68, 69].includes(slide)) return 'map';
+  if ([19, 31].includes(slide)) return 'comparison-table';
+  if ([63, 64].includes(slide)) return 'market-table';
+  if ([65, 66].includes(slide)) return 'price';
+  return 'trend-chart';
+}
+
+/** IDs oficiais permanecem estáveis; a numeração exibida acompanha as páginas realmente exportadas. */
+export function createFiergsReportManifest(includeAnnualAreaIvv = false): ReportPageDefinition[] {
+  return FIERGS_4T25_SLIDE_MANIFEST.filter((slide) => (includeAnnualAreaIvv || slide.slide !== 41) && !FIERGS_REDUNDANT_OFFICIAL_SLIDES.has(slide.slide)).map((slide, index) => {
+    const mapMode = slide.slide === 67 ? 'standard' : slide.slide === 68 ? 'stock' : slide.slide === 69 ? 'price' : undefined;
+    const fiergsSlide = slide.slide === 63 ? 'horizontal-offer-products' : slide.slide === 66 ? 'horizontal-price-range' : undefined;
+    const cityComparison = slide.slide === 31 ? 'sales' : undefined;
+    return {
+      page: index + 1,
+      referenceSlide: slide.slide,
+      fiergsOfficialSlide: slide.slide,
+      contentReferenceSlide: FIERGS_CONTENT_REFERENCE[slide.slide],
+      sectionId: fiergsSectionId(slide.slide),
+      title: slide.title,
+      intention: `Slide oficial FIERGS ${slide.slide}`,
+      visualFamily: fiergsVisualFamily(slide.slide),
+      contractKeys: [],
+      methodologyStatus: FIERGS_STATIC.has(slide.slide) || FIERGS_DIVIDERS.has(slide.slide) ? 'not_applicable' : 'assumed',
+      ...(mapMode ? { mapMode } : {}),
+      ...(fiergsSlide ? { fiergsSlide } : {}),
+      ...(cityComparison ? { cityComparison } : {}),
+    };
+  });
 }

@@ -1,0 +1,423 @@
+{
+  "summary": {
+    "candidatas": 32,
+    "leituras": 44,
+    "achados": 11,
+    "tabelas": "27/30",
+    "acertos": {
+      "fonte": {
+        "comparados": 16,
+        "batem": 9
+      },
+      "cruzamentos": {
+        "feitos": 22,
+        "batem": 22
+      }
+    }
+  },
+  "findings": [
+    {
+      "id": "review-notes",
+      "type": "LEFTOVER_NOTE",
+      "section": "GLOBAL",
+      "slideRef": "—",
+      "title": "3 comentário(s) de revisão em 3 slide(s)",
+      "detail": "Comunicação entre analista e A&R deixada no arquivo — não é erro do estudo. Use como checklist do que a revisão pediu; o portão de entrega avisa se o PPTX final ainda contiver comentários.",
+      "ok": false,
+      "viz": {
+        "kind": "text",
+        "evidence": "s1, s10, s38",
+        "checklist": [
+          {
+            "label": "s1 · “Lucas, conforme falei com você no presencial, a parte da análise de airbnb eu não fiz porque não tinha na região..”",
+            "status": "na"
+          },
+          {
+            "label": "s10 · “Lucas, aqui eu fiquei na dúvida.. No novo modelo colocamos somente o raio primário, mas no projeto de Campos do Jordão, eu coloquei os dois raios porque no raio primário não tinha praticamente nada de ponto. Ai, como esse é pra housi também, fiquei na dúvida se deixava somente o primário ou todos, então fiz das duas formas para verificar com você dai..”",
+            "status": "na"
+          },
+          {
+            "label": "s38 · “Lucas, na concorrência, como eram somente dois empreendimentos, um em cada raio eu fiquei na dúvida em como fazer e fiz de duas formas:a primeira parte fiz separado cada um em sua zona de influência, mas sem a parte das análises, somente a localização e consolidada.. No final fiz os dois juntos com todas as análises.. E depois a ficha técnica de cada um dos empreendimentos.”",
+            "status": "na"
+          }
+        ]
+      }
+    },
+    {
+      "id": "travel-speed-17",
+      "type": "FORMAT_MISMATCH",
+      "section": "GLOBAL",
+      "slideRef": "s17",
+      "title": "Distância incompatível com o tempo de deslocamento",
+      "detail": "«950 km | 3 min» implica 19.000 km/h — a unidade da distância provavelmente está errada (m em vez de km?).",
+      "ok": false,
+      "confidence": 2,
+      "viz": {
+        "kind": "text",
+        "evidence": "950 km | 3 min"
+      }
+    },
+    {
+      "id": "structure",
+      "type": "STRUCTURE_MISSING",
+      "section": "ESTRUTURA",
+      "slideRef": "—",
+      "title": "Checklist estrutural (1 ausente(s) · 2 seção(ões) sem conteúdo · slide final a conferir)",
+      "detail": "Cobertura por título e texto do slide, fora do sumário. Itens “a conferir” são mapas/prints: o conteúdo pode estar dentro da imagem — confirme visualmente antes de tratar como ausência. Seções listadas em sumários consecutivos sem conteúdo localizado: Seção 04 (Avaliação da Consultoria); Seção 05 (Recomendação). Slide final s78 sem conteúdo detectável; confirme visualmente antes de tratar como ausência.",
+      "ok": false,
+      "viz": {
+        "kind": "text",
+        "checklist": [
+          {
+            "label": "1.1 — Endereço",
+            "status": "ok"
+          },
+          {
+            "label": "1.2 — Latitude/longitude",
+            "status": "ok"
+          },
+          {
+            "label": "1.3 — Área do terreno",
+            "status": "ok"
+          },
+          {
+            "label": "1.4 — Acessos",
+            "status": "ok"
+          },
+          {
+            "label": "1.5 — Entorno varejo/serviços",
+            "status": "ok"
+          },
+          {
+            "label": "1.6 — Entorno revendas",
+            "status": "ok"
+          },
+          {
+            "label": "1.7 — Mapeamento físico",
+            "status": "ok"
+          },
+          {
+            "label": "1.9 — Distância ao centro",
+            "status": "ok"
+          },
+          {
+            "label": "2.1 — Dados cidade/estado/Brasil",
+            "status": "ok"
+          },
+          {
+            "label": "2.2 — Variação da população",
+            "status": "ok"
+          },
+          {
+            "label": "2.3 — Variação dos domicílios",
+            "status": "ok"
+          },
+          {
+            "label": "2.4 — População por renda",
+            "status": "ok"
+          },
+          {
+            "label": "2.4.1 — Mapa de densidade populacional",
+            "status": "ok"
+          },
+          {
+            "label": "2.5 — Domicílios por renda",
+            "status": "ok"
+          },
+          {
+            "label": "2.6 — Domicílios por moradores",
+            "status": "ok"
+          },
+          {
+            "label": "2.5.1 — Mapa de renda",
+            "status": "ok"
+          },
+          {
+            "label": "2.7 — Domicílios por tipo",
+            "status": "ok"
+          },
+          {
+            "label": "2.7.1 — Mapa de verticalização",
+            "status": "ok"
+          },
+          {
+            "label": "2.8 — Ocupação/propriedade",
+            "status": "ok"
+          },
+          {
+            "label": "2.8.1 — Mapa de propriedade",
+            "status": "ok"
+          },
+          {
+            "label": "3.1 — Absorção Z.I. total",
+            "status": "ok"
+          },
+          {
+            "label": "3.1.1 — Cenários de absorção",
+            "status": "ok"
+          },
+          {
+            "label": "4.1 — Mapa de localização",
+            "status": "ok"
+          },
+          {
+            "label": "4.2 — Mapa R$/m²",
+            "status": "ok"
+          },
+          {
+            "label": "4.3 — Mapa de estoque",
+            "status": "ok"
+          },
+          {
+            "label": "4.4 — Mapa de área média",
+            "status": "ok"
+          },
+          {
+            "label": "4.5 — Consolidada",
+            "status": "ok"
+          },
+          {
+            "label": "4.6 — Oferta por padrão",
+            "status": "ok"
+          },
+          {
+            "label": "4.7 — Oferta por ano",
+            "status": "ok"
+          },
+          {
+            "label": "4.8 — Oferta por tipologia",
+            "status": "ok"
+          },
+          {
+            "label": "4.9 — Preços por tipologia",
+            "status": "ok"
+          },
+          {
+            "label": "4.10 — Preços por padrão",
+            "status": "ok"
+          },
+          {
+            "label": "5.1 — Lacunas tipologia × metragem",
+            "status": "ok"
+          },
+          {
+            "label": "5.2 — Lacunas tipologia × preço",
+            "status": "ok"
+          },
+          {
+            "label": "5.3 — Lacunas preço × metragem",
+            "status": "ok"
+          },
+          {
+            "label": "6 — Fichas técnicas",
+            "status": "ok"
+          },
+          {
+            "label": "7.1 — Futuros lançamentos",
+            "status": "missing"
+          },
+          {
+            "label": "8.1 — Revenda",
+            "status": "ok"
+          },
+          {
+            "label": "8.2 — Revenda por bairro",
+            "status": "ok"
+          },
+          {
+            "label": "8.3 — Revenda por tipologia",
+            "status": "ok"
+          },
+          {
+            "label": "8.4 — Ticket de revenda",
+            "status": "ok"
+          },
+          {
+            "label": "Seção 04 (Avaliação da Consultoria)",
+            "status": "missing"
+          },
+          {
+            "label": "Seção 05 (Recomendação)",
+            "status": "missing"
+          },
+          {
+            "label": "Slide final s78 sem conteúdo detectável",
+            "status": "na"
+          }
+        ]
+      }
+    },
+    {
+      "id": "source-32-domicilios por tipo-rolandia-percentual",
+      "type": "SOURCE_CROSSCHECK",
+      "section": "SOCIO",
+      "slideRef": "s32, s33",
+      "title": "Valor diverge da planilha-fonte — Rolândia",
+      "detail": "Verticalização de Rolândia: o slide mostra 5,7%, mas a planilha registra 5,16% (5,2% na precisão do slide). A diferença de 0,5 p.p. não se explica por arredondamento. Origem: 02. SOCIODEMOGRAFIA.xlsm › Dom.p Tipo › linha 7. O mesmo valor aparece em s32, s33: se o deck está consistente nele, confira se não é a planilha que está desatualizada. Origens: 02..",
+      "confidence": 1,
+      "origem": "DET",
+      "viz": {
+        "kind": "sidebyside",
+        "leftLabel": "Slides s32, s33",
+        "rightLabel": "02. SOCIODEMOGRAFIA.xlsm › Dom.p Tipo › linha 7",
+        "rows": [
+          {
+            "label": "Rolândia",
+            "left": "5,7%",
+            "right": "5,16%",
+            "mismatch": true
+          },
+          {
+            "label": "Rolândia",
+            "left": "5,7%",
+            "right": "5,16%",
+            "mismatch": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "source-23-domicilios-pr-domicilios",
+      "type": "SOURCE_CROSSCHECK",
+      "section": "SOCIO",
+      "slideRef": "s23",
+      "title": "Valor diverge da planilha-fonte — PR",
+      "detail": "PR: o slide mostra 4.216.017 dom., mas a planilha registra 4.216.107 dom. (−90). Número próximo com dígitos trocados costuma ser erro de digitação. Origem: 01. POPULACAO E DOMICÍLIOS.xlsx › Domicilios › linha 8.",
+      "confidence": 1,
+      "origem": "DET",
+      "viz": {
+        "kind": "sidebyside",
+        "leftLabel": "Slide 23",
+        "rightLabel": "01. POPULACAO E DOMICÍLIOS.xlsx › Domicilios › linha 8",
+        "rows": [
+          {
+            "label": "PR",
+            "left": "4.216.017 dom.",
+            "right": "4.216.107 dom.",
+            "mismatch": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "source-23-domicilios-brasil-unidade-domicilios",
+      "type": "SOURCE_CROSSCHECK",
+      "section": "SOCIO",
+      "slideRef": "s23",
+      "title": "Unidade trocada no slide — Brasil",
+      "detail": "O número 75.298.796 está correto, mas o slide o rotula como habitantes (hab.); na planilha ele é de domicílios (dom.). Corrija só a unidade. Origem: 01. POPULACAO E DOMICÍLIOS.xlsx › Domicilios › linha 9.",
+      "confidence": 1,
+      "origem": "DET",
+      "viz": {
+        "kind": "sidebyside",
+        "leftLabel": "Slide 23",
+        "rightLabel": "01. POPULACAO E DOMICÍLIOS.xlsx › Domicilios › linha 9",
+        "rows": [
+          {
+            "label": "Brasil · unidade",
+            "left": "75.298.796 hab.",
+            "right": "75.298.796 dom.",
+            "mismatch": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "source-vision-46-padrao-3 km-economico-oferta_atual",
+      "type": "SOURCE_CROSSCHECK",
+      "section": "MERCADO",
+      "slideRef": "s46, s47",
+      "title": "Oferta atual diverge da planilha — Econômico",
+      "detail": "Oferta atual de «Econômico» no recorte 3 km: a leitura da imagem mostra 87, mas a planilha registra 184 (−97). Confira também se o slide usa o mesmo recorte. Origem: 01. Consolidada - 3 Km_verificação - OK.xlsm › Padrão › linha 7. O mesmo valor aparece em s46, s47: se o deck está consistente nele, confira se não é a planilha que está desatualizada. Origens: 01..",
+      "confidence": 2,
+      "origem": "IA_visao",
+      "evidenceSha1": "069577d5cf5c1ba561846edbb7fa1af37f269cd5",
+      "viz": {
+        "kind": "sidebyside",
+        "leftLabel": "Slides s46, s47",
+        "rightLabel": "01. Consolidada - 3 Km_verificação - OK.xlsm › Padrão › linha 7",
+        "rows": [
+          {
+            "label": "Econômico · Oferta atual",
+            "left": 87,
+            "right": 184,
+            "mismatch": true
+          },
+          {
+            "label": "2026 · Oferta atual",
+            "left": 87,
+            "right": 184,
+            "mismatch": true
+          },
+          {
+            "label": "2026 · Oferta atual",
+            "left": 87,
+            "right": 184,
+            "mismatch": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "nested-radii-s34",
+      "type": "VALUE_PLAUSIBILITY",
+      "section": "SOCIO",
+      "slideRef": "s34",
+      "title": "Raio maior com valor menor que o raio interno",
+      "detail": "«Alugado»: Até 3 Km tem 4.833, menos que os 4.924 de Até 2 km. Os raios são acumulados (um contém o outro), então o valor absoluto não pode diminuir. A planilha 02. SOCIODEMOGRAFIA.xlsm › Dom.p Cond. Ocup. tem os mesmos valores — o erro vem da fonte.",
+      "ok": false,
+      "confidence": 2,
+      "origem": "IA_visao",
+      "evidenceSha1": "108fa3778e1f7ec4077960c425e75e8dcfdc7619",
+      "viz": {
+        "kind": "text",
+        "evidence": "«Alugado»: Até 3 Km tem 4.833, menos que os 4.924 de Até 2 km"
+      }
+    },
+    {
+      "id": "nested-radii-fonte-Dom.p Tipo-0",
+      "type": "VALUE_PLAUSIBILITY",
+      "section": "GLOBAL",
+      "slideRef": "—",
+      "title": "Planilha com raio maior menor que o raio interno",
+      "detail": "02. SOCIODEMOGRAFIA.xlsm › Dom.p Tipo: «Apartamento»: Até 3 Km tem 1.428, menos que os 1.524 de Até 2 km. Os raios são acumulados, então o valor absoluto não pode diminuir — confira a extração da base antes de usar esses números.",
+      "ok": false,
+      "confidence": 2,
+      "origem": "DET",
+      "viz": {
+        "kind": "text",
+        "evidence": "«Apartamento»: Até 3 Km tem 1.428, menos que os 1.524 de Até 2 km"
+      }
+    },
+    {
+      "id": "entity-bin-boulevard",
+      "type": "CROSS_TABLE_MISMATCH",
+      "section": "LACUNAS",
+      "slideRef": "s55, s52",
+      "title": "Boulevard: faixa de R$/m² das lacunas não bate com a ficha",
+      "detail": "A ficha (s55) dá planta única de R$ 5.120/m² com 192 unidades lançadas, mas s52: “De R$5.001/m² a 7.000/m²” tem 0 unidade(s) e “Até R$5.000/m²” tem 192. A tabela de lacunas parece usar outro R$/m² para este empreendimento.",
+      "ok": false,
+      "confidence": 2,
+      "origem": "DET",
+      "viz": {
+        "kind": "text",
+        "evidence": "s52: “De R$5.001/m² a 7.000/m²” tem 0 unidade(s) e “Até R$5.000/m²” tem 192"
+      }
+    },
+    {
+      "id": "vision-unsafe-sums",
+      "type": "IMAGE_NOT_READ",
+      "section": "GLOBAL",
+      "slideRef": "s24",
+      "title": "Tabelas-imagem sem conferência segura (2 slides)",
+      "detail": "A leitura destas tabelas não permitiu conferir as somas com segurança (totais não alinhados às colunas, leituras discordantes ou incoerentes): s24, s45. Não é acusação de erro; confira manualmente se forem críticas.",
+      "ok": false,
+      "confidence": 3,
+      "origem": "IA_visao",
+      "viz": {
+        "kind": "text",
+        "evidence": "s24, s45"
+      }
+    }
+  ]
+}

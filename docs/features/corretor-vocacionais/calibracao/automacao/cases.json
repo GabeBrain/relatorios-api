@@ -1,0 +1,326 @@
+{
+  "version": 1,
+  "baselineDate": "2026-10-13",
+  "baselineCommit": "04edc0d",
+  "cases": [
+    {
+      "id": "rol",
+      "city": "Rolândia",
+      "uf": "PR",
+      "catalogCase": "V02",
+      "pptx": "Corretor_V3_Rolandia/02_APRESENTACAO_SELECIONAR_DEPOIS/Brain_Vocacional_Vertical_Housi_Av. Castro Alves_Rolandia - PR_v1.pptx",
+      "pptxSha256": "64789a5fdc70051c83e3a875f21e592f1993fddff8e50219f6bf2c70455cb8a6",
+      "excel": "Corretor_V3_Rolandia/01_PLANILHAS_SELECIONAR_TODAS",
+      "excelFiles": [
+        {
+          "name": "00. Base - Revenda e Locação.xlsx",
+          "sha256": "e49b784937606dfda6fc5e52646e286cc463cf1ea6f60e8e52efc6cebd060224"
+        },
+        {
+          "name": "00. Base - Rolândia 06.2026.xlsx",
+          "sha256": "3c8d5fc04632df966d07c8ba17c1c2c17aac07fa0d79b2b5b21a4f74bdd6f628"
+        },
+        {
+          "name": "00. Base - Área de Lazer.xlsx",
+          "sha256": "9b6a84749c94c43ce9f2f1d06913fe5568a09becb86ab267f4cebf76b66314d1"
+        },
+        {
+          "name": "01. Consolidada - 1 Km_verificação - OK.xlsm",
+          "sha256": "d53028cefb06b3ac92f324d7ca2eabeb6badbb8b50dbf11cd66299c54d3649a7"
+        },
+        {
+          "name": "01. Consolidada - 3 Km_verificação - OK.xlsm",
+          "sha256": "37241e53fd9a8e58397c1a2919ca1b1855e34d25492fc1c7031575935d17b4a0"
+        },
+        {
+          "name": "01. Consolidada - Z.I. Total.xlsm",
+          "sha256": "67b08aa8f19ae17ec9152c5e896d44d43708b17ac04c76ba4d0d3e53a6e24d58"
+        },
+        {
+          "name": "01. POPULACAO E DOMICÍLIOS.xlsx",
+          "sha256": "ed43f67621f9896a17b093f544929c353e637c541e9407e138f5d747d8951b79"
+        },
+        {
+          "name": "02. Revenda - Apartamento.xlsm",
+          "sha256": "92c35d28f824a25823281bbf47fc173cccba4f47ab529fcf91c8a561bf27b602"
+        },
+        {
+          "name": "02. SOCIODEMOGRAFIA.xlsm",
+          "sha256": "ff1b882ec1e756dca925d691ec3a6925c35e23bc113cca1f1c902c807aa558fc"
+        },
+        {
+          "name": "03. ABSORÇAO LANÇAMENTOS - Rolândia.xlsm",
+          "sha256": "02875ce01e0a880b552a7df6799e07262c0b1cac5d452d3055621bde143ce713"
+        },
+        {
+          "name": "03. Locação - Apartamento.xlsm",
+          "sha256": "dc682d25078e8fc71b301e4427963e30767e5b28504c02a3c6336222386ed3d2"
+        },
+        {
+          "name": "04. Área de Lazer - Z.I. Total.xlsx",
+          "sha256": "004df7012a7f939c59f878cba3b6fe351b821d8f3936d8510bb31e12b662a039"
+        },
+        {
+          "name": "05. Análise - Anúncios.xlsx",
+          "sha256": "4e42cd168abf722c2a65d97860888c9845ceb53899562d1e4a1f06190fbba8b9"
+        }
+      ],
+      "fixture": "src/features/corretor/lib/v3/__tests__/fixtures/rolandia-replay.json",
+      "fixtureSha256": "072ac6f9c4018772bcc7427de3a36f03aa9b3ca47be24511940b29d855fa86d7",
+      "expected": "docs/features/corretor-vocacionais/calibracao/automacao/rol.expected.json",
+      "studyName": "Brain_Vocacional_Vertical_Housi_Av. Castro Alves_Rolandia - PR_v1"
+    },
+    {
+      "id": "tol",
+      "city": "Toledo",
+      "uf": "PR",
+      "catalogCase": "V01",
+      "pptx": "Corretor_V3_Toledo/02_APRESENTACAO_SELECIONAR_DEPOIS/Brain_Vocacional_Vertical_Housi_Rua Raimundo Leonardi_VAP_03ago_12h.pptx",
+      "pptxSha256": "c0bbe30e8095cf81a01d898e531b330ad31dfba675db834ac7b0c62dd15b7a08",
+      "excel": "Corretor_V3_Toledo/01_PLANILHAS_SELECIONAR_TODAS",
+      "excelFiles": [
+        {
+          "name": "02. Revenda - Apartamento.xlsm",
+          "sha256": "901cd0b81232e62e178f832a2e2f28a2789643dd61bc1a7d0e12ff33f382588a"
+        },
+        {
+          "name": "02. SOCIODEMOGRAFIA 2 raios.xlsm",
+          "sha256": "8de1c129fe98fe3c4bcadfd75eb7804b1b576a025e3fe9f1773398141ccc764b"
+        },
+        {
+          "name": "03. ABSORCAO LANCAMENTOS - ZI.xlsm",
+          "sha256": "2aea9a15ae2778b1af4d83ee8eb0f9ad9154c44cda2f683589d91b7793a03bab"
+        },
+        {
+          "name": "03. ABSORCAO LANCAMENTOS -.xlsm",
+          "sha256": "05f60cc17e133688c25da2708a02e5d296b902a4cc54a1caa6ac545b2c1cf780"
+        },
+        {
+          "name": "03. Locacao - Apartamento.xlsm",
+          "sha256": "35098ab414f28b0d053be0566053012afe36c42c995ad4ce71801323cd3754b6"
+        },
+        {
+          "name": "04. Area de Lazer - Z.I. Total.xlsx",
+          "sha256": "1ad86f58da01397366574fc0fd05ad2130f7f3b56e855d91741de8253c775492"
+        },
+        {
+          "name": "1.CONSOLIDADA 1 KM.xlsm",
+          "sha256": "bbba286282791a9dfb9dab2b98a01abbcf9d73737a03400935b43eb6f9801727"
+        },
+        {
+          "name": "1.CONSOLIDADA 2 KM.xlsm",
+          "sha256": "7c5ede4ede0e4a77135401d528200278bbedabf607427f4147d69a3e638ff637"
+        },
+        {
+          "name": "1.Populacao de Domicilios.xlsx",
+          "sha256": "5f20c8dcd88d609bdd85fb43c305e6433eb74cb04e0fc406e25507d7572e8694"
+        },
+        {
+          "name": "2.Tabela Lacunas.xlsm",
+          "sha256": "0333d7eff6deab5ebf548c2a2d46593aa0d5ad7bd72c57d6fb6d2d2d554b4d90"
+        },
+        {
+          "name": "3. Area de Lazer.xlsx",
+          "sha256": "465b956684398615e07afc185d78e82b0bb98411061780e52f5c3545c3f0912f"
+        },
+        {
+          "name": "arbnb.xlsx",
+          "sha256": "fceee85b581eb718b86ba9285d54d35e525b97f5c2f50547bd6790a1db653cd1"
+        },
+        {
+          "name": "area de lazer.xlsx",
+          "sha256": "ee55c7448c4bc29127137f02248b4d8b38e343dc546c4e434e851bfd216e4b66"
+        }
+      ],
+      "fixture": "src/features/corretor/lib/v3/__tests__/fixtures/toledo-replay.json",
+      "fixtureSha256": "061e40dbba5a06e2938a963fee5086a66603410338b4bb8a7af8a9e36fa822d3",
+      "expected": "docs/features/corretor-vocacionais/calibracao/automacao/tol.expected.json",
+      "studyName": "Brain_Vocacional_Vertical_Housi_Rua Raimundo Leonardi_VAP_03ago_12h"
+    },
+    {
+      "id": "cj",
+      "city": "Campos do Jordão",
+      "uf": "SP",
+      "catalogCase": "V03",
+      "pptx": "Corretor_V3_Campos_do_Jordao/02_APRESENTACAO_SELECIONAR_DEPOIS/Brain_Vocacional_Vertical_Housi_Jardim Monte Bello_Campos do Jordao - SP_vAP_27jul.pptx",
+      "pptxSha256": "8a8cd47f305054ce9814dcabd75731850586e7a60572172698efc9600d7b88c4",
+      "excel": "Corretor_V3_Campos_do_Jordao/01_PLANILHAS_SELECIONAR_TODAS",
+      "excelFiles": [
+        {
+          "name": "05. Deslocamento (2ª moradia) - Até 1h.xlsx",
+          "sha256": "d0fdbdb95f9a1404cea80671084f0e86474552c26efb966b7952294f93ad2332"
+        },
+        {
+          "name": "05. Deslocamento (2ª moradia) - De 1h a 2h.xlsx",
+          "sha256": "13e71b8f5ce5c5fb571762a1b5cf0d469880329216c1b93bb4f042dd51dd6151"
+        },
+        {
+          "name": "05. Deslocamento (2ª moradia) - De 2h a 3h.xlsx",
+          "sha256": "f5a91416ce64b6c71e2d0b7a2ba966b9b9378f2b365f208cc2001a35feab77a3"
+        },
+        {
+          "name": "05. Deslocamento (2ª moradia) - De 3h a 4h (1).xlsx",
+          "sha256": "553342be757e7643aa97b79fda7db059fb3782c532f0a33eefb0e4991407b9d9"
+        },
+        {
+          "name": "05. Deslocamento (2ª moradia) - Total.xlsx",
+          "sha256": "ff5743b2bcf2d38a819877c38d987cdacb6ab1614470ab8911b7a22bcd6d2081"
+        },
+        {
+          "name": "Campos do Jordão_ABSORÇAO LANÇAMENTOS.xlsm",
+          "sha256": "6420e99242bc47bad0d52117c67d931d19c848dce0dc69c63326829f80556b2b"
+        },
+        {
+          "name": "Campos do Jordão_Consolidada - 4 Km-ok.xlsm",
+          "sha256": "0616fc22a874735bd6bcce7757eca2ad083fb2a73d0ffff80380e7fd18b22825"
+        },
+        {
+          "name": "Campos do Jordão_Consolidada - Fora da Z.I..xlsm",
+          "sha256": "3422e994abf4176814121f8996a6c1e705cdfe6f5d33c1eea86d17a1a04934f3"
+        },
+        {
+          "name": "Campos do Jordão_Consolidada.xlsm",
+          "sha256": "204298cf2a489764451d4f3029d00123a2e8fbfcb68ebf85e1df61061ab2cba8"
+        },
+        {
+          "name": "Campos do Jordão_POPULACAO E DOMICÍLIOS.xlsx",
+          "sha256": "e7c68877e6a68939a4da105b2050b266c1169a0c5e9d2ece4f4c22b1c9a8dec6"
+        },
+        {
+          "name": "Campos do Jordão_SOCIODEMOGRAFIA.xlsm",
+          "sha256": "183ea8a007a7c25b229c8dd8decf1bc78736088678e2c86f8ad0881898c2d390"
+        }
+      ],
+      "fixture": "src/features/corretor/lib/v3/__tests__/fixtures/cj-replay.json",
+      "fixtureSha256": "6ca5233244da4aef4112f9173db0b0c976652f1dbbedf4336f351b55c914aa6b",
+      "expected": "docs/features/corretor-vocacionais/calibracao/automacao/cj.expected.json",
+      "studyName": "Brain_Vocacional_Vertical_Housi_Jardim Monte Bello_Campos do Jordao - SP_vAP_27jul"
+    },
+    {
+      "id": "vap",
+      "city": "São José dos Campos",
+      "uf": "SP",
+      "catalogCase": "V04",
+      "pptx": "Corretor_V3_Sao_Jose_dos_Campos/02_APRESENTACAO_SELECIONAR_DEPOIS/Brain_Vocacional_Vertical_Housi_Rua Sebastiao F Oliveira-SP _VAP_03ago.pptx",
+      "pptxSha256": "5858dd71acf59ddf5475aa424d0101f97ed44c5ae9904e6924c5e2d6e42781d8",
+      "excel": "Corretor_V3_Sao_Jose_dos_Campos/01_PLANILHAS_SELECIONAR_TODAS",
+      "excelFiles": [
+        {
+          "name": "02. Revenda - Apartamento.xlsm",
+          "sha256": "0b55616a7e24c38708d68da118e27186c5b580d082c359af9292320b190af6e1"
+        },
+        {
+          "name": "02. SOCIODEMOGRAFIA 3 raios.xlsm",
+          "sha256": "3707e5616298e7a73384ac8e44ee08060ccd5361c9dbab909e4c2bb38428445c"
+        },
+        {
+          "name": "03. ABSORCAO LANCAMENTOS - - Z.I.xlsm",
+          "sha256": "151be1bb6a03ce0ef1da69e64f12150e94ad1a013bc05005725cc7dcfffa1bce"
+        },
+        {
+          "name": "03. ABSORCAO LANCAMENTOS -.xlsm",
+          "sha256": "8becea2cdd4d51ba576250ba3aac7e656f0005b3a99cef393933358c5df17ed8"
+        },
+        {
+          "name": "03. Locacao - Apartamento.xlsm",
+          "sha256": "f0a624db1d9334780c9739a854edf124c1a2416dc33be65186d6d7e3f9a26d72"
+        },
+        {
+          "name": "04. Area de Lazer - Z.I. Total.xlsx",
+          "sha256": "f38767a4aef8d7685cc59774310e0d3537e22bf4502de9b3454b3b592b0d7620"
+        },
+        {
+          "name": "1.Populacao de Domicilios.xlsx",
+          "sha256": "989f620a0f0fc36b5c1a0d5f9b8bae7444bab88167350a33b9463c580b1d6755"
+        },
+        {
+          "name": "CONSOLIDADA 4KM.xlsm",
+          "sha256": "045b44915237a6661f38bf33e401a4f6964619e01ac5096fa03c2d2fbdf23bd0"
+        },
+        {
+          "name": "CONSOLIDADA 6KM.xlsm",
+          "sha256": "c277fbceba790b766eecd88a6101525b13a1556eb216ee36aff89212f52093f3"
+        },
+        {
+          "name": "CONSOLIDADA COMPACTOS.xlsm",
+          "sha256": "609c5f3f0f441e1a65a60519d6e3fbfc2c287a6f0a55db1e67eaad8f50439c5b"
+        },
+        {
+          "name": "LACUNAS.xlsm",
+          "sha256": "3eefdd1345ef6c12febbb2f7cf27f8012920baef6c465f67ecea40e4aaa6e3ba"
+        },
+        {
+          "name": "areas de lazer.xlsx",
+          "sha256": "68dbc779843e011d95157ab89945bfc9cf90b47398692c5b5a92c7c2ea955e5a"
+        }
+      ],
+      "fixture": "src/features/corretor/lib/v3/__tests__/fixtures/sjc-vap-replay.json",
+      "fixtureSha256": "26835f2a51aa69dec8e1b2fca187303ec845601ae735307db4305cd2e1fc2404",
+      "expected": "docs/features/corretor-vocacionais/calibracao/automacao/vap.expected.json",
+      "studyName": "Brain_Vocacional_Vertical_Housi_Rua Sebastiao F Oliveira-SP _VAP_03ago"
+    },
+    {
+      "id": "v2",
+      "city": "São José dos Campos",
+      "uf": "SP",
+      "catalogCase": "V04",
+      "pptx": "Corretor_V3_Sao_Jose_dos_Campos/03_VERSAO_ANTERIOR_v2_31jul/Brain_Vocacional_Vertical_Housi_Rua Sebastiao F Oliveira-SP _v2.pptx",
+      "pptxSha256": "23fd641b3bfac438c75e18af916989ce848fd16a9ddffeee85426b797432e5d9",
+      "excel": "Corretor_V3_Sao_Jose_dos_Campos/01_PLANILHAS_SELECIONAR_TODAS",
+      "excelFiles": [
+        {
+          "name": "02. Revenda - Apartamento.xlsm",
+          "sha256": "0b55616a7e24c38708d68da118e27186c5b580d082c359af9292320b190af6e1"
+        },
+        {
+          "name": "02. SOCIODEMOGRAFIA 3 raios.xlsm",
+          "sha256": "3707e5616298e7a73384ac8e44ee08060ccd5361c9dbab909e4c2bb38428445c"
+        },
+        {
+          "name": "03. ABSORCAO LANCAMENTOS - - Z.I.xlsm",
+          "sha256": "151be1bb6a03ce0ef1da69e64f12150e94ad1a013bc05005725cc7dcfffa1bce"
+        },
+        {
+          "name": "03. ABSORCAO LANCAMENTOS -.xlsm",
+          "sha256": "8becea2cdd4d51ba576250ba3aac7e656f0005b3a99cef393933358c5df17ed8"
+        },
+        {
+          "name": "03. Locacao - Apartamento.xlsm",
+          "sha256": "f0a624db1d9334780c9739a854edf124c1a2416dc33be65186d6d7e3f9a26d72"
+        },
+        {
+          "name": "04. Area de Lazer - Z.I. Total.xlsx",
+          "sha256": "f38767a4aef8d7685cc59774310e0d3537e22bf4502de9b3454b3b592b0d7620"
+        },
+        {
+          "name": "1.Populacao de Domicilios.xlsx",
+          "sha256": "989f620a0f0fc36b5c1a0d5f9b8bae7444bab88167350a33b9463c580b1d6755"
+        },
+        {
+          "name": "CONSOLIDADA 4KM.xlsm",
+          "sha256": "045b44915237a6661f38bf33e401a4f6964619e01ac5096fa03c2d2fbdf23bd0"
+        },
+        {
+          "name": "CONSOLIDADA 6KM.xlsm",
+          "sha256": "c277fbceba790b766eecd88a6101525b13a1556eb216ee36aff89212f52093f3"
+        },
+        {
+          "name": "CONSOLIDADA COMPACTOS.xlsm",
+          "sha256": "609c5f3f0f441e1a65a60519d6e3fbfc2c287a6f0a55db1e67eaad8f50439c5b"
+        },
+        {
+          "name": "LACUNAS.xlsm",
+          "sha256": "3eefdd1345ef6c12febbb2f7cf27f8012920baef6c465f67ecea40e4aaa6e3ba"
+        },
+        {
+          "name": "areas de lazer.xlsx",
+          "sha256": "68dbc779843e011d95157ab89945bfc9cf90b47398692c5b5a92c7c2ea955e5a"
+        }
+      ],
+      "fixture": "src/features/corretor/lib/v3/__tests__/fixtures/sjc-v2-replay.json",
+      "fixtureSha256": "72b16250593ab5c1dc232c35324c815d61219b438b08f4a6f683819d54158bbf",
+      "expected": "docs/features/corretor-vocacionais/calibracao/automacao/v2.expected.json",
+      "studyName": "Brain_Vocacional_Vertical_Housi_Rua Sebastiao F Oliveira-SP _v2"
+    }
+  ]
+}

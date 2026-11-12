@@ -1,0 +1,57 @@
+/* Capas livres: fundação SE v0.1, sem alterar a arte do preset metropolitano. */
+.panorama-custom-cover,.panorama-custom-territory {
+  display:flex; flex-direction:column; height:100%; width:100%; box-sizing:border-box;
+  padding:3.4cqw 6cqw 3cqw; color:var(--gb-tinta); background:var(--gb-papel);
+  font-family:var(--gb-fonte); position:relative;
+}
+.panorama-custom-cover::before {
+  content:""; position:absolute; inset:0 0 auto; height:.65cqw; background:var(--gb-oliva-900);
+}
+.panorama-custom-cover header,.panorama-custom-cover footer,.panorama-custom-territory footer {
+  display:flex; align-items:center; justify-content:space-between; gap:3cqw; flex-shrink:0;
+}
+.panorama-custom-cover header { color:var(--gb-texto-2); font-size:1.2cqw; }
+.panorama-custom-cover header strong { font:600 1.3cqw var(--gb-fonte-mono); color:var(--gb-oliva-700); }
+.panorama-custom-cover header i { margin:0 .6cqw; font-style:normal; color:var(--gb-borda); }
+.panorama-custom-cover main {
+  display:flex; flex:1; min-height:0; flex-direction:column; align-items:center; justify-content:center;
+  width:100%; text-align:center; padding:2cqw 0;
+}
+.panorama-custom-eyebrow { margin:0; color:var(--gb-oliva-700); font:500 1.15cqw var(--gb-fonte-mono); letter-spacing:.13em; text-transform:uppercase; }
+.panorama-custom-cover h1 {
+  margin:1.7cqw 0 0; max-width:78cqw; font:600 5.8cqw/1.06 var(--gb-fonte)!important;
+  letter-spacing:-.025em; text-wrap:balance; overflow-wrap:anywhere;
+}
+.panorama-custom-cover[data-cover-size="large"] h1 { font-size:4.7cqw!important; }
+.panorama-custom-cover[data-cover-size="medium"] h1 { font-size:3.5cqw!important; }
+.panorama-custom-cover[data-cover-size="small"] h1 { font-size:2.7cqw!important; }
+.panorama-custom-cover-accent { display:block; width:6cqw; height:.45cqw; margin:2cqw 0; background:var(--gb-amarelo-400); flex-shrink:0; }
+.panorama-custom-cover-cities { display:flex; justify-content:center; flex-wrap:wrap; gap:1cqw 2.4cqw; width:100%; padding:0; margin:0; list-style:none; }
+.panorama-custom-cover-cities li { flex:0 1 21cqw; min-width:0; text-align:center; font:600 2cqw/1.25 var(--gb-fonte); text-wrap:balance; overflow-wrap:anywhere; }
+.panorama-custom-cover-cities[data-count="4"] li { flex-basis:30cqw; }
+.panorama-custom-cover-count { margin:0; font:500 2.1cqw/1.3 var(--gb-fonte); color:var(--gb-oliva-700); }
+.panorama-custom-cover-count span { padding:0 .65cqw; }
+.panorama-custom-cover-closing { display:flex; align-items:center; flex-direction:column; gap:.55cqw; margin-top:3cqw; }
+.panorama-custom-cover-closing>span { color:var(--gb-texto-3); font:500 .9cqw var(--gb-fonte-mono); text-transform:uppercase; letter-spacing:.1em; }
+.panorama-custom-cover-closing strong { font:600 2.1cqw var(--gb-fonte)!important; color:var(--gb-oliva-900); }
+.panorama-custom-cover footer,.panorama-custom-territory footer {
+  border-top:1px solid var(--gb-borda); padding-top:1.1cqw; color:var(--gb-texto-3); font-size:.95cqw; line-height:1.35;
+}
+.panorama-custom-cover footer>span:last-child,.panorama-custom-territory footer>span:last-child { text-align:right; }
+.panorama-custom-cover footer>span span,.panorama-custom-territory footer>span span { display:block; color:var(--gb-oliva-700); font-weight:600; }
+.panorama-custom-territory { background:var(--gb-superficie); }
+.panorama-custom-territory header { text-align:center; flex-shrink:0; }
+.panorama-custom-territory h2 { margin:1cqw 0 .8cqw; font:600 3.5cqw/1.1 var(--gb-fonte)!important; letter-spacing:-.025em; }
+.panorama-custom-territory header>p:last-child { margin:0; font-size:1.3cqw; color:var(--gb-texto-2); }
+.panorama-custom-territory main { display:flex; flex:1; min-height:0; align-items:center; justify-content:center; padding:2.5cqw 0; }
+.panorama-custom-territory ul { display:flex; justify-content:center; flex-wrap:wrap; gap:1.2cqw; padding:0; margin:0; list-style:none; width:100%; }
+.panorama-custom-territory li {
+  box-sizing:border-box; flex:0 0 calc((100% - (var(--territory-columns) - 1)*1.2cqw)/var(--territory-columns));
+  max-width:60cqw; min-width:0; min-height:7.2cqw; padding:1.15cqw 1.25cqw; background:var(--gb-papel);
+  display:flex; align-items:center; justify-content:center; flex-direction:column; gap:.6cqw; text-align:center;
+}
+.panorama-custom-city-index { font:500 .9cqw var(--gb-fonte-mono); letter-spacing:.1em; color:var(--gb-texto-3); }
+.panorama-custom-territory li strong { font:600 2.2cqw/1.22 var(--gb-fonte)!important; color:var(--gb-oliva-900); text-wrap:balance; overflow-wrap:anywhere; }
+.panorama-custom-territory[data-density="dense"] li { min-height:6cqw; padding:.8cqw 1.1cqw; }
+.panorama-custom-territory[data-density="dense"] li strong { font-size:1.6cqw!important; }
+.panorama-custom-territory[data-long-names="true"] li strong { font-size:1.55cqw!important; }

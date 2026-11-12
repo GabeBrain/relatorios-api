@@ -74,6 +74,8 @@ export function buildCompaniesWorkbook(input: CompaniesExportInput, xlsx: XlsxMo
       [
         ['Município', `${input.municipality.name}/${input.municipality.uf}`],
         ['Competência', formatCompetencia(input.meta.competencia)],
+        ['Competência solicitada', formatCompetencia(input.meta.targetCompetencia)],
+        ['Disponibilidade', input.meta.competencia < input.meta.targetCompetencia ? 'Períodos mais recentes indisponíveis no acesso atual; competência anterior utilizada.' : 'Competência solicitada disponível.'],
         ['Fonte', input.meta.source],
         ['Versão da metodologia', input.meta.methodologyVersion],
         ['Percentuais', 'Cada célula é % sobre o total do próprio setor; a coluna Total é % do município.'],
@@ -136,7 +138,8 @@ export function buildCompaniesSvg(input: CompaniesExportInput): string {
   const [header, ...body] = table;
   const columns = header.length;
   const width = COL_LABEL + (columns - 1) * COL_VALUE + 48;
-  const height = HEADER_HEIGHT + (body.length + 1) * ROW_HEIGHT + 32;
+  const isFallback = input.meta.competencia < input.meta.targetCompetencia;
+  const height = HEADER_HEIGHT + (body.length + 1) * ROW_HEIGHT + (isFallback ? 52 : 32);
   const x = (index: number) => 24 + (index === 0 ? 0 : COL_LABEL + (index - 1) * COL_VALUE);
   const esc = (value: string) => value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   const cellText = (value: string | number, index: number) =>
@@ -147,6 +150,7 @@ export function buildCompaniesSvg(input: CompaniesExportInput): string {
     `<text x="24" y="30" font-family="Archivo, Arial, sans-serif" font-size="16" font-weight="600" fill="#1f2a14">Macro setor × porte — ${esc(input.municipality.name)}/${esc(input.municipality.uf)}</text>`,
     `<text x="24" y="50" font-family="Archivo, Arial, sans-serif" font-size="11" fill="#6b7280">Competência ${esc(formatCompetencia(input.meta.competencia))} · ${esc(input.meta.source)}</text>`,
   );
+  if (isFallback) lines.push(`<text x="24" y="${height - 14}" font-family="Archivo, Arial, sans-serif" font-size="11" fill="#6b7280">Períodos mais recentes indisponíveis no acesso atual. Competência solicitada: ${esc(formatCompetencia(input.meta.targetCompetencia))}.</text>`);
 
   header.forEach((value, index) => {
     lines.push(

@@ -1,0 +1,553 @@
+{
+  "summary": {
+    "candidatas": 74,
+    "leituras": 86,
+    "achados": 8,
+    "tabelas": "41/45",
+    "acertos": {
+      "fonte": {
+        "comparados": 10,
+        "batem": 4
+      },
+      "cruzamentos": {
+        "feitos": 4,
+        "batem": 4
+      }
+    }
+  },
+  "findings": [
+    {
+      "id": "structure",
+      "type": "STRUCTURE_MISSING",
+      "section": "ESTRUTURA",
+      "slideRef": "—",
+      "title": "Checklist estrutural (1 ausente(s) · slide final a conferir)",
+      "detail": "Cobertura por título e texto do slide, fora do sumário. Itens “a conferir” são mapas/prints: o conteúdo pode estar dentro da imagem — confirme visualmente antes de tratar como ausência. Slide final s107 sem conteúdo detectável; confirme visualmente antes de tratar como ausência.",
+      "ok": false,
+      "viz": {
+        "kind": "text",
+        "checklist": [
+          {
+            "label": "1.1 — Endereço",
+            "status": "ok"
+          },
+          {
+            "label": "1.2 — Latitude/longitude",
+            "status": "ok"
+          },
+          {
+            "label": "1.3 — Área do terreno",
+            "status": "ok"
+          },
+          {
+            "label": "1.4 — Acessos",
+            "status": "ok"
+          },
+          {
+            "label": "1.5 — Entorno varejo/serviços",
+            "status": "ok"
+          },
+          {
+            "label": "1.6 — Entorno revendas",
+            "status": "ok"
+          },
+          {
+            "label": "1.7 — Mapeamento físico",
+            "status": "ok"
+          },
+          {
+            "label": "1.9 — Distância ao centro",
+            "status": "ok"
+          },
+          {
+            "label": "2.1 — Dados cidade/estado/Brasil",
+            "status": "ok"
+          },
+          {
+            "label": "2.2 — Variação da população",
+            "status": "ok"
+          },
+          {
+            "label": "2.3 — Variação dos domicílios",
+            "status": "ok"
+          },
+          {
+            "label": "2.4 — População por renda",
+            "status": "ok"
+          },
+          {
+            "label": "2.4.1 — Mapa de densidade populacional",
+            "status": "ok"
+          },
+          {
+            "label": "2.5 — Domicílios por renda",
+            "status": "ok"
+          },
+          {
+            "label": "2.6 — Domicílios por moradores",
+            "status": "ok"
+          },
+          {
+            "label": "2.5.1 — Mapa de renda",
+            "status": "ok"
+          },
+          {
+            "label": "2.7 — Domicílios por tipo",
+            "status": "ok"
+          },
+          {
+            "label": "2.7.1 — Mapa de verticalização",
+            "status": "ok"
+          },
+          {
+            "label": "2.8 — Ocupação/propriedade",
+            "status": "ok"
+          },
+          {
+            "label": "2.8.1 — Mapa de propriedade",
+            "status": "ok"
+          },
+          {
+            "label": "3.1 — Absorção Z.I. total",
+            "status": "ok"
+          },
+          {
+            "label": "3.1.1 — Cenários de absorção",
+            "status": "ok"
+          },
+          {
+            "label": "4.1 — Mapa de localização",
+            "status": "ok"
+          },
+          {
+            "label": "4.2 — Mapa R$/m²",
+            "status": "ok"
+          },
+          {
+            "label": "4.3 — Mapa de estoque",
+            "status": "ok"
+          },
+          {
+            "label": "4.4 — Mapa de área média",
+            "status": "ok"
+          },
+          {
+            "label": "4.5 — Consolidada",
+            "status": "ok"
+          },
+          {
+            "label": "4.6 — Oferta por padrão",
+            "status": "ok"
+          },
+          {
+            "label": "4.7 — Oferta por ano",
+            "status": "ok"
+          },
+          {
+            "label": "4.8 — Oferta por tipologia",
+            "status": "ok"
+          },
+          {
+            "label": "4.9 — Preços por tipologia",
+            "status": "ok"
+          },
+          {
+            "label": "4.10 — Preços por padrão",
+            "status": "ok"
+          },
+          {
+            "label": "5.1 — Lacunas tipologia × metragem",
+            "status": "ok"
+          },
+          {
+            "label": "5.2 — Lacunas tipologia × preço",
+            "status": "ok"
+          },
+          {
+            "label": "5.3 — Lacunas preço × metragem",
+            "status": "ok"
+          },
+          {
+            "label": "6 — Fichas técnicas",
+            "status": "ok"
+          },
+          {
+            "label": "7.1 — Futuros lançamentos",
+            "status": "missing"
+          },
+          {
+            "label": "8.1 — Revenda",
+            "status": "ok"
+          },
+          {
+            "label": "8.2 — Revenda por bairro",
+            "status": "ok"
+          },
+          {
+            "label": "8.3 — Revenda por tipologia",
+            "status": "ok"
+          },
+          {
+            "label": "8.4 — Ticket de revenda",
+            "status": "ok"
+          },
+          {
+            "label": "Slide final s107 sem conteúdo detectável",
+            "status": "na"
+          }
+        ]
+      }
+    },
+    {
+      "id": "source-31-domicilios por tipo-ate 4 km-percentual",
+      "type": "SOURCE_CROSSCHECK",
+      "section": "SOCIO",
+      "slideRef": "s31",
+      "title": "Valor diverge da planilha-fonte — Até 4 km",
+      "detail": "Verticalização de Até 4 km: o slide mostra 4,3%, mas a planilha registra 10,46% (10,5% na precisão do slide). A diferença de 6,2 p.p. não se explica por arredondamento. Origem: 02. SOCIODEMOGRAFIA 3 raios.xlsm › Dom.p Tipo › linha 7.",
+      "confidence": 1,
+      "origem": "DET",
+      "viz": {
+        "kind": "sidebyside",
+        "leftLabel": "Slide 31",
+        "rightLabel": "02. SOCIODEMOGRAFIA 3 raios.xlsm › Dom.p Tipo › linha 7",
+        "rows": [
+          {
+            "label": "Até 4 km",
+            "left": "4,3%",
+            "right": "10,46%",
+            "mismatch": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "source-31-domicilios por tipo-sao jose dos campos-percentual",
+      "type": "SOURCE_CROSSCHECK",
+      "section": "SOCIO",
+      "slideRef": "s31, s32",
+      "title": "Valor diverge da planilha-fonte — São José dos Campos",
+      "detail": "Verticalização de São José dos Campos: o slide mostra 5,7%, mas a planilha registra 28,85% (28,9% na precisão do slide). A diferença de 23,2 p.p. não se explica por arredondamento. Origem: 02. SOCIODEMOGRAFIA 3 raios.xlsm › Dom.p Tipo › linha 7. O mesmo valor aparece em s31, s32: se o deck está consistente nele, confira se não é a planilha que está desatualizada. Origens: 02..",
+      "confidence": 1,
+      "origem": "DET",
+      "viz": {
+        "kind": "sidebyside",
+        "leftLabel": "Slides s31, s32",
+        "rightLabel": "02. SOCIODEMOGRAFIA 3 raios.xlsm › Dom.p Tipo › linha 7",
+        "rows": [
+          {
+            "label": "São José dos Campos",
+            "left": "5,7%",
+            "right": "28,85%",
+            "mismatch": true
+          },
+          {
+            "label": "São José dos Campos",
+            "left": "5,7%",
+            "right": "28,85%",
+            "mismatch": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "source-31-domicilios por tipo-ate 2 km-percentual",
+      "type": "SOURCE_CROSSCHECK",
+      "section": "SOCIO",
+      "slideRef": "s31, s32",
+      "title": "Valor diverge da planilha-fonte — Até 2 km",
+      "detail": "Verticalização de Até 2 km: o slide mostra 1,7%, mas a planilha registra 15,92% (15,9% na precisão do slide). A diferença de 14,2 p.p. não se explica por arredondamento. Origem: 02. SOCIODEMOGRAFIA 3 raios.xlsm › Dom.p Tipo › linha 7. O mesmo valor aparece em s31, s32: se o deck está consistente nele, confira se não é a planilha que está desatualizada. Origens: 02..",
+      "confidence": 1,
+      "origem": "DET",
+      "viz": {
+        "kind": "sidebyside",
+        "leftLabel": "Slides s31, s32",
+        "rightLabel": "02. SOCIODEMOGRAFIA 3 raios.xlsm › Dom.p Tipo › linha 7",
+        "rows": [
+          {
+            "label": "Até 2 km",
+            "left": "1,7%",
+            "right": "15,92%",
+            "mismatch": true
+          },
+          {
+            "label": "Até 2 km",
+            "left": "1,7%",
+            "right": "15,92%",
+            "mismatch": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "source-22-domicilios-brasil-unidade-domicilios",
+      "type": "SOURCE_CROSSCHECK",
+      "section": "SOCIO",
+      "slideRef": "s22",
+      "title": "Unidade trocada no slide — Brasil",
+      "detail": "O número 75.298.796 está correto, mas o slide o rotula como habitantes (hab.); na planilha ele é de domicílios (dom.). Corrija só a unidade. Origem: 1.Populacao de Domicilios.xlsx › Domicilios › linha 9.",
+      "confidence": 1,
+      "origem": "DET",
+      "viz": {
+        "kind": "sidebyside",
+        "leftLabel": "Slide 22",
+        "rightLabel": "1.Populacao de Domicilios.xlsx › Domicilios › linha 9",
+        "rows": [
+          {
+            "label": "Brasil · unidade",
+            "left": "75.298.796 hab.",
+            "right": "75.298.796 dom.",
+            "mismatch": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "iavis-sum-751b3f8326-0",
+      "type": "ABSOLUTE_SUM",
+      "section": "SOCIO",
+      "slideRef": "s26",
+      "title": "Tabela não fecha no total (Faixas de Renda)",
+      "detail": "Todas as 5 colunas conferidas ficam cerca de 7,9% abaixo do total declarado: provável linha ou faixa omitida da tabela.. Números lidos da imagem do slide 26 (relido no gpt-4o; as duas leituras discordam entre si). Todas as colunas ficam abaixo do total na mesma proporção: isso não depende de um dígito lido. Confira se falta uma faixa ou linha na tabela.",
+      "ok": false,
+      "viz": {
+        "kind": "table",
+        "table": {
+          "title": "Faixas de Renda",
+          "columns": [
+            "Faixas de Renda",
+            "Nº Dom.",
+            "%",
+            "Nº Dom.",
+            "%",
+            "Nº Dom.",
+            "%",
+            "Nº Dom.",
+            "%",
+            "Nº Dom.",
+            "%"
+          ],
+          "rows": [
+            [
+              "Acima de R$36.511,01",
+              463364,
+              2.9,
+              9706,
+              3.9,
+              55,
+              0.7,
+              220,
+              0.7,
+              525,
+              1.1
+            ],
+            [
+              "R$ 27.320,01 a R$ 36.511,00",
+              353378,
+              2.2,
+              6975,
+              2.8,
+              90,
+              1.2,
+              398,
+              1.3,
+              700,
+              1.5
+            ],
+            [
+              "R$ 20.983,01 a R$ 27.320,00",
+              480980,
+              3,
+              9195,
+              3.7,
+              148,
+              1.9,
+              645,
+              2,
+              1073,
+              2.3
+            ],
+            [
+              "R$ 17.147,01 a R$ 20.983,00",
+              496388,
+              3.1,
+              9201,
+              3.7,
+              171,
+              2.2,
+              749,
+              2.4,
+              1203,
+              2.6
+            ],
+            [
+              "R$ 14.590,01 a R$ 17.147,00",
+              489125,
+              3,
+              8855,
+              3.6,
+              185,
+              2.4,
+              804,
+              2.5,
+              1251,
+              2.7
+            ],
+            [
+              "R$ 10.755,01 a R$ 14.590,00",
+              1157362,
+              7.1,
+              20253,
+              8.2,
+              477,
+              6.1,
+              2063,
+              6.5,
+              3127,
+              6.8
+            ],
+            [
+              "R$ 7.716,01 a R$ 10.755,00",
+              1631073,
+              10,
+              27269,
+              11,
+              739,
+              9.5,
+              3178,
+              10,
+              4673,
+              10.2
+            ],
+            [
+              "Abaixo de R$ 7.716,00",
+              9947578,
+              61.2,
+              136615,
+              55.1,
+              5296,
+              68.2,
+              21130,
+              66.6,
+              29609,
+              64.6
+            ]
+          ],
+          "totals": [
+            "TOTAL",
+            16256029,
+            100,
+            247953,
+            100,
+            7760,
+            100,
+            31738,
+            100,
+            45835,
+            100
+          ],
+          "colKinds": [
+            "label",
+            "count",
+            "share",
+            "count",
+            "share",
+            "count",
+            "share",
+            "count",
+            "share",
+            "count",
+            "share"
+          ],
+          "totalKind": "sum",
+          "shareOf": {
+            "2": 1,
+            "4": 3,
+            "6": 5,
+            "8": 7,
+            "10": 9
+          }
+        },
+        "badColumns": [
+          1,
+          3,
+          5,
+          7,
+          9
+        ],
+        "badRows": [],
+        "notes": [
+          "Todas as 5 colunas conferidas ficam cerca de 7,9% abaixo do total declarado: provável linha ou faixa omitida da tabela.",
+          "Coluna «Nº Dom.»: soma 15019248 ≠ total 16256029 — 463.364 + 353.378 + 480.980 + 496.388 + 489.125 + 1.157.362 + 1.631.073 + 9.947.578 = 15.019.248, diferença de 1.236.781",
+          "Coluna «Nº Dom.»: soma 228069 ≠ total 247953 — 9.706 + 6.975 + 9.195 + 9.201 + 8.855 + 20.253 + 27.269 + 136.615 = 228.069, diferença de 19.884",
+          "Coluna «Nº Dom.»: soma 7161 ≠ total 7760 — 55 + 90 + 148 + 171 + 185 + 477 + 739 + 5.296 = 7.161, diferença de 599",
+          "Coluna «Nº Dom.»: soma 29187 ≠ total 31738 — 220 + 398 + 645 + 749 + 804 + 2.063 + 3.178 + 21.130 = 29.187, diferença de 2.551",
+          "Coluna «Nº Dom.»: soma 42161 ≠ total 45835 — 525 + 700 + 1.073 + 1.203 + 1.251 + 3.127 + 4.673 + 29.609 = 42.161, diferença de 3.674"
+        ],
+        "omittedBand": true
+      },
+      "evidenceSha1": "751b3f832689bf7d933034d4b36525459a890559",
+      "escalated": false,
+      "confidence": 2,
+      "origem": "IA_visao"
+    },
+    {
+      "id": "iavis-labeltypo-8d48c12f61",
+      "type": "SPELLING",
+      "section": "LACUNAS",
+      "slideRef": "s60",
+      "title": "Erro de digitação em rótulo de faixa («Arté 35 m²», «Arté 35 m²»)",
+      "detail": "«Arté» parece erro de digitação de «Até»; «Arté» parece erro de digitação de «Até».",
+      "ok": false,
+      "origem": "IA_visao",
+      "confidence": 2,
+      "viz": {
+        "kind": "table",
+        "table": {
+          "title": "Formato",
+          "columns": [
+            "Onde",
+            "Texto na imagem",
+            "Inconsistência"
+          ],
+          "rows": [
+            [
+              "rótulo de faixa",
+              "Arté 35 m²",
+              "«Arté» parece erro de digitação de «Até»"
+            ],
+            [
+              "rótulo de faixa",
+              "Arté 35 m²",
+              "«Arté» parece erro de digitação de «Até»"
+            ]
+          ]
+        },
+        "badRows": [
+          0,
+          1
+        ],
+        "notes": [
+          "rótulo de faixa: «Arté 35 m²» — «Arté» parece erro de digitação de «Até»",
+          "rótulo de faixa: «Arté 35 m²» — «Arté» parece erro de digitação de «Até»"
+        ]
+      },
+      "evidenceSha1": "8d48c12f61492db539ee435b6af63eac33707b6d"
+    },
+    {
+      "id": "vision-unsafe-sums",
+      "type": "IMAGE_NOT_READ",
+      "section": "GLOBAL",
+      "slideRef": "s44",
+      "title": "Tabelas-imagem sem conferência segura (2 slides)",
+      "detail": "A leitura destas tabelas não permitiu conferir as somas com segurança (totais não alinhados às colunas, leituras discordantes ou incoerentes): s44, s61. Não é acusação de erro; confira manualmente se forem críticas.",
+      "ok": false,
+      "confidence": 3,
+      "origem": "IA_visao",
+      "viz": {
+        "kind": "text",
+        "evidence": "s44, s61"
+      }
+    }
+  ]
+}

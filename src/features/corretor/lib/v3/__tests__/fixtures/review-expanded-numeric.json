@@ -1,0 +1,330 @@
+{
+  "method": "Transcrição manual conferida nos PNG em 14/10/2026; cálculo offline, não saída OCR",
+  "cases": [
+    {
+      "id": "vap-renda-s28",
+      "path": ".local-inputs/review-20261013/vap-s28.png",
+      "sha256": "da4b7711b2f3a1cde164e06208b3234f487755b170e756689e7a4d456a115900",
+      "columns": [
+        "SP",
+        "São José dos Campos",
+        "Até 2 km",
+        "Até 4 km",
+        "Até 6 km"
+      ],
+      "rows": [
+        [
+          463364,
+          9706,
+          55,
+          220,
+          525
+        ],
+        [
+          353378,
+          6975,
+          90,
+          398,
+          700
+        ],
+        [
+          480980,
+          9195,
+          148,
+          645,
+          1073
+        ],
+        [
+          496388,
+          9201,
+          171,
+          749,
+          1203
+        ],
+        [
+          489125,
+          8855,
+          185,
+          804,
+          1251
+        ],
+        [
+          1157362,
+          20253,
+          477,
+          2063,
+          3127
+        ],
+        [
+          1631073,
+          27269,
+          739,
+          3178,
+          4673
+        ],
+        [
+          9947578,
+          136615,
+          5296,
+          21130,
+          29609
+        ]
+      ],
+      "totals": [
+        16256029,
+        247953,
+        7760,
+        31738,
+        45835
+      ],
+      "expectedSums": [
+        15019248,
+        228069,
+        7161,
+        29187,
+        42161
+      ],
+      "limitation": "Divergência entre oito linhas visíveis e total. Não determina total correto, origem da diferença ou célula Excel responsável. Último SP 9.947.578, não 4.947.578 do cache."
+    },
+    {
+      "id": "curitiba-absorcao-s37",
+      "path": ".local-inputs/audit-20261013/curitiba-sum.png",
+      "sha256": "005155df89436275df9095e08a383f18b97e0ccc3ff42b967149a3e5b80c7d81",
+      "columns": [
+        "BASE20",
+        "BASE40",
+        "BASE60",
+        "BASE80",
+        "BASE100",
+        "OTIMISTA20",
+        "OTIMISTA40",
+        "OTIMISTA60",
+        "OTIMISTA80",
+        "OTIMISTA100"
+      ],
+      "rows": [
+        [
+          235,
+          471,
+          706,
+          941,
+          1176,
+          284,
+          567,
+          851,
+          1135,
+          1418
+        ],
+        [
+          50,
+          100,
+          150,
+          200,
+          250,
+          60,
+          120,
+          181,
+          241,
+          301
+        ],
+        [
+          124,
+          247,
+          371,
+          495,
+          619,
+          149,
+          298,
+          448,
+          597,
+          746
+        ],
+        [
+          139,
+          278,
+          416,
+          555,
+          694,
+          167,
+          335,
+          502,
+          670,
+          837
+        ],
+        [
+          108,
+          215,
+          323,
+          431,
+          539,
+          129,
+          258,
+          388,
+          517,
+          646
+        ],
+        [
+          81,
+          162,
+          243,
+          324,
+          406,
+          97,
+          194,
+          290,
+          387,
+          484
+        ],
+        [
+          137,
+          273,
+          410,
+          547,
+          683,
+          162,
+          324,
+          486,
+          648,
+          810
+        ],
+        [
+          141,
+          282,
+          423,
+          564,
+          704,
+          167,
+          334,
+          501,
+          668,
+          835
+        ],
+        [
+          80,
+          161,
+          241,
+          321,
+          402,
+          95,
+          190,
+          286,
+          381,
+          476
+        ],
+        [
+          102,
+          204,
+          307,
+          409,
+          511,
+          120,
+          240,
+          361,
+          481,
+          601
+        ]
+      ],
+      "totals": [
+        1399,
+        2798,
+        4197,
+        5596,
+        6996,
+        1670,
+        3339,
+        5009,
+        6679,
+        8348
+      ],
+      "expectedSums": [
+        1197,
+        2393,
+        3590,
+        4787,
+        5984,
+        1430,
+        2860,
+        4294,
+        5725,
+        7154
+      ],
+      "limitation": "Dez colunas divergentes no recorte, sem PPTX original pareado. Causa/faixa omitida permanece hipótese; não concluir erro metodológico."
+    },
+    {
+      "id": "ushome-oferta-recorte",
+      "path": ".local-inputs/audit-20261013/ushome-sum.png",
+      "sha256": "dcd1149dddb5bf1673c64375a3eb143cad191601c31638a3d7080722a5cd7801",
+      "columns": [
+        "Oferta lançada por empreendimento",
+        "Oferta atual por empreendimento"
+      ],
+      "rows": [
+        [
+          59,
+          3
+        ],
+        [
+          46,
+          15
+        ],
+        [
+          130,
+          20
+        ],
+        [
+          527,
+          79
+        ],
+        [
+          31,
+          4
+        ],
+        [
+          429,
+          102
+        ],
+        [
+          128,
+          37
+        ],
+        [
+          56,
+          13
+        ],
+        [
+          489,
+          118
+        ],
+        [
+          241,
+          5
+        ],
+        [
+          363,
+          207
+        ],
+        [
+          100,
+          21
+        ],
+        [
+          52,
+          33
+        ],
+        [
+          130,
+          62
+        ]
+      ],
+      "totals": [
+        13408,
+        2991
+      ],
+      "expectedSums": [
+        2781,
+        719
+      ],
+      "limitation": "Células mescladas contadas uma vez por empreendimento. Tabela pode continuar em outros slides; diferença do recorte não comprova erro do total global."
+    }
+  ]
+}

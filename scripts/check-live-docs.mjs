@@ -1,4 +1,6 @@
 import { execFileSync } from 'node:child_process';
+import { readdirSync, readFileSync, statSync } from 'node:fs';
+import { join } from 'node:path';
 
 const [base, head = 'HEAD'] = process.argv.slice(2);
 if (!base) {
@@ -29,6 +31,24 @@ if (changedFiles.some((file) => /^(src\/|supabase\/)/.test(file)) && liveDocs.si
 if (changedFiles.some((file) => /^(src\/features\/corretor\/|supabase\/functions\/(analyze-slide|analyze-table-image|analyze-ata-image)\/)/.test(file)) && !hasCorretorDoc) {
   failures.push('Corretor Vocacionais: atualize docs/features/corretor-vocacionais/LIVE_regras_corretor_vocacionais.md.');
 }
+// Higiene dos docs vivos: só avisa, nunca bloqueia (convenção em docs/projetos/README.md, seção Rotação).
+const LIVE_LIMIT = 120 * 1024;
+const warn = (message) => console.warn(`${process.env.GITHUB_ACTIONS ? '::warning::' : 'Aviso: '}${message}`);
+const listLiveDocs = (dir) => readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
+  const path = join(dir, entry.name);
+  if (entry.isDirectory()) return entry.name === 'historico' ? [] : listLiveDocs(path);
+  return /^LIVE_.*\.md$/.test(entry.name) ? [path] : [];
+});
+for (const file of listLiveDocs('docs')) {
+  const size = statSync(file).size;
+  if (size > LIVE_LIMIT) {
+    warn(/regras/.test(file)
+      ? `${file} tem ${Math.round(size / 1024)} KB: consolide as regras vigentes antes de mover versões antigas para historico/.`
+      : `${file} tem ${Math.round(size / 1024)} KB: mova entradas com mais de 7 dias, sem edição, para historico/.`);
+  }
+  if (!/^\s*# /.test(readFileSync(file, 'utf8'))) warn(`${file} tem conteúdo acima do título: entrada nova vai no topo de Desenvolvimentos.`);
+}
+
 if (failures.length) {
   console.error('Documentação viva pendente:\n- ' + failures.join('\n- '));
   process.exit(1);

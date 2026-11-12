@@ -1,0 +1,11 @@
+/* Fundação SE v0.1 limitada aos controles do recorte; o deck mantém a arte homologada. */
+.panorama-scope-page > section:first-of-type {
+  border-radius: var(--gb-raio);
+}
+.panorama-scope-page > section:first-of-type button {
+  border-radius: var(--gb-raio);
+}
+.panorama-scope-page > section:first-of-type button:focus-visible {
+  outline: 2px solid var(--gb-oliva-700);
+  outline-offset: 2px;
+}

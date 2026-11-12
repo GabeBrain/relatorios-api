@@ -1,0 +1,9 @@
+{
+  "source": "2026.06_PANORAMA_SAO_PAULO_VAP_13ago.pptx",
+  "sourceSha256": "1350f82cb1d9386487ca1a9aee110fb19cf3d6ea7cb40d4a0205025802d9939b",
+  "slide": 2,
+  "file": "about-template.png",
+  "sha256": "5a47c3401ed16fdb191bf5c4082861c42b94b0b7685e16d5263723c235042f9d",
+  "render": "PowerPoint COM, read-only, 1280x720, 2026-11-05",
+  "change": "Removed only the fixed quarter text shape from the in-memory slide. The original file was not saved. Quarter/year and coverage are rendered dynamically."
+}

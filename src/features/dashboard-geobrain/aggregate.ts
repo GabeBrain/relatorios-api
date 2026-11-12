@@ -33,7 +33,17 @@ function periodSortKey(p: string, g: Granularity): number {
 // ============ filter helpers ============
 
 function garageBucket(g: number): string { return g >= 4 ? '4+' : String(g); }
-function bedroomBucket(n: number): string { return n >= 4 ? '4+' : String(n); }
+export function bedroomBucket(n: number | null | undefined): string {
+  if (n == null || n === 0) return '0';
+  if (n === 5) return 'studio';
+  return n >= 4 ? '4+' : String(n);
+}
+
+export function bedroomLabel(bucket: string): string {
+  if (bucket === 'studio') return 'Studio';
+  if (bucket === '4+') return '4+ dorms';
+  return bucket === '1' ? '1 dorm' : `${bucket} dorms`;
+}
 
 // ---- faixas dinâmicas (Área Privativa / Preço-m²) ----
 
@@ -132,6 +142,7 @@ export function applyFilters(buildings: Building[], f: Filters): Building[] {
   const out: Building[] = [];
   for (const b of buildings) {
     if (f.status.length && !f.status.includes(b.status)) continue;
+    if (f.states.length && !f.states.includes(b.state)) continue;
     if (f.cities.length && !f.cities.includes(b.city)) continue;
     if (f.neighborhoods.length && !f.neighborhoods.includes(b.neighborhood)) continue;
     if (f.types.length && !f.types.includes(b.building_type)) continue;
@@ -177,6 +188,8 @@ export function latestPeriodInScope(buildings: Building[], f: Filters): string |
 export interface BubblePoint {
   id: string;
   name: string;
+  state: string;
+  city: string;
   neighborhood: string;
   standard: string;
   privateArea: number;
@@ -187,12 +200,12 @@ export interface BubblePoint {
   availability: number;
 }
 
-export function computePriceAreaBubbles(buildings: Building[], f: Filters, standard: string | null, neighborhood: string | null): BubblePoint[] {
+export function computePriceAreaBubbles(buildings: Building[], f: Filters, standard: string | null, geographicGroupBy: GeographicGroupBy, geographicValue: string | null): BubblePoint[] {
   const latest = latestPeriodInScope(buildings, f);
   if (!latest) return [];
   const points: BubblePoint[] = [];
   for (const b of buildings) {
-    if (neighborhood && b.neighborhood !== neighborhood) continue;
+    if (geographicValue && geographicGroupKey(geographicGroupBy, b) !== geographicValue) continue;
     for (const t of b.typologies) {
       const h = t.history.find((entry) => entry.period === latest && historyMatches(entry, f));
       const x = t.private_area;
@@ -205,6 +218,8 @@ export function computePriceAreaBubbles(buildings: Building[], f: Filters, stand
       points.push({
         id: `${b.building_id}-${t.typology_id}`,
         name: b.name,
+        state: b.state,
+        city: b.city,
         neighborhood: b.neighborhood,
         standard: currentStandard,
         privateArea: x,
@@ -433,7 +448,7 @@ export function computeOfertaPorDormitorio(buildings: Building[], f: Filters): C
   const keys = Array.from(acc.keys()).sort();
   return keys.map((k) => {
     const { est, vnd } = acc.get(k)!;
-    return { key: `${k} dorm${k === '1' ? '' : 's'}`, estoque: est, tempoEstoque: tempoFromIvv(est, vnd) };
+    return { key: bedroomLabel(k), estoque: est, tempoEstoque: tempoFromIvv(est, vnd) };
   });
 }
 
@@ -447,8 +462,22 @@ export function computeOfertaPorPadrao(buildings: Building[], f: Filters): Combo
 
 export interface RankRow { key: string; value: number; }
 
-export function rankBairrosPorIvv(buildings: Building[], f: Filters): RankRow[] {
-  const acc = tempoEstoqueByLatest(buildings, f, (b) => b.neighborhood);
+export type GeographicGroupBy = 'neighborhood' | 'state' | 'city';
+
+export const GEOGRAPHIC_GROUP_LABEL: Record<GeographicGroupBy, string> = {
+  neighborhood: 'Bairro',
+  state: 'UF',
+  city: 'Município',
+};
+
+function geographicGroupKey(groupBy: GeographicGroupBy, building: Building): string {
+  if (groupBy === 'state') return building.state;
+  if (groupBy === 'city') return building.city;
+  return building.neighborhood;
+}
+
+export function rankBairrosPorIvv(buildings: Building[], f: Filters, groupBy: GeographicGroupBy = 'neighborhood'): RankRow[] {
+  const acc = tempoEstoqueByLatest(buildings, f, (b) => geographicGroupKey(groupBy, b));
   const rows: RankRow[] = [];
   for (const [k, { est, vnd }] of acc) {
     const denom = est + vnd;
@@ -458,8 +487,8 @@ export function rankBairrosPorIvv(buildings: Building[], f: Filters): RankRow[] 
 }
 
 /** Estoque atual (unidades) por bairro no período mais recente do escopo filtrado. */
-export function rankBairrosPorEstoque(buildings: Building[], f: Filters): RankRow[] {
-  const acc = tempoEstoqueByLatest(buildings, f, (b) => b.neighborhood);
+export function rankBairrosPorEstoque(buildings: Building[], f: Filters, groupBy: GeographicGroupBy = 'neighborhood'): RankRow[] {
+  const acc = tempoEstoqueByLatest(buildings, f, (b) => geographicGroupKey(groupBy, b));
   const rows: RankRow[] = [];
   for (const [k, { est }] of acc) {
     if (est > 0) rows.push({ key: k, value: est });
@@ -467,8 +496,8 @@ export function rankBairrosPorEstoque(buildings: Building[], f: Filters): RankRo
   return rows.sort((a, b) => b.value - a.value);
 }
 
-export function rankBairrosPorTempoEstoque(buildings: Building[], f: Filters): RankRow[] {
-  const acc = tempoEstoqueByLatest(buildings, f, (b) => b.neighborhood);
+export function rankBairrosPorTempoEstoque(buildings: Building[], f: Filters, groupBy: GeographicGroupBy = 'neighborhood'): RankRow[] {
+  const acc = tempoEstoqueByLatest(buildings, f, (b) => geographicGroupKey(groupBy, b));
   const rows: RankRow[] = [];
   for (const [k, { est, vnd }] of acc) {
     const t = tempoFromIvv(est, vnd);
@@ -499,11 +528,11 @@ function avgLastPrice(buildings: Building[], f: Filters, field: 'price' | 'price
     .filter((r) => r.value > 0);
 }
 
-export function rankBairrosPorPrecoM2(buildings: Building[], f: Filters): RankRow[] {
-  return avgLastPrice(buildings, f, 'price_private_area', (b) => b.neighborhood).sort((a, b) => a.value - b.value);
+export function rankBairrosPorPrecoM2(buildings: Building[], f: Filters, groupBy: GeographicGroupBy = 'neighborhood'): RankRow[] {
+  return avgLastPrice(buildings, f, 'price_private_area', (b) => geographicGroupKey(groupBy, b)).sort((a, b) => a.value - b.value);
 }
-export function rankBairrosPorPrecoMedio(buildings: Building[], f: Filters): RankRow[] {
-  return avgLastPrice(buildings, f, 'price', (b) => b.neighborhood).sort((a, b) => a.value - b.value);
+export function rankBairrosPorPrecoMedio(buildings: Building[], f: Filters, groupBy: GeographicGroupBy = 'neighborhood'): RankRow[] {
+  return avgLastPrice(buildings, f, 'price', (b) => geographicGroupKey(groupBy, b)).sort((a, b) => a.value - b.value);
 }
 export function precoM2PorPadrao(buildings: Building[], f: Filters): RankRow[] {
   return avgLastPrice(buildings, f, 'price_private_area', (b, _t, h) => patternOf(h, b)).sort((a, b) => a.value - b.value);
@@ -521,7 +550,7 @@ export interface OpportunityMatrix {
   rowLabel: string;
 }
 
-export type OpportunityRowBy = 'neighborhood' | 'building_type' | 'standard';
+export type OpportunityRowBy = GeographicGroupBy | 'building_type' | 'standard';
 export type OpportunityColBy = 'bedroom' | 'standard';
 export type OpportunityGroupBy = OpportunityRowBy;
 
@@ -532,6 +561,8 @@ interface OpportunityOptions {
 
 const ROW_LABEL: Record<OpportunityRowBy, string> = {
   neighborhood: 'Bairro',
+  state: 'UF',
+  city: 'Município',
   building_type: 'Tipo',
   standard: 'Padrão',
 };
@@ -545,13 +576,12 @@ export function computeOpportunityMap(
     ? { rowBy: opts, colBy: 'bedroom' }
     : { rowBy: opts.rowBy ?? 'neighborhood', colBy: opts.colBy ?? 'bedroom' };
 
-  const bedroomKeys = ['0', '1', '2', '3', '4+'];
-  const bedroomLabel = (k: string) => (k === '4+' ? '4 dorms' : k === '1' ? '1 dorm' : `${k} dorms`);
+  const bedroomKeys = ['0', '1', '2', '3', '4+', 'studio'];
 
   const rowKeyFn = (b: Building, h: HistoryEntry) => {
     if (rowBy === 'building_type') return b.building_type;
     if (rowBy === 'standard') return patternOf(h, b);
-    return b.neighborhood;
+    return geographicGroupKey(rowBy, b);
   };
 
   const est = new Map<string, Map<string, number>>();
@@ -685,6 +715,7 @@ export function extractOptions(buildings: Building[]) {
   const s = <T,>() => new Set<T>();
   const years = s<string>();
   const status = s<string>();
+  const states = s<string>();
   const cities = s<string>();
   const neighborhoods = s<string>();
   const types = s<string>();
@@ -710,6 +741,7 @@ export function extractOptions(buildings: Building[]) {
       }
     }
     if (b.status) status.add(b.status);
+    if (b.state) states.add(b.state);
     if (b.city) cities.add(b.city);
     if (b.neighborhood) neighborhoods.add(b.neighborhood);
     if (b.building_type) types.add(b.building_type);
@@ -723,7 +755,10 @@ export function extractOptions(buildings: Building[]) {
   }
 
   const sortStr = (arr: string[]) => arr.sort((a, b) => a.localeCompare(b, 'pt-BR'));
-  const sortBucket = (arr: string[]) => arr.sort((a, b) => (a === '4+' ? 99 : parseInt(a)) - (b === '4+' ? 99 : parseInt(b)));
+  const sortBucket = (arr: string[]) => arr.sort((a, b) => {
+    const order = (value: string) => value === '4+' ? 4 : value === 'studio' ? 5 : parseInt(value, 10);
+    return order(a) - order(b);
+  });
 
   const MONTH_LABELS_BR = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
   const months = Array.from(monthsMap.entries())
@@ -737,6 +772,7 @@ export function extractOptions(buildings: Building[]) {
     years: sortStr(Array.from(years)).reverse(),
     months,
     status: sortStr(Array.from(status)),
+    states: sortStr(Array.from(states)),
     cities: sortStr(Array.from(cities)),
     neighborhoods: sortStr(Array.from(neighborhoods)),
     types: sortStr(Array.from(types)),

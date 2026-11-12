@@ -1,10 +1,13 @@
 import { Component, lazy, Suspense, type ReactNode } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
+import { BrowserRouter, Navigate, Route, Routes, useLocation, useParams } from 'react-router-dom';
+import { legacyStudyHref, studyHref, portfolioHref } from './features/corretor/lib/study-navigation';
+import GeobrainAccessProvider from './features/corretor/components/GeobrainAccessProvider';
 import { Toaster as Sonner } from '@/components/ui/sonner';
 import { Toaster } from '@/components/ui/toaster';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { AppLayout } from '@/components/layout/AppLayout';
+import { BrainLoadingState } from '@/components/feedback/BrainLoadingState';
 import { PanoramaExportGate } from './features/panorama-secovi-fiergs/components/PanoramaExportGate.tsx';
 import MapaLegado from './pages/MapaLegado.tsx';
 import Home from './pages/Home.tsx';
@@ -19,14 +22,27 @@ import ValidacaoFechamento from './pages/ValidacaoFechamento.tsx';
 // v1/v2 do corretor aposentadas (v3.3): rotas antigas redirecionam p/ /corretor.
 // O histórico da v1 é lido em modo somente-leitura dentro da própria /corretor
 // (LegacyV1Panel). Componentes v1 preservados no repo, fora do grafo do bundle.
+const CorretorCatalog = lazy(() => import('./features/corretor/pages/VerificationCatalog').then(m => ({ default: m.CatalogPage })));
 const CorretorV3Page = lazy(() => import('./features/corretor/pages/CorretorV3Page.tsx'));
+const CorretorProjectsPage = lazy(() => import('./features/corretor/pages/CorretorProjectsPage.tsx'));
+function CorretorEntry() {
+  const location = useLocation();
+  const params = new URLSearchParams(location.search), id = params.get('study');
+  return id ? <Navigate replace to={studyHref(id, 'revisao', params.get('carteira') ?? '', params.get('version') ?? undefined)} /> : <CorretorProjectsPage />;
+}
+function CorretorLegacyProject() { const { studyId } = useParams(); const location = useLocation(); return <Navigate replace to={studyId ? legacyStudyHref(studyId, new URLSearchParams(location.search)) : portfolioHref(location.search)} />; }
+function CorretorLegacyAnalysis() { const location = useLocation(); const params = new URLSearchParams(location.search), id = params.get('study'); return id ? <Navigate replace to={studyHref(id, 'revisao', params.get('carteira') ?? '', params.get('version') ?? undefined)} /> : <Navigate replace to={`/corretor/novo${location.search}`} />; }
 const CorretorReportPage = lazy(() => import('./features/corretor/pages/CorretorReportPage.tsx'));
 const CorretorCalibrationPage = lazy(() => import('./features/corretor/pages/CorretorCalibrationPage.tsx'));
 const AtualizadorVgvPage = lazy(() => import('./features/atualizador-vgv/AtualizadorVgvPage.tsx'));
+const RelatorioApiExcelPage = lazy(() => import('./pages/RelatorioApiExcel.tsx'));
 const RelatorioAeloPage = lazy(() => import('./pages/RelatorioAelo.tsx'));
 const PanoramaSecoviFiergsPage = lazy(() => import('./features/panorama-secovi-fiergs/pages/PanoramaSecoviFiergsPage.tsx'));
+const SpInstitutionalPage = lazy(() => import('./features/relatorios-institucionais/sp/SpInstitutionalPage'));
+const FortalezaInstitutionalPage = lazy(() => import('./features/relatorios-institucionais/fortaleza/FortalezaInstitutionalPage'));
 const EmpresasEmpregadosPage = lazy(() => import('./features/empresas-empregados/pages/EmpresasEmpregadosPage.tsx'));
 const SindusconCuritibaPage = lazy(() => import('./features/sinduscon-curitiba/pages/SindusconCuritibaPage.tsx'));
+const EstimativasPage = lazy(() => import('./features/estimativas-vendas/EstimativasPage.tsx'));
 
 class ErrorBoundary extends Component<{ children: ReactNode }, { error: Error | null }> {
   state = { error: null };
@@ -64,10 +80,10 @@ const App = () => (
       <Toaster />
       <Sonner richColors closeButton />
       <BrowserRouter>
-        <AppLayout>
+        <GeobrainAccessProvider><AppLayout>
           <PanoramaExportGate />
           <ErrorBoundary>
-            <Suspense fallback={<div className="p-6 text-sm text-muted-foreground">Carregando...</div>}>
+            <Suspense fallback={<div className="p-6"><BrainLoadingState variant="page" title="Carregando ferramenta Rebrain" /></div>}>
               <Routes>
                 <Route path="/" element={<Navigate to="/inicio" replace />} />
                 <Route path="/inicio" element={<Home />} />
@@ -75,18 +91,35 @@ const App = () => (
                 {/* Rebrain */}
                 <Route path="/rebrain/secovi" element={<TestesArquitetura />} />
                 <Route path="/rebrain/panorama-secovi-fiergs" element={<PanoramaSecoviFiergsPage />} />
+                <Route path="/rebrain/estimativas-vendas" element={<EstimativasPage />} />
+                <Route path="/rebrain/relatorios-institucionais/sp" element={<Suspense fallback={<div className="p-6"><BrainLoadingState variant="page" title="Carregando SP institucional" /></div>}><SpInstitutionalPage /></Suspense>} />
+                <Route path="/rebrain/relatorios-institucionais/fortaleza" element={<FortalezaInstitutionalPage />} />
                 <Route
                   path="/rebrain/aelo"
                   element={(
-                    <Suspense fallback={<div className="flex h-full items-center justify-center p-6 text-sm text-muted-foreground">Carregando o Relatório AELO...</div>}>
+                    <Suspense fallback={<div className="p-6"><BrainLoadingState variant="page" title="Carregando Relatório AELO" /></div>}>
                       <RelatorioAeloPage />
+                    </Suspense>
+                  )}
+                />
+                <Route
+                  path="/rebrain/relatorio-api-excel"
+                  element={(
+                    <Suspense fallback={<div className="flex h-full items-center justify-center p-6 text-sm text-muted-foreground">Carregando o Relatório API Excel...</div>}>
+                      <RelatorioApiExcelPage />
                     </Suspense>
                   )}
                 />
                 <Route path="/rebrain/validacao-fechamento" element={<ValidacaoFechamento />} />
                 <Route path="/rebrain/empresas-empregados" element={<EmpresasEmpregadosPage />} />
                 <Route path="/rebrain/sinduscon-curitiba" element={<SindusconCuritibaPage />} />
-                <Route path="/corretor" element={<CorretorV3Page />} />
+                <Route path="/corretor" element={<CorretorEntry />} />
+                <Route path="/corretor/projetos" element={<CorretorLegacyProject />} />
+                <Route path="/corretor/projetos/:studyId" element={<CorretorLegacyProject />} />
+                <Route path="/corretor/estudos/:studyId/:section" element={<CorretorProjectsPage />} />
+                <Route path="/corretor/verificacoes" element={<CorretorCatalog />} />
+                <Route path="/corretor/novo" element={<CorretorV3Page />} />
+                <Route path="/corretor/analise" element={<CorretorLegacyAnalysis />} />
                 <Route path="/corretor/calibracao" element={<CorretorCalibrationPage />} />
                 <Route path="/corretor/:id/relatorio" element={<CorretorReportPage />} />
                 <Route path="/atualizador-vgv" element={<AtualizadorVgvPage />} />
@@ -122,7 +155,7 @@ const App = () => (
               </Routes>
             </Suspense>
           </ErrorBoundary>
-        </AppLayout>
+        </AppLayout></GeobrainAccessProvider>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>

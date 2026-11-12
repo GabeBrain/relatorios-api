@@ -1,0 +1,50 @@
+/*
+ * Geobrain System Design — tokens v0.1 (09/10/2026)
+ * Fonte: SE/System Design/FUNDAMENTOS.md. Valores aproximados do site; validar com o manual.
+ * Copie este arquivo sem alterar. Mudanças entram primeiro em SE/System Design.
+ *
+ * Fontes: https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap
+ */
+:root {
+  /* Paleta */
+  --gb-oliva-900: #2E3820;
+  --gb-oliva-700: #4A5530;
+  --gb-verde-500: #6B944A;
+  --gb-amarelo-400: #F2D93B;
+  --gb-amarelo-200: #EFE58C;
+  --gb-nevoa: #E8EBE4;
+  --gb-papel: #F3F4EF;
+  --gb-tinta: #1D2116;
+
+  /* Apoio */
+  --gb-superficie: #FFFFFF;
+  --gb-borda: #C4CAB6;
+  --gb-divisor: #DADED2;
+  --gb-texto-2: #4F5644;
+  --gb-texto-3: #5B6448;
+  --gb-placeholder: #6F7A5E;
+  --gb-erro: #A3361F;
+  --gb-amarelo-hover: #E8CC24;
+
+  /* Efeitos */
+  --gb-foco-anel: 0 0 0 3px rgba(74, 85, 48, .18);
+  --gb-marcador-halo: 0 0 0 5px rgba(242, 217, 59, .25);
+  --gb-raio: 2px;
+  --gb-filete: 3px;
+
+  /* Tipografia */
+  --gb-fonte: 'Archivo', system-ui, sans-serif;
+  --gb-fonte-mono: 'JetBrains Mono', ui-monospace, monospace;
+  --gb-display: 600 48px/1.05 var(--gb-fonte);
+  --gb-h1: 600 40px/1.15 var(--gb-fonte);
+  --gb-titulo: 600 32px/1.2 var(--gb-fonte);
+  --gb-corpo: 400 15px/1.55 var(--gb-fonte);
+  --gb-rotulo: 600 13px/1.4 var(--gb-fonte);
+  --gb-dado: 400 12px/1.4 var(--gb-fonte-mono);
+  --gb-secao: 500 12px/1.4 var(--gb-fonte-mono);
+  --gb-rotulo-tecnico: 400 11px/1.4 var(--gb-fonte-mono);
+
+  /* Componentes */
+  --gb-campo-altura: 44px;
+  --gb-botao-altura: 48px;
+}

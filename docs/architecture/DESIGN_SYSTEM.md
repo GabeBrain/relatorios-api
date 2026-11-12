@@ -738,3 +738,8 @@ Skeletons complementam a reserva estrutural; não substituem a explicação da o
 | Cantos | Arredondados (12px base) — suave, moderno |
 | Fontes | Montserrat (autoridade) + Source Sans 3 (legibilidade) |
 | Dark mode | Suportado nativamente via classe `.dark` no `<html>` |
+
+## Referências institucionais compartilhadas
+
+- [Pasta de materiais institucionais da Brain no Google Drive](https://drive.google.com/drive/folders/1kafbNcY8xd1qelQG0I9bMWjkFMCECMjL?usp=sharing) — referência compartilhada para consultas de identidade e aparência entre os aplicativos.
+- A apresentação **“Apresentação de slides 2”** disponível em **Materiais gerais** foi verificada em 2026-10-02 e ainda exibe “22 anos de empresa”. Não tratar como material institucional atualizado até o Marketing confirmar/substituir a arte.

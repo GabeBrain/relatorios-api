@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import * as XLSX from 'xlsx';
-import { strToU8, unzipSync, zipSync } from 'fflate';
+import { strFromU8, strToU8, unzipSync, zipSync } from 'fflate';
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { consolidateMonthlyBase, generateFinalReport, tabulateConsolidatedBase } from './monthly-workflow';
@@ -52,6 +52,44 @@ function reportBuffer() {
 }
 
 describe('processMonthlyWorkflow', () => {
+  it.each(['alvaras', 'cvco'] as const)('preenche meses e distingue unidades de áreas no modelo %s', (kind) => {
+    const source = workbookBuffer([HEADERS, ['JULHO', 'Centro', 'ZR2', 5, 2, 1, 300, 100, 200, 100, 'Habitação', 'Coletiva', 'Alvenaria', 2026]]);
+    const tabulation = tabulateConsolidatedBase(source, kind);
+    const template = readFileSync(`public/sinduscon-templates/report-${kind === 'alvaras' ? 'liberados' : 'concluidos'}.xlsx`);
+    const files = unzipSync(Uint8Array.from(template));
+    const path = 'xl/worksheets/sheet7.xml';
+    // Exercise July's missing formula as reported, rather than relying on the clean template.
+    const xml = new DOMParser().parseFromString(strFromU8(files[path]), 'application/xml');
+    const julyTotal = Array.from(xml.getElementsByTagNameNS('*', 'c')).find((cell) => cell.getAttribute('r') === 'O31');
+    for (const child of Array.from(julyTotal?.childNodes ?? [])) julyTotal?.removeChild(child);
+    files[path] = strToU8(new XMLSerializer().serializeToString(xml));
+    const output = generateFinalReport(tabulation.bytes.buffer as ArrayBuffer, zipSync(files).buffer as ArrayBuffer, kind);
+    const report = XLSX.read(output.bytes, { type: 'array', cellFormula: true });
+    const sheet = (num: string) => report.Sheets[report.SheetNames.find((name) => name.includes(`Folha ${num}`))!];
+    expect(sheet('04').C80.v).toBe(2);
+    expect(sheet('07').C80.v).toBe(1);
+    expect(sheet('05').D15.v).toBe(2);
+    expect(sheet('05').D32.v).toBe(200);
+    expect(sheet('08').D14.v).toBe(1);
+    expect(sheet('08').D31.v).toBe(100);
+    expect(sheet('08').O31.f).toContain('SUM(C31:N31)');
+    expect(sheet('08').O31.v).toBe(100);
+  });
+  it('limita as tabelas acumuladas ao ano da competência mais recente', () => {
+    const source = workbookBuffer([
+      HEADERS,
+      ['JULHO', 'Centro', 'ZR2', 5, 1000, '', 100000, 100, 100000, '', 'Habitação', 'Coletiva', 'Alvenaria', 2025],
+      ['JULHO', 'Centro', 'ZR2', 5, 2, '', 200, 100, 200, '', 'Habitação', 'Coletiva', 'Alvenaria', 2026],
+      ['JULHO', 'Centro', 'ZR2', 1, 2, '', 0, 0, 0, '', 'Habitação', 'Coletiva', 'Alvenaria', 2026],
+    ]);
+    const tabulation = tabulateConsolidatedBase(source, 'alvaras');
+    const workbook = XLSX.read(tabulation.bytes, { type: 'array' });
+    const areaRows = XLSX.utils.sheet_to_json<unknown[]>(workbook.Sheets['Residencial por área'], { header: 1, defval: '', raw: true });
+    const historyRows = XLSX.utils.sheet_to_json<unknown[]>(workbook.Sheets['Série histórica'], { header: 1, defval: '', raw: true });
+    expect(areaRows.find((row) => row[0] === 'Centro')?.at(-1)).toBe(4);
+    expect(historyRows.slice(1).map((row) => row[0])).toEqual(['2025-7', '2026-7']);
+  });
+
   it('anexa o mês, estende fórmulas e mantém os objetos do relatório', () => {
     const currentHeaders = [...HEADERS];
     currentHeaders[10] = 'Uso(s) Alvará';

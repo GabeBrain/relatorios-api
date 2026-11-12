@@ -1,0 +1,20 @@
+{
+  "base": "e4c1656",
+  "state": "validated_locally",
+  "paid_ai": false,
+  "database_changes": false,
+  "tests": {
+    "passed": 331,
+    "failed": 0,
+    "skipped": 2,
+    "material_passes": 10,
+    "browser_checks": 6
+  },
+  "protected_paths": [
+    "supabase/",
+    "src/features/corretor/lib/v3/execution.ts",
+    "src/features/corretor/lib/v3/db.ts",
+    "src/features/corretor/lib/recommendations.ts"
+  ],
+  "production_verified": false
+}

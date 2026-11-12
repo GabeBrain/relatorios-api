@@ -1,3 +1,4 @@
+import { invokeAnalysis, executionReviewModel } from './execution';
 // Corretor v3.1 — passe de IA de TEXTO sobre o IR (ortografia/cidade/coerência).
 // Batches de N slides por chamada à edge function analyze-text-batch.
 // Custo estimado ANTES de rodar; IDs de achado estáveis por conteúdo.
@@ -6,6 +7,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { calculateCost, type ModelId } from '../cost-calculator';
 import type { Ir, IrSlide } from '../audit/ir';
 import { toAuditSection } from '../audit/ir';
+import { literalTextAnchor } from './text-review';
 import type { Finding } from '../audit/model';
 
 const BATCH_SIZE = 12;
@@ -20,7 +22,8 @@ interface RawIaFinding {
 }
 
 function slideText(s: IrSlide): string {
-  return (s.textos ?? []).join('\n').slice(0, MAX_CHARS_PER_SLIDE);
+  const svg = (s.textos_svg ?? []).map((t) => `[texto de imagem SVG]\n${t}`);
+  return [...(s.textos ?? []), ...svg].join('\n').slice(0, MAX_CHARS_PER_SLIDE);
 }
 
 function slideTables(s: IrSlide): string {
@@ -70,6 +73,19 @@ export interface TextPassResult {
   batches: number;
 }
 
+const flat = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+
+/**
+ * true se a evidência citada pela IA aparece no texto do slide (sem acento,
+ * caixa ou pontuação). Ortografia sem evidência não tem o que mostrar ao
+ * analista e é descartada; outros tipos sem evidência passam.
+ */
+export function evidenceInSlide(slideText: string, evidence: string | undefined, required: boolean): boolean {
+  if (!evidence?.trim()) return !required;
+  const needle = flat(evidence);
+  return needle.length > 0 && literalTextAnchor(slideText, evidence);
+}
+
 export async function runTextPass(
   ir: Ir,
   city: string,
@@ -77,34 +93,39 @@ export async function runTextPass(
   onProgress?: (done: number, total: number) => void,
   signal?: AbortSignal
 ): Promise<TextPassResult> {
+  model=executionReviewModel('analyze-text-batch',model);
   const slides = reviewableSlides(ir);
   const secao = new Map(ir.slides.map((s) => [s.n, toAuditSection(s.secao_canonica)]));
   const batches: IrSlide[][] = [];
   for (let i = 0; i < slides.length; i += BATCH_SIZE) batches.push(slides.slice(i, i + BATCH_SIZE));
 
   const findings: Finding[] = [];
-  let inputTokens = 0, outputTokens = 0;
+  let inputTokens = 0, outputTokens = 0, costUsd = 0;
 
   for (let bi = 0; bi < batches.length; bi++) {
     if (signal?.aborted) break;
     const batch = batches[bi];
-    const { data, error } = await supabase.functions.invoke<{
-      findings: RawIaFinding[]; inputTokens: number; outputTokens: number; error?: string;
+    const { data, error } = await invokeAnalysis<{
+      findings: RawIaFinding[]; inputTokens: number; outputTokens: number; costUsd?: number; error?: string;
     }>('analyze-text-batch', {
-      body: {
         city,
         model,
         slides: batch.map((s) => ({ n: s.n, titulo: s.titulo ?? '', texto: slideText(s), tabelas: slideTables(s) })),
-      },
     });
     if (error) throw new Error(error.message);
     if (data?.error) throw new Error(data.error);
 
     inputTokens += data?.inputTokens ?? 0;
     outputTokens += data?.outputTokens ?? 0;
+    costUsd += data?.costUsd ?? calculateCost(data?.inputTokens ?? 0,data?.outputTokens ?? 0,model);
 
     for (const raw of data?.findings ?? []) {
       const type = ['SPELLING', 'CITY_NAME', 'COHERENCE'].includes(raw.type) ? raw.type : 'SPELLING';
+      // Âncora: o trecho citado tem de existir no slide apontado. No s12 de Campos
+      // do Jordão (set/2026) o modelo citou uma frase que não está em nenhum slide.
+      const slide = batch.find((s) => s.n === raw.slide);
+      const haystack = [slide?.titulo ?? '', slide ? slideText(slide) : '', JSON.stringify(slide ? slideTables(slide) : [])].join(' ');
+      if (!slide || !evidenceInSlide(haystack, raw.evidence, type === 'SPELLING')) continue;
       const key = djb2(`${raw.type}|${raw.evidence ?? raw.description}`);
       findings.push({
         id: `iatxt-${raw.slide}-${type.toLowerCase()}-${key}`,
@@ -120,5 +141,5 @@ export async function runTextPass(
     onProgress?.(bi + 1, batches.length);
   }
 
-  return { findings, inputTokens, outputTokens, costUsd: calculateCost(inputTokens, outputTokens, model), batches: batches.length };
+  return { findings, inputTokens, outputTokens, costUsd, batches: batches.length };
 }

@@ -79,10 +79,13 @@ describe('CH-2 — WRONG_CONTEXT de visão (54 achados do feedback, todos FP)', 
   });
 
   it('regressão: cidade IBGE divergente em seção de dados continua disparando', () => {
+    // Numa tabela de dados, a cidade copiada aparece no cabeçalho TRANSCRITO:
+    // é a âncora que sustenta o achado mesmo com uma cidade só (v0.63).
     const out = wrongContextFromVisibleLocales(
       [{ texto: 'Curitiba', tipo: 'cidade', principal: false }],
       { cidade: 'Brumadinho', uf: 'MG' },
       { slide: 30, secao: 'SOCIO', titulo: 'Domicílios por faixa de renda', sha1: 'deadbeef00' },
+      { tables: [{ title: 'Faixas de renda', columns: ['Faixa', 'Curitiba', '%'], rows: [['Até 2 SM', 100, 50], ['Acima', 100, 50]] }] },
     );
     expect(out).toHaveLength(1);
   });

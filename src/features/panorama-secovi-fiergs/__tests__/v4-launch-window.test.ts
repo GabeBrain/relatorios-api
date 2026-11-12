@@ -30,4 +30,18 @@ describe('Panorama V4 - janela de lancamentos', () => {
     expect(buildGranularBlocks(cube, scope).cohortsHorizontal.map((row) => row.label)).not.toContain('Até 2022');
     expect(buildGranularBlocks(cube, scope).cohortsHorizontal.at(-1)?.launchedUnits).toBe(428);
   });
+
+  it('mantém a fotografia FIERGS integral, mas abre o fluxo lançado somente na janela', () => {
+    const buildings = [
+      { ...building('legacy', '2022-10-01', 40), building_type: 'Vertical', standard: 'Médio' },
+      { ...building('window', '2024-03-01', 60), building_type: 'Vertical', standard: 'Médio' },
+    ];
+    const cube = buildCityCube(buildings, { city: 'Jundiai', uf: 'SP', endQuarter: '2T2026', entity: 'fiergs-rs' });
+    const fiergsScope: PanoramaScope = { ...scope, entity: 'fiergs-rs' };
+    const granular = buildGranularBlocks(cube, fiergsScope);
+    expect(granular.offerByStandard.at(-1)?.launchedUnits).toBe(100);
+    expect(granular.launchWindow?.offerByStandard.at(-1)?.launchedUnits).toBe(60);
+    expect(granular.launchWindow?.offerByStandard.at(-1)?.projects).toBe(1);
+    expect(granular.offerByStandard.at(-1)?.finalUnits).toBe(50);
+  });
 });

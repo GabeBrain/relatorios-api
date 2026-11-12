@@ -38,6 +38,656 @@ export type Database = {
         }
         Relationships: []
       }
+      corretor_analysis_snapshots: {
+        Row: {
+          created_at: string
+          created_by: string
+          findings: Json
+          id: string
+          reason: string
+          report: Json | null
+          source_scope: string
+          source_set_id: string | null
+          study_id: string
+          version_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string
+          findings: Json
+          id?: string
+          reason: string
+          report?: Json | null
+          source_scope: string
+          source_set_id?: string | null
+          study_id: string
+          version_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          findings?: Json
+          id?: string
+          reason?: string
+          report?: Json | null
+          source_scope?: string
+          source_set_id?: string | null
+          study_id?: string
+          version_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "corretor_analysis_snapshots_source_set_id_fkey"
+            columns: ["source_set_id"]
+            isOneToOne: false
+            referencedRelation: "corretor_source_sets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "corretor_analysis_snapshots_study_id_fkey"
+            columns: ["study_id"]
+            isOneToOne: false
+            referencedRelation: "studies_v3"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "corretor_analysis_snapshots_version_id_fkey"
+            columns: ["version_id"]
+            isOneToOne: false
+            referencedRelation: "study_versions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      corretor_execution_batches: {
+        Row: {
+          batch_hash: string
+          cost_usd: number | null
+          created_at: string
+          execution_id: string
+          function_name: string
+          reserved_usd: number
+          response: Json | null
+          state: string
+        }
+        Insert: {
+          batch_hash: string
+          cost_usd?: number | null
+          created_at?: string
+          execution_id: string
+          function_name: string
+          reserved_usd: number
+          response?: Json | null
+          state: string
+        }
+        Update: {
+          batch_hash?: string
+          cost_usd?: number | null
+          created_at?: string
+          execution_id?: string
+          function_name?: string
+          reserved_usd?: number
+          response?: Json | null
+          state?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "corretor_execution_batches_execution_id_fkey"
+            columns: ["execution_id"]
+            isOneToOne: false
+            referencedRelation: "corretor_executions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      corretor_executions: {
+        Row: {
+          budget_usd: number
+          confirmed_context: Json
+          context_hash: string
+          created_at: string
+          document_sha1: string
+          engine: string
+          estimated_usd: number | null
+          id: string
+          owner_hash: string
+          purpose: string
+          reserved_usd: number
+          spent_usd: number
+          state: string
+          study_id: string
+          updated_at: string
+          validation_budget_id: string | null
+          version_n: number
+        }
+        Insert: {
+          budget_usd: number
+          confirmed_context?: Json
+          context_hash: string
+          created_at?: string
+          document_sha1: string
+          engine?: string
+          estimated_usd?: number | null
+          id?: string
+          owner_hash: string
+          purpose?: string
+          reserved_usd?: number
+          spent_usd?: number
+          state?: string
+          study_id: string
+          updated_at?: string
+          validation_budget_id?: string | null
+          version_n: number
+        }
+        Update: {
+          budget_usd?: number
+          confirmed_context?: Json
+          context_hash?: string
+          created_at?: string
+          document_sha1?: string
+          engine?: string
+          estimated_usd?: number | null
+          id?: string
+          owner_hash?: string
+          purpose?: string
+          reserved_usd?: number
+          spent_usd?: number
+          state?: string
+          study_id?: string
+          updated_at?: string
+          validation_budget_id?: string | null
+          version_n?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "corretor_executions_study_id_fkey"
+            columns: ["study_id"]
+            isOneToOne: false
+            referencedRelation: "studies_v3"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "corretor_executions_validation_budget_id_fkey"
+            columns: ["validation_budget_id"]
+            isOneToOne: false
+            referencedRelation: "corretor_review_validation_budgets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      corretor_material_assets: {
+        Row: {
+          bytes: number
+          created_at: string
+          created_by: string
+          id: string
+          kind: string
+          original_name: string
+          path: string
+          sha1: string | null
+          sha256: string
+          slide_n: number | null
+          study_id: string
+          version_id: string
+        }
+        Insert: {
+          bytes: number
+          created_at?: string
+          created_by?: string
+          id?: string
+          kind: string
+          original_name: string
+          path: string
+          sha1?: string | null
+          sha256: string
+          slide_n?: number | null
+          study_id: string
+          version_id: string
+        }
+        Update: {
+          bytes?: number
+          created_at?: string
+          created_by?: string
+          id?: string
+          kind?: string
+          original_name?: string
+          path?: string
+          sha1?: string | null
+          sha256?: string
+          slide_n?: number | null
+          study_id?: string
+          version_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "corretor_material_assets_study_id_fkey"
+            columns: ["study_id"]
+            isOneToOne: false
+            referencedRelation: "studies_v3"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "corretor_material_assets_version_id_fkey"
+            columns: ["version_id"]
+            isOneToOne: false
+            referencedRelation: "study_versions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      corretor_originals: {
+        Row: {
+          bytes: number
+          created_at: string
+          id: string
+          original_name: string
+          path: string
+          project_id: string
+          sha1: string
+          sha256: string
+          version_id: string
+        }
+        Insert: {
+          bytes: number
+          created_at?: string
+          id?: string
+          original_name: string
+          path: string
+          project_id: string
+          sha1: string
+          sha256: string
+          version_id: string
+        }
+        Update: {
+          bytes?: number
+          created_at?: string
+          id?: string
+          original_name?: string
+          path?: string
+          project_id?: string
+          sha1?: string
+          sha256?: string
+          version_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "corretor_originals_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "corretor_projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "corretor_originals_version_id_fkey"
+            columns: ["version_id"]
+            isOneToOne: false
+            referencedRelation: "study_versions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      corretor_project_members: {
+        Row: {
+          owner_id: string
+          project_id: string
+          user_id: string
+        }
+        Insert: {
+          owner_id: string
+          project_id: string
+          user_id: string
+        }
+        Update: {
+          owner_id?: string
+          project_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "corretor_project_members_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "corretor_projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "corretor_project_members_project_id_owner_id_fkey"
+            columns: ["project_id", "owner_id"]
+            isOneToOne: false
+            referencedRelation: "corretor_projects"
+            referencedColumns: ["id", "owner_id"]
+          },
+        ]
+      }
+      corretor_projects: {
+        Row: {
+          analyst: string
+          city: string
+          client_name: string
+          created_at: string
+          display_name: string
+          due_date: string | null
+          id: string
+          notes: string
+          owner_id: string
+          reference_period: string
+          reviewer: string
+          study_id: string | null
+          study_type: string
+          uf: string
+          updated_at: string
+        }
+        Insert: {
+          analyst?: string
+          city?: string
+          client_name?: string
+          created_at?: string
+          display_name: string
+          due_date?: string | null
+          id?: string
+          notes?: string
+          owner_id: string
+          reference_period?: string
+          reviewer?: string
+          study_id?: string | null
+          study_type?: string
+          uf?: string
+          updated_at?: string
+        }
+        Update: {
+          analyst?: string
+          city?: string
+          client_name?: string
+          created_at?: string
+          display_name?: string
+          due_date?: string | null
+          id?: string
+          notes?: string
+          owner_id?: string
+          reference_period?: string
+          reviewer?: string
+          study_id?: string | null
+          study_type?: string
+          uf?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "corretor_projects_study_id_fkey"
+            columns: ["study_id"]
+            isOneToOne: true
+            referencedRelation: "studies_v3"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      corretor_recommendations: {
+        Row: {
+          budget_usd: number
+          cached_tokens: number
+          completed_at: string | null
+          config_version: string | null
+          content: string | null
+          coverage: Json
+          created_at: string
+          document_sha1: string
+          endpoint: string | null
+          error_message: string | null
+          estimated_usd: number
+          execution_id: string
+          has_truncated_memo: boolean
+          id: string
+          input_tokens: number
+          model: string
+          output_tokens: number
+          price_version: string
+          pricing_snapshot: Json | null
+          profile_id: string | null
+          prompt_version: string
+          provider_calls: number
+          provider_latency_ms: number
+          reasoning_effort: string | null
+          reasoning_reported_calls: number
+          reasoning_tokens: number | null
+          reserved_usd: number
+          service_tier: string | null
+          spent_usd: number
+          state: string
+          study_id: string
+          total_requests: number
+          updated_at: string
+          usage_origin: string | null
+          version_id: string
+          version_n: number
+        }
+        Insert: {
+          budget_usd: number
+          cached_tokens?: number
+          completed_at?: string | null
+          config_version?: string | null
+          content?: string | null
+          coverage: Json
+          created_at?: string
+          document_sha1: string
+          endpoint?: string | null
+          error_message?: string | null
+          estimated_usd: number
+          execution_id: string
+          has_truncated_memo?: boolean
+          id?: string
+          input_tokens?: number
+          model: string
+          output_tokens?: number
+          price_version: string
+          pricing_snapshot?: Json | null
+          profile_id?: string | null
+          prompt_version: string
+          provider_calls?: number
+          provider_latency_ms?: number
+          reasoning_effort?: string | null
+          reasoning_reported_calls?: number
+          reasoning_tokens?: number | null
+          reserved_usd?: number
+          service_tier?: string | null
+          spent_usd?: number
+          state?: string
+          study_id: string
+          total_requests: number
+          updated_at?: string
+          usage_origin?: string | null
+          version_id: string
+          version_n: number
+        }
+        Update: {
+          budget_usd?: number
+          cached_tokens?: number
+          completed_at?: string | null
+          config_version?: string | null
+          content?: string | null
+          coverage?: Json
+          created_at?: string
+          document_sha1?: string
+          endpoint?: string | null
+          error_message?: string | null
+          estimated_usd?: number
+          execution_id?: string
+          has_truncated_memo?: boolean
+          id?: string
+          input_tokens?: number
+          model?: string
+          output_tokens?: number
+          price_version?: string
+          pricing_snapshot?: Json | null
+          profile_id?: string | null
+          prompt_version?: string
+          provider_calls?: number
+          provider_latency_ms?: number
+          reasoning_effort?: string | null
+          reasoning_reported_calls?: number
+          reasoning_tokens?: number | null
+          reserved_usd?: number
+          service_tier?: string | null
+          spent_usd?: number
+          state?: string
+          study_id?: string
+          total_requests?: number
+          updated_at?: string
+          usage_origin?: string | null
+          version_id?: string
+          version_n?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "corretor_recommendations_execution_id_fkey"
+            columns: ["execution_id"]
+            isOneToOne: true
+            referencedRelation: "corretor_executions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "corretor_recommendations_study_id_fkey"
+            columns: ["study_id"]
+            isOneToOne: false
+            referencedRelation: "studies_v3"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "corretor_recommendations_version_id_fkey"
+            columns: ["version_id"]
+            isOneToOne: false
+            referencedRelation: "study_versions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      corretor_review_validation_budgets: {
+        Row: {
+          budget_usd: number
+          created_at: string
+          id: string
+        }
+        Insert: {
+          budget_usd: number
+          created_at?: string
+          id: string
+        }
+        Update: {
+          budget_usd?: number
+          created_at?: string
+          id?: string
+        }
+        Relationships: []
+      }
+      corretor_review_validation_studies: {
+        Row: {
+          budget_id: string
+          owner_hash: string
+          study_id: string
+        }
+        Insert: {
+          budget_id: string
+          owner_hash: string
+          study_id: string
+        }
+        Update: {
+          budget_id?: string
+          owner_hash?: string
+          study_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "corretor_review_validation_studies_budget_id_fkey"
+            columns: ["budget_id"]
+            isOneToOne: false
+            referencedRelation: "corretor_review_validation_budgets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "corretor_review_validation_studies_study_id_fkey"
+            columns: ["study_id"]
+            isOneToOne: true
+            referencedRelation: "studies_v3"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      corretor_source_sets: {
+        Row: {
+          created_at: string
+          created_by: string
+          file_ids: string[]
+          fingerprint: string
+          id: string
+          payload: Json
+          study_id: string
+          version_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string
+          file_ids: string[]
+          fingerprint: string
+          id?: string
+          payload: Json
+          study_id: string
+          version_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          file_ids?: string[]
+          fingerprint?: string
+          id?: string
+          payload?: Json
+          study_id?: string
+          version_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "corretor_source_sets_study_id_fkey"
+            columns: ["study_id"]
+            isOneToOne: false
+            referencedRelation: "studies_v3"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "corretor_source_sets_version_id_fkey"
+            columns: ["version_id"]
+            isOneToOne: false
+            referencedRelation: "study_versions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      corretor_study_shares: {
+        Row: {
+          created_at: string
+          shared_by: string
+          study_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          shared_by?: string
+          study_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          shared_by?: string
+          study_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "corretor_study_shares_study_id_fkey"
+            columns: ["study_id"]
+            isOneToOne: false
+            referencedRelation: "studies_v3"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       empresas_estab_manifesto: {
         Row: {
           bytes_processados: number | null
@@ -245,36 +895,106 @@ export type Database = {
       }
       ia_passes: {
         Row: {
+          batch_hash: string | null
+          cached_tokens: number
+          config_version: string | null
           created_at: string
           custo_usd: number
           escopo: string | null
+          execution_id: string | null
+          extraction_version: string | null
+          finish_reason: string | null
           id: string
           input_tokens: number
+          latency_ms: number | null
+          model: string | null
           output_tokens: number
+          price_version: string | null
+          pricing_snapshot: Json | null
+          profile_id: string | null
+          prompt_hash: string | null
+          prompt_version: string | null
+          provider_request_id: string | null
+          reasoning_effort: string | null
+          reasoning_tokens: number | null
+          requested_model: string | null
+          requested_service_tier: string | null
+          rules_version: string | null
+          service_tier: string | null
           study_id: string
           tipo: string
+          usage_origin: string | null
         }
         Insert: {
+          batch_hash?: string | null
+          cached_tokens?: number
+          config_version?: string | null
           created_at?: string
           custo_usd?: number
           escopo?: string | null
+          execution_id?: string | null
+          extraction_version?: string | null
+          finish_reason?: string | null
           id?: string
           input_tokens?: number
+          latency_ms?: number | null
+          model?: string | null
           output_tokens?: number
+          price_version?: string | null
+          pricing_snapshot?: Json | null
+          profile_id?: string | null
+          prompt_hash?: string | null
+          prompt_version?: string | null
+          provider_request_id?: string | null
+          reasoning_effort?: string | null
+          reasoning_tokens?: number | null
+          requested_model?: string | null
+          requested_service_tier?: string | null
+          rules_version?: string | null
+          service_tier?: string | null
           study_id: string
           tipo: string
+          usage_origin?: string | null
         }
         Update: {
+          batch_hash?: string | null
+          cached_tokens?: number
+          config_version?: string | null
           created_at?: string
           custo_usd?: number
           escopo?: string | null
+          execution_id?: string | null
+          extraction_version?: string | null
+          finish_reason?: string | null
           id?: string
           input_tokens?: number
+          latency_ms?: number | null
+          model?: string | null
           output_tokens?: number
+          price_version?: string | null
+          pricing_snapshot?: Json | null
+          profile_id?: string | null
+          prompt_hash?: string | null
+          prompt_version?: string | null
+          provider_request_id?: string | null
+          reasoning_effort?: string | null
+          reasoning_tokens?: number | null
+          requested_model?: string | null
+          requested_service_tier?: string | null
+          rules_version?: string | null
+          service_tier?: string | null
           study_id?: string
           tipo?: string
+          usage_origin?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "ia_passes_execution_id_fkey"
+            columns: ["execution_id"]
+            isOneToOne: false
+            referencedRelation: "corretor_executions"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "ia_passes_study_id_fkey"
             columns: ["study_id"]
@@ -839,7 +1559,11 @@ export type Database = {
           cidade: string | null
           concluded_at: string | null
           created_at: string
+          created_by: string | null
           custo_total: number
+          deleted_at: string | null
+          deleted_by: string | null
+          generation: string
           id: string
           nome: string
           relatorio: Json | null
@@ -852,7 +1576,11 @@ export type Database = {
           cidade?: string | null
           concluded_at?: string | null
           created_at?: string
+          created_by?: string | null
           custo_total?: number
+          deleted_at?: string | null
+          deleted_by?: string | null
+          generation?: string
           id?: string
           nome: string
           relatorio?: Json | null
@@ -865,7 +1593,11 @@ export type Database = {
           cidade?: string | null
           concluded_at?: string | null
           created_at?: string
+          created_by?: string | null
           custo_total?: number
+          deleted_at?: string | null
+          deleted_by?: string | null
+          generation?: string
           id?: string
           nome?: string
           relatorio?: Json | null
@@ -873,6 +1605,35 @@ export type Database = {
           uf?: string | null
         }
         Relationships: []
+      }
+      study_sources_v3: {
+        Row: {
+          filename: string
+          payload: Json
+          study_id: string
+          updated_at: string
+        }
+        Insert: {
+          filename: string
+          payload: Json
+          study_id: string
+          updated_at?: string
+        }
+        Update: {
+          filename?: string
+          payload?: Json
+          study_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "study_sources_v3_study_id_fkey"
+            columns: ["study_id"]
+            isOneToOne: true
+            referencedRelation: "studies_v3"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       study_versions: {
         Row: {
@@ -911,6 +1672,45 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      validacao_fechamento_aprovacoes: {
+        Row: {
+          approval_key: string
+          approved_at: string
+          approved_by_email: string
+          building_id: string
+          city: string
+          divergence: string
+          field: string
+          period: string
+          rule: string
+          typology_id: string
+        }
+        Insert: {
+          approval_key: string
+          approved_at?: string
+          approved_by_email: string
+          building_id: string
+          city: string
+          divergence: string
+          field: string
+          period: string
+          rule: string
+          typology_id: string
+        }
+        Update: {
+          approval_key?: string
+          approved_at?: string
+          approved_by_email?: string
+          building_id?: string
+          city?: string
+          divergence?: string
+          field?: string
+          period?: string
+          rule?: string
+          typology_id?: string
+        }
+        Relationships: []
       }
       vision_cache: {
         Row: {
@@ -973,6 +1773,74 @@ export type Database = {
       }
     }
     Functions: {
+      activate_corretor_source_set: {
+        Args: {
+          p_files: string[]
+          p_fingerprint: string
+          p_name: string
+          p_payload: Json
+          p_study: string
+          p_version: string
+        }
+        Returns: string
+      }
+      corretor_access_enabled: { Args: never; Returns: boolean }
+      corretor_ai_usage: { Args: never; Returns: Json }
+      corretor_claim_batch: {
+        Args: {
+          p_execution: string
+          p_function: string
+          p_hash: string
+          p_owner: string
+          p_reserve: number
+        }
+        Returns: Json
+      }
+      corretor_claim_batch_pre_review: {
+        Args: {
+          p_execution: string
+          p_function: string
+          p_hash: string
+          p_owner: string
+          p_reserve: number
+        }
+        Returns: Json
+      }
+      corretor_finish_batch: {
+        Args: {
+          p_cost: number
+          p_execution: string
+          p_hash: string
+          p_response: Json
+        }
+        Returns: undefined
+      }
+      corretor_finish_batch_pre_review: {
+        Args: {
+          p_cost: number
+          p_execution: string
+          p_hash: string
+          p_response: Json
+        }
+        Returns: undefined
+      }
+      corretor_prepare_study: {
+        Args: {
+          p_file: string
+          p_findings: Json
+          p_name: string
+          p_sha1: string
+          p_slides: number
+        }
+        Returns: Json
+      }
+      corretor_recommendation_profile_schema: { Args: never; Returns: number }
+      corretor_recommendation_usage: {
+        Args: { p_since?: string; p_until?: string }
+        Returns: Json
+      }
+      corretor_review_profile_schema: { Args: never; Returns: number }
+      corretor_trash_study: { Args: { p_study_id: string }; Returns: boolean }
       rais_claim_history_snapshot: {
         Args: {
           p_lease_seconds?: number
@@ -1040,6 +1908,18 @@ export type Database = {
           p_total_links_in_year: number
         }
         Returns: undefined
+      }
+      register_corretor_original: {
+        Args: {
+          p_bytes: number
+          p_name: string
+          p_path: string
+          p_project: string
+          p_sha1: string
+          p_sha256: string
+          p_version: string
+        }
+        Returns: string
       }
     }
     Enums: {

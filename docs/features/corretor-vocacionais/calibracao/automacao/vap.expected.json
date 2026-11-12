@@ -1,0 +1,424 @@
+{
+  "summary": {
+    "candidatas": 93,
+    "leituras": 93,
+    "achados": 7,
+    "tabelas": "57/67",
+    "acertos": {
+      "fonte": {
+        "comparados": 11,
+        "batem": 10
+      },
+      "cruzamentos": {
+        "feitos": 69,
+        "batem": 65
+      }
+    }
+  },
+  "findings": [
+    {
+      "id": "structure",
+      "type": "STRUCTURE_MISSING",
+      "section": "ESTRUTURA",
+      "slideRef": "—",
+      "title": "Checklist estrutural (1 ausente(s) · slide final a conferir)",
+      "detail": "Cobertura por título e texto do slide, fora do sumário. Itens “a conferir” são mapas/prints: o conteúdo pode estar dentro da imagem — confirme visualmente antes de tratar como ausência. Slide final s145 sem conteúdo detectável; confirme visualmente antes de tratar como ausência.",
+      "ok": false,
+      "viz": {
+        "kind": "text",
+        "checklist": [
+          {
+            "label": "1.1 — Endereço",
+            "status": "ok"
+          },
+          {
+            "label": "1.2 — Latitude/longitude",
+            "status": "ok"
+          },
+          {
+            "label": "1.3 — Área do terreno",
+            "status": "ok"
+          },
+          {
+            "label": "1.4 — Acessos",
+            "status": "ok"
+          },
+          {
+            "label": "1.5 — Entorno varejo/serviços",
+            "status": "ok"
+          },
+          {
+            "label": "1.6 — Entorno revendas",
+            "status": "ok"
+          },
+          {
+            "label": "1.7 — Mapeamento físico",
+            "status": "ok"
+          },
+          {
+            "label": "1.9 — Distância ao centro",
+            "status": "ok"
+          },
+          {
+            "label": "2.1 — Dados cidade/estado/Brasil",
+            "status": "ok"
+          },
+          {
+            "label": "2.2 — Variação da população",
+            "status": "ok"
+          },
+          {
+            "label": "2.3 — Variação dos domicílios",
+            "status": "ok"
+          },
+          {
+            "label": "2.4 — População por renda",
+            "status": "ok"
+          },
+          {
+            "label": "2.4.1 — Mapa de densidade populacional",
+            "status": "ok"
+          },
+          {
+            "label": "2.5 — Domicílios por renda",
+            "status": "ok"
+          },
+          {
+            "label": "2.6 — Domicílios por moradores",
+            "status": "ok"
+          },
+          {
+            "label": "2.5.1 — Mapa de renda",
+            "status": "ok"
+          },
+          {
+            "label": "2.7 — Domicílios por tipo",
+            "status": "ok"
+          },
+          {
+            "label": "2.7.1 — Mapa de verticalização",
+            "status": "ok"
+          },
+          {
+            "label": "2.8 — Ocupação/propriedade",
+            "status": "ok"
+          },
+          {
+            "label": "2.8.1 — Mapa de propriedade",
+            "status": "ok"
+          },
+          {
+            "label": "3.1 — Absorção Z.I. total",
+            "status": "ok"
+          },
+          {
+            "label": "3.1.1 — Cenários de absorção",
+            "status": "ok"
+          },
+          {
+            "label": "4.1 — Mapa de localização",
+            "status": "ok"
+          },
+          {
+            "label": "4.2 — Mapa R$/m²",
+            "status": "ok"
+          },
+          {
+            "label": "4.3 — Mapa de estoque",
+            "status": "ok"
+          },
+          {
+            "label": "4.4 — Mapa de área média",
+            "status": "ok"
+          },
+          {
+            "label": "4.5 — Consolidada",
+            "status": "ok"
+          },
+          {
+            "label": "4.6 — Oferta por padrão",
+            "status": "ok"
+          },
+          {
+            "label": "4.7 — Oferta por ano",
+            "status": "ok"
+          },
+          {
+            "label": "4.8 — Oferta por tipologia",
+            "status": "ok"
+          },
+          {
+            "label": "4.9 — Preços por tipologia",
+            "status": "ok"
+          },
+          {
+            "label": "4.10 — Preços por padrão",
+            "status": "ok"
+          },
+          {
+            "label": "5.1 — Lacunas tipologia × metragem",
+            "status": "ok"
+          },
+          {
+            "label": "5.2 — Lacunas tipologia × preço",
+            "status": "ok"
+          },
+          {
+            "label": "5.3 — Lacunas preço × metragem",
+            "status": "ok"
+          },
+          {
+            "label": "6 — Fichas técnicas",
+            "status": "ok"
+          },
+          {
+            "label": "7.1 — Futuros lançamentos",
+            "status": "missing"
+          },
+          {
+            "label": "8.1 — Revenda",
+            "status": "ok"
+          },
+          {
+            "label": "8.2 — Revenda por bairro",
+            "status": "ok"
+          },
+          {
+            "label": "8.3 — Revenda por tipologia",
+            "status": "ok"
+          },
+          {
+            "label": "8.4 — Ticket de revenda",
+            "status": "ok"
+          },
+          {
+            "label": "Slide final s145 sem conteúdo detectável",
+            "status": "na"
+          }
+        ]
+      }
+    },
+    {
+      "id": "source-24-domicilios-brasil-unidade-domicilios",
+      "type": "SOURCE_CROSSCHECK",
+      "section": "SOCIO",
+      "slideRef": "s24",
+      "title": "Unidade trocada no slide — Brasil",
+      "detail": "O número 75.298.796 está correto, mas o slide o rotula como habitantes (hab.); na planilha ele é de domicílios (dom.). Corrija só a unidade. Origem: 1.Populacao de Domicilios.xlsx › Domicilios › linha 9.",
+      "confidence": 1,
+      "origem": "DET",
+      "viz": {
+        "kind": "sidebyside",
+        "leftLabel": "Slide 24",
+        "rightLabel": "1.Populacao de Domicilios.xlsx › Domicilios › linha 9",
+        "rows": [
+          {
+            "label": "Brasil · unidade",
+            "left": "75.298.796 hab.",
+            "right": "75.298.796 dom.",
+            "mismatch": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "iavis-format-5181287e1f",
+      "type": "FORMAT_MISMATCH",
+      "section": "MERCADO",
+      "slideRef": "s73",
+      "title": "Formatação divergente na tabela (2 células)",
+      "detail": "rótulo: «2.023» ano escrito com separador de milhar (3 ocorrências, ex.: «2.023» em vez de «2023»). Mais 1 ocorrência(s) na tabela. Confira na imagem.",
+      "ok": false,
+      "origem": "IA_visao",
+      "confidence": 2,
+      "viz": {
+        "kind": "table",
+        "table": {
+          "title": "Formato",
+          "columns": [
+            "Onde",
+            "Texto na imagem",
+            "Inconsistência"
+          ],
+          "rows": [
+            [
+              "rótulo",
+              "2.023",
+              "ano escrito com separador de milhar (3 ocorrências, ex.: «2.023» em vez de «2023»)"
+            ],
+            [
+              "rótulo",
+              "2.023",
+              "ano escrito com separador de milhar (3 ocorrências, ex.: «2.023» em vez de «2023»)"
+            ]
+          ]
+        },
+        "badRows": [
+          0,
+          1
+        ],
+        "notes": [
+          "rótulo: «2.023» — ano escrito com separador de milhar (3 ocorrências, ex.: «2.023» em vez de «2023»)",
+          "rótulo: «2.023» — ano escrito com separador de milhar (3 ocorrências, ex.: «2.023» em vez de «2023»)"
+        ]
+      },
+      "evidenceSha1": "5181287e1fce4de9e05bb9b3ac5b8ac48d6b846e"
+    },
+    {
+      "id": "iavis-labeltypo-497bed3f86",
+      "type": "SPELLING",
+      "section": "LACUNAS",
+      "slideRef": "s80",
+      "title": "Erro de digitação em rótulo de faixa («Arté 30 m²», «Arté 30 m²», «Arté 30 m²»)",
+      "detail": "«Arté» parece erro de digitação de «Até»; «Arté» parece erro de digitação de «Até»; «Arté» parece erro de digitação de «Até».",
+      "ok": false,
+      "origem": "IA_visao",
+      "confidence": 2,
+      "viz": {
+        "kind": "table",
+        "table": {
+          "title": "Formato",
+          "columns": [
+            "Onde",
+            "Texto na imagem",
+            "Inconsistência"
+          ],
+          "rows": [
+            [
+              "rótulo de faixa",
+              "Arté 30 m²",
+              "«Arté» parece erro de digitação de «Até»"
+            ],
+            [
+              "rótulo de faixa",
+              "Arté 30 m²",
+              "«Arté» parece erro de digitação de «Até»"
+            ],
+            [
+              "rótulo de faixa",
+              "Arté 30 m²",
+              "«Arté» parece erro de digitação de «Até»"
+            ]
+          ]
+        },
+        "badRows": [
+          0,
+          1,
+          2
+        ],
+        "notes": [
+          "rótulo de faixa: «Arté 30 m²» — «Arté» parece erro de digitação de «Até»",
+          "rótulo de faixa: «Arté 30 m²» — «Arté» parece erro de digitação de «Até»",
+          "rótulo de faixa: «Arté 30 m²» — «Arté» parece erro de digitação de «Até»"
+        ]
+      },
+      "evidenceSha1": "497bed3f8634981c882c2d5b000edbe52f479696"
+    },
+    {
+      "id": "iavis-format-2da29d2906",
+      "type": "FORMAT_MISMATCH",
+      "section": "LACUNAS",
+      "slideRef": "s81",
+      "title": "Formatação divergente na tabela (1 célula)",
+      "detail": "Dispon. S/O.L. · Dispon. S/O.L. · De R$8001/m² a 9000/m²: «0,076» decimal sem formato de percentual entre valores em %; equivale a 7,6%. Confira na imagem.",
+      "ok": false,
+      "origem": "IA_visao",
+      "confidence": 2,
+      "viz": {
+        "kind": "table",
+        "table": {
+          "title": "Formato",
+          "columns": [
+            "Onde",
+            "Texto na imagem",
+            "Inconsistência"
+          ],
+          "rows": [
+            [
+              "Dispon. S/O.L. · Dispon. S/O.L. · De R$8001/m² a 9000/m²",
+              "0,076",
+              "decimal sem formato de percentual entre valores em %; equivale a 7,6%"
+            ]
+          ]
+        },
+        "badRows": [
+          0
+        ],
+        "notes": [
+          "Dispon. S/O.L. · Dispon. S/O.L. · De R$8001/m² a 9000/m²: «0,076» — decimal sem formato de percentual entre valores em %; equivale a 7,6%"
+        ]
+      },
+      "evidenceSha1": "2da29d290653470b6e6b92951e24b6e15190a3a2"
+    },
+    {
+      "id": "iavis-rowbin-dfa0f21683-0",
+      "type": "BINNING_RULE",
+      "section": "LACUNAS",
+      "slideRef": "s82",
+      "title": "Faixas das linhas inconsistentes (Oferta Lançada)",
+      "detail": "A faixa aberta «Acima de R$ 8.000//m²» não é a última: «De 9.001/m² a R$10.000/m²» começa acima dela, então os intervalos se sobrepõem. Provável rótulo errado (deveria ser uma faixa fechada, como «De 8.001 a 9.000»).",
+      "ok": false,
+      "viz": {
+        "kind": "binrange",
+        "unit": "",
+        "bins": [
+          {
+            "label": "Até R$5.000//m²",
+            "from": 0,
+            "to": 5000
+          },
+          {
+            "label": "De 5.001/m² a R$6.000/m²",
+            "from": 5001,
+            "to": 6000
+          },
+          {
+            "label": "De 6.001/m² a R$7.000/m²",
+            "from": 6001,
+            "to": 7000
+          },
+          {
+            "label": "De 7.001/m² a R$8.000/m²",
+            "from": 7001,
+            "to": 8000
+          },
+          {
+            "label": "Acima de R$ 8.000//m²",
+            "from": 8000,
+            "to": null
+          },
+          {
+            "label": "De 9.001/m² a R$10.000/m²",
+            "from": 9001,
+            "to": 10000
+          },
+          {
+            "label": "Acima de R$10.000/m²",
+            "from": 10000,
+            "to": null
+          }
+        ],
+        "gapAfterIndex": 4,
+        "gapDescription": "A faixa aberta «Acima de R$ 8.000//m²» não é a última: «De 9.001/m² a R$10.000/m²» começa acima dela, então os intervalos se sobrepõem. Provável rótulo errado (deveria ser uma faixa fechada, como «De 8.001 a 9.000»)."
+      },
+      "evidenceSha1": "dfa0f21683e49054ddbfb799ed61537efd2184f0",
+      "escalated": false,
+      "origem": "IA_visao"
+    },
+    {
+      "id": "vision-unsafe-sums",
+      "type": "IMAGE_NOT_READ",
+      "section": "GLOBAL",
+      "slideRef": "s28",
+      "title": "Tabelas-imagem sem conferência segura (6 slides)",
+      "detail": "A leitura destas tabelas não permitiu conferir as somas com segurança (totais não alinhados às colunas, leituras discordantes ou incoerentes): s28, s50, s51, s71, s72, s82. Não é acusação de erro; confira manualmente se forem críticas.",
+      "ok": false,
+      "confidence": 3,
+      "origem": "IA_visao",
+      "viz": {
+        "kind": "text",
+        "evidence": "s28, s50, s51, s71, s72, s82"
+      }
+    }
+  ]
+}

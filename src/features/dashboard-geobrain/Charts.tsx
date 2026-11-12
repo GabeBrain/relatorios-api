@@ -7,7 +7,7 @@ import { ArrowDownAZ, ArrowDownUp, ArrowUpAZ, Download, Info } from 'lucide-reac
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { currencyCompactNoPrefix, numCompactBR, pctRaw } from '@/lib/format';
 import { VariationStrip } from './VariationStrip';
-import type { SeriesPoint, ComboBucket, IpcSeriesPoint, BubblePoint } from './aggregate';
+import type { SeriesPoint, ComboBucket, IpcSeriesPoint, BubblePoint, GeographicGroupBy } from './aggregate';
 import type { Granularity } from './types';
 import { exportElementAsSvg } from '../area-quanti/dashboard/svgExport';
 
@@ -272,14 +272,18 @@ function BubbleTooltip({ active, payload }: DGTooltipProps & { payload?: Array<T
   );
 }
 
-export function PriceAreaBubbleChart({ data, standards, standard, neighborhoods, neighborhood, onStandardChange, onNeighborhoodChange }: {
+const BUBBLE_GEOGRAPHIC_LABEL: Record<GeographicGroupBy, string> = { neighborhood: 'Bairro', state: 'UF', city: 'Município' };
+
+export function PriceAreaBubbleChart({ data, standards, standard, geographicGroupBy, geographicValues, geographicValue, onStandardChange, onGeographicGroupByChange, onGeographicValueChange }: {
   data: BubblePoint[];
   standards: string[];
   standard: string | null;
-  neighborhoods: string[];
-  neighborhood: string | null;
+  geographicGroupBy: GeographicGroupBy;
+  geographicValues: string[];
+  geographicValue: string | null;
   onStandardChange: (value: string | null) => void;
-  onNeighborhoodChange: (value: string | null) => void;
+  onGeographicGroupByChange: (value: GeographicGroupBy) => void;
+  onGeographicValueChange: (value: string | null) => void;
 }) {
   return (
     <ChartCard
@@ -304,10 +308,12 @@ export function PriceAreaBubbleChart({ data, standards, standard, neighborhoods,
             <option value="">Todos</option>
             {standards.map((item) => <option key={item} value={item}>{item}</option>)}
           </select>
-          <span>Bairro</span>
-          <select className="dg-select" value={neighborhood ?? ''} onChange={(e) => onNeighborhoodChange(e.target.value || null)} aria-label="Filtrar gráfico por bairro">
+          <select className="dg-select" value={geographicGroupBy} onChange={(e) => onGeographicGroupByChange(e.target.value as GeographicGroupBy)} aria-label="Definir nível geográfico do filtro">
+            {(['neighborhood', 'state', 'city'] as GeographicGroupBy[]).map((item) => <option key={item} value={item}>{BUBBLE_GEOGRAPHIC_LABEL[item]}</option>)}
+          </select>
+          <select className="dg-select" value={geographicValue ?? ''} onChange={(e) => onGeographicValueChange(e.target.value || null)} aria-label={`Filtrar gráfico por ${BUBBLE_GEOGRAPHIC_LABEL[geographicGroupBy].toLowerCase()}`}>
             <option value="">Todos</option>
-            {neighborhoods.map((item) => <option key={item} value={item}>{item}</option>)}
+            {geographicValues.map((item) => <option key={item} value={item}>{item}</option>)}
           </select>
         </label>
       )}

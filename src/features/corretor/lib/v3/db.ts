@@ -2,9 +2,11 @@
 // Requer a migration 20260709100000_corretor_v3.sql.
 
 import { supabase } from '@/integrations/supabase/client';
+import { reviewCacheKey, LUNA_REVIEW_PROFILE } from '../../../../../supabase/functions/_shared/reviewer';
 import type { Finding } from '../audit/model';
 import type { AtaData } from './ia-ata';
 import type { AnalysisReport } from './pipeline';
+import { validateFonte, type Fonte } from './fonte';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const db = supabase as any;
@@ -13,6 +15,7 @@ export type FindingStatus = 'pendente' | 'corrigido' | 'ignorado';
 
 export interface StudyV3 {
   id: string;
+  createdBy?: string | null;
   nome: string;
   cidade: string | null;
   uf: string | null;
@@ -26,9 +29,27 @@ export interface StudyV3 {
   custoTotal: number;
   lastSha1: string | null;
   ata?: AtaData | null;
+  generation: 'v2' | 'v3';
+  /** Snapshot da análise completa (texto + visão + cruzamentos); null = não rodou. */
+  analise?: AnalysisReport | null;
+  /** Há planilhas-fonte (study_sources_v3) vinculadas ao estudo. */
+  temFonte?: boolean;
+}
+
+/**
+ * A análise completa não rodou: só a triagem inicial (R$ 0) existe. Nesse estado
+ * os contadores de erro NÃO descrevem o estudo — nada de texto/imagem foi lido.
+ * Caso real (Ana, João Pessoa, 30/set): o painel mostrava "0 erros" e liberava a
+ * entrega sem a análise ter sido feita. Estudos V2 antigos não têm o snapshot e
+ * não entram nessa regra.
+ */
+export function analysisPending(study: Pick<StudyV3, 'generation' | 'analise' | 'status'>): boolean {
+  return study.generation === 'v3' && study.status !== 'pronto' && !study.analise;
 }
 
 export interface FindingV3 {
+  /** IDs agrupados apenas na apresentação; nunca coluna/payload persistido. */
+  duplicateRuleIds?: string[];
   ruleId: string;
   status: FindingStatus;
   origem: string;
@@ -45,9 +66,20 @@ export interface DiffResult {
   fresh: string[];       // novos
 }
 
+export interface StudyFonte {
+  filename: string;
+  fonte: Fonte;
+}
+
 const isLocal = (f: Finding) => /^s\d+$/.test(f.slideRef.trim());
 
 // ── criação / listagem ────────────────────────────────────────────────────────
+
+export async function prepareStudyAtomic(nome: string, meta: {sha1: string; nSlides: number; arquivo: string}, findings: Finding[]): Promise<{id: string; created: boolean}> {
+  const {data,error} = await db.rpc('corretor_prepare_study', {p_name: nome,p_sha1: meta.sha1,p_slides:meta.nSlides,p_file:meta.arquivo,p_findings:findings});
+  if(error||!data?.id)throw new Error('Não foi possível registrar a apresentação. Confira a atualização do banco e tente novamente; os materiais continuam selecionados.');
+  return data;
+}
 
 export async function createStudy(
   nome: string,
@@ -56,7 +88,7 @@ export async function createStudy(
 ): Promise<string> {
   const { data: study, error } = await db
     .from('studies_v3')
-    .insert({ nome })
+    .insert({ nome, generation: 'v3' })
     .select('id')
     .single();
   if (error || !study) throw new Error(error?.message ?? 'Falha ao criar estudo');
@@ -85,18 +117,36 @@ export async function createStudy(
   return studyId;
 }
 
-export async function listStudies(): Promise<StudyV3[]> {
+export async function saveStudyFonte(studyId: string, filename: string, fonte: Fonte): Promise<void> {
+  const validated = validateFonte(fonte);
+  if (!validated.ok || !validated.fonte) throw new Error(`Fonte inválida: ${validated.errors.join(' ')}`);
+  const { error } = await db.from('study_sources_v3').upsert({
+    study_id: studyId, filename, payload: validated.fonte, updated_at: new Date().toISOString(),
+  });
+  if (error) throw new Error(error.message);
+}
+
+export async function loadStudyFonte(studyId: string): Promise<StudyFonte | null> {
+  const { data, error } = await db.from('study_sources_v3')
+    .select('filename, payload').eq('study_id', studyId).maybeSingle();
+  if (error || !data) return null;
+  const validated = validateFonte(data.payload);
+  return validated.ok && validated.fonte ? { filename: data.filename, fonte: validated.fonte } : null;
+}
+
+export async function listStudies(strict = false): Promise<StudyV3[]> {
   const { data, error } = await db
     .from('studies_v3')
-    .select('*, study_versions(n, n_slides, sha1), findings_v3(status)')
+    .select('*, study_versions(n, n_slides, sha1), findings_v3(status), study_sources_v3(study_id)')
     .order('created_at', { ascending: false });
-  if (error || !data) return [];
+  if (error || !data) { if (strict) throw new Error('Falha ao carregar os estudos.'); return []; }
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return data.map((s: any) => {
+  return data.filter((s: any) => !s.deleted_at).map((s: any) => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const versions = (s.study_versions ?? []).sort((a: any, b: any) => b.n - a.n);
     return {
       id: s.id,
+      createdBy: s.created_by ?? null,
       nome: s.nome,
       cidade: s.cidade,
       uf: s.uf ?? null,
@@ -109,6 +159,9 @@ export async function listStudies(): Promise<StudyV3[]> {
       custoTotal: Number(s.custo_total ?? 0),
       lastSha1: versions[0]?.sha1 ?? null,
       ata: (s.ata ?? null) as AtaData | null,
+      generation: s.generation === 'v3' ? 'v3' : 'v2',
+      analise: (s.relatorio ?? null) as AnalysisReport | null,
+      temFonte: Array.isArray(s.study_sources_v3) ? s.study_sources_v3.length > 0 : Boolean(s.study_sources_v3),
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       pendentes: (s.findings_v3 ?? []).filter((f: any) => f.status === 'pendente').length,
     };
@@ -153,12 +206,12 @@ export async function confirmAta(
   if (error) throw new Error(error.message);
 }
 
-export async function loadFindings(studyId: string): Promise<FindingV3[]> {
+export async function loadFindings(studyId: string, strict = false): Promise<FindingV3[]> {
   const { data, error } = await db
     .from('findings_v3')
     .select('*')
     .eq('study_id', studyId);
-  if (error || !data) return [];
+  if (error || !data) { if (strict) throw new Error('Não foi possível carregar os apontamentos.'); return []; }
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return data.map((r: any) => ({
     ruleId: r.rule_id,
@@ -204,6 +257,8 @@ export async function resolveInvalidFindings(studyId: string, ruleIds: string[])
     .update({ status: 'corrigido', resolvido_na_versao: version?.n ?? 1 })
     .eq('study_id', studyId)
     .eq('status', 'pendente')
+    .is('verdict', null)
+    .eq('verdict_revisado', false)
     .in('rule_id', ruleIds);
   if (error) throw new Error(error.message);
 }
@@ -229,15 +284,23 @@ export async function recheck(
   studyId: string,
   versionN: number,
   meta: { sha1?: string; nSlides: number; arquivo: string },
-  newFindings: Finding[]
+  newFindings: Finding[],
+  opts: { sourceCrosscheckRan?: boolean; evaluatedRule?: (ruleId: string) => boolean } = {}
 ): Promise<DiffResult> {
   const current = await loadFindings(studyId);
   // Diff comparado só com achados DET: newFindings vêm do motor determinístico,
   // então achados de IA (origem IA_*) não podem ser dados como resolvidos aqui —
   // eles só se resolvem quando um novo passe de IA rodar sobre a versão nova.
-  const activeIds = new Set(
-    current.filter((c) => c.resolvidoNaVersao === null && c.origem === 'DET').map((c) => c.ruleId)
-  );
+  const activeIds = new Set(current.filter((c) => {
+    if (c.resolvidoNaVersao !== null || c.origem !== 'DET') return false;
+    if (c.verdict || c.verdictRevisado || c.status === 'ignorado') return false;
+    // Ausência só prova resolução quando a regra realmente executou nesta rodada.
+    // Origem DET também inclui ata, visão/cache e relações da fonte de outras fases.
+    if (!opts.evaluatedRule?.(c.ruleId)) return false;
+    // Sem a fonte anexada nesta reconferência não há evidência para concluir que
+    // uma divergência fonte×deck sumiu; o achado permanece, em vez de virar falso corrigido.
+    return opts.sourceCrosscheckRan || c.finding.type !== 'SOURCE_CROSSCHECK';
+  }).map((c) => c.ruleId));
   const newIds = new Set(newFindings.map((f) => f.id));
 
   const resolved = [...activeIds].filter((id) => !newIds.has(id));
@@ -331,6 +394,25 @@ export async function insertIaFindings(
   return count ?? findings.length;
 }
 
+/** Atualiza só cobertura automática ainda não decidida; mantém a evidência anterior no payload. */
+export async function refreshUnreadCoverage(studyId: string, findings: Finding[]): Promise<void> {
+  const finding = findings.find(f => f.id === 'image-not-read');
+  if (!finding) return;
+  const {data: row, error} = await db.from('findings_v3').select('payload,status,verdict,verdict_revisado')
+    .eq('study_id',studyId).eq('rule_id',finding.id).maybeSingle();
+  if (error) throw new Error(error.message);
+  if (!row || row.status !== 'pendente' || row.verdict || row.verdict_revisado) return;
+  const previous = row.payload ?? {};
+  if (previous.detail === finding.detail && previous.title === finding.title && previous.slideRef === finding.slideRef) return;
+  const {readCoverageHistory = [], ...snapshot} = previous;
+  const payload = {...finding, readCoverageHistory:[...(Array.isArray(readCoverageHistory) ? readCoverageHistory : []), snapshot]};
+  const {error: updateError} = await db.from('findings_v3')
+    .update({titulo:finding.title,detalhe:finding.detail,slide_ref:finding.slideRef,payload})
+    .eq('study_id',studyId).eq('rule_id',finding.id).eq('status','pendente').is('verdict',null).eq('verdict_revisado',false)
+    .eq('detalhe',previous.detail ?? '');
+  if (updateError) throw new Error(updateError.message);
+}
+
 /** Registra um passe de IA e acumula o custo no estudo. */
 export async function registerIaPass(
   studyId: string,
@@ -358,7 +440,11 @@ export async function concludeStudy(studyId: string): Promise<void> {
 }
 
 export async function deleteStudy(studyId: string): Promise<void> {
-  await db.from('studies_v3').delete().eq('id', studyId);
+  const {data,error} = await db.rpc('corretor_trash_study',{p_study_id:studyId});
+  if (error || data !== true) {
+    if (error?.code === 'PGRST202' || error?.code === '42883') throw new Error('A exclusão aguarda a atualização do banco. O estudo continua preservado.');
+    throw new Error(error?.message || 'Não foi possível excluir este estudo. Ele continua disponível.');
+  }
 }
 
 // ── WS-2: relatório de entrega ────────────────────────────────────────────────
@@ -382,7 +468,7 @@ export async function loadDeliveryReport(studyId: string): Promise<DeliveryRepor
     .select('*, study_versions(n, n_slides, sha1)')
     .eq('id', studyId)
     .maybeSingle();
-  if (!s) return null;
+  if (!s || s.deleted_at) return null;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const versions = (s.study_versions ?? []).sort((a: any, b: any) => b.n - a.n);
   const study: StudyV3 = {
@@ -392,6 +478,8 @@ export async function loadDeliveryReport(studyId: string): Promise<DeliveryRepor
     lastVersion: versions[0]?.n ?? 1, nSlides: versions[0]?.n_slides ?? 0,
     custoTotal: Number(s.custo_total ?? 0), lastSha1: versions[0]?.sha1 ?? null,
     ata: (s.ata ?? null) as AtaData | null,
+    generation: s.generation === 'v3' ? 'v3' : 'v2',
+    analise: (s.relatorio ?? null) as AnalysisReport | null,
   };
 
   const findings = await loadFindings(studyId);
@@ -521,6 +609,21 @@ export async function loadTranscribedBySha1(shas: string[]): Promise<Map<string,
       for (const total of t.totals ?? []) parts.push(String(total ?? ''));
     }
     out.set(row.sha1 as string, parts.join(' | '));
+  }
+  return out;
+}
+
+/**
+ * Leituras de visão já pagas (vision_cache) para os sha1 dados, em lotes. Base do
+ * cruzamento com planilhas DEPOIS da análise: refaz as tabelas lidas sem nova
+ * chamada de IA e sem custo.
+ */
+export async function loadVisionReadings(shas: string[], profileId?: string): Promise<Map<string, { payload: unknown; model?: string }>> {
+  const out = new Map<string, { payload: unknown; model?: string }>();
+  for (let i = 0; i < shas.length; i += 50) {
+    const keys = shas.slice(i,i+50).map(sha=>profileId===LUNA_REVIEW_PROFILE?reviewCacheKey(sha,'vision','gpt-6-luna'):sha);
+    const { data } = await db.from('vision_cache').select('sha1, payload, model').in('sha1', keys);
+    for (const row of data ?? []) { const index=keys.indexOf(row.sha1); if(index>=0)out.set(shas[i+index], { payload: row.payload, model: (row.model as string) ?? undefined }); }
   }
   return out;
 }

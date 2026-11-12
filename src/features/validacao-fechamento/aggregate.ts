@@ -133,10 +133,7 @@ export function flattenBuildings(buildings: Building[]): ClosureRow[] {
   return out;
 }
 
-/** Campos necessários para aplicar os filtros da sidebar a qualquer linha (ClosureRow, Divergence). */
-export type VFFilterKeys = Pick<ClosureRow, 'city' | 'building_id' | 'building_type' | 'standard' | 'periodKey' | 'bucketYear' | 'bucketQuarter'>;
-
-export function applyVFFilters<T extends VFFilterKeys>(rows: T[], f: VFFilters): T[] {
+export function applyVFFilters(rows: ClosureRow[], f: VFFilters): ClosureRow[] {
   return rows.filter((r) => {
     if (f.cities.length && !f.cities.includes(r.city)) return false;
     if (f.years.length && !f.years.includes(r.bucketYear)) return false;
@@ -470,6 +467,14 @@ export interface ResumoResult {
 }
 
 export interface ResumoEmailResult {
+  displayPeriods: {
+    previousYearLabel: string;
+    previousLabel: string;
+    selectedLabel: string;
+    previousYear: Record<MetricKey, number | null>;
+    previous: Record<MetricKey, number | null>;
+    selected: Record<MetricKey, number | null>;
+  };
   previousYearKey: string;
   previousMonthKey: string;
   selectedKey: string;
@@ -517,13 +522,31 @@ export function computeResumo(rows: ClosureRow[], allRowsUnfiltered: ClosureRow[
   return { buckets, yearAgo, prevBucket };
 }
 
+/** Exclusivo do Resumo email: seleciona a última posição antes dos filtros de preço. */
+function emailLatestAveragePrice(rows: ClosureRow[]): number | null {
+  const latest = new Map<string, ClosureRow>();
+  for (const row of rows) {
+    const key = JSON.stringify([row.building_id, row.typology_id]);
+    const previous = latest.get(key);
+    if (!previous || row.period > previous.period) latest.set(key, row);
+  }
+  let totalPrice = 0;
+  let totalQty = 0;
+  for (const row of latest.values()) {
+    if (row.type_of_typology !== 'Padrão' || row.typology_stock === 0 || row.price == null) continue;
+    totalPrice += row.qty * row.price;
+    totalQty += row.qty;
+  }
+  return totalQty > 0 ? totalPrice / totalQty : null;
+}
+
 function metricsForRows(rows: ClosureRow[], dimensionRows: ClosureRow[], maxPeriodKey: string): Record<MetricKey, number | null> {
   const agg = newAgg();
   for (const row of rows) {
     const bucketKey = bucketKeyOfRow(row, 'month');
     accumulate(agg, row, bucketKey, releaseBucketKeyOfRow(row, 'month'));
   }
-  return metricsWithOfertaAtiva(agg, dimensionRows, maxPeriodKey);
+  return { ...metricsWithOfertaAtiva(agg, dimensionRows, maxPeriodKey), preco_medio: emailLatestAveragePrice(rows) };
 }
 
 function shiftMonth(periodKey: string, months: number): string {
@@ -536,11 +559,10 @@ function shiftMonth(periodKey: string, months: number): string {
 }
 
 /**
- * Base da aba Resumo Email: sempre trabalha em meses, mesmo que a visualização
- * principal esteja anual ou trimestral. O período de referência é o último mês
- * que permanece após os filtros temporais aplicados.
+ * As três colunas de períodos e a variação anual acompanham a visualização.
+ * Os acumulados preservam o cálculo mensal e o último mês selecionado como referência.
  */
-export function computeResumoEmail(selectedRows: ClosureRow[], dimensionRows: ClosureRow[]): ResumoEmailResult | null {
+export function computeResumoEmail(selectedRows: ClosureRow[], dimensionRows: ClosureRow[], granularity: Granularity = 'month'): ResumoEmailResult | null {
   const selectedKey = selectedRows.reduce((latest, row) => row.periodKey > latest ? row.periodKey : latest, '');
   if (!selectedKey) return null;
 
@@ -550,15 +572,48 @@ export function computeResumoEmail(selectedRows: ClosureRow[], dimensionRows: Cl
   const previousYear = previousYearKey.slice(0, 4);
   const inRange = (row: ClosureRow, year: string, end: string) => row.periodKey >= `${year}-01` && row.periodKey <= end;
 
+  const current = metricsForRows(dimensionRows.filter((row) => row.periodKey === selectedKey), dimensionRows, selectedKey);
+  const priorYear = metricsForRows(dimensionRows.filter((row) => row.periodKey === previousYearKey), dimensionRows, previousYearKey);
+  const priorMonth = metricsForRows(dimensionRows.filter((row) => row.periodKey === previousMonthKey), dimensionRows, previousMonthKey);
+  const displayKey = bucketOfStr(selectedKey, granularity);
+  const displayPriorYearKey = bucketOfStr(previousYearKey, granularity);
+  const displayPriorKey = bucketOfStr(shiftMonth(selectedKey, granularity === 'year' ? -12 : granularity === 'quarter' ? -3 : -1), granularity);
+  const grouped = granularity === 'month' ? null : computeResumo(dimensionRows, dimensionRows, granularity);
+  // Exclusivo do Resumo email: qty entra no trimestre/ano somente no mês de
+  // lançamento, como já ocorre na visão mensal e nos acumulados. Não repetir
+  // a mesma quantidade nos históricos posteriores do intervalo.
+  const launchesByBucket = new Map<string, number>();
+  if (granularity !== 'month') {
+    for (const row of dimensionRows) {
+      if (!row.periodKey || row.periodKey !== row.release_period_key) continue;
+      const key = bucketKeyOfRow(row, granularity);
+      launchesByBucket.set(key, (launchesByBucket.get(key) ?? 0) + row.qty);
+    }
+  }
+  const groupedMetrics = (key: string) => {
+    const metrics = grouped?.buckets.find((bucket) => bucket.key === key)?.metrics;
+    return metrics
+      ? { ...metrics, unidades_lancadas: launchesByBucket.get(key) ?? 0, preco_medio: emailLatestAveragePrice(dimensionRows.filter((row) => bucketKeyOfRow(row, granularity) === key)) }
+      : metricsWithOfertaAtiva(undefined, dimensionRows, '');
+  };
+
   return {
+    displayPeriods: {
+      previousYearLabel: displayPriorYearKey,
+      previousLabel: displayPriorKey,
+      selectedLabel: displayKey,
+      previousYear: granularity === 'month' ? priorYear : groupedMetrics(displayPriorYearKey),
+      previous: granularity === 'month' ? priorMonth : groupedMetrics(displayPriorKey),
+      selected: granularity === 'month' ? current : groupedMetrics(displayKey),
+    },
     previousYearKey,
     previousMonthKey,
     selectedKey,
     previousYearAccumLabel: `Acum jan/${previousYear.slice(-2)} a ${bucketMonthFromStr(previousYearKey)}`,
     selectedAccumLabel: `Acum jan/${selectedYear.slice(-2)} a ${bucketMonthFromStr(selectedKey)}`,
-    previousYear: metricsForRows(dimensionRows.filter((row) => row.periodKey === previousYearKey), dimensionRows, previousYearKey),
-    previousMonth: metricsForRows(dimensionRows.filter((row) => row.periodKey === previousMonthKey), dimensionRows, previousMonthKey),
-    selected: metricsForRows(dimensionRows.filter((row) => row.periodKey === selectedKey), dimensionRows, selectedKey),
+    previousYear: priorYear,
+    previousMonth: priorMonth,
+    selected: current,
     previousYearAccum: metricsForRows(dimensionRows.filter((row) => inRange(row, previousYear, previousYearKey)), dimensionRows, previousYearKey),
     selectedAccum: metricsForRows(dimensionRows.filter((row) => inRange(row, selectedYear, selectedKey)), dimensionRows, selectedKey),
   };

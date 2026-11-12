@@ -6,7 +6,6 @@ import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { CheckCircle2, Loader2, PackageCheck, ArrowLeft, Printer } from 'lucide-react';
 import { errorLabel, type ErrorType } from '../lib/error-catalog';
-import { formatBRL } from '../lib/v3/config';
 import { loadDeliveryReport, type DeliveryReport } from '../lib/v3/db';
 
 function Stat({ n, label }: { n: number; label: string }) {
@@ -61,7 +60,6 @@ export default function CorretorReportPage() {
           </div>
           <p className="text-sm text-muted-foreground">
             {local && <>{local} · </>}versão {study.lastVersion} · {study.nSlides} slides
-            {study.custoTotal > 0 && <> · IA {formatBRL(study.custoTotal)}</>}
           </p>
           <p className="text-[11px] text-muted-foreground">
             {entregue

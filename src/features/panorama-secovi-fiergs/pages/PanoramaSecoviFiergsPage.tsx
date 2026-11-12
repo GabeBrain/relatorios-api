@@ -1,58 +1,106 @@
-import { useMemo, useState } from 'react';
+import { TerritorialGroupsDialog } from '../components/TerritorialGroupsDialog';
+import { defaultTerritorialPresentation, panoramaCollectionKey, territorialPresentationErrors, territorialPresentationKey } from '../domain/territorial-presentation';
+import { reprojectPanoramaReport } from '../report/model';
+import { useAuthStore } from '@/store/auth-store';
+import type { PanoramaReportModel, TerritorialPresentation } from '../types';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { AlertCircle, BarChart3, CircleHelp, Info, RefreshCw } from 'lucide-react';
+import { AlertCircle, BarChart3, CircleHelp, RefreshCw } from 'lucide-react';
 import { useGeoApiScope } from '@/features/shared/geo-api-scope-engine';
 import type { GeoScope } from '@/features/shared/geo-api-scope-engine/types';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { fetchPanoramaReportModel } from '../api';
+import { createPanoramaCollectionSession, fetchPanoramaReportModel, PanoramaCollectionError } from '../api';
 import { ReportPaginator } from '../components/ReportPaginator';
+import { GenerationNoticesPanel } from '../components/GenerationNoticesPanel';
+import { FormulaReference, GlossaryReference, MethodologyReference } from '../components/ReportReferencePanels';
 import { PanoramaCityMultiSelect } from '../components/PanoramaCityMultiSelect';
 import { PanoramaQuarterRangePicker } from '../components/PanoramaQuarterRangePicker';
 import { PanoramaLoadingState } from '../components/PanoramaLoadingState';
 import { availableEndQuarters } from '../domain/quarters';
 import { type PanoramaGenerationProgress } from '../domain/generation-progress';
-import { panoramaManifestFor } from '../report/manifest';
-import type { PanoramaScope, Quarter } from '../types';
+import { downloadCollectionFailureCsv } from '../lib/collection-failure-audit';
+import type { EntityId, PanoramaScope, Quarter } from '../types';
+import { panoramaCitiesAuthorized } from '../scope-identity';
+import { HISTORY_CONTRACT_KEY } from '../domain/building-history';
+import '@/styles/geobrain-tokens.css';
+import '../scope-controls.css';
 
 export default function PanoramaSecoviFiergsPage() {
+  const token = useAuthStore((state) => state.token);
+  const collected = useRef<{ report: PanoramaReportModel; token: string | null } | null>(null);
+  const [groupsOpen,setGroupsOpen]=useState(false);
+  const [groupDraft,setGroupDraft]=useState<TerritorialPresentation>();
   const [geo, setGeo] = useState<GeoScope>({ uf: 'SP', city: '' });
   const [cities, setCities] = useState<string[]>([]);
   const [scope, setScope] = useState<PanoramaScope>({ uf: 'SP', cities: [], startQuarter: '1T2023', endQuarter: '2T2026', entity: 'secovi-sp', engineVersion: 'v4' });
   const [submitted, setSubmitted] = useState<PanoramaScope | null>(null);
   const [generationProgress, setGenerationProgress] = useState<PanoramaGenerationProgress | null>(null);
-  const geoApi = useGeoApiScope({ value: geo, onChange: (next) => { setGeo(next); if (next.uf !== geo.uf) { setCities([]); setScope((current) => ({ ...current, cities: [] })); setSubmitted(null); } } });
+  const [generationId, setGenerationId] = useState(0);
+  const collectionSession = useRef<object>(createPanoramaCollectionSession());
+  const generationController = useRef(new AbortController());
+  const resetCollectionSession = () => {
+    generationController.current.abort();
+    generationController.current = new AbortController();
+    collectionSession.current = createPanoramaCollectionSession();
+  };
+  useEffect(() => () => generationController.current.abort(), []);
+  useEffect(() => { collected.current = null; setSubmitted(null); }, [token]);
+  const geoApi = useGeoApiScope({ value: geo, onChange: (next) => { setGeo(next); if (next.uf !== geo.uf) { resetCollectionSession(); setCities([]); setScope((current) => ({ ...current, uf: next.uf, cities: [], presentation: { mode: 'consolidated' } })); setGroupDraft(undefined); setGroupsOpen(false); setSubmitted(null); } } });
   const quarters = useMemo(() => availableEndQuarters('1T2019'), []);
   const queryScope = submitted ? { ...submitted, cities: [...submitted.cities].sort((a, b) => a.localeCompare(b, 'pt-BR')) } : null;
   const report = useQuery({
-    queryKey: ['panorama-report', queryScope?.uf, queryScope?.cities, queryScope?.startQuarter, queryScope?.endQuarter, queryScope?.entity, queryScope?.engineVersion],
+    queryKey: ['panorama-report', HISTORY_CONTRACT_KEY, 'geobrain-market-v1', generationId, queryScope?.uf, queryScope?.cities, queryScope?.startQuarter, queryScope?.endQuarter, queryScope?.entity, queryScope?.engineVersion, territorialPresentationKey(queryScope?.presentation)],
     // O recorte só muda por uma nova geração (o botão fica bloqueado durante a coleta).
     // Não repassamos o sinal efêmero do React Query: ele vinha cancelando o fallback legado de
     // todas as cidades quando uma das requisições paralelas era descartada pelo navegador.
-    queryFn: () => fetchPanoramaReportModel(queryScope!, undefined, setGenerationProgress),
+    queryFn: async () => {
+      const previous = collected.current;
+      if (previous && previous.token === token && panoramaCollectionKey(previous.report.scope) === panoramaCollectionKey(queryScope!))
+        return reprojectPanoramaReport(previous.report, queryScope!);
+      const result = await fetchPanoramaReportModel(queryScope!, generationController.current.signal, setGenerationProgress, collectionSession.current);
+      collected.current = { report: result, token };
+      return result;
+    },
     enabled: Boolean(queryScope), staleTime: 5 * 60_000, refetchOnWindowFocus: false, refetchOnReconnect: false, retry: 0,
   });
-  const reportPageCount = report.data ? panoramaManifestFor(report.data, import.meta.env.VITE_MAPBOX_ACCESS_TOKEN ?? '').length : 0;
-  const ready = Boolean(geoApi.strictReady && cities.length && scope.startQuarter && scope.endQuarter);
-  const updateCities = (next: string[]) => { setCities(next); setGeo((current) => ({ ...current, city: next[0] ?? '' })); setScope((current) => ({ ...current, cities: next })); setSubmitted(null); };
-  const updateRange = (startQuarter: Quarter, endQuarter: Quarter) => { setScope((current) => ({ ...current, startQuarter, endQuarter })); setSubmitted(null); };
-  const generate = () => { if (!ready || !scope.startQuarter) return; const next = { ...scope, uf: geo.uf, cities: [...cities].sort((a, b) => a.localeCompare(b, 'pt-BR')) }; setGenerationProgress(null); setScope(next); setSubmitted(next); };
-  return <div className="mx-auto max-w-[1440px] space-y-5 p-4 sm:p-6 animate-fade-in">
-    <header className="max-w-3xl"><h1 className="text-2xl font-semibold tracking-tight">Relatório Secovi/FIERGS</h1></header>
-    <section className="overflow-visible rounded-xl border border-border bg-card p-4 shadow-sm"><div className="grid grid-cols-1 items-start gap-x-5 gap-y-3 md:grid-cols-[96px_minmax(280px,1fr)_minmax(190px,auto)_auto]">
+  const ready = Boolean(geoApi.strictReady && panoramaCitiesAuthorized(cities, geoApi.availableCities) && scope.startQuarter && scope.endQuarter);
+  const updateCities = (next: string[]) => { resetCollectionSession(); setCities(next); setGeo((current)=>({...current,city:next[0]??''}));setScope(current=>({...current,cities:next,presentation:defaultTerritorialPresentation(next)}));setSubmitted(null);setGroupsOpen(false); };
+
+  const updateRange = (startQuarter: Quarter, endQuarter: Quarter) => { resetCollectionSession(); setScope((current) => ({ ...current, startQuarter, endQuarter })); setSubmitted(null); };
+  const updateEntity = (entity: EntityId) => {
+    resetCollectionSession();
+    setSubmitted(null);
+    const uf = entity === 'fiergs-rs' ? 'RS' : 'SP';
+    setGeo({ uf, city: '' });
+    setCities([]);
+    setGroupDraft(undefined); setGroupsOpen(false);
+    setScope((current) => ({ ...current, uf, cities: [], entity, engineVersion: 'v4', presentation: { mode: 'consolidated' } }));
+  };
+  const submit=(presentation:TerritorialPresentation)=>{
+    if(!ready||territorialPresentationErrors({cities,presentation}).length)return;
+    const next={...scope,uf:geo.uf,cities:[...cities].sort((a,b)=>a.localeCompare(b,'pt-BR')),presentation};
+    resetCollectionSession();setGenerationId(id=>id+1);setGenerationProgress(null);setScope(next);setSubmitted(next);setGroupsOpen(false);
+  };
+  const generate=()=>{if(!ready)return;if(cities.length>=2)setGroupsOpen(true);else submit(defaultTerritorialPresentation(cities));};
+
+  return <div className="panorama-scope-page mx-auto max-w-[1440px] space-y-5 p-4 sm:p-6 animate-fade-in">
+    <header className="max-w-3xl"><h1 className="text-2xl font-semibold tracking-tight">Panorama de Mercado</h1><p className="mt-1 text-sm text-muted-foreground">Panoramas executivos Secovi/FIERGS por praça e período.</p></header>
+    <section className="overflow-visible rounded-xl border border-border bg-card p-4 shadow-sm"><div className="grid grid-cols-1 items-start gap-x-5 gap-y-3 md:grid-cols-[210px_96px_minmax(280px,1fr)_minmax(190px,auto)_auto]">
+      <div className="w-full space-y-1.5"><label htmlFor="panorama-entity" className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">Entidade / produto</label><Select value={scope.entity ?? 'secovi-sp'} onValueChange={(value) => updateEntity(value as EntityId)} disabled={report.isFetching}><SelectTrigger id="panorama-entity" className="h-9 text-sm"><SelectValue/></SelectTrigger><SelectContent><SelectItem value="secovi-sp">Secovi-SP</SelectItem><SelectItem value="fiergs-rs">FIERGS</SelectItem></SelectContent></Select></div>
       {!geoApi.hasToken ? <div className="rounded-lg border border-amber-400 bg-amber-50 px-3 py-2 text-xs text-amber-800 md:col-span-2">Faça login no cabeçalho para carregar as cidades monitoradas.</div> : geoApi.error ? <div className="flex items-center gap-2 rounded-lg border border-destructive/40 bg-destructive/5 px-3 py-2 text-xs text-destructive md:col-span-2"><span className="min-w-0 flex-1">Falha ao carregar /monitored-cities: {geoApi.error.message}</span><Button type="button" size="sm" variant="outline" onClick={geoApi.reload}><RefreshCw className="h-3 w-3"/>Tentar novamente</Button></div> : <>
-        <div className="w-full space-y-1.5"><label className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">UF</label><Select value={geo.uf} onValueChange={geoApi.setUf} disabled={geoApi.isLoading || !geoApi.citiesByUf}><SelectTrigger className="h-9 text-sm"><SelectValue placeholder={geoApi.isLoading ? '…' : 'UF'}/></SelectTrigger><SelectContent>{geoApi.availableUfs.map((uf) => <SelectItem key={uf} value={uf}>{uf}</SelectItem>)}</SelectContent></Select></div>
-        <div className="min-w-[260px] flex-1"><PanoramaCityMultiSelect cities={cities} options={geoApi.availableCities} onChange={updateCities} loading={geoApi.isLoading} disabled={geoApi.isLoading || !geo.uf} /></div>
+        <div className="w-full space-y-1.5"><label htmlFor="panorama-uf" className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">UF</label><Select value={geo.uf} onValueChange={geoApi.setUf} disabled={geoApi.isLoading || !geoApi.citiesByUf || report.isFetching}><SelectTrigger id="panorama-uf" className="h-9 text-sm"><SelectValue placeholder={geoApi.isLoading ? '…' : 'UF'}/></SelectTrigger><SelectContent>{geoApi.availableUfs.map((uf) => <SelectItem key={uf} value={uf}>{uf}</SelectItem>)}</SelectContent></Select></div>
+        <div className="min-w-0 flex-1"><PanoramaCityMultiSelect cities={cities} options={geoApi.availableCities} onChange={updateCities} loading={geoApi.isLoading} disabled={geoApi.isLoading || !geo.uf || report.isFetching} /></div>
       </>}
       <PanoramaQuarterRangePicker start={scope.startQuarter} end={scope.endQuarter} options={quarters} onChange={updateRange} />
       <div className="min-w-[176px] pt-[30px]"><Button className="h-9 w-full justify-center whitespace-nowrap" onClick={generate} disabled={!ready || report.isFetching}><BarChart3 className="shrink-0"/>{report.isFetching ? 'Consultando APIs…' : 'Gerar relatório'}</Button></div>
-    </div></section>
+    </div></section><TerritorialGroupsDialog open={groupsOpen} onOpenChange={setGroupsOpen} cities={cities} value={groupDraft} onConfirm={(presentation)=>{setGroupDraft(presentation);submit(presentation);}}/>
     {!submitted && <Alert><CircleHelp className="h-4 w-4"/><AlertTitle>Defina o recorte</AlertTitle><AlertDescription>Escolha a UF, um ou mais municípios monitorados e o período; nenhuma chamada pesada é feita antes de um escopo válido.</AlertDescription></Alert>}
     {report.isPending && submitted && <PanoramaLoadingState label="Consultando APIs e montando o relatório…" progress={generationProgress} />}
     {report.data && report.isFetching && <PanoramaLoadingState compact label="Atualizando relatório…" progress={generationProgress} />}
-    {report.isError && <Alert variant="destructive"><AlertCircle className="h-4 w-4"/><AlertTitle>Não foi possível compor o relatório</AlertTitle><AlertDescription><p className="mt-1 break-words">{report.error instanceof Error ? report.error.message : 'A API não retornou um recorte utilizável.'}</p><Button className="mt-3" variant="outline" size="sm" onClick={() => report.refetch()}><RefreshCw/>Tentar novamente</Button></AlertDescription></Alert>}
-    {report.data && <Tabs defaultValue="report"><TabsList><TabsTrigger value="report">Relatório V4 ({reportPageCount} páginas)</TabsTrigger><TabsTrigger value="method">Metodologia</TabsTrigger></TabsList><TabsContent value="report" className="space-y-4"><Alert><Info className="h-4 w-4"/><AlertTitle>IVV por tipologia calculado pelo histórico granular</AlertTitle><AlertDescription>Para este relatório, o IVV por faixa/tipologia é calculado com vendas líquidas, oferta anterior e lançamentos observados no recorte. O documento exportado apresenta apenas o indicador calculado, sem mensagens técnicas.</AlertDescription></Alert><ReportPaginator report={report.data}/></TabsContent><TabsContent value="method"><Alert><CircleHelp className="h-4 w-4"/><AlertTitle>Metodologia do recorte</AlertTitle><AlertDescription>Os lançamentos vêm de `building-with-history`. Vendas, estoque, IVV, preços, coortes e mapa usam as fontes e fórmulas apropriadas ao indicador, com proveniência por município e sem fallback para gabarito ou mock.</AlertDescription></Alert></TabsContent></Tabs>}
+    {report.isError && <Alert variant="destructive"><AlertCircle className="h-4 w-4"/><AlertTitle>Não foi possível concluir a coleta</AlertTitle><AlertDescription><p className="mt-1 break-words">{report.error instanceof Error ? report.error.message : 'A API não retornou um recorte completo.'}</p><p className="mt-2 text-xs">Nenhum relatório parcial foi montado ou liberado para exportação. As cidades concluídas ficam preservadas apenas nesta tentativa.</p><div className="mt-3 flex flex-wrap gap-2"><Button variant="outline" size="sm" disabled={report.isFetching || !(report.error instanceof PanoramaCollectionError && report.error.retryable)} onClick={() => report.refetch()}><RefreshCw/>Tentar cidades faltantes</Button><Button variant="outline" size="sm" onClick={() => report.error instanceof PanoramaCollectionError && downloadCollectionFailureCsv(report.error.failures)}>Baixar diagnóstico CSV</Button><Button variant="ghost" size="sm" disabled={report.isFetching} onClick={generate}>Recomeçar coleta</Button></div></AlertDescription></Alert>}
+    {report.data && <Tabs defaultValue="report"><TabsList className="flex h-auto flex-wrap justify-start"><TabsTrigger value="report">Relatório</TabsTrigger><TabsTrigger value="notices">Avisos</TabsTrigger><TabsTrigger value="method">Metodologia</TabsTrigger><TabsTrigger value="glossary">Glossário</TabsTrigger><TabsTrigger value="formulas">Fórmulas</TabsTrigger></TabsList><TabsContent value="report"><ReportPaginator report={report.data}/></TabsContent><TabsContent value="notices"><GenerationNoticesPanel report={report.data} idPrefix="notices"/></TabsContent><TabsContent value="method"><MethodologyReference entity={report.data.scope.entity ?? 'secovi-sp'} scope={report.data.scope}/></TabsContent><TabsContent value="glossary"><GlossaryReference/></TabsContent><TabsContent value="formulas"><FormulaReference entity={report.data.scope.entity ?? 'secovi-sp'}/></TabsContent></Tabs>}
   </div>;
 }

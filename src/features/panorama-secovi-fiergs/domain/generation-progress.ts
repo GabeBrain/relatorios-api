@@ -1,4 +1,4 @@
-export type PanoramaGenerationPhase = 'collecting' | 'consolidating' | 'preparing';
+export type PanoramaGenerationPhase = 'collecting' | 'retrying' | 'consolidating' | 'preparing';
 
 export interface PanoramaGenerationProgress {
   phase: PanoramaGenerationPhase;
@@ -10,11 +10,13 @@ export interface PanoramaGenerationProgress {
   operation?: string;
   completedCities: string[];
   failedCities: string[];
+  totalCities: number;
+  attempt?: number;
 }
 
 export type PanoramaProgressListener = (progress: PanoramaGenerationProgress) => void;
 
-const UNITS_PER_CITY = 11;
+const UNITS_PER_CITY = 10;
 
 /** Progresso baseado nas chamadas realmente encerradas, não em temporizador estimado. */
 export function createPanoramaGenerationProgress(cityCount: number, listener?: PanoramaProgressListener) {
@@ -24,23 +26,35 @@ export function createPanoramaGenerationProgress(cityCount: number, listener?: P
   let phase: PanoramaGenerationPhase = 'collecting';
   let city: string | undefined;
   let operation: string | undefined;
+  let attempt: number | undefined;
+  const finishedUnits = new Set<string>();
   const completedCities = new Set<string>();
   const failedCities = new Set<string>();
 
   const emit = () => listener?.({
-    phase, completed, total, percent: Math.round(completed / total * 100), startedAt, city, operation,
-    completedCities: [...completedCities], failedCities: [...failedCities],
+    phase, completed, total, percent: Math.floor(completed / total * 100), startedAt, city, operation,
+    completedCities: [...completedCities], failedCities: [...failedCities], attempt, totalCities: cityCount,
   });
   const step = (nextPhase: PanoramaGenerationPhase, nextCity?: string, nextOperation?: string) => {
     completed = Math.min(total, completed + 1);
-    phase = nextPhase; city = nextCity; operation = nextOperation;
+    phase = nextPhase; city = nextCity; operation = nextOperation; attempt = undefined;
     emit();
   };
 
   return {
     start: () => emit(),
-    unit: (nextCity: string, nextOperation: string) => step('collecting', nextCity, nextOperation),
+    unit: (nextCity: string, nextOperation: string) => {
+      const key = JSON.stringify([nextCity, nextOperation]);
+      if (!finishedUnits.has(key)) {
+        finishedUnits.add(key);
+        completed = Math.min(cityCount * UNITS_PER_CITY, completed + 1);
+      }
+      phase = 'collecting'; city = nextCity; operation = nextOperation; attempt = undefined;
+      emit();
+    },
+    retry: (nextCity: string, nextAttempt: number) => { phase = 'retrying'; city = nextCity; operation = 'tentativa de recuperação'; attempt = nextAttempt; emit(); },
     cityComplete: (nextCity: string) => { completedCities.add(nextCity); city = nextCity; operation = 'cidade concluída'; emit(); },
+    cityReused: (nextCity: string) => { if (!completedCities.has(nextCity)) completed = Math.min(cityCount * UNITS_PER_CITY, completed + UNITS_PER_CITY); completedCities.add(nextCity); city = nextCity; operation = 'cidade preservada da tentativa anterior'; emit(); },
     cityFailed: (nextCity: string) => { failedCities.add(nextCity); city = nextCity; operation = 'cidade indisponível'; emit(); },
     consolidate: () => step('consolidating', undefined, 'consolidando municípios'),
     prepare: () => step('preparing', undefined, 'preparando páginas'),

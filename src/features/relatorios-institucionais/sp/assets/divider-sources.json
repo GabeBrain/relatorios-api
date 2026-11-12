@@ -1,0 +1,61 @@
+{
+  "source": "2026.06_PANORAMA_SAO_PAULO_VAP_13ago.pptx",
+  "sourceSha256": "1350f82cb1d9386487ca1a9aee110fb19cf3d6ea7cb40d4a0205025802d9939b",
+  "render": "PowerPoint COM, read-only, 1280x720, 2026-11-05",
+  "slides": [
+    {
+      "slide": 8,
+      "file": "divider-08.png",
+      "sha256": "2f459becae98ee2a68f00b4b13299b6a9805bf5162f4371a4438a6a172278462",
+      "change": "None"
+    },
+    {
+      "slide": 12,
+      "file": "divider-12.png",
+      "sha256": "4dd59c1f40853363ae917ed08cd326a218558a4533a1ceac6c753a8a119a84fa",
+      "change": "None"
+    },
+    {
+      "slide": 31,
+      "file": "divider-31.png",
+      "sha256": "1ab3182be3aaa618c14966a1e16679839c40c08986ab05d2b6771adb53c22c1b",
+      "change": "None"
+    },
+    {
+      "slide": 45,
+      "file": "divider-45.png",
+      "sha256": "ec9ef7c0f2fc50f97905d2858933df8c6f3ca143db3370e1a5c3817685aec533",
+      "change": "Removed fixed June2026 date label in memory before rendering; no source save."
+    },
+    {
+      "slide": 49,
+      "file": "divider-49.png",
+      "sha256": "002dccd7a031ddf0f712306cd15b337440acd5d3e2ce6929ab8ad038c14a1e04",
+      "change": "None"
+    },
+    {
+      "slide": 52,
+      "file": "divider-52.png",
+      "sha256": "fd73666a416b5fca39468d741cdd7d17b40bb8e9a9bd624386647ebc143d4baf",
+      "change": "None"
+    },
+    {
+      "slide": 60,
+      "file": "divider-60.png",
+      "sha256": "1ca2c7cd8f672992f1af17fe8482b712db1429541f2a18834d71ad4580a5766c",
+      "change": "None"
+    },
+    {
+      "slide": 65,
+      "file": "divider-65.png",
+      "sha256": "b4a2e0e6aded65fd523b7344d130c9bca075d8bebd7b6942ed583ec616af2d6a",
+      "change": "None"
+    },
+    {
+      "slide": 81,
+      "file": "divider-81.png",
+      "sha256": "93d6810d7548945238c7783d2f3e0cbe9e4a45d08315261a2f5a33c83e6c220b",
+      "change": "None"
+    }
+  ]
+}

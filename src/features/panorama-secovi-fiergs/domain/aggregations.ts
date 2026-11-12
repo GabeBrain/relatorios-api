@@ -1,6 +1,8 @@
 import type { CubeProject, MarketCube } from './cube';
 import { addNullable, horizontalProjects, verticalProjects, weightedAverage } from './cube';
-import { SECOVI_HORIZONTAL_LABEL } from './entity-policy';
+import { FIERGS_HORIZONTAL_PRODUCT_LABELS, SECOVI_HORIZONTAL_LABEL } from './entity-policy';
+import { closingPlants, priceContributions, pricePlant, plantSnapshot, previousQuarter, sumObserved } from './market-observations';
+import { quarterEndMonth } from './quarters';
 import {
   COHORT_SUBTOTAL_LABEL,
   COHORT_TOTAL_LABEL,
@@ -92,7 +94,7 @@ export interface VgvRow {
 /* Helpers                                                                     */
 /* -------------------------------------------------------------------------- */
 
-const distinctProjects = (projects: CubeProject[]) => new Set(projects.map((project) => project.key)).size;
+const distinctProjects = (projects: CubeProject[]) => new Set(projects.filter((p) => p.marketActive !== false).map((project) => project.key)).size;
 const sumOf = (projects: CubeProject[], pick: (project: CubeProject) => number | null): number | null =>
   projects.reduce<number | null>((sum, project) => addNullable(sum, pick(project)), null);
 
@@ -115,6 +117,14 @@ function offerRow(label: string, kind: RowKind, projects: CubeProject[]): OfferR
   };
 }
 
+/** Regra compartilhada entre a tabela de preços e a distribuição mínimo/média/máximo. */
+export function projectAveragePricePerMeter(projects: CubeProject[]): number | null {
+  return weightedAverage(projects.map((project) => ({
+    value: project.averagePricePerMeter,
+    weight: project.finalUnits ?? project.launchedUnits,
+  })));
+}
+
 function priceRow(label: string, kind: RowKind, projects: CubeProject[]): PriceRow {
   const weight = (project: CubeProject) => project.finalUnits ?? project.launchedUnits;
   return {
@@ -123,7 +133,7 @@ function priceRow(label: string, kind: RowKind, projects: CubeProject[]): PriceR
     projects: distinctProjects(projects),
     averageTicket: weightedAverage(projects.map((project) => ({ value: project.averageTicket, weight: weight(project) }))),
     averageArea: weightedAverage(projects.map((project) => ({ value: project.averageArea, weight: weight(project) }))),
-    averagePricePerMeter: weightedAverage(projects.map((project) => ({ value: project.averagePricePerMeter, weight: weight(project) }))),
+    averagePricePerMeter: projectAveragePricePerMeter(projects),
   };
 }
 
@@ -166,6 +176,37 @@ function typologyOfferRow(label: string, projects: CubeProject[]): OfferRow {
   };
 }
 
+type OfferMetric = 'launchedUnits' | 'finalUnits' | 'soldUnits';
+
+/**
+ * Parte do total do empreendimento que a API não abriu em linhas tipológicas.
+ * `null` no total continua `null`: ausência nunca é convertida em zero. Um valor
+ * negativo permanece visível para que as guardas possam acusar sobrecobertura.
+ */
+function typologyResidual(project: CubeProject, metric: OfferMetric): number | null {
+  const projectValue = project[metric];
+  if (projectValue === null) return null;
+  const typedValue = project.typologies.reduce<number | null>((sum, row) => addNullable(sum, row[metric]), null);
+  return projectValue - (typedValue ?? 0);
+}
+
+function typologyResidualOfferRow(projects: CubeProject[]): OfferRow | null {
+  const residualProjects = projects.filter((project) => (['launchedUnits', 'finalUnits', 'soldUnits'] as const)
+    .some((metric) => (typologyResidual(project, metric) ?? 0) !== 0));
+  if (!residualProjects.length) return null;
+  const launchedUnits = sumOf(residualProjects, (project) => typologyResidual(project, 'launchedUnits'));
+  const finalUnits = sumOf(residualProjects, (project) => typologyResidual(project, 'finalUnits'));
+  return {
+    label: UNCLASSIFIED,
+    kind: 'row',
+    projects: distinctProjects(residualProjects),
+    launchedUnits,
+    finalUnits,
+    soldUnits: sumOf(residualProjects, (project) => typologyResidual(project, 'soldUnits')),
+    availability: availabilityOf(launchedUnits, finalUnits),
+  };
+}
+
 /* -------------------------------------------------------------------------- */
 /* Slides 31, 34, 35 — oferta por padrão e por tipologia                       */
 /* -------------------------------------------------------------------------- */
@@ -183,17 +224,23 @@ export function offerByTypology(cube: MarketCube, segment: 'Vertical' | 'Horizon
   const universe = segment === 'Vertical' ? verticalProjects(cube) : horizontalProjects(cube);
   const groups = projectsByTypology(universe);
   const rows = orderTypologies(groups.keys()).map((label) => typologyOfferRow(label, groups.get(label) ?? []));
-  const launchedUnits = rows.reduce<number | null>((sum, row) => addNullable(sum, row.launchedUnits), null);
-  const finalUnits = rows.reduce<number | null>((sum, row) => addNullable(sum, row.finalUnits), null);
-  return [...rows, {
-    label: 'Total',
-    kind: 'total',
-    projects: distinctProjects(universe),
-    launchedUnits,
-    finalUnits,
-    soldUnits: rows.reduce<number | null>((sum, row) => addNullable(sum, row.soldUnits), null),
-    availability: availabilityOf(launchedUnits, finalUnits),
-  }];
+  const residual = typologyResidualOfferRow(universe);
+  if (residual) {
+    const unclassified = rows.find((row) => row.label === UNCLASSIFIED);
+    if (unclassified) {
+      const unclassifiedProjects = groups.get(UNCLASSIFIED) ?? [];
+      const residualProjects = universe.filter((project) => (['launchedUnits', 'finalUnits', 'soldUnits'] as const)
+        .some((metric) => (typologyResidual(project, metric) ?? 0) !== 0));
+      unclassified.projects = distinctProjects([...unclassifiedProjects, ...residualProjects]);
+      unclassified.launchedUnits = addNullable(unclassified.launchedUnits, residual.launchedUnits);
+      unclassified.finalUnits = addNullable(unclassified.finalUnits, residual.finalUnits);
+      unclassified.soldUnits = addNullable(unclassified.soldUnits, residual.soldUnits);
+      unclassified.availability = availabilityOf(unclassified.launchedUnits, unclassified.finalUnits);
+    } else {
+      rows.push(residual);
+    }
+  }
+  return [...rows, offerRow('Total', 'total', universe)];
 }
 
 /* -------------------------------------------------------------------------- */
@@ -316,24 +363,22 @@ export function maturityByTypology(cube: MarketCube): MaturityRow[] {
   });
   // O total canônico vem do universo por empreendimento, não da soma das tipologias: a API pode
   // omitir a tipologia de parte das unidades. O resíduo fica explícito em uma linha não classificada.
-  const canonical = maturityByStandard(cube).find((row) => row.kind === 'total')!;
   const residual = emptyMaturity();
   const residualFinal = emptyMaturity();
-  for (const key of MATURITY_ORDER) {
-    const typedLaunched = rows.reduce<number>((sum, row) => sum + (row.launched[key] ?? 0), 0);
-    const typedFinal = rows.reduce<number>((sum, row) => sum + (row.final[key] ?? 0), 0);
-    residual[key] = Math.max(0, (canonical.launched[key] ?? 0) - typedLaunched);
-    residualFinal[key] = Math.max(0, (canonical.final[key] ?? 0) - typedFinal);
+  const residualProjects: CubeProject[] = [];
+  for (const project of universe) {
+    if (!project.maturity) continue;
+    const launched = typologyResidual(project, 'launchedUnits');
+    const final = typologyResidual(project, 'finalUnits');
+    if ((launched ?? 0) === 0 && (final ?? 0) === 0) continue;
+    residualProjects.push(project);
+    residual[project.maturity] = addNullable(residual[project.maturity], launched);
+    residualFinal[project.maturity] = addNullable(residualFinal[project.maturity], final);
   }
-  residual.total = MATURITY_ORDER.reduce((sum, key) => sum + (residual[key] ?? 0), 0);
-  residualFinal.total = MATURITY_ORDER.reduce((sum, key) => sum + (residualFinal[key] ?? 0), 0);
-  const residualProjects = universe.filter((project) => {
-    const typed = project.typologies.reduce((sum, row) => sum + (row.launchedUnits ?? 0), 0);
-    const typedFinal = project.typologies.reduce((sum, row) => sum + (row.finalUnits ?? 0), 0);
-    return typed < (project.launchedUnits ?? 0) || typedFinal < (project.finalUnits ?? 0);
-  }).length;
-  const residualRow = residual.total || residualFinal.total
-    ? [{ label: UNCLASSIFIED, kind: 'row' as RowKind, projects: residualProjects, launched: residual, final: residualFinal }]
+  residual.total = MATURITY_ORDER.reduce<number | null>((sum, key) => addNullable(sum, residual[key]), null);
+  residualFinal.total = MATURITY_ORDER.reduce<number | null>((sum, key) => addNullable(sum, residualFinal[key]), null);
+  const residualRow = residualProjects.length
+    ? [{ label: UNCLASSIFIED, kind: 'row' as RowKind, projects: distinctProjects(residualProjects), launched: residual, final: residualFinal }]
     : [];
   return [...rows, ...residualRow, maturityRow('Total', 'total', universe)];
 }
@@ -345,6 +390,11 @@ export function maturityByTypology(cube: MarketCube): MaturityRow[] {
 /** Slides 38/39: ticket, área e R$/m² por padrão, universo vertical, ordem canônica. */
 export function pricesByStandard(cube: MarketCube, segment: 'Vertical' | 'Horizontal' = 'Vertical'): PriceRow[] {
   const universe = segment === 'Vertical' ? verticalProjects(cube) : horizontalProjects(cube);
+  if (cube.entity === 'fiergs-rs' && universe.some((p) => p.marketObservations)) {
+    const labels = orderStandards(new Set(universe.flatMap((p) => closingPlants(p).filter(pricePlant).map((r) => r.standard))));
+    return [...labels.map((label) => ({ label, kind: 'row' as const, ...priceContributions(universe, (r) => r.standard === label) })),
+      { label: 'Média Geral', kind: 'total' as const, ...priceContributions(universe) }];
+  }
   const groups = groupBy(universe, (project) => project.standard);
   const rows = orderStandards(groups.keys()).map((label) => priceRow(label, 'row', groups.get(label) ?? []));
   // Média geral ponderada pelo universo inteiro — nunca média simples das linhas acima.
@@ -354,6 +404,11 @@ export function pricesByStandard(cube: MarketCube, segment: 'Vertical' | 'Horizo
 /** Slides 36/37: ticket, área e R$/m² por tipologia canônica, universo vertical. */
 export function pricesByTypology(cube: MarketCube): PriceRow[] {
   const universe = verticalProjects(cube);
+  if (cube.entity === 'fiergs-rs' && universe.some((p) => p.marketObservations)) {
+    const labels = orderTypologies(new Set(universe.flatMap((p) => closingPlants(p).filter(pricePlant).map((r) => r.typology))));
+    return [...labels.map((label) => ({ label, kind: 'row' as const, ...priceContributions(universe, (r) => r.typology === label) })),
+      { label: 'Média Geral', kind: 'total' as const, ...priceContributions(universe) }];
+  }
   const groups = projectsByTypology(universe);
   const rows = orderTypologies(groups.keys()).map((label) => {
     const entries = (groups.get(label) ?? []).flatMap((project) => project.typologies.filter((item) => item.typology === label));
@@ -375,6 +430,15 @@ export function pricesByTypology(cube: MarketCube): PriceRow[] {
  * Casas pela política Secovi, portanto não há loteamento nesta tabela.
  */
 export function horizontalPricesByStandard(cube: MarketCube): PriceRow[] {
+  if (cube.entity === 'fiergs-rs') {
+    const universe = horizontalProjects(cube);
+    const groups = groupBy(universe, (project) => project.horizontalSubtype ?? 'indefinido');
+    const atomic = universe.some((p) => p.marketObservations);
+    const price = (label: string, kind: RowKind, projects: CubeProject[]) => atomic
+      ? { label, kind, ...priceContributions(projects) } : priceRow(label, kind, projects);
+    const rows = [...groups.entries()].map(([subtype, projects]) => price(FIERGS_HORIZONTAL_PRODUCT_LABELS[subtype as keyof typeof FIERGS_HORIZONTAL_PRODUCT_LABELS] ?? 'Não classificado', 'row', projects));
+    return [...rows, price('Média Horizontal', 'total', universe)];
+  }
   return pricesByStandard(cube, 'Horizontal');
 }
 
@@ -412,6 +476,7 @@ export interface AreaBandRow {
  */
 export function offerByAreaBand(cube: MarketCube): AreaBandRow[] {
   const universe = verticalProjects(cube);
+  if (cube.entity === 'fiergs-rs' && universe.length && universe.every((p) => p.marketObservations)) return observedAreaBands(cube);
   const buckets = new Map<AreaBandLabel, { final: number | null; launched: number | null; sold: number | null }>();
   for (const project of universe) {
     const launchedInPeriod = project.releaseQuarter === cube.endQuarter;
@@ -478,6 +543,44 @@ export function offerByAreaBand(cube: MarketCube): AreaBandRow[] {
   }];
 }
 
+/** Flows use all deduplicated observations of the quarter; stocks use independent snapshots. */
+function observedAreaBands(cube: MarketCube): AreaBandRow[] {
+  type Facts = { previous: (number | null)[]; final: (number | null)[]; sold: (number | null)[]; launched: (number | null)[] };
+  const bands = new Map<string, Facts>();
+  const bucket = (area: number | null) => {
+    const label = areaBandOf(area);
+    if (!label) return null;
+    if (!bands.has(label)) bands.set(label, { previous: [], final: [], sold: [], launched: [] });
+    return bands.get(label)!;
+  };
+  const end = quarterEndMonth(cube.endQuarter), previous = quarterEndMonth(previousQuarter(cube.endQuarter));
+  const start = `${end.slice(0, 4)}-${String(Number(end.slice(5)) - 2).padStart(2, '0')}`;
+  for (const p of verticalProjects(cube)) {
+    for (const r of closingPlants(p, cube.endQuarter)) {
+      const b = bucket(r.area);
+      if (!b) continue;
+      b.final.push(r.stock);
+      b.launched.push(p.releaseQuarter === cube.endQuarter ? r.quantity : 0);
+      // A launch after the previous close had no previous offer, by release-date evidence.
+      if (p.releaseQuarter === cube.endQuarter) b.previous.push(0);
+      else if (!plantSnapshot(p.marketObservations!, previous).some((prior) => prior.id === r.id)) b.previous.push(null);
+    }
+    if (p.releaseQuarter !== cube.endQuarter) for (const r of plantSnapshot(p.marketObservations!, previous)) bucket(r.area)?.previous.push(r.stock);
+    for (const r of p.marketObservations!.filter((r) => r.month >= start && r.month <= end && r.status !== 'futuro')) bucket(r.area)?.sold.push(r.sold);
+  }
+  const make = (label: string, kind: RowKind, b: Facts): AreaBandRow => {
+    const previousUnits = b.previous.some((n) => n === null) ? null : sumObserved(b.previous), launchedUnits = sumObserved(b.launched), soldUnits = sumObserved(b.sold);
+    const base = previousUnits === null || launchedUnits === null ? null : previousUnits + launchedUnits;
+    return { label, kind, previousUnits, finalUnits: sumObserved(b.final), launchedUnits, soldUnits,
+      ivv: soldUnits !== null && base !== null && base > 0 ? soldUnits / base * 100 : null };
+  };
+  const labels = orderAreaBands(bands.keys() as Iterable<AreaBandLabel>);
+  const rows = labels.map((label) => make(label, 'row', bands.get(label)!));
+  const all: Facts = { previous: [], final: [], sold: [], launched: [] };
+  for (const b of bands.values()) for (const key of ['previous','final','sold','launched'] as const) all[key].push(...b[key]);
+  return [...rows, make('Total', 'total', all)];
+}
+
 /* -------------------------------------------------------------------------- */
 /* Slide 51 — VGV geral                                                        */
 /* -------------------------------------------------------------------------- */
@@ -491,7 +594,7 @@ function vgvRow(label: string, kind: RowKind, segment: VgvRow['segment'], projec
     kind,
     segment,
     projects: distinctProjects(projects),
-    averageTicket: weightedAverage(projects.map((project) => ({ value: project.averageTicket, weight: project.finalUnits ?? project.launchedUnits }))),
+    averageTicket: projects.some((p) => p.marketObservations) ? priceContributions(projects).averageTicket : weightedAverage(projects.map((project) => ({ value: project.averageTicket, weight: project.finalUnits ?? project.launchedUnits }))),
     launchedUnits: sumOf(projects, (project) => project.launchedUnits),
     finalUnits: sumOf(projects, (project) => project.finalUnits),
     soldUnits,
@@ -505,7 +608,7 @@ function vgvRow(label: string, kind: RowKind, segment: VgvRow['segment'], projec
  * Slide 51: padrões verticais → `Subtotal vertical` → padrões horizontais permitidos →
  * `Total geral`. A contagem de empreendimentos é de IDs distintos, e por isso deixa de ser zero.
  */
-export function vgvSummary(cube: MarketCube): VgvRow[] {
+export function vgvSummary(cube: MarketCube, launchCube?: MarketCube): VgvRow[] {
   const vertical = verticalProjects(cube);
   const horizontal = horizontalProjects(cube);
   const rowsFor = (projects: CubeProject[], segment: 'Vertical' | 'Horizontal') => {
@@ -518,10 +621,30 @@ export function vgvSummary(cube: MarketCube): VgvRow[] {
   // Sem horizontal aceito, `Subtotal vertical` repetiria célula a célula o `Total geral`. Duas
   // linhas idênticas em sequência não informam nada e fazem o leitor procurar a diferença.
   if (vertical.length && horizontal.length) rows.push(vgvRow('Subtotal vertical', 'subtotal', 'Vertical', vertical));
-  rows.push(...rowsFor(horizontal, 'Horizontal'));
+  if (cube.entity === 'fiergs-rs') {
+    const groups = groupBy(horizontal, (project) => project.horizontalSubtype ?? 'indefinido');
+    for (const subtype of ['condominio_casas', 'loteamento_aberto', 'loteamento_fechado'] as const) {
+      const projects = groups.get(subtype);
+      if (projects?.length) rows.push(vgvRow(FIERGS_HORIZONTAL_PRODUCT_LABELS[subtype]!, 'row', 'Horizontal', projects));
+    }
+    for (const [subtype, projects] of groups) {
+      if (!FIERGS_HORIZONTAL_PRODUCT_LABELS[subtype as keyof typeof FIERGS_HORIZONTAL_PRODUCT_LABELS]) {
+        rows.push(vgvRow('Produto não classificado', 'row', 'Horizontal', projects));
+      }
+    }
+  } else rows.push(...rowsFor(horizontal, 'Horizontal'));
   if (horizontal.length) rows.push(vgvRow('Subtotal horizontal', 'subtotal', 'Horizontal', horizontal));
   rows.push(vgvRow(COHORT_TOTAL_LABEL, 'total', 'Total', cube.projects));
-  return rows;
+  if (!launchCube) return rows;
+  const launchedRows = vgvSummary(launchCube);
+  return rows.map((row) => {
+    if (row.kind !== 'row') {
+      const projects = launchCube.projects.filter((project) => row.segment === 'Total' || project.segment === row.segment);
+      return { ...row, launchedUnits: projects.length ? sumOf(projects, (project) => project.launchedUnits) : 0 };
+    }
+    const launched = launchedRows.find((item) => item.segment === row.segment && item.kind === row.kind && item.label === row.label);
+    return { ...row, launchedUnits: launched?.launchedUnits ?? (launched ? null : 0) };
+  });
 }
 
 /* -------------------------------------------------------------------------- */

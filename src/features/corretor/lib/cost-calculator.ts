@@ -2,6 +2,7 @@ import type { ModelId } from '../store/analysis-store';
 export type { ModelId };
 
 export const MODEL_PRICING: Record<ModelId, { inputPer1M: number; outputPer1M: number; label: string }> = {
+  'gpt-6-luna': { inputPer1M: 0.10, outputPer1M: 0.50, label: 'GPT-6 Luna' },
   'gpt-4o': {
     inputPer1M: 2.5,
     outputPer1M: 10.0,
@@ -21,6 +22,7 @@ export const MODEL_PRICING: Record<ModelId, { inputPer1M: number; outputPer1M: n
 // em ~7× no painel de estimativa (o custo cobrado, via `usage`, sempre esteve certo).
 // Fonte: OpenAI pricing (jul/2026) + docs/features/corretor-vocacionais/custos_visao_reais.md
 const IMAGE_TOKEN_RATES: Record<ModelId, { base: number; perTile: number }> = {
+  'gpt-6-luna': { base: 0, perTile: 0 },
   'gpt-4o': { base: 85, perTile: 170 },
   'gpt-4o-mini': { base: 2833, perTile: 5667 },
 };
@@ -31,6 +33,8 @@ export function calculateImageTokens(
   model: ModelId = 'gpt-4o',
   detail: 'low' | 'high' = 'high'
 ): number {
+  // Upper estimate only: reserve/cost are confirmed by the server and provider usage.
+  if (model === 'gpt-6-luna') return 128000;
   const rate = IMAGE_TOKEN_RATES[model];
   if (detail === 'low') return rate.base;
 

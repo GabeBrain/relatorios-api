@@ -67,7 +67,8 @@ qualquer trabalho paralelo mesmo sem ninguém discordar. Onde houver `.gitattrib
 
 Se ainda assim conflitar, **a resolução é somativa**: preserve todas as entradas dos dois lados,
 em ordem decrescente de data. Nenhuma entrada é descartada, resumida ou reescrita — não existe
-"escolher um lado" num log.
+"escolher um lado" num log. Rotação também não descarta: entradas antigas são movidas sem edição
+para `docs/projetos/historico/`, conforme a seção *Rotação* de `docs/projetos/README.md`.
 
 Para conferir que nada se perdeu, use a identidade do merge de três pontos:
 
@@ -206,12 +207,20 @@ Quando a interação começar com uma **saudação** ("oi", "olá", "bom dia", "
 
 ## Guidelines de frontend — Rebrain
 
+### Carregamento obrigatório com identidade Brain
+
+Toda ferramenta nova e todo fluxo de carregamento alterado no Rebrain, inclusive POC e funcionalidades em implementação, deve usar `src/components/feedback/BrainLoadingState.tsx`. Consultas que impedem a análise usam a variante `overlay`, logo Brain visível, etapa e tempo real; processamento local usa a mesma identidade e permite cancelar. Campos usam a variante apropriada, preservando a identidade visual. Não substituir por texto, spinner genérico ou progresso fictício. Verificar o estado carregando no navegador com resposta deliberadamente lenta, além dos estados de sucesso, vazio e erro. Esta obrigação vale para todos os autores.
+
 Antes de desenvolver ou alterar interface React, leia
 `docs/architecture/FRONTEND_GUIDELINES.md` e o `DESIGN_SYSTEM.md`. Classifique o pedido, reutilize
 o padrão/componente existente e cubra os estados de página aplicáveis. Páginas de feature são lazy
 por padrão; exceções duradouras (novo primitive, token, fluxo ou desvio de lazy-loading) devem ser
 registradas em `docs/architecture/FRONTEND_DECISIONS.md`. No handoff, informe o padrão reutilizado e
 os estados verificados. Essas regras se aplicam a Lovable, Codex do Lucas e qualquer outro autor.
+
+## Handoff de relatórios automatizados — Lucas (14/10/2026)
+
+Para iniciar/retomar essa frente, leia `docs/handoffs/lucas-relatorios-2026-10-14/README.md` na ordem do índice e atualize `STATUS.md` com evidência do ambiente da sessão. O pacote transfere somente relatórios automatizados; Corretor V3 e unificação Quanti 2026 seguem com Gabriel. Preservar políticas Secovi/FIERGS, regressões 2T2026/4T2025 e domínios paralelos. Férias Lucas a partir de 19/10: plano curto propõe um piloto, sem presumir quatro entregas ou execução durante férias. Permissão GitHub confirmada não prova API/Drive/Lovable. Push/ensaios reais continuam sujeitos a autorização conforme protocolo. Fontes brutas no Drive ou `.local-inputs/`, nunca credenciais no pacote.
 
 ## Corretor de Vocacionais
 

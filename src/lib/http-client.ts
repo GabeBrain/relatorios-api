@@ -14,6 +14,7 @@ export interface HttpResponse<T = unknown> {
   requestBody: unknown;
   url: string;
   method: string;
+  retryAfterMs?: number | null;
 }
 
 export interface RequestOptions {
@@ -25,6 +26,7 @@ export interface RequestOptions {
   includeAuth?: boolean;
   timeoutMs?: number;
   signal?: AbortSignal;
+  cache?: RequestCache;
 }
 
 function buildQueryString(query: Record<string, unknown>): string {
@@ -77,6 +79,7 @@ export async function httpRequest<T = unknown>(opts: RequestOptions): Promise<Ht
 
   try {
     const fetchOpts: RequestInit = { method, headers, signal };
+    if (opts.cache) fetchOpts.cache = opts.cache;
     if (opts.body !== undefined && opts.body !== null && !['GET', 'HEAD', 'OPTIONS'].includes(method)) {
       fetchOpts.body = JSON.stringify(opts.body);
     }
@@ -85,6 +88,8 @@ export async function httpRequest<T = unknown>(opts: RequestOptions): Promise<Ht
     clearTimeout(timer);
     const latencyMs = performance.now() - start;
     const contentType = response.headers.get('Content-Type') ?? '';
+    const retryAfter = response.headers.get('Retry-After');
+    const retryAfterMs = retryAfter ? (/^\d+(?:\.\d+)?$/.test(retryAfter.trim()) ? Number(retryAfter) * 1000 : Math.max(0, Date.parse(retryAfter) - Date.now())) : null;
     const raw = await response.arrayBuffer();
     const bytes = raw.byteLength;
     const text = new TextDecoder().decode(raw);
@@ -112,6 +117,7 @@ export async function httpRequest<T = unknown>(opts: RequestOptions): Promise<Ht
       requestBody: opts.body ?? null,
       url: fullUrl,
       method,
+      retryAfterMs,
     };
   } catch (err) {
     clearTimeout(timer);
@@ -131,6 +137,7 @@ export async function httpRequest<T = unknown>(opts: RequestOptions): Promise<Ht
       requestBody: opts.body ?? null,
       url: fullUrl,
       method,
+      retryAfterMs: null,
     };
   }
 }

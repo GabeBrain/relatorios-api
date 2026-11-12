@@ -7,13 +7,38 @@ import type { Ir } from '../../audit/ir';
 const candidate = { slide: 36, secao: 'SOCIO', titulo: 'Dados sociodemográficos', sha1: '1234567890abcdef' };
 
 describe('WRONG_CONTEXT — cidade/UF', () => {
-  it('sinaliza cidade protagonista divergente vista na imagem', () => {
+  it('sinaliza mapa com várias cidades de outra UF, num achado só (s135 de João Pessoa)', () => {
     const findings = wrongContextFromVisibleLocales(
-      [{ texto: 'São Paulo', tipo: 'cidade', principal: true }],
-      { cidade: 'Guarulhos', uf: 'SP' }, candidate,
+      [
+        { texto: 'Novo Hamburgo', tipo: 'cidade', principal: true },
+        { texto: 'São Leopoldo', tipo: 'cidade', principal: true },
+        { texto: 'Esteio', tipo: 'cidade', principal: false },
+      ],
+      { cidade: 'João Pessoa', uf: 'PB' }, candidate,
     );
     expect(findings).toHaveLength(1);
     expect(findings[0]).toMatchObject({ type: 'WRONG_CONTEXT', slideRef: 's36', evidenceSha1: candidate.sha1 });
+    expect(findings[0].detail).toContain('Novo Hamburgo, São Leopoldo, Esteio (RS)');
+  });
+
+  it('cidade vizinha da mesma UF e cidade única não ancorada não viram achado (s73 de João Pessoa)', () => {
+    // A visão marcou "São Paulo" como protagonista num mapa em que ela não aparece:
+    // "principal" sozinho não é evidência. Cabedelo é vizinha, da mesma UF.
+    expect(wrongContextFromVisibleLocales(
+      [{ texto: 'Cabedelo', tipo: 'cidade', principal: false }, { texto: 'São Paulo', tipo: 'cidade', principal: true }],
+      { cidade: 'João Pessoa', uf: 'PB' }, candidate,
+    )).toHaveLength(0);
+    expect(wrongContextFromVisibleLocales(
+      [{ texto: 'São Paulo', tipo: 'cidade', principal: true }, { texto: 'Osasco', tipo: 'cidade', principal: false }],
+      { cidade: 'Guarulhos', uf: 'SP' }, candidate,
+    )).toHaveLength(0);
+  });
+
+  it('cidades confirmadas pelo analista como parte do estudo não são contexto errado', () => {
+    expect(wrongContextFromVisibleLocales(
+      [{ texto: 'Recife', tipo: 'cidade', principal: true }, { texto: 'Olinda', tipo: 'cidade', principal: true }],
+      { cidade: 'João Pessoa', uf: 'PB', outras: ['Recife', 'Olinda'] }, candidate,
+    )).toHaveLength(0);
   });
 
   it('não sinaliza cidade esperada, estado esperado ou tabela comparativa', () => {
@@ -83,14 +108,16 @@ describe('WRONG_CONTEXT — cidade/UF', () => {
     expect(out[0].type).toBe('WRONG_CONTEXT');
   });
 
-  it('sem payload de tabelas, mantém o comportamento anterior (não silencia)', () => {
-    // Imagem sem tabela extraída (mapa/arte): não há o que ancorar, então a
-    // regra continua valendo pelo julgamento da visão.
+  it('sem payload de tabelas, uma cidade de fora sozinha não basta; duas bastam', () => {
+    // Imagem sem tabela extraída (mapa/arte): não há o que ancorar. Uma cidade
+    // isolada pode ser alucinação da visão (s73); duas de outra UF, não.
     expect(wrongContextFromVisibleLocales(
       [{ texto: 'São Paulo', tipo: 'cidade', principal: true }],
-      { cidade: 'Rolândia', uf: 'PR' },
-      { ...candidate, titulo: null },
-      { tables: [] },
+      { cidade: 'Rolândia', uf: 'PR' }, { ...candidate, titulo: null }, { tables: [] },
+    )).toHaveLength(0);
+    expect(wrongContextFromVisibleLocales(
+      [{ texto: 'São Paulo', tipo: 'cidade', principal: true }, { texto: 'Campinas', tipo: 'cidade', principal: false }],
+      { cidade: 'Rolândia', uf: 'PR' }, { ...candidate, titulo: null }, { tables: [] },
     )).toHaveLength(1);
   });
 

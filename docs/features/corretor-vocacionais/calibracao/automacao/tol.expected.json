@@ -1,0 +1,1006 @@
+{
+  "summary": {
+    "candidatas": 60,
+    "leituras": 60,
+    "achados": 5,
+    "tabelas": "46/52",
+    "acertos": {
+      "fonte": {
+        "comparados": 11,
+        "batem": 10
+      },
+      "cruzamentos": {
+        "feitos": 11,
+        "batem": 11
+      }
+    }
+  },
+  "findings": [
+    {
+      "id": "structure",
+      "type": "STRUCTURE_MISSING",
+      "section": "ESTRUTURA",
+      "slideRef": "—",
+      "title": "Checklist estrutural (1 ausente(s) · slide final a conferir)",
+      "detail": "Cobertura por título e texto do slide, fora do sumário. Itens “a conferir” são mapas/prints: o conteúdo pode estar dentro da imagem — confirme visualmente antes de tratar como ausência. Slide final s131 sem conteúdo detectável; confirme visualmente antes de tratar como ausência.",
+      "ok": false,
+      "viz": {
+        "kind": "text",
+        "checklist": [
+          {
+            "label": "1.1 — Endereço",
+            "status": "ok"
+          },
+          {
+            "label": "1.2 — Latitude/longitude",
+            "status": "ok"
+          },
+          {
+            "label": "1.3 — Área do terreno",
+            "status": "ok"
+          },
+          {
+            "label": "1.4 — Acessos",
+            "status": "ok"
+          },
+          {
+            "label": "1.5 — Entorno varejo/serviços",
+            "status": "ok"
+          },
+          {
+            "label": "1.6 — Entorno revendas",
+            "status": "ok"
+          },
+          {
+            "label": "1.7 — Mapeamento físico",
+            "status": "ok"
+          },
+          {
+            "label": "1.9 — Distância ao centro",
+            "status": "ok"
+          },
+          {
+            "label": "2.1 — Dados cidade/estado/Brasil",
+            "status": "ok"
+          },
+          {
+            "label": "2.2 — Variação da população",
+            "status": "ok"
+          },
+          {
+            "label": "2.3 — Variação dos domicílios",
+            "status": "ok"
+          },
+          {
+            "label": "2.4 — População por renda",
+            "status": "ok"
+          },
+          {
+            "label": "2.4.1 — Mapa de densidade populacional",
+            "status": "ok"
+          },
+          {
+            "label": "2.5 — Domicílios por renda",
+            "status": "ok"
+          },
+          {
+            "label": "2.6 — Domicílios por moradores",
+            "status": "ok"
+          },
+          {
+            "label": "2.5.1 — Mapa de renda",
+            "status": "ok"
+          },
+          {
+            "label": "2.7 — Domicílios por tipo",
+            "status": "ok"
+          },
+          {
+            "label": "2.7.1 — Mapa de verticalização",
+            "status": "ok"
+          },
+          {
+            "label": "2.8 — Ocupação/propriedade",
+            "status": "ok"
+          },
+          {
+            "label": "2.8.1 — Mapa de propriedade",
+            "status": "ok"
+          },
+          {
+            "label": "3.1 — Absorção Z.I. total",
+            "status": "ok"
+          },
+          {
+            "label": "3.1.1 — Cenários de absorção",
+            "status": "ok"
+          },
+          {
+            "label": "4.1 — Mapa de localização",
+            "status": "ok"
+          },
+          {
+            "label": "4.2 — Mapa R$/m²",
+            "status": "ok"
+          },
+          {
+            "label": "4.3 — Mapa de estoque",
+            "status": "ok"
+          },
+          {
+            "label": "4.4 — Mapa de área média",
+            "status": "ok"
+          },
+          {
+            "label": "4.5 — Consolidada",
+            "status": "ok"
+          },
+          {
+            "label": "4.6 — Oferta por padrão",
+            "status": "ok"
+          },
+          {
+            "label": "4.7 — Oferta por ano",
+            "status": "ok"
+          },
+          {
+            "label": "4.8 — Oferta por tipologia",
+            "status": "ok"
+          },
+          {
+            "label": "4.9 — Preços por tipologia",
+            "status": "ok"
+          },
+          {
+            "label": "4.10 — Preços por padrão",
+            "status": "ok"
+          },
+          {
+            "label": "5.1 — Lacunas tipologia × metragem",
+            "status": "ok"
+          },
+          {
+            "label": "5.2 — Lacunas tipologia × preço",
+            "status": "ok"
+          },
+          {
+            "label": "5.3 — Lacunas preço × metragem",
+            "status": "ok"
+          },
+          {
+            "label": "6 — Fichas técnicas",
+            "status": "ok"
+          },
+          {
+            "label": "7.1 — Futuros lançamentos",
+            "status": "missing"
+          },
+          {
+            "label": "8.1 — Revenda",
+            "status": "ok"
+          },
+          {
+            "label": "8.2 — Revenda por bairro",
+            "status": "ok"
+          },
+          {
+            "label": "8.3 — Revenda por tipologia",
+            "status": "ok"
+          },
+          {
+            "label": "8.4 — Ticket de revenda",
+            "status": "ok"
+          },
+          {
+            "label": "Slide final s131 sem conteúdo detectável",
+            "status": "na"
+          }
+        ]
+      }
+    },
+    {
+      "id": "source-26-domicilios-brasil-unidade-domicilios",
+      "type": "SOURCE_CROSSCHECK",
+      "section": "SOCIO",
+      "slideRef": "s26",
+      "title": "Unidade trocada no slide — Brasil",
+      "detail": "O número 75.298.796 está correto, mas o slide o rotula como habitantes (hab.); na planilha ele é de domicílios (dom.). Corrija só a unidade. Origem: 1.Populacao de Domicilios.xlsx › Domicilios › linha 9.",
+      "confidence": 1,
+      "origem": "DET",
+      "viz": {
+        "kind": "sidebyside",
+        "leftLabel": "Slide 26",
+        "rightLabel": "1.Populacao de Domicilios.xlsx › Domicilios › linha 9",
+        "rows": [
+          {
+            "label": "Brasil · unidade",
+            "left": "75.298.796 hab.",
+            "right": "75.298.796 dom.",
+            "mismatch": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "iavis-sum-e775e0ff4a-0",
+      "type": "ABSOLUTE_SUM",
+      "section": "SOCIO",
+      "slideRef": "s30",
+      "title": "Tabela não fecha no total (Faixas de Renda)",
+      "detail": "Todas as 5 colunas conferidas ficam cerca de 8,4% abaixo do total declarado: provável linha ou faixa omitida da tabela.. Números lidos da imagem do slide 30 (relido no gpt-4o; as duas leituras discordam entre si). Todas as colunas ficam abaixo do total na mesma proporção: isso não depende de um dígito lido. Confira se falta uma faixa ou linha na tabela.",
+      "ok": false,
+      "viz": {
+        "kind": "table",
+        "table": {
+          "title": "Faixas de Renda",
+          "columns": [
+            "Faixas de Renda",
+            "N° Dom. (PR)",
+            "% (PR)",
+            "N° Dom. (Toledo)",
+            "% (Toledo)",
+            "N° Dom. (Até 1 km)",
+            "% (Até 1 km)",
+            "N° Dom. (De 1 a 2 km)",
+            "% (De 1 a 2 km)",
+            "N° Dom. (Até 2 km)",
+            "% (Até 2 km)"
+          ],
+          "rows": [
+            [
+              "Acima de R$36.511,01",
+              74543,
+              1.8,
+              830,
+              1.5,
+              488,
+              5,
+              217,
+              1.6,
+              705,
+              3
+            ],
+            [
+              "R$ 27.320,01 a R$ 36.511,00",
+              69389,
+              1.6,
+              908,
+              1.6,
+              390,
+              4,
+              242,
+              1.8,
+              632,
+              2.7
+            ],
+            [
+              "R$ 20.983,01 a R$ 27.320,00",
+              100318,
+              2.4,
+              1373,
+              2.4,
+              521,
+              5.3,
+              380,
+              2.8,
+              901,
+              3.8
+            ],
+            [
+              "R$ 17.147,01 a R$ 20.983,00",
+              107956,
+              2.6,
+              1524,
+              2.7,
+              519,
+              5.3,
+              426,
+              3.1,
+              945,
+              4
+            ],
+            [
+              "R$ 14.590,01 a R$ 17.147,00",
+              109538,
+              2.6,
+              1572,
+              2.8,
+              488,
+              5,
+              439,
+              3.2,
+              927,
+              3.9
+            ],
+            [
+              "R$ 10.755,01 a R$ 14.590,00",
+              268588,
+              6.4,
+              3899,
+              6.9,
+              1070,
+              10.9,
+              1089,
+              8,
+              2159,
+              9.2
+            ],
+            [
+              "R$ 7.716,01 a R$ 10.755,00",
+              394424,
+              9.4,
+              5755,
+              10.2,
+              1331,
+              13.6,
+              1578,
+              11.5,
+              2909,
+              12.4
+            ],
+            [
+              "Abaixo de R$7.716,00",
+              2782424,
+              66,
+              36058,
+              63.9,
+              4122,
+              42,
+              8110,
+              59.3,
+              12232,
+              52.1
+            ]
+          ],
+          "totals": [
+            "TOTAL",
+            4216107,
+            100,
+            56405,
+            100,
+            9819,
+            100,
+            13680,
+            100,
+            23499,
+            100
+          ],
+          "colKinds": [
+            "label",
+            "count",
+            "share",
+            "count",
+            "share",
+            "count",
+            "share",
+            "count",
+            "share",
+            "count",
+            "share"
+          ],
+          "totalKind": "sum",
+          "shareOf": {
+            "2": 1,
+            "4": 3,
+            "6": 5,
+            "8": 7,
+            "10": 9
+          }
+        },
+        "badColumns": [
+          1,
+          3,
+          5,
+          7,
+          9
+        ],
+        "badRows": [],
+        "notes": [
+          "Todas as 5 colunas conferidas ficam cerca de 8,4% abaixo do total declarado: provável linha ou faixa omitida da tabela.",
+          "Coluna «N° Dom. (PR)»: soma 3907180 ≠ total 4216107 — 74.543 + 69.389 + 100.318 + 107.956 + 109.538 + 268.588 + 394.424 + 2.782.424 = 3.907.180, diferença de 308.927",
+          "Coluna «N° Dom. (Toledo)»: soma 51919 ≠ total 56405 — 830 + 908 + 1.373 + 1.524 + 1.572 + 3.899 + 5.755 + 36.058 = 51.919, diferença de 4.486",
+          "Coluna «N° Dom. (Até 1 km)»: soma 8929 ≠ total 9819 — 488 + 390 + 521 + 519 + 488 + 1.070 + 1.331 + 4.122 = 8.929, diferença de 890",
+          "Coluna «N° Dom. (De 1 a 2 km)»: soma 12481 ≠ total 13680 — 217 + 242 + 380 + 426 + 439 + 1.089 + 1.578 + 8.110 = 12.481, diferença de 1.199",
+          "Coluna «N° Dom. (Até 2 km)»: soma 21410 ≠ total 23499 — 705 + 632 + 901 + 945 + 927 + 2.159 + 2.909 + 12.232 = 21.410, diferença de 2.089"
+        ],
+        "omittedBand": true
+      },
+      "evidenceSha1": "e775e0ff4a8abe3a589d0997b4f264b42326f0c8",
+      "escalated": false,
+      "confidence": 2,
+      "origem": "IA_visao"
+    },
+    {
+      "id": "paged-sum-123-125",
+      "type": "ABSOLUTE_SUM",
+      "section": "MERCADO",
+      "slideRef": "s123 × s125",
+      "title": "Totais da tabela paginada não conferidos (2 fatias)",
+      "detail": "Os slides s123, s125 repetem o mesmo total declarado — são fatias da mesma tabela. A linha de totais não pôde ser casada com as colunas em nenhuma das fatias, então a soma do conjunto não foi conferida: confira na imagem. — o slide declara exclusão: “Unidades garden, duplex e coberturas não são apresentadas na análise para evitar distorções de preço e metragem.”. O total pode não fechar por isso (tabela completa costuma ficar no apêndice); confira antes de corrigir.",
+      "ok": false,
+      "viz": {
+        "kind": "table",
+        "table": {
+          "title": "",
+          "columns": [
+            "Empreendimento",
+            "Bairro",
+            "Incorporadora",
+            "Lançamento",
+            "Oferta Lançada",
+            "Vendidas",
+            "Oferta Atual",
+            "Disp. (%)",
+            "Quartos",
+            "Padrão",
+            "Unidades por Tipologia",
+            "Status",
+            "Tipo",
+            "Preço (R$)",
+            "m² (priv.)",
+            "R$/m² (priv.)",
+            "Vagas de Garagem",
+            "Abaixo ou acima da média"
+          ],
+          "rows": [
+            [
+              "Edificio Bela Vista",
+              "Centro",
+              "Meza",
+              "ago/17",
+              90,
+              81,
+              9,
+              10,
+              2,
+              "Standard",
+              45,
+              "Esgotado",
+              "Padrão",
+              null,
+              77,
+              null,
+              1,
+              null
+            ],
+            [
+              "Edificio Urban",
+              "Centro",
+              "Taipas",
+              "jun/18",
+              45,
+              44,
+              1,
+              2.2,
+              3,
+              "Médio",
+              45,
+              "Comercialização",
+              "Padrão",
+              962810,
+              167,
+              5765,
+              2,
+              -39.7
+            ],
+            [
+              "Residencial Amaranto",
+              "Vila Industrial",
+              "Kaiser",
+              "out/19",
+              58,
+              57,
+              1,
+              1.7,
+              3,
+              "Alto",
+              52,
+              "Comercialização",
+              "Padrão",
+              1750000,
+              163,
+              10736,
+              3,
+              17.3
+            ],
+            [
+              "Edificio West Lake",
+              "Vila Industrial",
+              "Particular",
+              "out/19",
+              39,
+              34,
+              5,
+              12.8,
+              2,
+              "Standard",
+              7,
+              "Esgotado",
+              "Cobertura",
+              2400000,
+              171,
+              14073,
+              4,
+              47.3
+            ],
+            [
+              "Edificio Geneva",
+              "Vila Industrial",
+              "TSI",
+              "mar/21",
+              18,
+              16,
+              2,
+              11.1,
+              3,
+              "Médio",
+              16,
+              "Comercialização",
+              "Garden",
+              null,
+              236,
+              null,
+              4,
+              null
+            ],
+            [
+              "Vancouver",
+              "Centro",
+              "Polo",
+              "mar/21",
+              24,
+              21,
+              3,
+              12.5,
+              3,
+              "Standard",
+              24,
+              "Esgotado",
+              "Padrão",
+              null,
+              81,
+              null,
+              1,
+              null
+            ],
+            [
+              "Duo Pilastri",
+              "Vila Industrial",
+              "Mauro Mallmann",
+              "nov/21",
+              14,
+              13,
+              1,
+              7.1,
+              2,
+              "Standard",
+              14,
+              "Esgotado",
+              "Padrão",
+              800000,
+              99,
+              8067,
+              1,
+              15.6
+            ],
+            [
+              "Nord",
+              "Vila Industrial",
+              "Taipas",
+              "jan/22",
+              31,
+              19,
+              12,
+              38.7,
+              3,
+              "Médio",
+              27,
+              "Comercialização",
+              "Padrão",
+              1050000,
+              129,
+              8119,
+              2,
+              15
+            ],
+            [
+              "Edificio Nexus",
+              "Centro",
+              "Dal Bosco",
+              "dez/24",
+              28,
+              17,
+              11,
+              39.3,
+              3,
+              "Standard",
+              28,
+              "Comercialização",
+              "Padrão",
+              943312,
+              130,
+              7235,
+              1,
+              24.3
+            ],
+            [
+              "Marcante",
+              "Centro",
+              "Kaiser",
+              "dez/24",
+              48,
+              27,
+              21,
+              43.8,
+              2,
+              "Standard",
+              24,
+              "Comercialização",
+              "Padrão",
+              902312,
+              138,
+              6530,
+              2,
+              10.5
+            ],
+            [
+              "Olimpia",
+              "Centro",
+              "Decarli",
+              "jan/25",
+              20,
+              8,
+              12,
+              60,
+              2,
+              "Médio",
+              10,
+              "Comercialização",
+              "Padrão",
+              1298000,
+              138,
+              9373,
+              2,
+              1.9
+            ],
+            [
+              "Znt Gisela",
+              "Jardim Gisela",
+              "Zanette",
+              "jan/25",
+              28,
+              13,
+              15,
+              53.6,
+              3,
+              "Standard",
+              3,
+              "Comercialização",
+              "Padrão",
+              477750,
+              138,
+              3461,
+              2,
+              16.1
+            ],
+            [
+              "Znt Vista",
+              "Vila Industrial",
+              "Zanette",
+              "abr/25",
+              11,
+              4,
+              7,
+              63.6,
+              4,
+              "Cobertura",
+              1,
+              "Comercialização",
+              "Garden",
+              1575000,
+              114,
+              11095,
+              2,
+              6.9
+            ],
+            [
+              "Encanto Toledo",
+              "Toledo",
+              "SF",
+              "mai/25",
+              270,
+              68,
+              202,
+              74.8,
+              2,
+              "Standard",
+              130,
+              "Comercialização",
+              "Padrão",
+              3864000,
+              284,
+              13610,
+              2,
+              16.2
+            ],
+            [
+              "Bella Aurora",
+              "Jardim Gisela",
+              "Ethos",
+              "set/25",
+              26,
+              18,
+              8,
+              30.8,
+              2,
+              "Standard",
+              2,
+              "Comercialização",
+              "Padrão",
+              660264,
+              284,
+              8483,
+              1,
+              1.2
+            ],
+            [
+              "",
+              "Jardim Gisela",
+              "Ethos",
+              "set/25",
+              null,
+              15,
+              null,
+              null,
+              3,
+              "Garden",
+              22,
+              "Comercialização",
+              "Garden",
+              571053,
+              57,
+              8734,
+              1,
+              4.6
+            ],
+            [
+              "",
+              "Jardim Gisela",
+              "Ethos",
+              "set/25",
+              null,
+              1,
+              null,
+              null,
+              3,
+              "Garden",
+              3,
+              "Comercialização",
+              "Garden",
+              225650,
+              115,
+              3200,
+              1,
+              1.1
+            ],
+            [
+              "Znt Dom",
+              "Toledo",
+              "Zanette",
+              "out/25",
+              24,
+              11,
+              13,
+              54.2,
+              2,
+              "Standard",
+              24,
+              "Comercialização",
+              "Padrão",
+              691053,
+              118,
+              6755,
+              2,
+              1.8
+            ],
+            [
+              "Nature",
+              "Jardim La Salle",
+              "Taipas",
+              "nov/25",
+              27,
+              13,
+              14,
+              51.9,
+              3,
+              "Médio",
+              1,
+              "Comercialização",
+              "Padrão",
+              788870,
+              114,
+              6291,
+              2,
+              15
+            ],
+            [
+              "",
+              "Jardim La Salle",
+              "Taipas",
+              "nov/25",
+              null,
+              10,
+              null,
+              null,
+              3,
+              "Standard",
+              23,
+              "Esgotado",
+              "Padrão",
+              762451,
+              80,
+              9520,
+              2,
+              15.3
+            ],
+            [
+              "",
+              "Jardim La Salle",
+              "Taipas",
+              "nov/25",
+              null,
+              1,
+              null,
+              null,
+              2,
+              "Standard",
+              1,
+              "Esgotado",
+              "Padrão",
+              761032,
+              88,
+              9827,
+              2,
+              1.9
+            ],
+            [
+              "",
+              "Jardim La Salle",
+              "Taipas",
+              "nov/25",
+              null,
+              1,
+              null,
+              null,
+              2,
+              "Standard",
+              1,
+              "Esgotado",
+              "Padrão",
+              945750,
+              65,
+              14546,
+              2,
+              16.1
+            ],
+            [
+              "",
+              "Jardim La Salle",
+              "Taipas",
+              "nov/25",
+              null,
+              5,
+              null,
+              null,
+              2,
+              "Standard",
+              5,
+              "Esgotado",
+              "Padrão",
+              812529,
+              75,
+              9683,
+              1,
+              13.7
+            ],
+            [
+              "",
+              "Jardim La Salle",
+              "Taipas",
+              "nov/25",
+              null,
+              1,
+              null,
+              null,
+              2,
+              "Garden",
+              1,
+              "Esgotado",
+              "Garden",
+              1033475,
+              85,
+              13958,
+              2,
+              52.5
+            ],
+            [
+              "",
+              "Jardim La Salle",
+              "Taipas",
+              "nov/25",
+              null,
+              9,
+              null,
+              null,
+              3,
+              "Garden",
+              9,
+              "Esgotado",
+              "Garden",
+              1594666,
+              114,
+              15407,
+              2,
+              68.3
+            ]
+          ],
+          "totals": [
+            "Total",
+            1099,
+            702,
+            397,
+            36.1,
+            null,
+            null,
+            1099
+          ],
+          "colKinds": [
+            "label",
+            "other",
+            "other",
+            "other",
+            "count",
+            "count",
+            "count",
+            "rate",
+            "other",
+            "other",
+            "count",
+            "other",
+            "other",
+            "measure",
+            "measure",
+            "measure",
+            "count",
+            "rate"
+          ],
+          "totalKind": "mixed",
+          "shareOf": {}
+        },
+        "badColumns": [],
+        "badRows": [],
+        "notes": [
+          "A linha de totais não pôde ser alinhada às colunas (8 totais para 18 colunas) — confira os totais na imagem."
+        ],
+        "unaligned": true
+      },
+      "confidence": 3,
+      "origem": "DET"
+    },
+    {
+      "id": "vision-unsafe-sums",
+      "type": "IMAGE_NOT_READ",
+      "section": "GLOBAL",
+      "slideRef": "s68",
+      "title": "Tabelas-imagem sem conferência segura (2 slides)",
+      "detail": "A leitura destas tabelas não permitiu conferir as somas com segurança (totais não alinhados às colunas, leituras discordantes ou incoerentes): s68, s127. Não é acusação de erro; confira manualmente se forem críticas.",
+      "ok": false,
+      "confidence": 3,
+      "origem": "IA_visao",
+      "viz": {
+        "kind": "text",
+        "evidence": "s68, s127"
+      }
+    }
+  ]
+}

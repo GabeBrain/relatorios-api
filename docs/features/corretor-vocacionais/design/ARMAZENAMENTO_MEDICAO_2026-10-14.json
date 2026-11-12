@@ -1,0 +1,174 @@
+{
+  "unit": "GB/MB decimais",
+  "sample": [
+    {
+      "id": "rol",
+      "pptxBytes": 170208153,
+      "excelBytes": 13618919,
+      "excelFiles": 13,
+      "slides": 78
+    },
+    {
+      "id": "tol",
+      "pptxBytes": 57281312,
+      "excelBytes": 6592559,
+      "excelFiles": 13,
+      "slides": 131
+    },
+    {
+      "id": "cj",
+      "pptxBytes": 99627395,
+      "excelBytes": 5631964,
+      "excelFiles": 11,
+      "slides": 153
+    },
+    {
+      "id": "vap",
+      "pptxBytes": 99421031,
+      "excelBytes": 7324692,
+      "excelFiles": 12,
+      "slides": 145
+    },
+    {
+      "id": "v2",
+      "pptxBytes": 174069866,
+      "excelBytes": 7324692,
+      "excelFiles": 12,
+      "slides": 107
+    }
+  ],
+  "meanPptxMB": 120.1215514,
+  "meanExcelMB": 8.0985652,
+  "meanSlides": 122.8,
+  "uniqueOriginalGB": 0.633775891,
+  "snapshotStudies": 14,
+  "snapshotJsonMB": 0.681363,
+  "scenarios": [
+    {
+      "name": "uma_versao",
+      "MBPerStudy": 150,
+      "perStudyMonthUSD": 0.003195,
+      "months": [
+        {
+          "month": 1,
+          "studies": 57.33,
+          "GB": 8.6,
+          "storageMarginalUSD": 0.0,
+          "storageWithoutQuotaUSD": 0.183
+        },
+        {
+          "month": 6,
+          "studies": 274.0,
+          "GB": 41.1,
+          "storageMarginalUSD": 0.0,
+          "storageWithoutQuotaUSD": 0.875
+        },
+        {
+          "month": 12,
+          "studies": 534.0,
+          "GB": 80.1,
+          "storageMarginalUSD": 0.0,
+          "storageWithoutQuotaUSD": 1.706
+        },
+        {
+          "month": 24,
+          "studies": 1054.0,
+          "GB": 158.1,
+          "storageMarginalUSD": 1.238,
+          "storageWithoutQuotaUSD": 3.368
+        },
+        {
+          "month": 36,
+          "studies": 1574.0,
+          "GB": 236.1,
+          "storageMarginalUSD": 2.899,
+          "storageWithoutQuotaUSD": 5.029
+        }
+      ]
+    },
+    {
+      "name": "tres_versoes",
+      "MBPerStudy": 450,
+      "perStudyMonthUSD": 0.009585,
+      "months": [
+        {
+          "month": 1,
+          "studies": 57.33,
+          "GB": 25.8,
+          "storageMarginalUSD": 0.0,
+          "storageWithoutQuotaUSD": 0.55
+        },
+        {
+          "month": 6,
+          "studies": 274.0,
+          "GB": 123.3,
+          "storageMarginalUSD": 0.496,
+          "storageWithoutQuotaUSD": 2.626
+        },
+        {
+          "month": 12,
+          "studies": 534.0,
+          "GB": 240.3,
+          "storageMarginalUSD": 2.988,
+          "storageWithoutQuotaUSD": 5.118
+        },
+        {
+          "month": 24,
+          "studies": 1054.0,
+          "GB": 474.3,
+          "storageMarginalUSD": 7.973,
+          "storageWithoutQuotaUSD": 10.103
+        },
+        {
+          "month": 36,
+          "studies": 1574.0,
+          "GB": 708.3,
+          "storageMarginalUSD": 12.957,
+          "storageWithoutQuotaUSD": 15.087
+        }
+      ]
+    },
+    {
+      "name": "seis_versoes",
+      "MBPerStudy": 900,
+      "perStudyMonthUSD": 0.01917,
+      "months": [
+        {
+          "month": 1,
+          "studies": 57.33,
+          "GB": 51.6,
+          "storageMarginalUSD": 0.0,
+          "storageWithoutQuotaUSD": 1.099
+        },
+        {
+          "month": 6,
+          "studies": 274.0,
+          "GB": 246.6,
+          "storageMarginalUSD": 3.123,
+          "storageWithoutQuotaUSD": 5.253
+        },
+        {
+          "month": 12,
+          "studies": 534.0,
+          "GB": 480.6,
+          "storageMarginalUSD": 8.107,
+          "storageWithoutQuotaUSD": 10.237
+        },
+        {
+          "month": 24,
+          "studies": 1054.0,
+          "GB": 948.6,
+          "storageMarginalUSD": 18.075,
+          "storageWithoutQuotaUSD": 20.205
+        },
+        {
+          "month": 36,
+          "studies": 1574.0,
+          "GB": 1416.6,
+          "storageMarginalUSD": 28.044,
+          "storageWithoutQuotaUSD": 30.174
+        }
+      ]
+    }
+  ]
+}

@@ -1,5 +1,9 @@
 project_id = "mxinpvcqzbfbzjodhgtz"
 
+[functions.corretor-access]
+# Credenciais GeoBrain verificadas pela função; lista de contas habilitadas no servidor.
+verify_jwt = false
+
 [functions.analyze-slide]
 verify_jwt = false
 
@@ -25,4 +29,12 @@ verify_jwt = false
 
 [functions.empresas-materialize-request]
 # Solicitação pública: sem Supabase Auth e sem login; protegida por limites por IP (hash) e globais.
+verify_jwt = false
+
+[functions.corretor-material-preview]
+# Biblioteca pública, só derivados PDF/PNG registrados. Originais exigem identidade via Storage/RLS.
+verify_jwt = false
+
+[functions.corretor-execution]
+# Entrada pública com orçamento confirmado e lotes registrados no servidor.
 verify_jwt = false

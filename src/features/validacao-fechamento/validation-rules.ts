@@ -1,100 +1,148 @@
 import type { ValidationBuilding, ValidationHistory } from './api';
-import { bucketQuarterFromStr, bucketYearFromStr, periodKeyFromStr, type VFFilterKeys } from './aggregate';
+import { areaKey, typologyAreaGroups } from './area-cluster';
 
-export interface Divergence extends VFFilterKeys {
+export interface Divergence {
+  building_type: string;
   building_id: string; typology_id: string; building_name: string; private_area: number | null; city: string; status: string; period: string;
   field: string; error: string; value: string; rule: string; group: string; isBuildingRule: boolean;
 }
-interface Row {
-  b: ValidationBuilding; h: ValidationHistory; typologyId: string; database: string;
-  buildingUnits: number; buildingSold: number; buildingPrice: number; buildingArea: number;
-  cityPriceM2: number; cityTicket: number; cityAvgArea: number; citySalesRate: number; cityBuildingUnits: number;
-  standardTicket: number; standardPriceM2: number; noGarageTicket: number; loteFechadoM2: number;
-}
-const n = (v: number | null | undefined) => v ?? 0;
-const ratio = (a: number, b: number) => b ? a / b : 0;
-const key = (...v: string[]) => v.join('|');
-const contains = (value: string, needle: string) => value.toLocaleLowerCase('pt-BR').includes(needle.toLocaleLowerCase('pt-BR'));
-const fmt = (v: number | null | undefined) => n(v).toLocaleString('pt-BR', { maximumFractionDigits: 2 });
 
-/** Tradução literal das tratativas v3. `database` é o período de data[] informado pelo usuário. */
+interface Row { b: ValidationBuilding; h: ValidationHistory; typologyId: string; cluster: string; clusterValid: boolean; }
+interface Totals { qty: number; sold: number; price: number; area: number; standardQty: number; standardPrice: number; }
+interface Cluster extends Totals { buildings: Set<string>; soldValues: number[]; prices: number[]; pricesM2: number[]; noGarageQty: number; noGaragePrice: number; noGarageArea: number; }
+const n = (value: number | null | undefined) => value ?? 0;
+const emptyTotals = (): Totals => ({ qty: 0, sold: 0, price: 0, area: 0, standardQty: 0, standardPrice: 0 });
+const key = (...values: string[]) => JSON.stringify(values);
+const fmt = (value: number) => value.toLocaleString('pt-BR', { maximumFractionDigits: 2 });
+const percent = (value: number) => Number.isFinite(value) ? `${fmt(value * 100)}%` : value === Infinity ? '∞ (referência zero)' : 'não calculável';
+
+/** pandas/numpy round: empates para o inteiro par. */
+function round(value: number, digits = 0): number {
+  const factor = 10 ** digits;
+  const scaled = value * factor;
+  const floor = Math.floor(scaled);
+  return (scaled - floor === .5 ? (floor % 2 === 0 ? floor : floor + 1) : Math.round(scaled)) / factor;
+}
+const ratio = (a: number, b: number) => b === 0 ? 0 : round(a / b, 2);
+// Divisão por zero: positivo/0 é infinito; 0/0 não dispara desvio (pandas).
+const deviation = (value: number, reference: number) => Math.abs(value / reference - 1);
+const hasGarage = (history: ValidationHistory) => (history.garage_label || '0').slice(0, 1) !== '0';
+
+function add(totals: Totals, history: ValidationHistory) {
+  const qty = n(history.qty), price = round(qty * n(history.price), 2), area = round(qty * n(history.private_area), 2);
+  totals.qty += qty; totals.sold += n(history.sold); totals.price += price; totals.area += area;
+  if (history.type_of_typology === 'Padrão') { totals.standardQty += qty; totals.standardPrice += price; }
+}
+
+function median(values: number[]): number {
+  const sorted = [...values].sort((a, b) => a - b);
+  const middle = Math.floor(sorted.length / 2);
+  return sorted.length ? round(sorted.length % 2 ? sorted[middle] : (sorted[middle - 1] + sorted[middle]) / 2, 2) : 0;
+}
+
+/** Farol atualizado: último registro por tipologia antes dos agrupamentos; cluster sem período. */
 export function validateBuildings(buildings: ValidationBuilding[]): Divergence[] {
-  const out: Divergence[] = [];
-  const base = buildings.flatMap((b) => b.typologies.flatMap((t) => t.history.map((h) => ({ b, h, typologyId: t.typology_id, database: b.period }))));
-  const sum = new Map<string, { qty: number; sold: number; price: number; area: number; standardQty: number; standardPrice: number; standardArea: number; noGarageQty: number; noGaragePrice: number }>();
-  const city = new Map<string, { qty: number; sold: number; price: number; area: number; units: number[] }>();
-  const cityLote = new Map<string, { price: number; area: number }>();
-  for (const r of base) {
-    const qty = n(r.h.qty), price = n(r.h.price), area = n(r.h.private_area), total = qty * price, totalArea = qty * area;
-    const bk = key(r.b.building_id, r.h.period); const bs = sum.get(bk) ?? { qty: 0, sold: 0, price: 0, area: 0, standardQty: 0, standardPrice: 0, standardArea: 0, noGarageQty: 0, noGaragePrice: 0 };
-    bs.qty += qty; bs.sold += n(r.h.sold); bs.price += total; bs.area += totalArea;
-    if (r.h.type_of_typology === 'Padrão') { bs.standardQty += qty; bs.standardPrice += total; bs.standardArea += totalArea; }
-    if (contains(r.h.pattern, 'Loteamento') || !/^0|^1\s*vagas?/i.test(r.h.garage_label)) { bs.noGarageQty += qty; bs.noGaragePrice += total; }
-    sum.set(bk, bs);
-    const ck = key(r.b.city, r.b.building_type, r.h.type_of_typology, r.h.pattern, `${r.h.number_bedroom} dorms`, r.h.period); const cs = city.get(ck) ?? { qty: 0, sold: 0, price: 0, area: 0, units: [] };
-    cs.qty += qty; cs.sold += n(r.h.sold); cs.price += total; cs.area += totalArea; city.set(ck, cs);
-    const lk = key(r.b.city, r.h.period); const ls = cityLote.get(lk) ?? { price: 0, area: 0 }; if (r.h.pattern === 'Loteamento Fechado') { ls.price += total; ls.area += totalArea; } cityLote.set(lk, ls);
+  const areaGroups = typologyAreaGroups(buildings);
+  const historyRows: Row[] = buildings.flatMap((b) => b.typologies.flatMap((t) => t.history.map((h) => {
+    const releaseYear = /^\d{4}-\d{2}-\d{2}/.test(b.release_date) && Number.isFinite(Date.parse(b.release_date)) ? b.release_date.slice(0, 4) : '';
+    const zipcode5 = String(b.zipcode ?? '').split('.')[0].padStart(8, '0').slice(0, 5);
+    const clusterDimension = /loteamento/i.test(b.standard) ? areaGroups.get(areaKey(b.building_id, t.typology_id))! : `${n(h.number_bedroom)} dorms`;
+    return { b, h, typologyId: t.typology_id, clusterValid: Boolean(releaseYear), cluster: [b.city, b.building_type, h.type_of_typology, b.standard, clusterDimension, zipcode5, releaseYear].join('|') };
+  })));
+  // Mesmo critério do Python: database, period, building_id, typology_id.
+  const compareId = (a: string, b: string) => Number.isFinite(Number(a)) && Number.isFinite(Number(b)) ? Number(a) - Number(b) : a.localeCompare(b);
+  const ordered = [...historyRows].sort((a, b) => a.b.period.localeCompare(b.b.period) || a.h.period.localeCompare(b.h.period) || compareId(a.b.building_id, b.b.building_id) || compareId(a.typologyId, b.typologyId));
+  const latestTypologies = new Map<string, Row>();
+  for (const row of ordered) latestTypologies.set(row.typologyId, row);
+  const latestBuildings = new Map<string, Row>();
+  for (const row of [...latestTypologies.values()].sort((a, b) => a.b.period.localeCompare(b.b.period) || a.h.period.localeCompare(b.h.period) || compareId(a.b.building_id, b.b.building_id) || compareId(a.typologyId, b.typologyId))) latestBuildings.set(row.b.building_id, row);
+
+  const base = [...latestTypologies.values()];
+
+  const buildingTotals = new Map<string, Totals>();
+  const clusters = new Map<string, Cluster>();
+  for (const row of base) {
+    const buildingKey = key(row.b.building_id, row.h.period);
+    const totals = buildingTotals.get(buildingKey) ?? emptyTotals();
+    add(totals, row.h);
+    buildingTotals.set(buildingKey, totals);
+    if (!row.clusterValid) continue;
+    const cluster = clusters.get(row.cluster) ?? { ...emptyTotals(), buildings: new Set<string>(), soldValues: [], prices: [], pricesM2: [], noGarageQty: 0, noGaragePrice: 0, noGarageArea: 0 };
+    add(cluster, row.h);
+    cluster.buildings.add(row.b.building_id);
+    cluster.soldValues.push(n(row.h.sold));
+    if (row.h.price != null) cluster.prices.push(row.h.price);
+    cluster.pricesM2.push(ratio(n(row.h.price), n(row.h.private_area)));
+    if (!hasGarage(row.h)) {
+      cluster.noGarageQty += n(row.h.qty);
+      cluster.noGaragePrice += round(n(row.h.qty) * n(row.h.price), 2);
+      cluster.noGarageArea += round(n(row.h.qty) * n(row.h.private_area), 2);
+    }
+    clusters.set(row.cluster, cluster);
   }
-  for (const r of base) { const bs = sum.get(key(r.b.building_id, r.h.period))!; const cs = city.get(key(r.b.city, r.b.building_type, r.h.type_of_typology, r.h.pattern, `${r.h.number_bedroom} dorms`, r.h.period))!; cs.units.push(bs.qty); }
-  const rows: Row[] = base.map(({ b, h, typologyId, database }) => { const bs = sum.get(key(b.building_id, h.period))!; const cs = city.get(key(b.city, b.building_type, h.type_of_typology, h.pattern, `${h.number_bedroom} dorms`, h.period))!; const ls = cityLote.get(key(b.city, h.period))!; const median = [...cs.units].sort((a, z) => a - z)[Math.floor(cs.units.length / 2)] ?? 0; return { b, h, typologyId, database, buildingUnits: bs.qty, buildingSold: bs.sold, buildingPrice: bs.price, buildingArea: bs.area, cityPriceM2: ratio(cs.price, cs.area), cityTicket: ratio(cs.price, cs.qty), cityAvgArea: ratio(cs.area, cs.qty), citySalesRate: ratio(cs.sold, cs.qty), cityBuildingUnits: median, standardTicket: ratio(bs.standardPrice, bs.standardQty), standardPriceM2: ratio(bs.standardPrice, bs.standardArea), noGarageTicket: ratio(bs.noGaragePrice, bs.noGarageQty), loteFechadoM2: ratio(ls.price, ls.area) }; });
-  const enterpriseErrors = new Set(['Vertical ou comercial com incorporadora PARTICULAR', 'Antigo com alta disponibilidade (mais 2 anos com mais 50% estoque)', 'Loteamento Comercial não deve entrar na base', 'Loteamento Fechado com preço acima de R$ 3.000/m2, deve ser Condomínio de Casas', 'Loteamento Aberto com poucas unidades (100 lotes ou menos)', 'Loteamento Fechado com entrada fora do limite 10% a 40%', 'Loteamento Aberto com entrada fora do limite 5% a 10%', 'Loteamento Fechado com mais de 60 parcelas', 'Loteamento Aberto com menos de 120 parcelas', 'Loteamento com financiamento bancário', 'Taxa de juros deve ser anual mas apresenta valor menor ou igual 1%', 'Oferta lançada precisa bater com o total de unidades por tipologia', 'Velocidade de vendas com variação maior que 50% da mediana do padrão para cidade', 'Oferta lançada com variação maior que 50% da mediana do padrão da cidade']);
-  const emit = (r: Row, field: string, error: string, value: string, rule: string) => {
-    const cityAverage = error.includes('ticket') ? `Média cidade: ${fmt(r.cityTicket)}` : error.includes('Metragem') ? `Média cidade: ${fmt(r.cityAvgArea)}` : `Média cidade: ${fmt(r.cityPriceM2)}`;
-    const cityRule = !/oferta lançada|velocidade de vendas|unidades menores|empreendimentos verticais com diferença|ticket garden|ticket cobertura|preço\/m2 cobertura|loteamento aberto com preço\/m2 maior/i.test(error)
-      && /cidade|loteamento fechado com preço abaixo|loteamento aberto com preço abaixo|condomínio de casas com preço abaixo|vertical com preço|metragem variando/i.test(error);
-    const hasCityAverage = cityRule;
-    const usesCityGroup = cityRule || /cidade:|mediana cidade:/i.test(value);
-    const usesEnterpriseGroup = field === 'total_stock' || field === 'total_units' || value.includes('Ticket Empreendimento') || value.includes('Padrão') || error.includes('empreendimento');
-    const groups = [
-      usesEnterpriseGroup ? `Empreendimento: building_id=${r.b.building_id} | período=${r.h.period}` : '',
-      usesCityGroup ? `Cidade: cidade=${r.b.city} | tipo=${r.b.building_type} | tipologia=${r.h.type_of_typology} | padrão=${r.h.pattern} | dormitórios=${r.h.number_bedroom} | período=${r.h.period}` : '',
-    ].filter(Boolean).join(' / ');
-    out.push({ building_id: r.b.building_id, typology_id: r.typologyId, building_name: r.b.name, private_area: r.h.private_area, city: r.b.city, status: r.h.building_status, period: r.h.period, building_type: r.b.building_type, standard: r.b.standard, periodKey: periodKeyFromStr(r.h.period), bucketYear: bucketYearFromStr(r.h.period), bucketQuarter: bucketQuarterFromStr(r.h.period), field, error, value: hasCityAverage && !/cidade:/i.test(value) ? `${value} | ${cityAverage}` : value, rule, group: groups, isBuildingRule: enterpriseErrors.has(error) });
+
+
+  const out: Divergence[] = [];
+  const emit = (row: Row, field: string, error: string, value: string, rule: string, group = '', isBuildingRule = false) => {
+    out.push({ building_type: row.b.building_type, building_id: row.b.building_id, typology_id: isBuildingRule ? '0' : row.typologyId, building_name: row.b.name, private_area: isBuildingRule ? null : row.h.private_area, city: row.b.city, status: row.b.status, period: row.h.period, field, error, value, rule, group, isBuildingRule });
   };
-  const latestBuilding = new Map<string, Row>(), latestTypology = new Map<string, Row>();
-  for (const r of rows) { const order = `${r.database}|${r.h.period}|${r.b.building_id}|${r.typologyId}`; if (!latestBuilding.has(r.b.building_id) || order > `${latestBuilding.get(r.b.building_id)!.database}|${latestBuilding.get(r.b.building_id)!.h.period}|${r.b.building_id}|${latestBuilding.get(r.b.building_id)!.typologyId}`) latestBuilding.set(r.b.building_id, r); if (!latestTypology.has(r.typologyId) || r.h.period > latestTypology.get(r.typologyId)!.h.period) latestTypology.set(r.typologyId, r); }
-  for (const r of latestBuilding.values()) { const months = Math.round((new Date(r.h.period).getTime() - new Date(r.b.release_date).getTime()) / 86400000 / 30.44); const half = r.buildingUnits * .5; const lot = contains(r.b.standard, 'Loteamento');
-    if (r.b.builder_name === 'Particular' && r.b.building_type !== 'Horizontal') emit(r, 'builder_name', 'Vertical ou comercial com incorporadora PARTICULAR', r.b.builder_name, 'OFERTA, TIPOLOGIA E CADASTRO');
-    if (months > 24 && r.b.status === 'Ativo' && n(r.b.total_stock) > half) emit(r, 'total_stock', 'Antigo com alta disponibilidade (mais 2 anos com mais 50% estoque)', `Tempo venda: ${months} | Estoque atual: ${fmt(r.b.total_stock)} | Total unidades: ${fmt(r.buildingUnits)}`, 'ESTOQUE / DISPONIBILIDADE');
-    if (r.b.standard === 'Loteamento Comercial') emit(r, 'standard', 'Loteamento Comercial não deve entrar na base', r.b.standard, 'OFERTA, TIPOLOGIA E CADASTRO');
-    if (r.b.standard === 'Loteamento Fechado' && n(r.h.price_private_area) > 3000) emit(r, 'price_private_area', 'Loteamento Fechado com preço acima de R$ 3.000/m2, deve ser Condomínio de Casas', fmt(r.h.price_private_area), 'OFERTA, TIPOLOGIA E CADASTRO');
-    if (r.b.standard === 'Loteamento Aberto' && r.buildingUnits <= 100) emit(r, 'qty', 'Loteamento Aberto com poucas unidades (100 lotes ou menos)', `Total unidades: ${fmt(r.buildingUnits)}`, 'OFERTA, TIPOLOGIA E CADASTRO');
-    if (r.b.standard === 'Loteamento Fechado' && (n(r.b.down_payment_percentage) < 10 || n(r.b.down_payment_percentage) > 40)) emit(r, 'down_payment_percentage', 'Loteamento Fechado com entrada fora do limite 10% a 40%', fmt(r.b.down_payment_percentage), 'CONDIÇÕES DE PAGAMENTO');
-    if (r.b.standard === 'Loteamento Aberto' && (n(r.b.down_payment_percentage) < 5 || n(r.b.down_payment_percentage) > 10)) emit(r, 'down_payment_percentage', 'Loteamento Aberto com entrada fora do limite 5% a 10%', fmt(r.b.down_payment_percentage), 'CONDIÇÕES DE PAGAMENTO');
-    if (r.b.standard === 'Loteamento Fechado' && n(r.b.number_of_installments) > 60) emit(r, 'number_of_installments', 'Loteamento Fechado com mais de 60 parcelas', fmt(r.b.number_of_installments), 'CONDIÇÕES DE PAGAMENTO');
-    if (r.b.standard === 'Loteamento Aberto' && n(r.b.number_of_installments) < 120) emit(r, 'number_of_installments', 'Loteamento Aberto com menos de 120 parcelas', fmt(r.b.number_of_installments), 'CONDIÇÕES DE PAGAMENTO');
-    if (lot && n(Number(r.b.bank_financing)) !== 0) emit(r, 'bank_financing', 'Loteamento com financiamento bancário', String(r.b.bank_financing), 'CONDIÇÕES DE PAGAMENTO');
-    if (r.b.building_type === 'Horizontal' && n(Number(r.b.own_financing)) === 1 && n(r.b.interest_rate_tax) <= 1) emit(r, 'interest_rate_tax', 'Taxa de juros deve ser anual mas apresenta valor menor ou igual 1%', fmt(r.b.interest_rate_tax), 'CONDIÇÕES DE PAGAMENTO');
-    if (n(r.b.total_units) !== r.buildingUnits) emit(r, 'total_units', 'Oferta lançada precisa bater com o total de unidades por tipologia', `Oferta lançada: ${fmt(r.b.total_units)} | Unidades empreendimento: ${fmt(r.buildingUnits)}`, 'OFERTA E FASEAMENTO');
-    if (Math.abs(ratio(r.buildingSold, r.buildingUnits) / r.citySalesRate - 1) > .5) emit(r, 'sold', 'Velocidade de vendas com variação maior que 50% da mediana do padrão para cidade', `Empreendimento: ${fmt(ratio(r.buildingSold, r.buildingUnits))} | Mediana cidade: ${fmt(r.citySalesRate)}`, 'ESTOQUE / DISPONIBILIDADE');
-    if (Math.abs(ratio(r.buildingUnits, r.cityBuildingUnits) - 1) > .5) emit(r, 'qty', 'Oferta lançada com variação maior que 50% da mediana do padrão da cidade', `Oferta lançada: ${fmt(r.buildingUnits)} | Mediana cidade: ${fmt(r.cityBuildingUnits)}`, 'ESTOQUE / DISPONIBILIDADE'); }
-  for (const r of latestTypology.values()) { const h=r.h, lot=contains(h.pattern,'Loteamento'), p=n(h.price_private_area), area=n(h.private_area), garage=h.garage_label;
-    if (h.sold > h.qty) emit(r,'sold','Quantidade vendida maior Quantidade lançada',`Vendido: ${h.sold} > Lançado: ${h.qty}`,'OFERTA, TIPOLOGIA E CADASTRO');
-    if (r.b.release_date === h.period && Math.round(n(h.release_price)) !== Math.round(n(h.price))) emit(r,'release_price','Preço de lançamento diferente do preço do período',`Preço Lançamento: ${fmt(h.release_price)} | Preço Período: ${fmt(h.price)}`,'PREÇO');
-    if (h.sold_in_period !== 0 && h.building_status === 'Futuro') emit(r,'sold_in_period','Empreendimento Futuro com venda',fmt(h.sold_in_period),'OFERTA, TIPOLOGIA E CADASTRO');
-    if (r.b.release_date < h.period && h.building_status === 'Futuro') emit(r,'release_date','Data lançamento < Período atual',`Data lançamento: ${r.b.release_date} < Período atual: ${h.period}`,'OFERTA, TIPOLOGIA E CADASTRO');
-    if (Math.abs(ratio(n(h.price),r.cityTicket)-1)>=.2) emit(r,'price','Variação de 20% do ticket da tipologia comparando com o ticket do padrão da cidade',fmt(h.price),'PREÇO');
-    if (n(h.distractions)>5) emit(r,'distractions','Mais de 5 distratos no período',fmt(h.distractions),'OFERTA, TIPOLOGIA E CADASTRO');
-    if (lot && area<120) emit(r,'private_area','Loteamento menor que 120 m2',fmt(h.private_area),'METRAGEM E VAGAS DE GARAGEM'); if (lot && area>800) emit(r,'private_area','Loteamento maior que 800 m2',fmt(h.private_area),'METRAGEM E VAGAS DE GARAGEM');
-    if (h.pattern==='Loteamento Aberto' && p>r.loteFechadoM2) emit(r,'price_private_area','Loteamento aberto com preço/m2 maior que o do fechado da cidade',`Preço/m2 Aberto: ${fmt(p)} | Preço/m2 Fechado Cidade: ${fmt(r.loteFechadoM2)}`,'PREÇO');
-    if (h.pattern==='Loteamento Fechado' && p<600 && Math.abs(ratio(p,r.cityPriceM2)-1)>=.2) emit(r,'price_private_area','Loteamento Fechado com preço abaixo de R$ 600/m2',fmt(p),'PREÇO');
-    if (h.pattern==='Loteamento Aberto' && p<150 && Math.abs(ratio(p,r.cityPriceM2)-1)>=.2) emit(r,'price_private_area','Loteamento Aberto com preço abaixo de R$ 150/m2',fmt(p),'PREÇO');
-    if (contains(h.pattern,'Condomínio de Casas') && p<3500 && Math.abs(ratio(p,r.cityPriceM2)-1)>=.2) emit(r,'price_private_area','Condomínio de Casas com preço abaixo de R$ 3.500/m2',fmt(p),'PREÇO');
-    if (area<ratio(r.buildingArea,r.buildingUnits) && n(h.price)>ratio(r.buildingPrice,r.buildingUnits)) emit(r,'price','Unidades menores com ticket maior que a média do empreendimento',`Preço: ${fmt(h.price)} | Ticket Empreendimento: ${fmt(ratio(r.buildingPrice,r.buildingUnits))}`,'PREÇO');
-    if (area<ratio(r.buildingArea,r.buildingUnits) && Math.abs(ratio(p,ratio(r.buildingPrice,r.buildingArea)))<.8) emit(r,'price_private_area','Unidades menores com preço/m2 20% menor que a média do empreendimento',`M2/Tipologia: ${fmt(p)} | Média empreendimento: ${fmt(ratio(r.buildingPrice,r.buildingArea))}`,'PREÇO');
-    if (r.b.building_type==='Vertical' && Math.abs(ratio(p,ratio(r.buildingPrice,r.buildingArea)))>=1.15) emit(r,'price_private_area','Empreendimentos Verticais com diferença do preço/m2 maior que 15% entre tipologias',`M2/Tipologia: ${fmt(p)} | Média empreendimento: ${fmt(ratio(r.buildingPrice,r.buildingArea))}`,'PREÇO');
-    if (!/^0/.test(garage) && n(h.price) <= r.noGarageTicket) emit(r,'price','Unidade com vaga com preço inferior à unidade sem vaga',`Ticket: ${fmt(h.price)} | Sem vagas: ${fmt(r.noGarageTicket)}`,'PREÇO');
-    if (!lot && r.b.building_type!=='Comercial' && area>=100 && h.number_bedroom<=1) emit(r,'number_bedroom','Tipologia acima de 100 m2 com no máximo 1 dormitório',`Quartos: ${h.number_bedroom} | M2: ${fmt(area)}`,'METRAGEM E VAGAS DE GARAGEM');
-    if (r.b.building_type==='Vertical' && p<5000 && Math.abs(ratio(p,r.cityPriceM2)-1)>.15) emit(r,'price_private_area','Vertical com preço/m2 abaixo de R$ 5.000',fmt(p),'PREÇO');
-    if (r.b.building_type==='Vertical' && h.pattern==='Econômico' && !/0|1\s*vagas?/i.test(garage)) emit(r,'garage','Econômico com mais de 1 vaga de garagem',garage,'METRAGEM E VAGAS DE GARAGEM');
-    if (r.b.building_type==='Vertical' && h.pattern==='Econômico' && contains(garage,'Rotativa')) emit(r,'garage','Econômico com vaga rotativa',garage,'METRAGEM E VAGAS DE GARAGEM');
-    if (r.b.building_type==='Vertical' && h.pattern!=='Econômico' && contains(garage,'Descoberta')) emit(r,'garage','Não econômico com vaga descoberta',garage,'METRAGEM E VAGAS DE GARAGEM');
-    if (r.b.building_type==='Vertical' && /0|1\s*vagas?/i.test(garage) && area>=150) emit(r,'garage','Tipologia com 150 m2 ou mais com menos de 2 vagas',garage,'METRAGEM E VAGAS DE GARAGEM');
-    if (r.b.building_type==='Vertical' && /0\s*vagas?/i.test(garage) && area>=40 && h.pattern==='Compacto') emit(r,'garage','Compacto com 40 m2 ou mais sem vaga de garagem',garage,'METRAGEM E VAGAS DE GARAGEM');
-    if (Math.abs(ratio(p,r.cityPriceM2)-1)>=.4) emit(r,'price_private_area','Preço/m2 com variação a partir de 40% sobre a média do padrão da cidade',fmt(p),'PREÇO');
-    if (h.type_of_typology==='Garden' && Math.round(n(h.price))>=Math.round(r.standardTicket)) emit(r,'price','Ticket Garden >= Ticket Padrão',`Garden: ${fmt(h.price)} >= Padrão: ${fmt(r.standardTicket)}`,'METRAGEM E VAGAS DE GARAGEM');
-    if (h.type_of_typology==='Cobertura' && Math.round(n(h.price))<=Math.round(r.standardTicket)) emit(r,'price','Ticket Cobertura <= Ticket Padrão',`Cobertura: ${fmt(h.price)} <= Padrão: ${fmt(r.standardTicket)}`,'METRAGEM E VAGAS DE GARAGEM');
-    if (h.type_of_typology==='Cobertura' && Math.round(p)>=Math.round(r.standardPriceM2)) emit(r,'price','Preço/M2 Cobertura >= Preço/M2 Padrão',`Cobertura: ${fmt(p)} >= Padrão: ${fmt(r.standardPriceM2)}`,'PREÇO');
-    if (Math.abs(ratio(area,r.cityAvgArea)-1)>=.2) emit(r,'private_area','Metragem variando a partir de 20% sobre a média do grupo da cidade',`${fmt(area)} | Média cidade: ${fmt(r.cityAvgArea)}`,'PREÇO'); }
+
+  for (const row of latestBuildings.values()) {
+    const totals = buildingTotals.get(key(row.b.building_id, row.h.period))!;
+    const cluster = clusters.get(row.cluster);
+    const months = round((Date.parse(row.h.period) - Date.parse(row.b.release_date)) / 86400000 / 30.44) || 0;
+    const stock = n(row.b.total_stock);
+    const salesRate = ratio(totals.sold, totals.qty);
+    const salesValue = `Tempo venda: ${months} meses | Estoque atual: ${fmt(stock)} | Total vendido: ${fmt(totals.sold)} | Oferta lançada: ${fmt(totals.qty)} | % Vendido: ${percent(salesRate)} | Status empreendimento: ${row.b.status} | Lançamento: ${row.b.release_date} | Período: ${row.h.period}`;
+    const buildingGroup = `Empreendimento: building_id=${row.b.building_id} | período=${row.h.period}`;
+    if (months > 24 && row.b.status === 'Ativo' && salesRate <= .3) emit(row, 'total_stock', '> 24 meses, Ativo, Vendido ≤ 30% das unidades', `${salesValue} | Critério: mais de 24 meses e vendido ≤ 30%`, 'Estoque - Empreendimento', buildingGroup, true);
+    if (months <= 24 && row.b.status === 'Ativo' && salesRate >= .8) emit(row, 'total_stock', '≤ 24 meses, Ativo, Vendido ≥ 80% das unidades', `${salesValue} | Critério: até 24 meses e vendido ≥ 80%`, 'Estoque - Empreendimento', buildingGroup, true);
+    if (cluster && cluster.buildings.size > 1 && deviation(salesRate, ratio(cluster.sold, cluster.qty)) > .5) emit(row, 'sold', 'Taxa de vendas com desvio > 50% da taxa do cluster', `Vendas: ${fmt(totals.sold)} | Oferta lançada: ${fmt(totals.qty)} | % Vendido: ${percent(salesRate)} | Empreendimentos: ${cluster.buildings.size} | Mediana de vendas do cluster: ${fmt(round(median(cluster.soldValues)))} unidades | % Vendido cluster: ${percent(ratio(cluster.sold, cluster.qty))} | Desvio absoluto: ${percent(deviation(salesRate, ratio(cluster.sold, cluster.qty)))} | Limite de desvio: > 50%`, 'Estoque - Tipologia', row.cluster, true);
+  }
+
+  for (const row of latestTypologies.values()) {
+    const { h, b } = row;
+    const cluster = clusters.get(row.cluster);
+    const count = cluster?.buildings.size ?? 0;
+    const totals = buildingTotals.get(key(b.building_id, h.period))!;
+    const area = n(h.private_area), price = n(h.price), priceM2 = n(h.price_private_area);
+    const launched = /Ativo|Esgotado|Lançado/i.test(h.building_status ?? '');
+    const zeroPrice = price === 0 && launched;
+    const priceMedian = median(cluster?.prices ?? []);
+    const lowPriceLimit = b.building_type === 'Horizontal' ? 40000 : 100000;
+    const lowPrice = price > 0 && price <= lowPriceLimit && deviation(price, priceMedian) >= .3;
+    const suffix = ` | Empreendimentos: ${count}`;
+    const priceDeviation = ` | Desvio absoluto: ${percent(deviation(price, priceMedian))} | Limite de desvio: ≥ 30%`;
+    const priceM2Median = median(cluster?.pricesM2 ?? []);
+    const priceM2Deviation = ` | Desvio absoluto: ${percent(deviation(priceM2, priceM2Median))} | Limite de desvio: ≥ 30%`;
+    if (b.building_type === 'Vertical' && b.standard === 'Compacto' && area >= 50 && n(h.number_bedroom) <= 1) emit(row, 'private_area', 'Compacto ≥ 50 m² com até 1 quarto', `M²: ${fmt(area)} | Quartos: ${n(h.number_bedroom)} dorms | Padrão: ${b.standard} | Tipo: ${b.building_type} | Critério: área ≥ 50 m² e até 1 quarto`, 'Metragem - Tipologia');
+    // Prioridade apenas nesta família: zerado > limite específico > desvio geral.
+    if (lowPrice) emit(row, 'price', `Preço abaixo de R$ ${fmt(lowPriceLimit)}`, `Preço: ${fmt(price)} | Mediana cluster: ${fmt(priceMedian)} | Limite de preço: ≤ R$ ${fmt(lowPriceLimit)} | Tipo: ${b.building_type}${priceDeviation}${suffix}`, 'Preço', row.cluster);
+    else if (!zeroPrice && cluster && count > 1 && deviation(price, priceMedian) >= .3) emit(row, 'price', 'Desvio ≥ 30% da mediana do cluster', `Preço: ${fmt(price)} | Mediana cluster: ${fmt(priceMedian)}${priceDeviation}${suffix}`, 'Preço - Tipologia', row.cluster);
+    else if (!zeroPrice && price < 1000 && count === 1) emit(row, 'price', 'Desvio ≥ 30% da mediana do cluster', `Preço: ${fmt(price)} | Critério de cluster unitário: preço < R$ 1.000${suffix}`, 'Preço', row.cluster);
+    if (cluster && count > 1 && deviation(priceM2, median(cluster.pricesM2)) >= .3) emit(row, 'price_private_area', 'Desvio ≥ 30% da mediana do cluster', `Preço/m²: ${fmt(priceM2)} | Mediana cluster: ${fmt(priceM2Median)}${priceM2Deviation}${suffix}`, 'Preço', row.cluster);
+    if (priceM2 < 10 && count === 1) emit(row, 'price_private_area', 'Desvio ≥ 30% da mediana do cluster', `Preço/m²: ${fmt(priceM2)} | Critério de cluster unitário: preço/m² < R$ 10${suffix}`, 'Preço', row.cluster);
+    if (hasGarage(h) && round(price) <= round(ratio(cluster?.noGaragePrice ?? 0, cluster?.noGarageQty ?? 0))) emit(row, 'price', 'Preço com vaga ≤ Preço sem vaga', `Com vagas: ${fmt(price)} | Sem vagas: ${fmt(ratio(cluster?.noGaragePrice ?? 0, cluster?.noGarageQty ?? 0))} | Vagas: ${h.garage_label} | Unidades sem vagas: ${fmt(cluster?.noGarageQty ?? 0)} | Referência: média ponderada pela oferta lançada das unidades sem vagas${suffix}`, 'Preço', row.cluster);
+    if (hasGarage(h) && round(priceM2) <= round(ratio(cluster?.noGaragePrice ?? 0, cluster?.noGarageArea ?? 0))) emit(row, 'price_private_area', 'Preço/m² com vaga ≤ Preço/m² sem vaga', `Com vagas: ${fmt(priceM2)} | Sem vagas: ${fmt(ratio(cluster?.noGaragePrice ?? 0, cluster?.noGarageArea ?? 0))} | Vagas: ${h.garage_label} | Área total sem vagas: ${fmt(cluster?.noGarageArea ?? 0)} m² | Referência: preço total ÷ área total das unidades sem vagas${suffix}`, 'Preço', row.cluster);
+    const standardTicket = ratio(totals.standardPrice, totals.standardQty);
+    const buildingGroup = `Empreendimento: building_id=${b.building_id} | período=${h.period}`;
+    if (h.type_of_typology === 'Garden' && round(price) >= round(standardTicket)) emit(row, 'price', 'Ticket Garden ≥ Ticket Padrão', `Garden: ${fmt(price)} | Padrão: ${fmt(standardTicket)} | Referência Padrão: média ponderada pela oferta lançada | Unidades Padrão: ${fmt(totals.standardQty)}`, 'Preço', buildingGroup);
+    if (h.type_of_typology === 'Cobertura' && round(price) <= round(standardTicket)) emit(row, 'price', 'Ticket Cobertura ≤ Ticket Padrão', `Cobertura: ${fmt(price)} | Padrão: ${fmt(standardTicket)} | Referência Padrão: média ponderada pela oferta lançada | Unidades Padrão: ${fmt(totals.standardQty)}`, 'Preço', buildingGroup);
+    if (b.building_type === 'Vertical' && b.standard === 'Econômico' && !/0|1\s*vagas?/i.test(h.garage_label)) emit(row, 'garage', 'Vertical Econômico com mais de 1 vaga', `Vagas: ${h.garage_label} | M²: ${fmt(area)} | Padrão: ${b.standard} | Tipo: ${b.building_type}`, 'Vagas');
+    if (b.building_type === 'Vertical' && area >= 150 && /0|1\s*vagas?/i.test(h.garage_label)) emit(row, 'garage', 'Vertical ≥ 150 m² com menos de 2 vagas', `Vagas: ${h.garage_label} | M²: ${fmt(area)} | Padrão: ${b.standard} | Tipo: ${b.building_type}`, 'Vagas');
+    if (b.building_type === 'Vertical' && b.standard === 'Compacto' && area >= 40 && /0\s*vagas?/i.test(h.garage_label)) emit(row, 'garage', 'Vertical Compacto ≥ 40 m² sem vaga', `Vagas: ${h.garage_label} | M²: ${fmt(area)} | Padrão: ${b.standard} | Tipo: ${b.building_type}`, 'Vagas');
+
+    // Farol 26/10/2026: integridade cadastral, sem duplicar os desvios de preço do cluster.
+    const releasePrice = n(h.release_price);
+    const monthLabel = (date: string) => /^\d{4}-\d{2}-\d{2}/.test(date) && Number.isFinite(Date.parse(date)) ? `${date.slice(5, 7)}/${date.slice(0, 4)}` : '';
+    const releaseDay = b.release_date.slice(0, 10);
+    const sameReleasePeriod = Boolean(releaseDay && Number.isFinite(Date.parse(releaseDay)) && releaseDay === h.period.slice(0, 10));
+    if (area === 0 && h.building_status !== 'Futuro') emit(row, 'private_area', 'Área privativa zerada', `M2: ${fmt(area)} | Status tipologia: ${h.building_status || 'não informado'} | Período: ${h.period} | Critério: área zero e status diferente de Futuro`, 'Metragem');
+    if (round(Math.abs(round(priceM2, 2) - ratio(price, area)), 2) > .01) emit(row, 'price_private_area', 'Preço M2 diferente de (Preço / Área Privativa)', `Preço M2 gravado: ${fmt(priceM2)} | Preço: ${fmt(price)} | M2: ${fmt(area)} | Preço/m² calculado: ${fmt(ratio(price, area))} | Diferença absoluta: ${fmt(round(Math.abs(round(priceM2, 2) - ratio(price, area)), 2))} | Tolerância: R$ 0,01/m²${area === 0 ? ' | Área zero: cálculo tratado como zero' : ''}`, 'Preço');
+    if (releasePrice === 0 && launched) emit(row, 'release_price', 'Preço de lançamento zerado', `Preço: ${fmt(releasePrice)} | Período: ${monthLabel(b.release_date)} | Lançamento: ${b.release_date} | Status tipologia: ${h.building_status}`, 'Preço');
+    if (price === 0 && launched) emit(row, 'price', 'Preço do período zerado', `Preço: ${fmt(price)} | Período: ${monthLabel(h.period)} | Status tipologia: ${h.building_status}`, 'Preço');
+    if (sameReleasePeriod && n(h.qty) === 0) emit(row, 'qty', 'Quantidade lançada zerada', `Quantidade lançada: ${fmt(n(h.qty))} | Lançamento: ${b.release_date} | Período: ${h.period} | Critério: quantidade zero no período de lançamento`, 'Estoque');
+    if (sameReleasePeriod && round(releasePrice, 2) !== round(price, 2)) emit(row, 'release_price', 'Preço de lançamento diferente do preço do período', `Preço lançamento: ${fmt(releasePrice)} | Preço: ${fmt(price)} | Diferença absoluta: ${fmt(round(Math.abs(round(releasePrice, 2) - round(price, 2)), 2))} | Lançamento: ${b.release_date} | Período: ${h.period}`, 'Preço');
+  }
   return out;
 }

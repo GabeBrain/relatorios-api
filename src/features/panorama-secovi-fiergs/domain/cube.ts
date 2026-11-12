@@ -2,6 +2,9 @@ import type { Quarter, Segment } from '../types';
 import { compareQuarters, parseQuarter, quarterEndMonth, quarterIndex } from './quarters';
 import { canonicalStandard, canonicalTypology, maturityOfMonths, type MaturityLabel, type StandardLabel, type TypologyLabel } from './taxonomy';
 import { entityPolicy, type EntityId, type HorizontalSubtype } from './entity-policy';
+import { reviewedFiergsHorizontalProduct } from '../reference/fiergs-reviewed-horizontal-products';
+import { normalizeBuildingHistory, type HistoryAudit } from './building-history';
+import { marketObservations, periodSales, sumObserved, type MarketObservation } from './market-observations';
 
 /**
  * Cubo granular por empreendimento. É a base única de contagem, ponderação e reconciliação: todas
@@ -31,6 +34,7 @@ export interface CubeProject {
   city: string;
   uf: string;
   name: string;
+  neighborhood?: string | null;
   segment: Segment;
   horizontalSubtype: HorizontalSubtype | null;
   standard: StandardLabel;
@@ -55,12 +59,20 @@ export interface CubeProject {
   longitude: number | null;
   typologies: CubeTypology[];
   coverage: CubeCoverage;
+  /** Original launch, closing capacity and registry are distinct, auditable bases. */
+  historyAudit?: HistoryAudit;
+  /** Primitive, deduplicated plant observations. Never collapse geometry before aggregation. */
+  marketObservations?: MarketObservation[];
+  /** Present only on a derived market view, never on historical release facts. */
+  marketActive?: boolean;
 }
 
 export interface CubeRejection {
   buildingId: string;
   city: string;
   reason: string;
+  observedClosingStock?: number | null;
+  productEvidence?: string;
 }
 
 export interface MarketCube {
@@ -179,21 +191,37 @@ export function buildCityCube(raw: Record<string, unknown>[], options: BuildCube
 
   for (const building of raw) {
     const buildingId = String(firstText(building, ['building_id', 'id']) ?? '');
-    const decision = policy.classify({
+    const sourceDecision = policy.classify({
       segment: segmentOf(building.building_type ?? building.type ?? building.segment),
       rawSubtype: firstText(building, ['building_subtype', 'subtype', 'sub_type', 'horizontal_type', 'product_type']),
+      rawWork: building.work,
       rawType: firstText(building, ['building_type', 'type']),
       rawName: firstText(building, ['name', 'building_name']),
       standard: firstText(building, ['standard', 'pattern']),
       historicalPatterns: (Array.isArray(building.typologies_history) ? building.typologies_history : []).map((entry) => firstText(entry as Record<string, unknown>, ['pattern', 'standard'])),
     });
+    // A fonte pode perder o rótulo de produto de um empreendimento já observado. Nesse caso,
+    // apenas um catálogo granular auditado supre o subtipo; produto explícito atual prevalece.
+    const reviewedSubtype = entity === 'fiergs-rs' && sourceDecision.reason === 'subtipo_horizontal_indefinido'
+      ? reviewedFiergsHorizontalProduct(options.uf, options.city, buildingId)
+      : null;
+    const decision = reviewedSubtype
+      ? { accepted: true, segment: 'Horizontal' as const, horizontalSubtype: reviewedSubtype, reason: null }
+      : sourceDecision;
 
     if (!buildingId) {
       rejections.push({ buildingId: '(sem id)', city: options.city, reason: 'empreendimento sem identificador estável' });
       continue;
     }
     if (!decision.accepted || !decision.segment) {
-      rejections.push({ buildingId, city: options.city, reason: decision.reason ?? 'segmento_desconhecido' });
+      const hasIdentifiedRows = Array.isArray(building.typologies_history) && building.typologies_history.some((r) => r && typeof r === 'object' && 'typology_id' in r);
+      const rejectedHistory = hasIdentifiedRows ? normalizeBuildingHistory(building, endMonth, `${options.uf}/${options.city}#${buildingId}`) : null;
+      rejections.push({ buildingId, city: options.city, reason: decision.reason ?? 'segmento_desconhecido',
+        ...(rejectedHistory ? {
+          observedClosingStock: rejectedHistory.audit.issues.length ? null : sumObserved(rejectedHistory.closingRows.map((r) => firstNumber(r, ['typology_stock','stock']))),
+          productEvidence: String(firstText(building, ['building_subtype','subtype','work','standard']) ?? ''),
+        } : {}),
+      });
       continue;
     }
 
@@ -211,7 +239,10 @@ export function buildCityCube(raw: Record<string, unknown>[], options: BuildCube
     if (seen.has(key)) continue;
     seen.add(key);
 
-    const history = (Array.isArray(building.typologies_history) ? building.typologies_history : []) as Record<string, unknown>[];
+    const normalizedHistory = normalizeBuildingHistory(building, endMonth, key);
+    const history = normalizedHistory.rows;
+    const capacityMode = entity === 'fiergs-rs' && normalizedHistory.audit.identityMode === 'identified';
+    const observations = capacityMode ? marketObservations(history) : undefined;
     const withinWindow = history.filter((entry) => String(entry.period ?? '').slice(0, 7) <= endMonth);
     const releaseMonth = releaseRaw.slice(0, 7);
     const releaseEntries = withinWindow.filter((entry) => String(entry.period ?? '').slice(0, 7) === releaseMonth);
@@ -230,7 +261,9 @@ export function buildCityCube(raw: Record<string, unknown>[], options: BuildCube
       byTypology.set(label, current);
       return current;
     };
-    for (const entry of releaseEntries) {
+    // Existing consumers call this "launchedUnits": for the closing market it means capacity
+    // of release-date cohorts at this close, never the original launch observation.
+    for (const entry of capacityMode ? latestEntries : releaseEntries) {
       // O contrato oficial de `building-with-history` usa `number_bedroom`;
       // os aliases anteriores permanecem para não quebrar respostas legadas.
       const row = ensure(canonicalTypology(firstText(entry, ['number_bedroom', 'typology', 'typology_name', 'type_of_typology', 'bedrooms', 'dorms'])));
@@ -239,7 +272,7 @@ export function buildCityCube(raw: Record<string, unknown>[], options: BuildCube
     for (const entry of latestEntries) {
       const row = ensure(canonicalTypology(firstText(entry, ['number_bedroom', 'typology', 'typology_name', 'type_of_typology', 'bedrooms', 'dorms'])));
       row.finalUnits = addNullable(row.finalUnits, firstNumber(entry, ['typology_stock', 'stock']));
-      row.soldUnits = addNullable(row.soldUnits, firstNumber(entry, ['sold_in_period', 'liquid_sales', 'sold', 'sales']));
+      row.soldUnits = addNullable(row.soldUnits, firstNumber(entry, capacityMode ? ['sold_in_period', 'liquid_sales', 'sales'] : ['sold_in_period', 'liquid_sales', 'sold', 'sales']));
       const area = firstNumber(entry, ['private_area', 'area', 'average_area']);
       const price = firstNumber(entry, ['price', 'average_price', 'release_price']);
       const meter = firstNumber(entry, ['price_private_area', 'price_per_meter', 'average_price_per_meter']);
@@ -248,24 +281,30 @@ export function buildCityCube(raw: Record<string, unknown>[], options: BuildCube
       row.averagePricePerMeter = row.averagePricePerMeter ?? meter ?? (price !== null && area ? price / area : null);
     }
 
+    if (observations) for (const t of byTypology.values()) {
+      t.soldUnits = periodSales(observations.filter((r) => r.typology === t.typology), options.endQuarter);
+    }
+
     const typologies = [...byTypology.values()];
     const weights = typologies.map((row) => row.finalUnits ?? row.launchedUnits);
     const launchedFromTypology = typologies.reduce<number | null>((sum, row) => addNullable(sum, row.launchedUnits), null);
-    const launchedUnits = firstNumber(building, ['total_units', 'qty']) ?? launchedFromTypology;
-    const finalUnits = firstNumber(building, ['stock', 'final_stock'])
-      ?? typologies.reduce<number | null>((sum, row) => addNullable(sum, row.finalUnits), null);
+    const launchedUnits = capacityMode ? normalizedHistory.audit.capacityAtClosing
+      : firstNumber(building, ['total_units', 'qty']) ?? launchedFromTypology;
+    const historicalStock = typologies.reduce<number | null>((sum, row) => addNullable(sum, row.finalUnits), null);
+    const finalUnits = capacityMode ? historicalStock : firstNumber(building, ['stock', 'final_stock']) ?? historicalStock;
     const soldUnits = typologies.reduce<number | null>((sum, row) => addNullable(sum, row.soldUnits), null)
-      ?? (launchedUnits !== null && finalUnits !== null ? launchedUnits - finalUnits : null);
+      ?? (!capacityMode && launchedUnits !== null && finalUnits !== null ? launchedUnits - finalUnits : null);
 
     const averageArea = weightedAverage(typologies.map((row, index) => ({ value: row.averageArea, weight: weights[index] })));
     const averageTicket = weightedAverage(typologies.map((row, index) => ({ value: row.averageTicket, weight: weights[index] })))
-      ?? firstNumber(building, ['average_price']);
+      ?? (capacityMode ? null : firstNumber(building, ['average_price']));
     const averagePricePerMeter = weightedAverage(typologies.map((row, index) => ({ value: row.averagePricePerMeter, weight: weights[index] })))
       ?? (averageTicket !== null && averageArea ? averageTicket / averageArea : null);
 
     // VGV: fonte bruta quando existe; senão Σ(qty × preço) do mês de lançamento; senão unidades × ticket.
-    const rawLaunchedVgv = firstNumber(building, ['vgv_released', 'vgv_launched', 'launch_vgv']);
-    const rawFinalVgv = firstNumber(building, ['vgv_stock', 'vgv_final']) ?? firstNumber(latestEntries[0] ?? {}, ['vgv_stock']);
+    const compatibleRegistry = !capacityMode || normalizedHistory.audit.registryComparable;
+    const rawLaunchedVgv = compatibleRegistry ? firstNumber(building, ['vgv_released', 'vgv_launched', 'launch_vgv']) : null;
+    const rawFinalVgv = (compatibleRegistry ? firstNumber(building, ['vgv_stock', 'vgv_final']) : null) ?? firstNumber(latestEntries[0] ?? {}, ['vgv_stock']);
     const releaseVgvFromHistory = releaseEntries.length
       ? releaseEntries.reduce<number | null>((sum, entry) => {
         const qty = firstNumber(entry, ['qty', 'units']);
@@ -296,6 +335,7 @@ export function buildCityCube(raw: Record<string, unknown>[], options: BuildCube
       city: options.city,
       uf: options.uf,
       name: String(firstText(building, ['name', 'building_name']) ?? 'Empreendimento'),
+      neighborhood: String(firstText(building, ['neighborhood', 'bairro']) ?? '').trim() || null,
       segment: decision.segment,
       horizontalSubtype: decision.horizontalSubtype,
       standard,
@@ -316,7 +356,9 @@ export function buildCityCube(raw: Record<string, unknown>[], options: BuildCube
       latitude: firstNumber(building, ['latitude', 'lat']),
       longitude: firstNumber(building, ['longitude', 'lng', 'lon']),
       typologies,
+      ...(observations ? { marketObservations: observations } : {}),
       coverage,
+      historyAudit: normalizedHistory.audit,
     });
   }
 

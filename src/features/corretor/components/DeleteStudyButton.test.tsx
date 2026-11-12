@@ -1,0 +1,13 @@
+import {fireEvent,render,screen,waitFor} from '@testing-library/react';
+import {beforeEach,expect,it,vi} from 'vitest';
+import DeleteStudyButton from './DeleteStudyButton';
+const m=vi.hoisted(()=>({access:vi.fn(),remove:vi.fn(),clear:vi.fn()}));
+vi.mock('../lib/geobrain-access-context',()=>({useGeobrainAccess:()=>m.access}));
+vi.mock('../lib/v3/db',()=>({deleteStudy:m.remove}));
+vi.mock('../lib/v3/local-materials',()=>({clearPreparationForDocument:m.clear}));
+vi.mock('../lib/v3/execution',()=>({hasActiveExecution:()=>false}));
+beforeEach(()=>{vi.clearAllMocks();m.access.mockResolvedValue(true);m.remove.mockResolvedValue(undefined);m.clear.mockResolvedValue(undefined);vi.spyOn(window,'confirm').mockReturnValue(true);});
+it('oferece exclusão sem depender de análise completa e atualiza só após sucesso',async()=>{const deleted=vi.fn();render(<DeleteStudyButton id="pending" name="Estudo incompleto" sha1="sha" onDeleted={deleted}/>);fireEvent.click(screen.getByRole('button',{name:'Excluir estudo Estudo incompleto'}));await waitFor(()=>expect(deleted).toHaveBeenCalledOnce());expect(m.remove).toHaveBeenCalledWith('pending');expect(m.clear).toHaveBeenCalledWith('sha');});
+it('cancelar confirmação não remove nem limpa preparação',async()=>{vi.mocked(window.confirm).mockReturnValue(false);render(<DeleteStudyButton id="pending" name="Teste" onDeleted={vi.fn()}/>);fireEvent.click(screen.getByRole('button'));await waitFor(()=>expect(window.confirm).toHaveBeenCalledOnce());expect(m.remove).not.toHaveBeenCalled();expect(m.clear).not.toHaveBeenCalled();});
+it('cancelar login não executa exclusão',async()=>{m.access.mockResolvedValue(false);render(<DeleteStudyButton id="pending" name="Teste" onDeleted={vi.fn()}/>);fireEvent.click(screen.getByRole('button'));await waitFor(()=>expect(m.access).toHaveBeenCalledOnce());expect(m.remove).not.toHaveBeenCalled();expect(window.confirm).not.toHaveBeenCalled();});
+it('falha do banco mantém estudo na interface',async()=>{m.remove.mockRejectedValue(new Error('Migration pendente'));const deleted=vi.fn();render(<DeleteStudyButton id="pending" name="Teste" onDeleted={deleted}/>);fireEvent.click(screen.getByRole('button'));await waitFor(()=>expect(m.remove).toHaveBeenCalledOnce());expect(deleted).not.toHaveBeenCalled();expect(m.clear).not.toHaveBeenCalled();});

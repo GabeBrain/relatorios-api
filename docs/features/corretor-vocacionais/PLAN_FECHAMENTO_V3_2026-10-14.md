@@ -1,0 +1,19 @@
+# Plano executável — fechamento delimitado V3 — 14/10/2026
+
+Autorizado por Gabriel: implementar correções, retestar materiais disponíveis/referências, explorar pasta Drive e atualizar etapas/plano semanal. Base `9b68aab`, origin/main 0/0; documentos FIERGS locais preservados. Sem IA nova; orçamento anterior não recorrente. Estado inicial: **em execução**, publicação depende de revisão do resultado.
+
+## Ordem e aceites
+
+1. **Custo:** reconferência DET termina gratuitamente; toda releitura paga abre confirmação explícita com texto/imagens/cache/estimativa. Cancelamento não chama funções; confirma uma vez. Usar modal/primitives existentes, fundação SE intacta. Critério: teste de cancelamento/confirmar e browser com funções interceptadas.
+2. **Texto antigo:** revalidar evidência contra PPTX da versão selecionada quando disponível no cofre local ou fornecido. Ausência de trecho vira “não conferido nesta versão”, confiança Verificar, nunca “corrigido”. Decisões humanas/registro original preservados. Sem PPTX, não presumir revisão. Comparação por palavras completas evita aceitar trecho truncado como palavra correta. Critério: CJ12/VAP12 negativos, erros literais positivos, mesmo arquivo pareado.
+3. **Duplicatas:** agrupar somente evidências equivalentes/contidas do mesmo tipo/slide e sem decisões humanas distintas; preservar IDs/trechos e ocorrências em outros slides. A ação de revisão no grupo deve operar os registros explicitamente apresentados. Critério: CJ23/68 agrupados, OBSERTÓRIO em slides diferentes preservado; dois erros diferentes não agrupados.
+4. **Acusação textual sem sentido:** separar acusações de layout/caixa/continuação sem erro linguístico demonstrado como Verificar; usar negativos Concorrentes Compactos/Identificação, positivos são esperado/Arté/Avalição. Não criar blacklist por nome de projeto nem declarar novo prompt validado sem chamada real.
+5. **Colunas de imagem:** detectar associação ambígua quando percentual inconsistente coincide com outra coluna/recorte; marcar leitura suspeita, não mover número nem sugerir corrigir tabela. Anomalias literais sem duas leituras concordantes ficam Verificar. Critério: percentual 6km do VAP31 não vira erro confirmado; faixas/ano/Arté/soma real preservados. Os prints corrigidos por transcrição são pista separada do cache original. Não prometer que regra matemática resolve OCR.
+6. **Materiais:** inventariar pasta Drive e materiais locais; escolher candidato fora da suíte sem presumir gabarito/fonte. Arquivos brutos em `.local-inputs/`, derivados e catálogo pequenos versionados. Critério: registrar MIME/URL/estado de acesso, insumo novo de fato versus versão alternativa, utilidade e lacunas. Testes estruturais gratuitos onde houver download materializado.
+7. **Validação/fechamento:** testes por causa, suíte Corretor/referências, dez replays fonte fixa/Excel bruto, tipos/lint/build/docs e bancada browser local com snapshots, sem tocar decisões de produção. Não regravar expectativas para esconder regressão. Resultado antes do push; publicação/reteste real posterior não inferidos pelo Git. Atualizar LIVE Corretor/Rebrain, plano e diário SE.
+
+## Limites de conclusão
+
+**Execução nesta sessão:** itens 1–5 implementados/validados localmente; item 6 inventariado (80 arquivos, PPTX/XLSX GO extraídos gratuitamente, contrato regional não reconhecido); item 7 testes/replays/browser local concluídos, publicação/reteste real pendentes. [Resultado e limites](./RESULTADO_FECHAMENTO_V3_2026-10-14.md). Sem gasto novo. Não marcar v0.69 publicada por esse estado local.
+
+Hoje fecha comportamento de custo/texto/duplicatas e confiança das associações ambíguas em um corpus reproduzível. Não encerra OCR de todos os slides, Daniele extraído do original, precisão global ou adjudicação humana integral. Meta semanal continua um caso verificável; Corretor permanece com Gabriel, não transferido ao Lucas.

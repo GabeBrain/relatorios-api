@@ -112,7 +112,7 @@ export default function AuditoriaV2Page() {
           </button>
           <div className="min-w-0">
             <h1 className="text-sm font-semibold flex items-center gap-2">
-              Auditoria do Estudo <span className="text-[10px] rounded bg-primary/10 text-primary px-1.5 py-0.5">v2 · demo</span>
+              Auditoria do Estudo <span className="text-[10px] rounded bg-primary/10 text-primary px-1.5 py-0.5">Demonstração</span>
             </h1>
             <p className="text-xs text-muted-foreground">
               {study.city} · {study.type} · {study.slides} slides · raios {study.radii}

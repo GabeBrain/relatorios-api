@@ -1,0 +1,102 @@
+{
+  "scope": "SP 2T2026; supplied artifacts, not a new API observation",
+  "manualSourceSha256": "1350f82cb1d9386487ca1a9aee110fb19cf3d6ea7cb40d4a0205025802d9939b",
+  "generatedSourceSha256": "6e9eaa58d7a91dfa909f3faec4a5cfb4d3dc7b114cd19cbdba18bca843403832",
+  "generatedAt": "2026-11-05T19:22:37.971Z",
+  "manualStock": 118362,
+  "generatedStock": 127840,
+  "manualOverallMeter": 15896.0,
+  "generatedOverallMeter": 12369.940178035047,
+  "manualPatternMeterWeightedByStock": 12710.412700021967,
+  "generatedPatternMeterWeightedByStock": 12369.94017803505,
+  "manualPatterns": [
+    {
+      "pattern": "Compacto",
+      "stock": 21060,
+      "meter": 19694.0
+    },
+    {
+      "pattern": "Econômico",
+      "stock": 62520,
+      "meter": 8843.0
+    },
+    {
+      "pattern": "Standard",
+      "stock": 20313,
+      "meter": 11219.0
+    },
+    {
+      "pattern": "Médio",
+      "stock": 7595,
+      "meter": 15666.0
+    },
+    {
+      "pattern": "Médio-Alto",
+      "stock": 2371,
+      "meter": 19686.0
+    },
+    {
+      "pattern": "Alto",
+      "stock": 2201,
+      "meter": 22823.0
+    },
+    {
+      "pattern": "Luxo",
+      "stock": 2302,
+      "meter": 40411.0
+    }
+  ],
+  "generatedPatterns": [
+    {
+      "group": "Compacto",
+      "units": 22321,
+      "ticket": 690895.0920232072,
+      "meter": 17855.234299986554,
+      "issues": []
+    },
+    {
+      "group": "Econômico",
+      "units": 68986,
+      "ticket": 292588.6678607257,
+      "meter": 8977.498908619154,
+      "issues": []
+    },
+    {
+      "group": "Standard",
+      "units": 21740,
+      "ticket": 537360.1134112233,
+      "meter": 11294.751002299909,
+      "issues": []
+    },
+    {
+      "group": "Médio",
+      "units": 7774,
+      "ticket": 1411536.9615165934,
+      "meter": 16265.088617185489,
+      "issues": []
+    },
+    {
+      "group": "Médio-Alto",
+      "units": 2403,
+      "ticket": 2550707.472309613,
+      "meter": 21075.981161048683,
+      "issues": []
+    },
+    {
+      "group": "Alto",
+      "units": 2205,
+      "ticket": 3851276.7489206367,
+      "meter": 23942.15403628119,
+      "issues": []
+    },
+    {
+      "group": "Luxo",
+      "units": 2411,
+      "ticket": 11029624.912583986,
+      "meter": 36530.07455827455,
+      "issues": []
+    }
+  ],
+  "conclusion": "The manual overall does not reproduce the unit-stock-weighted mean of its displayed pattern prices. Confirm methodology and data snapshot; do not impose a target or change the runtime formula from this comparison alone.",
+  "analystApproval": false
+}

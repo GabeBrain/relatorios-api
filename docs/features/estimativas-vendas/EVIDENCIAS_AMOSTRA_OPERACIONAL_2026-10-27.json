@@ -1,0 +1,76 @@
+{
+  "label": "CANDIDATO INTERNO — NÃO IMPORTAR",
+  "asOf": "2026-10-27",
+  "cutoff": "2026-09",
+  "target": "2026-10 mensal / 2026-12 trimestral; hipóteses, não competência operacional aprovada",
+  "sources": [
+    {
+      "path": ".local-inputs/estimativas-vendas/edgar-drive-20261022/horizontal.xlsb",
+      "sha256": "09378fe364048c85c8027efb439db70975428363fa54cdb46b15cf3565e9bda7",
+      "sheet": "MyWorkSheet-1",
+      "rows": 55876
+    },
+    {
+      "path": ".local-inputs/estimativas-vendas/edgar-drive-20261022/cuiaba.xlsx",
+      "sha256": "9ba0649d628c34f9361dbc3d13ad5d71b61971434997f89c18c3d0dfe713590f",
+      "sheet": "Sheet1",
+      "rows": 6799
+    },
+    {
+      "path": ".local-inputs/estimativas-vendas/edgar-drive-20261022/belo-horizonte.xlsx",
+      "sha256": "52386a1434b12813a7e31f69df75686fea719e9ade30988ece74a37d140df7f1",
+      "sheet": "Sheet1",
+      "rows": 195511
+    }
+  ],
+  "models": [
+    {
+      "file": "horizontal.js",
+      "sha256": "c55412f516296247262652027172c399b025098922a8c4f10bb0efbf62fb8eeb"
+    },
+    {
+      "file": "vertical.js",
+      "sha256": "35f1fc7988d533348bafc75a5ff2c749813ff5209825130fcdf755332b43bdde"
+    },
+    {
+      "file": "horizontal-parameters.json",
+      "sha256": "b201a20d2be544c8e0545db91fb291362f1a0c60a785c666b3bc3306e03729fd"
+    },
+    {
+      "file": "vertical-cohorts.json",
+      "sha256": "f723d6b322587ed754ef8de97f7be786d72dab3e6bd40399aed7d75ce944affe"
+    }
+  ],
+  "selectionCounts": {
+    "COLETA": 3974,
+    "PENDENTE": 635,
+    "CANDIDATO_CONDICIONAL": 1
+  },
+  "reasonCounts": {
+    "ESTOQUE_EXIGE_COLETA": 3924,
+    "IDADE_FORA_DO_MODELO": 1958,
+    "STATUS_REQUER_REVISAO": 3212,
+    "CADENCIA_INCONSISTENTE": 2172,
+    "MULTITIPOLOGIA_SEM_REGRA_DE_CALCULO": 2314,
+    "POSICAO_INVALIDA": 278,
+    "SEM_POSICAO_NO_CORTE": 278,
+    "TIPOLOGIA_AUSENTE_NO_CORTE": 278,
+    "QUATRO_COLETAS_NAO_COMPROVADAS": 1499,
+    "FLUXO_ESTOQUE_DIVERGENTE": 595,
+    "PERIODO_ANTERIOR_ESTIMADO": 500,
+    "PADRAO_REQUER_REVISAO": 2,
+    "JANELA_QUATRO_PERIODOS_INCOMPLETA": 266,
+    "MENOS_QUATRO_PERIODOS": 24
+  },
+  "uniqueBuildings": 2305,
+  "sampleSize": 1,
+  "importable": 0,
+  "limitations": [
+    "Snapshot de 22/10; ausência de coleta atual não verificada",
+    "Duas hipóteses de cadência por empreendimento, não somar como pessoas distintas",
+    "Quatro posições consecutivas não estimadas e oferta estável: política conservadora candidata",
+    "Multitipologias não rateadas",
+    "Sem divisão automática da metade",
+    "Preço/distratos sem preenchimento; null não é zero"
+  ]
+}

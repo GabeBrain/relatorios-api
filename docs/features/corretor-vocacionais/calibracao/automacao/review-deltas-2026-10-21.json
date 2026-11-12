@@ -1,0 +1,48 @@
+{
+  "rulesVersion": "review-guajajaras-2026-10-21",
+  "baselinePreserved": true,
+  "cases": {
+    "rol": {
+      "before": "b3f974592a60d1bf57517c42cd1c61b35278912d89384d38c677dc6223c333a4",
+      "after": "77b838f0bd69cd319eadbcdedcde6c084a8364e80ce25366696eafbd7804855e",
+      "added": [
+        "semantic-unit-23"
+      ],
+      "reason": "Revisao explicita: achados antigos integralmente preservados; novo alerta de unidade hab. em pagina de domicilios em todos os casos; VAP/v2 tambem tem rendas 6.722 e 5.703 no mesmo raio, ambas citadas literalmente, como Verificar conceito/periodo. Percentual nunca comparado a absoluto."
+    },
+    "tol": {
+      "before": "04071300864c04dad12a14ade51fe8c559c0b8605fcbaabdd4a823d4fc60d4e6",
+      "after": "35ba20747e0a7cbaaaba6788ba411d93057482e1b3ca854bd30b09f06a8ba614",
+      "added": [
+        "semantic-unit-26"
+      ],
+      "reason": "Revisao explicita: achados antigos integralmente preservados; novo alerta de unidade hab. em pagina de domicilios em todos os casos; VAP/v2 tambem tem rendas 6.722 e 5.703 no mesmo raio, ambas citadas literalmente, como Verificar conceito/periodo. Percentual nunca comparado a absoluto."
+    },
+    "cj": {
+      "before": "a8e986b2b865779f29f401e7c3e8353da3c0b41b50630024337e7f7907a1a37c",
+      "after": "d38e94a29e8919cddc1b24c7aeafb02ec1654d803afe7918c00fb96cb2522c75",
+      "added": [
+        "semantic-unit-23"
+      ],
+      "reason": "Revisao explicita: achados antigos integralmente preservados; novo alerta de unidade hab. em pagina de domicilios em todos os casos; VAP/v2 tambem tem rendas 6.722 e 5.703 no mesmo raio, ambas citadas literalmente, como Verificar conceito/periodo. Percentual nunca comparado a absoluto."
+    },
+    "vap": {
+      "before": "7f15f2f725189d3ba0c246863851337f1c0dd972064c7907d81cf7736d49ee88",
+      "after": "c76ca04924533548fa4a6e538d7fa30822249c2d58f3229baebe52b580f7402e",
+      "added": [
+        "semantic-renda-até 2 km-29-30",
+        "semantic-unit-24"
+      ],
+      "reason": "Revisao explicita: achados antigos integralmente preservados; novo alerta de unidade hab. em pagina de domicilios em todos os casos; VAP/v2 tambem tem rendas 6.722 e 5.703 no mesmo raio, ambas citadas literalmente, como Verificar conceito/periodo. Percentual nunca comparado a absoluto."
+    },
+    "v2": {
+      "before": "be25c1c33d3365fd30a08006dc43c0f24a76235c2fbd564ca7b51b12d8072cab",
+      "after": "6965a282c76cace9ad3e89b14bf726bd42f5376c001a5bd7e5b5194ae8e6bc8c",
+      "added": [
+        "semantic-renda-até 2 km-27-28",
+        "semantic-unit-22"
+      ],
+      "reason": "Revisao explicita: achados antigos integralmente preservados; novo alerta de unidade hab. em pagina de domicilios em todos os casos; VAP/v2 tambem tem rendas 6.722 e 5.703 no mesmo raio, ambas citadas literalmente, como Verificar conceito/periodo. Percentual nunca comparado a absoluto."
+    }
+  }
+}

@@ -1,0 +1,159 @@
+{
+  "bench": {
+    "scope": "PPTX real exportado localmente pelo PowerPoint, PDF153 páginas; achados snapshot, servidor inteiramente simulado",
+    "checks": [
+      "wrong page count blocked",
+      "real PDF slide 23 rendered",
+      "map navigation slide 68",
+      "zoom",
+      "last slide",
+      "mobile reflow",
+      "decision login cancellation"
+    ],
+    "pixels": 1691,
+    "writes": [],
+    "paid": [],
+    "errors": []
+  },
+  "materials": {
+    "scope": "11 Excel brutos reais de CJ; browser e extração reais, armazenamento/auth/Postgres simulados",
+    "assets": [
+      {
+        "name": "05. Deslocamento (2ª moradia) - Até 1h.xlsx",
+        "sha256": "d0fdbdb95f9a1404cea80671084f0e86474552c26efb966b7952294f93ad2332",
+        "bytes": 218295
+      },
+      {
+        "name": "05. Deslocamento (2ª moradia) - De 1h a 2h.xlsx",
+        "sha256": "13e71b8f5ce5c5fb571762a1b5cf0d469880329216c1b93bb4f042dd51dd6151",
+        "bytes": 221433
+      },
+      {
+        "name": "05. Deslocamento (2ª moradia) - De 2h a 3h.xlsx",
+        "sha256": "f5a91416ce64b6c71e2d0b7a2ba966b9b9378f2b365f208cc2001a35feab77a3",
+        "bytes": 231279
+      },
+      {
+        "name": "05. Deslocamento (2ª moradia) - De 3h a 4h (1).xlsx",
+        "sha256": "553342be757e7643aa97b79fda7db059fb3782c532f0a33eefb0e4991407b9d9",
+        "bytes": 296618
+      },
+      {
+        "name": "05. Deslocamento (2ª moradia) - Total.xlsx",
+        "sha256": "ff5743b2bcf2d38a819877c38d987cdacb6ab1614470ab8911b7a22bcd6d2081",
+        "bytes": 336197
+      },
+      {
+        "name": "Campos do Jordão_ABSORÇAO LANÇAMENTOS.xlsm",
+        "sha256": "6420e99242bc47bad0d52117c67d931d19c848dce0dc69c63326829f80556b2b",
+        "bytes": 105519
+      },
+      {
+        "name": "Campos do Jordão_Consolidada - 4 Km-ok.xlsm",
+        "sha256": "0616fc22a874735bd6bcce7757eca2ad083fb2a73d0ffff80380e7fd18b22825",
+        "bytes": 1311012
+      },
+      {
+        "name": "Campos do Jordão_Consolidada - Fora da Z.I..xlsm",
+        "sha256": "3422e994abf4176814121f8996a6c1e705cdfe6f5d33c1eea86d17a1a04934f3",
+        "bytes": 1313259
+      },
+      {
+        "name": "Campos do Jordão_Consolidada.xlsm",
+        "sha256": "204298cf2a489764451d4f3029d00123a2e8fbfcb68ebf85e1df61061ab2cba8",
+        "bytes": 1315076
+      },
+      {
+        "name": "Campos do Jordão_POPULACAO E DOMICÍLIOS.xlsx",
+        "sha256": "e7c68877e6a68939a4da105b2050b266c1169a0c5e9d2ece4f4c22b1c9a8dec6",
+        "bytes": 21174
+      },
+      {
+        "name": "Campos do Jordão_SOCIODEMOGRAFIA.xlsm",
+        "sha256": "183ea8a007a7c25b229c8dd8decf1bc78736088678e2c86f8ad0881898c2d390",
+        "bytes": 262102
+      }
+    ],
+    "sourceFiles": 11,
+    "blocks": 15,
+    "snapshots": 1,
+    "snapshotSourceScope": "persisted_set",
+    "recoveryHashChecked": true,
+    "reload": true,
+    "paid": [],
+    "errors": []
+  },
+  "sql": {
+    "engine": "PGlite isolado; auth/storage simulados",
+    "results": [
+      {
+        "name": "material sem objeto confirmado recusado",
+        "pass": true
+      },
+      {
+        "name": "tamanho diferente recusado",
+        "pass": true
+      },
+      {
+        "name": "original salvo sem perfil/cadastro comercial",
+        "pass": true
+      },
+      {
+        "name": "autor forjado recusado",
+        "pass": true
+      },
+      {
+        "name": "material imutável",
+        "pass": true
+      },
+      {
+        "name": "conjunto e fonte ativados atomicamente/idempotentes",
+        "pass": true
+      },
+      {
+        "name": "fingerprint não sobrescreve payload de conjunto antigo",
+        "pass": true
+      },
+      {
+        "name": "falha preserva fonte ativa anterior",
+        "pass": true
+      },
+      {
+        "name": "snapshot não aponta versão de outro estudo",
+        "pass": true
+      },
+      {
+        "name": "outra conta lê biblioteca sem compartilhar permissões",
+        "pass": true
+      },
+      {
+        "name": "conta sem permissão não grava snapshot",
+        "pass": true
+      },
+      {
+        "name": "visitante consulta metadados públicos",
+        "pass": true
+      },
+      {
+        "name": "visitante não grava materiais",
+        "pass": true
+      },
+      {
+        "name": "visitante não ativa fonte",
+        "pass": true
+      },
+      {
+        "name": "visitante não forja autoria",
+        "pass": true
+      },
+      {
+        "name": "autoria nova vem da sessão assinada",
+        "pass": true
+      },
+      {
+        "name": "autoria não transfere em update",
+        "pass": true
+      }
+    ]
+  }
+}

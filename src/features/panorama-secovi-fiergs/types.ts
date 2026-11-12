@@ -1,6 +1,7 @@
 import type { EntityId } from './domain/entity-policy';
 import type { AreaBandRow, CohortMatrix, MaturityRow, OfferRow, PriceRow, VgvRow } from './domain/aggregations';
 import type { MarketCube } from './domain/cube';
+import { panoramaScopeIdentity } from './scope-identity';
 
 export type { EntityId };
 
@@ -23,6 +24,24 @@ export interface PanoramaScope {
   entity?: EntityId;
   /** V4 é a versão de teste atual e usa o universo granular oficial. */
   engineVersion?: PanoramaEngineVersion;
+  /** Absent in older snapshots: retains their consolidated presentation. */
+  presentation?: TerritorialPresentation;
+}
+
+export interface TerritorialUnit { id: string; label: string; cities: string[]; }
+export interface TerritorialPresentation { mode: 'consolidated' | 'comparison'; layout?: 'integrated'; units?: TerritorialUnit[]; }
+export type TerritorialProjection = Pick<PanoramaReportModel, 'scope' | 'launches' | 'sales' | 'stock' | 'ivv' | 'prices' | 'granular' | 'closingFacts' | 'dataState'>;
+export interface TerritorialCheck {
+  metric: string; period: string; dimension: string; source: string;
+  canonical: number | null; grouped: number | null; delta: number | null;
+  status: 'match' | 'different' | 'unavailable';
+  cities: { label: string; value: number | null }[];
+  units: { id: string; label: string; value: number | null }[];
+}
+export interface TerritorialComparison {
+  nonApplicableSegments?: { city: string; segment: 'vertical' | 'horizontal' }[];
+  units: { unit: TerritorialUnit; data: TerritorialProjection }[];
+  checks: TerritorialCheck[];
 }
 
 /** Rótulo determinístico do recorte para capa, título e nome de arquivo, com uma ou várias cidades. */
@@ -42,11 +61,28 @@ export function scopeCitySlug(scope: Pick<PanoramaScope, 'cities'>): string {
   return cities.length <= 3 ? cities.join('-') : `${cities.slice(0, 3).join('-')}-e-mais-${cities.length - 3}`;
 }
 
+/** Identifica presets institucionais no arquivo exportado; recortes livres mantêm o slug municipal. */
+export function scopeFileSlug(scope: Pick<PanoramaScope, 'cities' | 'entity'> & Partial<Pick<PanoramaScope, 'uf' | 'presentation'>>): string {
+  if (scope.presentation?.mode === 'comparison' && scope.presentation.layout !== 'integrated') return `${scope.entity === 'fiergs-rs' ? `fiergs-${scope.uf?.toLowerCase()}` : 'secovi-sp'}-comparativo-${scopeCitySlug(scope)}`;
+  if (scope.entity === 'secovi-sp') return 'secovi-sp';
+  if (scope.entity === 'fiergs-rs') return panoramaScopeIdentity({ ...scope, uf: scope.uf ?? '' }).fileSlug;
+  return scopeCitySlug(scope);
+}
+
+/** Nome aprovado do preset permanece; recortes personalizados identificam a janela completa. */
+export function scopeExportPeriod(scope: PanoramaScope): string {
+  return (scope.presentation?.mode === 'comparison' || scope.entity === 'fiergs-rs' && !panoramaScopeIdentity(scope).official) && scope.startQuarter && scope.startQuarter !== scope.endQuarter
+    ? `${scope.startQuarter}-${scope.endQuarter}` : scope.endQuarter;
+}
+
 /** Proveniência do consolidado multi-cidade: o que foi pedido, o que fechou e o que falhou. */
 export interface PanoramaProvenance {
   requestedCities: string[];
   completedCities: string[];
   failedCities: { city: string; error: string }[];
+  /** Tentativas completas por cidade; não contém payload nem credenciais. */
+  cityCollectionAttempts?: { city: string; attempts: number; recovered: boolean }[];
+  cityCollectionMetrics?: { city: string; operation: string; requests: number; durationMs: number }[];
   entity: EntityId;
   engineVersion?: PanoramaEngineVersion;
   /** Empreendimentos recusados pela política de universo, agrupados por motivo. */
@@ -119,7 +155,7 @@ export interface PanoramaReference {
 
 /** Fonte única do livro editorial; páginas sem contrato homologado não recebem números de referência. */
 export type ReportDataState = 'ready' | 'partial' | 'unavailable' | 'not_applicable';
-export interface ReportSeries extends LaunchSeries { methodStatus: MethodStatus; dataStatus: ReportDataState; source: string; }
+export interface ReportSeries extends LaunchSeries { methodStatus: MethodStatus; dataStatus: ReportDataState; source: string; observed?: { vertical: boolean; horizontal: boolean }; }
 export interface ReportGroupSeries { label: string; series: ReportSeries[]; }
 export interface ReportMarketBlock {
   series: ReportSeries[];
@@ -169,6 +205,39 @@ export interface PanoramaClosingFacts {
   priceSource: string;
 }
 
+export type PanoramaReconciliationStatus = 'match' | 'different' | 'unavailable';
+export interface PanoramaReconciliationRow {
+  checkKind?: 'source_integrity' | 'dimensional_conservation' | 'independent_comparison';
+  metricId: string;
+  source: string;
+  formula: string;
+  universe: string;
+  period: Quarter;
+  canonicalTotal: number | null;
+  dimensionalTotal: number | null;
+  delta: number | null;
+  tolerance: number;
+  status: PanoramaReconciliationStatus;
+  critical: boolean;
+}
+export interface PanoramaReconciliation {
+  homologable: boolean;
+  rows: PanoramaReconciliationRow[];
+}
+
+export interface ReportGenerationNotice {
+  code: string;
+  severity: 'info' | 'warning' | 'critical';
+  indicator: string;
+  entity: EntityId;
+  period: string;
+  affectedPages: number[];
+  affectedOfficialSlides: number[];
+  reason: string;
+  source: string;
+  displayDecision: string;
+}
+
 /**
  * Créditos de apresentação. A V2 preserva a identidade fixa e recebe pessoas variáveis como
  * slots opcionais — a ausência é intencional para finalização do analista, nunca um nome errado.
@@ -189,6 +258,9 @@ export interface HorizontalSeriesPolicy {
 }
 
 export interface PanoramaReportModel {
+  annualCompositions?: import('./report/annual-composition').AnnualComposition[];
+  territorial?: TerritorialComparison;
+  territorialLabel?: string;
   scope: PanoramaScope;
   generatedAt: string;
   launches: LaunchModel;
@@ -200,8 +272,9 @@ export interface PanoramaReportModel {
   ivvByTypology: ReportMarketBlock;
   prices: { ticket: ReportMarketBlock; meter: ReportMarketBlock; ticketByTypology: ReportMarketBlock; meterByTypology: ReportMarketBlock };
   market: { cohorts: ReportMarketBlock; cohortMatrix: { year: string; standard: string; vertical: number; horizontal: number; total: number }[] };
-  locations: { name: string; segment: Segment; latitude: number; longitude: number }[];
-  source: 'GeoBrain API';
+  municipalTerritory?: import('./lib/municipal-territory').MunicipalTerritory;
+  locations: { projectKey?: string; name: string; segment: Segment; city?: string; neighborhood?: string | null; latitude: number; longitude: number; standard?: string; finalUnits?: number | null; averagePricePerMeter?: number | null }[];
+  source: 'Geobrain API';
   dataState: ReportDataState;
   openMethodologies: string[];
   /** Proveniência do consolidado multi-cidade (G-01). */
@@ -210,9 +283,15 @@ export interface PanoramaReportModel {
   cube: MarketCube;
   /** Linhas prontas para os slides 31–51, já canonizadas, ordenadas e reconciliadas. */
   granular: PanoramaGranularBlocks;
+  /** Somente preenchido quando houver fonte anual completa por faixa; nunca inferido do trimestre. */
+  annualAreaIvv?: AreaBandRow[];
   cityComparisons: PanoramaCityComparisons;
   presentation: PanoramaPresentationCredits;
   closingFacts: PanoramaClosingFacts;
+  /** Guardas críticas calculadas antes da renderização e consultadas novamente no início do export. */
+  reconciliation: PanoramaReconciliation;
+  /** Diagnósticos estruturados do resultado atual; mesma fonte para UI e auditoria CSV. */
+  notices: ReportGenerationNotice[];
 }
 
 /**
@@ -220,6 +299,16 @@ export interface PanoramaReportModel {
  * todas derivam do mesmo `cube` e por isso fecham entre si.
  */
 export interface PanoramaGranularBlocks {
+  marketContract?: 'geobrain-market-v1';
+  /** Fluxo de lançamentos na janela editorial, separado da fotografia integral de fechamento. */
+  launchWindow?: {
+    offerByStandard: OfferRow[];
+    offerByTypology: OfferRow[];
+    cohortsVertical: OfferRow[];
+    cohortsHorizontal: OfferRow[];
+    maturityByStandard: MaturityRow[];
+    maturityByTypology: MaturityRow[];
+  };
   /** Slide 31 — oferta lançada/final por padrão, vertical. */
   offerByStandard: OfferRow[];
   /** Slide 27 — oferta final e IVV por faixa de área útil, calculados do cubo (JG-19). */

@@ -15,6 +15,7 @@ import {
   universeTotals,
   vgvSummary,
 } from '../domain/aggregations';
+import { fiergsHorizontalOfferRows, fiergsHorizontalPriceRangeRows } from '../components/MarketSlides';
 
 /** Empreendimento sintético no formato bruto de `building-with-history`. */
 function building(overrides: Record<string, unknown> = {}): Record<string, unknown> {
@@ -55,6 +56,100 @@ describe('OP-4 · cubo granular', () => {
     expect(project.ageMonths).toBe(13);
     expect(project.maturity).toBe('Construção');
     expect(project.typologies.map((row) => row.typology)).toEqual(['2 Dormitórios', '3 Dormitórios']);
+  });
+
+  it('preserva bairro como dimensão observada do contrato granular', () => {
+    const cube = cubeOf([building({ neighborhood: 'Centro Histórico' })]);
+    expect(cube.projects[0].neighborhood).toBe('Centro Histórico');
+  });
+
+  it('abre preços horizontais FIERGS pelos três produtos homologáveis e exclui chácaras', () => {
+    const fiergs = cubeOf([
+      building({ building_id: 'H1', building_type: 'Horizontal', standard: 'Loteamento Aberto' }),
+      building({ building_id: 'H2', building_type: 'Horizontal', standard: 'Condomínio de Chácaras' }),
+      building({ building_id: 'H3', building_type: 'Horizontal', standard: 'Loteamento Fechado' }),
+      building({ building_id: 'H4', building_type: 'Horizontal', standard: 'Condomínio de Casas/Sobrados' }),
+    ], { city: 'Porto Alegre', uf: 'RS', entity: 'fiergs-rs' });
+    expect(horizontalPricesByStandard(fiergs).filter((row) => row.kind === 'row').map((row) => row.label)).toEqual([
+      'Loteamento Aberto', 'Loteamento Fechado', 'Condomínio de Casas',
+    ]);
+    expect(fiergs.rejections).toEqual(expect.arrayContaining([
+      expect.objectContaining({ buildingId: 'H2', reason: 'horizontal_fora_da_politica' }),
+    ]));
+  });
+
+  it('recupera produto horizontal previamente auditado quando a API omite subtipo, sem sobrescrever produto explícito', () => {
+    const base = building({ building_id: '66842', name: 'Solar Dos Passáros - Fase 1', building_type: 'Horizontal', standard: 'Econômico' });
+    const recovered = cubeOf([base], { city: 'Alvorada', uf: 'RS', entity: 'fiergs-rs', endQuarter: '2T2026' });
+    expect(recovered.projects[0]?.horizontalSubtype).toBe('condominio_casas');
+    const explicit = cubeOf([{ ...base, standard: 'Loteamento Aberto' }], { city: 'Alvorada', uf: 'RS', entity: 'fiergs-rs', endQuarter: '2T2026' });
+    expect(explicit.projects[0]?.horizontalSubtype).toBe('loteamento_aberto');
+    const unknown = cubeOf([{ ...base, building_id: 'not-reviewed' }], { city: 'Alvorada', uf: 'RS', entity: 'fiergs-rs', endQuarter: '2T2026' });
+    expect(unknown.rejections).toEqual(expect.arrayContaining([
+      expect.objectContaining({ buildingId: 'not-reviewed', reason: 'subtipo_horizontal_indefinido' }),
+    ]));
+  });
+
+  it('reconcilia o horizontal FIERGS por produto e coorte no mesmo universo', () => {
+    const fiergs = cubeOf([
+      building({ building_id: 'H1', building_type: 'Horizontal', standard: 'Loteamento Aberto' }),
+      building({ building_id: 'H2', building_type: 'Horizontal', standard: 'Condomínio de Chácaras' }),
+      building({ building_id: 'H3', building_type: 'Horizontal', standard: 'Loteamento Fechado', release_date: '2024-02-10' }),
+      building({ building_id: 'H4', building_type: 'Horizontal', standard: 'Condomínio de Casas/Sobrados', release_date: '2023-02-10' }),
+    ], { city: 'Porto Alegre', uf: 'RS', entity: 'fiergs-rs' });
+    const products = fiergsHorizontalOfferRows(fiergs.projects);
+    const cohortTotal = totalRowOf(offerByCohort(fiergs, 'Horizontal'))!;
+    expect(products.map((row) => row.label).sort()).toEqual(['Condomínio de Casas', 'Loteamento Aberto', 'Loteamento Fechado']);
+    expect(products.reduce((sum, row) => sum + row.projects, 0)).toBe(cohortTotal.projects);
+    expect(products.reduce((sum, row) => sum + row.launched, 0)).toBe(cohortTotal.launchedUnits);
+    expect(products.reduce((sum, row) => sum + row.final, 0)).toBe(cohortTotal.finalUnits);
+    expect(products.every((row) => row.averageLaunchedPerProject === row.launched / row.projects)).toBe(true);
+    expect(fiergs.projects.some((project) => project.buildingId === 'H2')).toBe(false);
+    const vgv = vgvSummary(fiergs);
+    const productRows = vgv.filter((row) => row.kind === 'row' && row.segment === 'Horizontal');
+    expect(productRows.map((row) => row.label)).toEqual(['Condomínio de Casas', 'Loteamento Aberto', 'Loteamento Fechado']);
+    expect(productRows.reduce((sum, row) => sum + row.projects, 0)).toBe(cohortTotal.projects);
+    expect(productRows.reduce((sum, row) => sum + (row.launchedUnits ?? 0), 0)).toBe(cohortTotal.launchedUnits);
+    expect(productRows.reduce((sum, row) => sum + (row.finalUnits ?? 0), 0)).toBe(cohortTotal.finalUnits);
+  });
+
+  it('calcula Média Horizontal incluindo condomínio de casas e loteamentos', () => {
+    const priced = (id: string, standard: string, pricePerMeter: number) => building({
+      building_id: id,
+      building_type: 'Horizontal',
+      standard,
+      typologies_history: [
+        { period: '2025-02-01', typology: 'Produto', qty: 100, release_price: pricePerMeter * 50, private_area: 50 },
+        { period: '2026-03-01', typology: 'Produto', typology_stock: 20, price: pricePerMeter * 50, price_private_area: pricePerMeter, private_area: 50 },
+      ],
+    });
+    const fiergs = cubeOf([
+      priced('H1', 'Loteamento Aberto', 1000),
+      priced('H2', 'Loteamento Fechado', 3000),
+      priced('H3', 'Condomínio de Casas/Sobrados', 9000),
+      priced('H4', 'Condomínio de Chácaras', 11000),
+    ], { city: 'Porto Alegre', uf: 'RS', entity: 'fiergs-rs' });
+    expect(fiergsHorizontalPriceRangeRows(fiergs.projects)).toContainEqual({
+      label: 'Média Horizontal', min: 1000, average: 13000 / 3, max: 9000,
+    });
+    const mean = horizontalPricesByStandard(fiergs).find((row) => row.kind === 'total');
+    expect(horizontalPricesByStandard(fiergs).some((row) => row.kind === 'row' && row.label === 'Condomínio de Casas')).toBe(true);
+    expect(fiergsHorizontalPriceRangeRows(fiergs.projects).some((row) => row.label === 'Condomínio de Casas' && row.average === 9000)).toBe(true);
+    expect(mean?.label).toBe('Média Horizontal');
+    expect(mean?.projects).toBe(3);
+    expect(mean?.averagePricePerMeter).toBeCloseTo(13000 / 3);
+
+    // Pesos desiguais distinguem a regra ponderada da antiga média simples.
+    fiergs.projects.forEach((project, index) => { project.finalUnits = [10, 30, 0][index]; });
+    const weighted = horizontalPricesByStandard(fiergs);
+    const ranges = fiergsHorizontalPriceRangeRows(fiergs.projects);
+    for (const row of weighted) {
+      expect(ranges.find((range) => range.label === row.label)?.average).toBe(row.averagePricePerMeter);
+    }
+    expect(ranges.find((row) => row.label === 'Média Horizontal')?.average).toBe(2500);
+    expect(ranges.find((row) => row.label === 'Condomínio de Casas')?.average).toBeNull();
+    fiergs.projects.forEach((project) => { project.averagePricePerMeter = null; });
+    expect(fiergsHorizontalPriceRangeRows(fiergs.projects).every((row) => row.average === null)).toBe(true);
   });
 
   it('lê number_bedroom e os nomes oficiais do histórico sem criar Não classificado', () => {

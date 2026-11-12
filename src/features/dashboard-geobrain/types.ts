@@ -94,6 +94,7 @@ export interface Filters {
   years: string[];
   periods: string[]; // 'YYYY-MM'
   status: string[];
+  states: string[];
   cities: string[];
   neighborhoods: string[];
   types: string[];

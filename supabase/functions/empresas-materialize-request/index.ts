@@ -4,7 +4,7 @@
 // Só devolve resultado agregado; nunca HMAC, SQL, CNPJ, payload interno ou dados brutos.
 import { createClient } from 'jsr:@supabase/supabase-js@2';
 
-const COMPETENCIA = '2026-07-01';
+const DEFAULT_COMPETENCIA = '2026-07-01';
 const QUERY_VERSION = 'empresas-pilot-v1';
 const METHODOLOGY_VERSION = 'empresas-pilot-methodology-v1';
 const SIMPLES_NOTE =
@@ -17,6 +17,15 @@ const GLOBAL_WINDOW_MINUTES = 10;
 const GLOBAL_MAX_REQUESTS = 12;
 const GLOBAL_MAX_RUNNING = 2;
 const PROCESSING_TIMEOUT_MINUTES = 20;
+const FALLBACK_RECHECK_HOURS = 24;
+
+function targetCompetencia(): string {
+  const value = Deno.env.get('EMPRESAS_TARGET_COMPETENCIA')?.trim() || DEFAULT_COMPETENCIA;
+  if (!/^\d{4}-(0[1-9]|1[0-2])-01$/.test(value)) {
+    throw new SafeError('INVALID_TARGET_COMPETENCIA', 500, 'Competência alvo de Empresas inválida.');
+  }
+  return value;
+}
 
 const DEV_ORIGINS = ['http://localhost:8080', 'http://localhost:5173'];
 const PRODUCTION_ORIGIN = 'https://geobrain-relatorios.lovable.app';
@@ -68,12 +77,15 @@ function parseScope(raw: unknown): Scope {
   if (!/^\d{7}$/.test(ibgeCode)) throw new SafeError('INVALID_SCOPE', 400, 'Código IBGE deve ter 7 dígitos.');
   if (!/^[A-Z]{2}$/.test(uf)) throw new SafeError('INVALID_SCOPE', 400, 'UF deve ter duas letras.');
   if (!name || name.length > 120 || /[;'"\\]/.test(name)) throw new SafeError('INVALID_SCOPE', 400, 'Nome do município inválido.');
-  for (const value of [establishmentsPartition, companiesPartition]) {
+  // Legacy browser dates are accepted for compatibility, but never control a public BigQuery query.
+  for (const value of [establishmentsPartition, companiesPartition].filter(Boolean)) {
     if (!ISO_DATE.test(value) || Number.isNaN(Date.parse(value))) {
       throw new SafeError('INVALID_PARTITION', 400, 'Partições devem estar no formato YYYY-MM-DD.');
     }
   }
-  return { municipality: { ibgeCode, name, uf }, establishmentsPartition, companiesPartition };
+  const target = targetCompetencia();
+  const partition = `${target.slice(0, 7)}-12`;
+  return { municipality: { ibgeCode, name, uf }, establishmentsPartition: partition, companiesPartition: partition };
 }
 
 function clientIp(req: Request): string {
@@ -109,13 +121,14 @@ Deno.serve(async (req) => {
   try {
     const scope = parseScope(await req.json().catch(() => null));
     const ibge = scope.municipality.ibgeCode;
+    const competencia = targetCompetencia();
 
     // 1) Já publicado? Devolve o que existe, sem custo novo.
     const manifest = await db
       .from('empresas_estab_manifesto')
       .select('id, status, gerado_em, publicado_em, linhas_geradas')
       .eq('id_municipio', ibge)
-      .eq('competencia', COMPETENCIA)
+      .eq('competencia', competencia)
       .eq('query_version', QUERY_VERSION)
       .eq('methodology_version', METHODOLOGY_VERSION)
       .maybeSingle();
@@ -126,7 +139,7 @@ Deno.serve(async (req) => {
         status: 'published',
         message: 'Este município já possui competência publicada. Nenhuma nova consulta foi disparada.',
         municipality: scope.municipality,
-        competencia: COMPETENCIA,
+        competencia,
         methodologyNote: SIMPLES_NOTE,
       }, 200, headers);
     }
@@ -140,10 +153,27 @@ Deno.serve(async (req) => {
           status: 'processing',
           message: 'A atualização deste município já está em processamento. Tente novamente em alguns minutos.',
           municipality: scope.municipality,
-          competencia: COMPETENCIA,
+          competencia,
           methodologyNote: SIMPLES_NOTE,
         }, 200, headers);
       }
+    }
+
+    // A confirmed older publication is reusable for 24h; after that, probe newer months again.
+    const fallback = await db.from('empresas_estab_manifesto')
+      .select('competencia, publicado_em')
+      .eq('id_municipio', ibge)
+      .eq('status', 'ok')
+      .lt('competencia', competencia)
+      .eq('query_version', QUERY_VERSION)
+      .eq('methodology_version', METHODOLOGY_VERSION)
+      .order('competencia', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (fallback.error) throw new SafeError('LOOKUP', 500, 'Não foi possível verificar a situação deste município.');
+    const fallbackPublishedAt = fallback.data?.publicado_em ? Date.parse(String(fallback.data.publicado_em)) : 0;
+    if (fallbackPublishedAt && Date.now() - fallbackPublishedAt < FALLBACK_RECHECK_HOURS * 3600_000) {
+      return json({ status: 'published', message: 'Dados já preparados para este município. O acesso aos meses mais recentes será verificado novamente em até 24 horas.', municipality: scope.municipality, competencia: fallback.data!.competencia, methodologyNote: SIMPLES_NOTE }, 200, headers);
     }
 
     // 3) Limites públicos.
@@ -191,7 +221,7 @@ Deno.serve(async (req) => {
 
     const pedido = await db
       .from('empresas_materialize_pedido')
-      .insert({ ip_hash: ipHash, id_municipio: ibge, competencia: COMPETENCIA, status: 'requested' })
+      .insert({ ip_hash: ipHash, id_municipio: ibge, competencia, status: 'requested' })
       .select('id')
       .single();
     if (pedido.error || !pedido.data) throw new SafeError('RATE_WRITE', 500, 'Não foi possível registrar a solicitação.');
@@ -232,11 +262,14 @@ Deno.serve(async (req) => {
     await db.from('empresas_materialize_pedido').update({ status: 'ok' }).eq('id', pedidoId);
 
     const manifesto = (result.manifesto ?? {}) as Record<string, unknown>;
+    const selectedCompetencia = String(manifesto.competencia ?? competencia);
     return json({
       status: 'ok',
-      message: 'Dados de Empresas atualizados para este município.',
+      message: selectedCompetencia < competencia
+        ? `Dados de Empresas preparados com a competência ${selectedCompetencia.slice(0, 7)}. Os meses mais recentes não retornaram dados para o acesso atual.`
+        : 'Dados de Empresas atualizados para este município.',
       municipality: scope.municipality,
-      competencia: String(manifesto.competencia ?? COMPETENCIA),
+      competencia: selectedCompetencia,
       aggregatedRows: Number(result.aggregatedRows ?? 0),
       totalEstabelecimentos: Number(result.totalEstabelecimentos ?? 0),
       methodologyNote: SIMPLES_NOTE,

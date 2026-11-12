@@ -8,7 +8,6 @@ import { toast } from 'sonner';
 import { FileText, Loader2, FileUp } from 'lucide-react';
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/components/ui/collapsible';
 import { type ModelId } from '../lib/cost-calculator';
-import { formatBRL } from '../lib/v3/config';
 import { pptxToIr } from '../lib/audit/pptx-to-ir';
 import { findAtaImage } from '../lib/v3/ata-image';
 import { docxToText } from '../lib/v3/ata-docx';
@@ -96,7 +95,7 @@ export default function AtaTestPanel({ studyId }: { studyId: string }) {
             {loaded && (
               <span className="text-[11px] text-muted-foreground">
                 {loaded.source === 'pptx' ? `slide ${loaded.slide}` : 'DOCX'} ·{' '}
-                {loaded.result.fromCache ? 'do cache' : formatBRL(loaded.result.costUsd)}
+                {loaded.result.fromCache ? 'leitura reaproveitada' : 'leitura concluída'}
               </span>
             )}
           </div>

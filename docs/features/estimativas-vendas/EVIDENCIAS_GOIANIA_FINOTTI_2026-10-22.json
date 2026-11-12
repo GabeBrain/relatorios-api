@@ -1,0 +1,318 @@
+{
+  "date": "2026-10-22",
+  "state": "validated locally; not deployed",
+  "sourceManifest": "MANIFESTO_REFERENCIAS_FINOTTI_2026-10-22.json",
+  "referenceCases": {
+    "horizontal": 12,
+    "vertical": 10,
+    "passed": 22
+  },
+  "tests": {
+    "focused": 62,
+    "integratedWithApiExcelAndMenu": 108,
+    "files": 11
+  },
+  "snapshot": {
+    "scope": "GO/Goiânia/Vertical",
+    "sha256": "3d5e8c39fccacdb850122ce1dda970f5e8d321de88bfea8295aef087e8fb4f03",
+    "buildings": 641,
+    "pages": 7,
+    "latestEligibility": {
+      "auto": 640,
+      "finotti-reference": 185,
+      "stock-trend": 629,
+      "constant": 641
+    }
+  },
+  "liveApiUi": {
+    "mode": "local UI and live authenticated API; no mocked routes",
+    "city": "Goiânia",
+    "type": "Vertical",
+    "elapsedSeconds": 16.183334600000002,
+    "summary": "641 empreendimentos · 640 com previsão",
+    "visibleCards": 12,
+    "curves": 24,
+    "bands": 14,
+    "network": [
+      {
+        "page": 1,
+        "status": 200
+      },
+      {
+        "page": 7,
+        "status": 200
+      },
+      {
+        "page": 2,
+        "status": 200
+      },
+      {
+        "page": 5,
+        "status": 200
+      },
+      {
+        "page": 3,
+        "status": 200
+      },
+      {
+        "page": 6,
+        "status": 200
+      },
+      {
+        "page": 4,
+        "status": 200
+      }
+    ],
+    "errors": []
+  },
+  "responsiveSnapshotUi": {
+    "checks": [
+      {
+        "width": 390,
+        "theme": "light",
+        "source": "authenticated API snapshot, 641 buildings; transport mocked for deterministic UI test",
+        "reads": 7,
+        "peak": 6,
+        "preparedMs": 6559,
+        "autoSelected": 641,
+        "visibleCards": 12,
+        "bands": 14,
+        "portfolio": "Carteira · 640 de 641 membros avaliáveis",
+        "overflow": false,
+        "modalOverflow": false,
+        "contentWidth": 334
+      },
+      {
+        "width": 390,
+        "theme": "dark",
+        "source": "authenticated API snapshot, 641 buildings; transport mocked for deterministic UI test",
+        "reads": 7,
+        "peak": 6,
+        "preparedMs": 9830,
+        "autoSelected": 641,
+        "visibleCards": 12,
+        "bands": 14,
+        "portfolio": "Carteira · 640 de 641 membros avaliáveis",
+        "overflow": false,
+        "modalOverflow": false,
+        "contentWidth": 334
+      },
+      {
+        "width": 768,
+        "theme": "light",
+        "source": "authenticated API snapshot, 641 buildings; transport mocked for deterministic UI test",
+        "reads": 7,
+        "peak": 6,
+        "preparedMs": 6231,
+        "autoSelected": 641,
+        "visibleCards": 12,
+        "bands": 14,
+        "portfolio": "Carteira · 640 de 641 membros avaliáveis",
+        "overflow": false,
+        "modalOverflow": false,
+        "contentWidth": 512
+      },
+      {
+        "width": 768,
+        "theme": "dark",
+        "source": "authenticated API snapshot, 641 buildings; transport mocked for deterministic UI test",
+        "reads": 7,
+        "peak": 6,
+        "preparedMs": 6082,
+        "autoSelected": 641,
+        "visibleCards": 12,
+        "bands": 14,
+        "portfolio": "Carteira · 640 de 641 membros avaliáveis",
+        "overflow": false,
+        "modalOverflow": false,
+        "contentWidth": 512
+      },
+      {
+        "width": 1440,
+        "theme": "light",
+        "source": "authenticated API snapshot, 641 buildings; transport mocked for deterministic UI test",
+        "reads": 7,
+        "peak": 6,
+        "preparedMs": 6644,
+        "autoSelected": 641,
+        "visibleCards": 12,
+        "bands": 14,
+        "portfolio": "Carteira · 640 de 641 membros avaliáveis",
+        "overflow": false,
+        "modalOverflow": false,
+        "contentWidth": 1184
+      },
+      {
+        "width": 1440,
+        "theme": "dark",
+        "source": "authenticated API snapshot, 641 buildings; transport mocked for deterministic UI test",
+        "reads": 7,
+        "peak": 6,
+        "preparedMs": 6104,
+        "autoSelected": 641,
+        "visibleCards": 12,
+        "bands": 14,
+        "portfolio": "Carteira · 640 de 641 membros avaliáveis",
+        "overflow": false,
+        "modalOverflow": false,
+        "contentWidth": 1184
+      },
+      {
+        "width": 1920,
+        "theme": "light",
+        "source": "authenticated API snapshot, 641 buildings; transport mocked for deterministic UI test",
+        "reads": 7,
+        "peak": 6,
+        "preparedMs": 6313,
+        "autoSelected": 641,
+        "visibleCards": 12,
+        "bands": 14,
+        "portfolio": "Carteira · 640 de 641 membros avaliáveis",
+        "overflow": false,
+        "modalOverflow": false,
+        "contentWidth": 1600
+      },
+      {
+        "width": 1920,
+        "theme": "dark",
+        "source": "authenticated API snapshot, 641 buildings; transport mocked for deterministic UI test",
+        "reads": 7,
+        "peak": 6,
+        "preparedMs": 7017,
+        "autoSelected": 641,
+        "visibleCards": 12,
+        "bands": 14,
+        "portfolio": "Carteira · 640 de 641 membros avaliáveis",
+        "overflow": false,
+        "modalOverflow": false,
+        "contentWidth": 1600
+      }
+    ],
+    "failures": []
+  },
+  "syntheticSelectionRegression": {
+    "checks": [
+      {
+        "selectionAndFlowMs": 3525,
+        "width": 1440,
+        "theme": "light",
+        "selected": 100,
+        "visible": 12,
+        "pagination": true,
+        "portfolio": true,
+        "retrospective": true,
+        "focus": true,
+        "overflow": false,
+        "dialogOverflow": false
+      }
+    ],
+    "failures": []
+  },
+  "loadingAndErrorStates": [
+    {
+      "mode": "cancel",
+      "fieldBrainLogo": true,
+      "noFalseCharts": true,
+      "keyboardCancel": true,
+      "pageErrors": []
+    },
+    {
+      "mode": "error",
+      "fieldBrainLogo": true,
+      "noFalseCharts": true,
+      "keyboardCancel": false,
+      "pageErrors": []
+    },
+    {
+      "mode": "empty",
+      "fieldBrainLogo": true,
+      "noFalseCharts": true,
+      "keyboardCancel": false,
+      "pageErrors": []
+    }
+  ],
+  "notes": [
+    "Snapshot timing is not live API latency.",
+    "Reference bands have not been independently calibrated for Goiânia.",
+    "Automatic projections include explicit recent-stock fallback; not all are Finotti.",
+    "Original reference was trained through 2026-09 and is not an independent historical test.",
+    "Raw inputs, credentials and captures remain ignored."
+  ],
+  "targetedVisualCheck": {
+    "checks": [
+      {
+        "width": 390,
+        "theme": "light",
+        "source": "authenticated API snapshot, 641 buildings; transport mocked for deterministic UI test",
+        "reads": 7,
+        "peak": 6,
+        "preparedMs": 6279,
+        "autoSelected": 641,
+        "visibleCards": 12,
+        "bands": 14,
+        "portfolio": "Carteira · 640 de 641 membros avaliáveis",
+        "overflow": false,
+        "modalOverflow": false,
+        "contentWidth": 334
+      },
+      {
+        "width": 390,
+        "theme": "dark",
+        "source": "authenticated API snapshot, 641 buildings; transport mocked for deterministic UI test",
+        "reads": 7,
+        "peak": 6,
+        "preparedMs": 6270,
+        "autoSelected": 641,
+        "visibleCards": 12,
+        "bands": 14,
+        "portfolio": "Carteira · 640 de 641 membros avaliáveis",
+        "overflow": false,
+        "modalOverflow": false,
+        "contentWidth": 334
+      },
+      {
+        "width": 1440,
+        "theme": "light",
+        "source": "authenticated API snapshot, 641 buildings; transport mocked for deterministic UI test",
+        "reads": 7,
+        "peak": 6,
+        "preparedMs": 6356,
+        "autoSelected": 641,
+        "visibleCards": 12,
+        "bands": 14,
+        "portfolio": "Carteira · 640 de 641 membros avaliáveis",
+        "overflow": false,
+        "modalOverflow": false,
+        "contentWidth": 1184
+      },
+      {
+        "width": 1440,
+        "theme": "dark",
+        "source": "authenticated API snapshot, 641 buildings; transport mocked for deterministic UI test",
+        "reads": 7,
+        "peak": 6,
+        "preparedMs": 6360,
+        "autoSelected": 641,
+        "visibleCards": 12,
+        "bands": 14,
+        "portfolio": "Carteira · 640 de 641 membros avaliáveis",
+        "overflow": false,
+        "modalOverflow": false,
+        "contentWidth": 1184
+      }
+    ],
+    "failures": []
+  },
+  "unprojected": [
+    {
+      "id": "21812",
+      "reason": "Age outside reference support and no comparable stock three months before cut; history retained."
+    }
+  ],
+  "gates": {
+    "typescriptApp": "passed",
+    "eslintChangedTsTsx": "passed",
+    "productionBuild": "passed",
+    "liveDocument": "docs/projetos/LIVE_rebrain.md"
+  }
+}

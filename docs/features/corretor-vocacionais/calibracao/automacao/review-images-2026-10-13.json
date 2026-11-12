@@ -1,0 +1,78 @@
+{
+  "date": "2026-10-13",
+  "method": "inspeção visual direta de nove PNG persistidos, sem IA nova",
+  "cases": [
+    {
+      "caseId": "cj",
+      "ruleId": "iavis-bin-3c1bea45a9-0",
+      "evidenceUrl": "https://mxinpvcqzbfbzjodhgtz.supabase.co/storage/v1/object/public/corretor-evidencias/3c1bea45a95c6dc50abfc9bb43971d88f47dde31.png",
+      "sha256": "2d8341b55597090b89ea1d5fda5261cdd0e7e85d3345999b7c26ffe13d7d543b",
+      "classification": "erro_literal_confirmado",
+      "reason": "Cabeçalho Abaixo de 27.511,00 sobrepõe faixa 27.320,01–36.511,00."
+    },
+    {
+      "caseId": "cj",
+      "ruleId": "iavis-format-34bf9eac86",
+      "evidenceUrl": "https://mxinpvcqzbfbzjodhgtz.supabase.co/storage/v1/object/public/corretor-evidencias/34bf9eac868a0f067685ace70ee1554fdd646144.png",
+      "sha256": "2eac024312cc430080fee8d91f9c16fe47feaacd9bfc6f4a14644ecb4bc1c504",
+      "classification": "fp_ocr_confirmado",
+      "reason": "PNG termina a faixa em 36.511,00; leitura citou 36.511,01."
+    },
+    {
+      "caseId": "cj",
+      "ruleId": "iavis-format-5039684ae6",
+      "evidenceUrl": "https://mxinpvcqzbfbzjodhgtz.supabase.co/storage/v1/object/public/corretor-evidencias/5039684ae6011106533901d2c42d99d8db7b0771.png",
+      "sha256": "fb94d7ee3c0724b48bdf64a40bcf576ef751ca6faff84aec0a01ca301e748aad",
+      "classification": "fp_ocr_confirmado",
+      "reason": "PNG termina a faixa em 36.511,00; leitura citou 36.511,01."
+    },
+    {
+      "caseId": "vap",
+      "ruleId": "iavis-sum-99ef53004b-0",
+      "evidenceUrl": "https://mxinpvcqzbfbzjodhgtz.supabase.co/storage/v1/object/public/corretor-evidencias/99ef53004b23bb9f8506921dc451a3f955660801.png",
+      "sha256": "da4b7711b2f3a1cde164e06208b3234f487755b170e756689e7a4d456a115900",
+      "classification": "divergencia_visual_com_leitura_errada",
+      "reason": "SP: PNG soma 15.019.248 versus total 16.256.029; cache soma 10.019.248 por ler 9.947.578 como 4.947.578. Escopo/faixa ausente ainda requer adjudicação."
+    },
+    {
+      "caseId": "vap",
+      "ruleId": "iavis-pct-9767fb66f7-0",
+      "evidenceUrl": "https://mxinpvcqzbfbzjodhgtz.supabase.co/storage/v1/object/public/corretor-evidencias/9767fb66f75f89ec49d25c664a1dbaba85faceb3.png",
+      "sha256": "93d44278ef6b7a1e842ed42b12b1bc0cfea2b8a67fdce7e4a34a76f806eb6ed9",
+      "classification": "fp_ocr_confirmado",
+      "reason": "Até 6 km: 6.614/45.835 = 14,430%; imagem informa 14,4%. Cache atribuiu 19,2% de SP."
+    },
+    {
+      "caseId": "vap",
+      "ruleId": "iavis-format-5181287e1f",
+      "evidenceUrl": "https://mxinpvcqzbfbzjodhgtz.supabase.co/storage/v1/object/public/corretor-evidencias/5181287e1fce4de9e05bb9b3ac5b8ac48d6b846e.png",
+      "sha256": "371aea1ce8684f85a9145c990900798750998e2236a7fa9d3f740a19487996ea",
+      "classification": "erro_literal_confirmado",
+      "reason": "Coluna Ano Lançamento mostra 2.023/2.024/2.025."
+    },
+    {
+      "caseId": "vap",
+      "ruleId": "iavis-labeltypo-a74c5c4b86",
+      "evidenceUrl": "https://mxinpvcqzbfbzjodhgtz.supabase.co/storage/v1/object/public/corretor-evidencias/a74c5c4b86f7952603faa2d93e2fa8aca742540c.png",
+      "sha256": "e388404550d1b4a8687e29eb3806faf0c78dc4b11ec1de8260f893748792a49e",
+      "classification": "erro_literal_confirmado",
+      "reason": "Arté 35 m² aparece no cabeçalho."
+    },
+    {
+      "caseId": "v2",
+      "ruleId": "iavis-sum-751b3f8326-0",
+      "evidenceUrl": "https://mxinpvcqzbfbzjodhgtz.supabase.co/storage/v1/object/public/corretor-evidencias/751b3f832689bf7d933034d4b36525459a890559.png",
+      "sha256": "0382e8af2e656aaa121d6b21ee8d1df3c004b9a54a92ee79b4ff4eb9b1ec3c18",
+      "classification": "divergencia_visual_confirmada_escopo_pendente",
+      "reason": "Mesma tabela/faixas da VAP, SP soma 15.019.248 versus 16.256.029. Não desativar somas; conferir faixa omitida."
+    },
+    {
+      "caseId": "v2",
+      "ruleId": "iavis-labeltypo-8d48c12f61",
+      "evidenceUrl": "https://mxinpvcqzbfbzjodhgtz.supabase.co/storage/v1/object/public/corretor-evidencias/8d48c12f61492db539ee435b6af63eac33707b6d.png",
+      "sha256": "079e5d831c5fde8ecd5fcc7b4eef74d325469191c838e50b186883d618c6f795",
+      "classification": "erro_literal_confirmado",
+      "reason": "Arté 35 m² aparece no cabeçalho."
+    }
+  ]
+}

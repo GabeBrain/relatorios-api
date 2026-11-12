@@ -16,6 +16,497 @@ Este arquivo deve ser atualizado sempre que uma regra for adicionada, removida, 
 4. Informar a fonte técnica/documental da mudança.
 5. Separar regras `DET` de regras `IA/LLM`.
 
+## Versão 0.75 — 10/11/2026 — registro da proteção CSV recebida do remoto
+
+- **DET / RUNTIME, exportação:** serializers CSV de auditoria (`lib/audit/session.ts`) e calibração (`pages/CorretorCalibrationPage.tsx`) prefixam apóstrofo em textos iniciados por `=`, `+`, `-`, `@`, tab ou CR, antes de escapar aspas e envolver a célula. O prefixo é literal do arquivo para neutralizar interpretação como fórmula de planilha.
+- **Origem:** alteração já existente de gpt-engineer-app/Lovable em e7a00db, preservada na integração autorizada b6c6488. Este registro documenta o remoto; não houve nova edição do código Corretor nesta sessão de Fortaleza.
+- Não altera achados, regras de análise, prompts, classificações DET/IA, schema, extração ou dados persistidos. Novas verificações desta sessão cobrem Fortaleza/build integrado; runtime/exportação Corretor não foram exercitados.
+
+## 22/10/2026 — Ajuste visual do tema escuro, sem mudança nas regras
+
+Rodapé de apontamentos deixava uma faixa Papel clara no modo escuro; triagem em portal não herdava aliases locais. Corrigida adaptação escura da carteira/preparação, bancada, carregamento, materiais, Sugestão em blocos e triagem: superfícies neutras próximas, texto menos luminoso, bordas discretas e preenchimentos de estado suaves. Botões de decisão indicam seleção com aria-pressed/filete, mantendo callbacks e decisões existentes. Tokens da fundação copiados sem alteração; nenhum motor, prompt, perfil, limite, retomada, material ou registro de consumo alterado.
+
+Build23,80s/TypeScript e lint aprovados; prévia visual isolada dos componentes reais com dados ilustrativos,1440/390px, claro/escuro, portal com390×844px após estabilizar transição. Sem erro de página/overflow, rede externa bloqueada. Evidências locais ignoradas em `.local-inputs/dark-interface-20261022/`. Sem testes de regressão ou IA nesta rodada; estado validado localmente, Publish do frontend e aceite em produção pendentes. Não exige migration nem republicação de funções.
+
+## 22/10/2026 — Unknown isolado não exige parar outras etapas
+
+Validação final local:392aprovados/2ignorados,56arquivos; tipos/lint/Deno/build24,67s aprovados. Sem dezpasses materiais ou chamadas reais nesta rodada; não equivale a análise real concluída.
+
+Correção do86de30f após rejeição de Gabriel: unknown e running deixam de ter o mesmo efeito global. Prepared/interrupted/failed sem running podem continuar os outros lotes; reserva unknown mantida, orçamento não ampliado e claim do mesmo hash continua recusado antes do provedor, com REVIEW_BATCH_UNCONFIRMED. Completed é replay; novo lote segue reserva/finish normais. UI remove requisito de conferência pela equipe, preserva resultados e informa a leitura pendente. Sem fingir cobertura completa/entrega autorizada. Aviso image-not-read só atualiza se automático pendente/sem veredicto, com histórico do payload e condição contra concorrência. Testes do controlador real e cobertura são simulados, sem IA, e entram em CI. Nenhuma regra de análise, modelo/prompt/cache/material/decisão ou migration alterada. Publicar controlador+reviewer e frontend; falha histórica não reconciliada por suposição.
+
+## 22/10/2026 — Resultados parciais disponíveis e retomada consultada antes de iniciar
+
+Validação final:380aprovados/2ignorados na suíte,54arquivos aprovados; tipos/lint/Deno/build e prévia isolada aprovados. Estado validado localmente, sem execução real/migration/deploy nesta sessão.
+
+Nova projeção review_status consulta somente leitura da revisão deste owner/estudo/versão/SHA; nenhuma IA ou gravação remota nessa consulta. Bancada parcial apresenta achados/evidências/triagem com cobertura incompleta, entrega bloqueada e navegação à preparação. Status running/completed, lote unknown/running, reserva ou consulta inválida não liberam continuação; start reconfere os impedimentos, mantendo claim transacional e reserva desconhecida. Retomada válida usa mesma execução/cache/perfil, fonte/cidades/ata confirmada; ignoreDuplicates protege decisões humanas. Cobertura image-not-read obsoleta só encerra após análise completa sem essa lacuna e sem veredicto humano. Motores/prompts/modelos/limites não alterados; unknown Rolândia não reconciliado ou repetido. Tipos/lint/Deno/build/prévia isolada aprovados. Publicar três folhas/controlador com reviewer.ts+review-provider.ts e frontend, sem migration. Diagnóstico atualizado diferencia código publicado de homologação.
+
+## 22/10/2026 — Diagnóstico de falha da folha sem consumo confirmado
+
+SQL real Rolândia5ef5c1a9 confirma um unknown com resposta genérica do catch da visão e reserva retida, sem metadados de uso. Logs colados Boot/Shutdown não informam reason/invocação; causa original não comprovada. Shared passa a classificar transporte/timeout/HTTP/envelope/uso ausente e registrar somente metadados seguros nas três folhas; controlador preserva status/razão privada e classifica bloqueio de claim no log. Sem mudança de regra, modelo/prompt/limites, cache, retomada, reserva ou decisão humana, sem retry/IA/banco.37 testes focados/369aprovados e2ignorados, tipos/Deno/lint aprovados; local, aguarda publicação quatro funções com shared/frontend, nenhuma migration nova. DIAGNOSTICO_INTERRUPCAO_IMAGENS_ROLANDIA_2026-10-22.md reúne evidências e limites; não declarar lote antigo reconciliado ou causa resolvida.
+
+## 22/10/2026 — Cobertura incompleta distingue falha de pausa
+
+Incidente real Rolândia após37chamadas contabilizadas: cobertura registra duas falhas s4/s45 e não há relatório completo. Aborted agregava falha de imagem com pausa; mantida a regra de não concluir relatório, acrescentados failedImages/pausedByUser e contagem de tentativas/falhas. Frontend comunica avaliação incompleta com slides em estado persistente; sucesso não é sinalizado só por total tentado.363 testes/2ignorados e tipos/lint aprovados; nenhum motor/prompt/cache/custo/decisão alterado, sem IA. Consulta administrativa de lotes unknown/erro preparada; causa específica da resposta desconhecida e bloqueio ainda não confirmada. Detalhes no DIAGNOSTICO_INTERRUPCAO_IMAGENS_ROLANDIA_2026-10-22.md.
+
+## 21/10/2026 — Listas null da ata: causa real corrigida localmente
+
+Fechamento posterior: suíte completa361aprovados/2ignorados,52arquivos aprovados e build20,97s; Deno quatro funções, tipos/lint e documentação viva aprovados. Sem dezpasses materiais nesta rodada, IA ou escrita remota; homologação de produção continua pendente após publicação.
+
+JSON real fornecido por Gabriel confirma incompatibilidade prompt/validador em três listas null, com stop sem recusa e uso contabilizado. Normalização ata-null-lists-v1 antes de validar, só null explícito vira [], sem converter campos malformados/ausentes ou apagar pedidos/candidatos. Replay de lote completed autoriza recuperação pura da resposta inválida armazenada, com mesmo perfil/término/erro conhecidos e sem nova IA/finish/custo; lote original intacto. Comparação de retomada ignora só fonte.gerado_em e preserva snapshot/hash; multi-cidade continua sem escolha automática.33 testes focados/TypeScript/lint/Deno aprovados; sem banco/IA/deploy. Publicar folha ATA+shared/controlador e frontend; nenhuma migration nova, uso futuro/revisor completo ainda não homologados. Evidências no CARREGAMENTO_BRAIN_E_FALHA_ATA_2026-10-21.md.
+
+## 21/10/2026 — Diagnóstico específico de conteúdo recusado
+
+Nova falha real chegou à leitura da ata segundo prints, sem acesso privilegiado ao lote. CallReviewProvider distinguia só mensagem genérica; adicionados errorCode e caminhos validationErrors para próximas respostas, com etapa/motivo em português e invalidOutput privado preservado. Aceitação de conteúdo, prompts, perfis/cache/limites/preços e política de não repetir continuam iguais. Null em listas ATA conflita com regra genérica do prompt, mas não foi confirmado como causa do lote; consulta administrativa somente leitura preparada. Carregamento Brain aplicado no Corretor/Sugestão, tipo/lint/Deno/build/prévia isolada aprovados; sem testes/IA/migration/alteração remota. Detalhes em CARREGAMENTO_BRAIN_E_FALHA_ATA_2026-10-21.md; não declarar falha de produção resolvida.
+
+## 21/10/2026 — Início incompleto não pode ser retomada legada
+
+Correção local f345adb após três tentativas Rolândia com identificador Luna sem snapshot, sem lotes/uso/reservas segundo inspeção Lovable. Contexto moderno incompleto ou snapshot divergente é recusado; legado válido preservado. Cliente retém id confirmado antes de validar perfil, permitindo encerramento no catch sem enviar lote pago; resposta HTTP operacional preservada. Erro permanece no topo da preparação e navegação só após sucesso. Tipos aplicação/Deno/lint/build24,88s aprovados; testes e provedor não reexecutados. Sem migration nova, banco/deploy ou reconciliação das antigas. Próximo envio e publicação corretor-execution com shared + frontend, depois reteste real; diagnóstico detalhado em DIAGNOSTICO_INICIO_ROLANDIA_2026-10-21.md.
+
+## 21/10/2026 — Fechamento local e retenção de evidências do revisor
+
+Implementação principal no commit local829f862, documentação viva aprovada. Complemento guarda resposta inválida/metadados divergentes no lote privado, com reserva desconhecida; só muda running para unknown, preservando finish já confirmado. Texto visível inválido pode ser auditado sem conteúdo interno de raciocínio.25 testes focados e Deno revalidados; PostgreSQL local agora13 verificações, incluindo proteção do finish confirmado. Suíte355 e dez passes da entrega preservados. Nenhum provedor/SQL remoto/deploy/email, gasto US$0. Push/CI remoto aguardam decisão específica sobre dois commits Finotti anteriores; pacote de publicação e R6/R8 reais continuam pendentes. Estado validado localmente, não produção.
+
+## 21/10/2026 — Revisor Luna/high e regras Guajajaras validados localmente
+
+Executado por Gabriel/sessão o recorte local R0–R5 do plano, com teto posterior autorizado US$3 globais (não US$5 da proposta). Matriz liga regra/entrada/evidência/resultado e distingue transcrição derivada de leitura real. Novos conflitos entre páginas, unidade título/trecho e categoria possivelmente omitida; faixas/somas existentes preservadas. Extração separa51 caixas, mantendo snapshot de texto/notas anteriores para retomada legada. Ata não comprova atendimento pela própria repetição. Nenhum valor ou decisão humana corrigido automaticamente.
+
+Texto/ata/visão novos em Luna/high por flag técnica e snapshot, legado/cache/hash preservados; isolamento de cache, guarda de perfil, JSON inválido não vira zero, uso confirmado contabilizado sem dobrar raciocínio e desconhecidos sem retry. Migration aditiva `20261021223119_corretor_review_model_profiles.sql` delega à contabilidade consultiva anterior e aplica teto global US$3 com reservas pendentes e vínculo técnico do canário. Sem fallback para4o; custos continuam ocultos. Atalhos da triagem corrigidos para evento no documento; seletor V1 não expõe modelo sem endpoint compatível. Sugestão/prompt preservados, testes atualizados ao seu perfil já vigente.
+
+Evidência local:355 testes/2 ignorados;12 verificações PostgreSQL em memória; quatro testes do comparador; dez passes baseline/Excel. Sete adições intencionais fixadas por hash/justificativa, nenhum achado antigo removido ou alterado, baseline original intocada. Deno/tipos/lint/build e percurso isolado com PPTX+11Excel, saída/reabertura sem erros. CI técnica acrescentada; verificação remota depende do envio. Backend correto não aparece no conector nem CLI: nenhum SQL remoto/deploy/IA paga/email; gasto US$0. Lotes A/B preparados em dry-run, R6/R8 pendentes após publicação. Dois commits Finotti locais anteriores não enviados por inferência. [Resultado e limites](RESULTADO_REVISAO_REGRAS_LUNA_2026-10-21.md), [matriz](MATRIZ_GUAJAJARAS_REGRAS_2026-10-21.md) e [pacote único de publicação/email](PUBLICACAO_REVISOR_LUNA_2026-10-21.md). Estado validado localmente, não produção.
+
+## 21/10/2026 — Plano de revisão de regras, Luna/high e reteste de Amanda
+
+Gabriel solicitou planejamento integral com mínima intervenção: `PLAN_REVISAO_REGRAS_LUNA_RETESTE_AMANDA_2026-10-21.md`, R0–R9. Inventário de código confirma texto 4o, ata/visão mini e releitura 4o; o revisor já inclui SVG no passe textual, diferente da Sugestão. Plano prevê matriz esperado/evidência/regra/resultado, correções demonstradas, três passes Luna/high por perfil, cache isolado, confiança por evidência, ledger e migration aditiva, dez passes offline, CI e dois lotes reais com teto proposto US$5 condicionado ao CTA. Retomadas/decisões preservadas, sem fallback automático. Publicação das três folhas + corretor-execution + frontend e email somente preparado após verificação real. Backend correto/acessos e commits Finotti alheios são dependências explícitas. Estado preparado; nenhum produto, teste, provedor, SQL remoto, deploy, email, commit ou push executado nesta preparação.
+
+## 21/10/2026 — Diagnóstico Guajajaras/BH sem nova geração
+
+A pedido de Gabriel, ampliada a leitura do PPTX enviado: marcações vermelhas em25 slides, embora sem comentários nativos. Correção da constatação inicial: há revisão humana no arquivo, mas não se comprovou ser o mesmo relatório anexo ao email ou a autoria de cada caixa. Extração real local do código atual:137slides,124 incluídos/13 excluídos,26.173caracteres;47 tabelas nativas são41 legendas e6 rodapés. Dados PNG ausentes na sugestão; SVG de30/70 existe no IR mas não entra no pedido; recados de revisão sobrevivem ao filtro. Divergências de renda/propriedade/verticalização, cabeçalho63 e categoria de garagem66 mapeadas, distinguindo soma32 atual correta e amostra108 atual de1.815 da nota antiga sobre30.
+
+Consulta REST pública somente leitura não localizou caso/arquivo Guajajaras; estudo Quanti VBE homônimo não foi confundido. Código histórico d58f64c guardava sugestão somente em estado React; persistência entrou em bb0f22a/16out, sem comprovar runtime do uso antigo. Email direto indisponível por reautenticação. Matriz completa dos25 slides e13 diagnósticos/proposta P0–P3 em `DIAGNOSTICO_GUAJAJARAS_AMANDA_2026-10-21.md`. Evidência reproduzível por script local de cobertura. Estado: diagnóstico documental/extração local, correções propostas e ainda não implementadas. Sem suíte, IA paga, escrita remota, deploy, contato com Amanda ou push; dois commits locais Finotti e demais alterações alheias preservados. Próximo: P0/P1, fonte limpa e reconciliação antes de nova geração.
+
+**Destilação posterior,21/10:** Gabriel pediu reduzir a frente a um passo de melhoria do revisor. Seção 0 do diagnóstico consolida seis preocupações observáveis e seis candidatos a verificações, com contraexemplos e separação entre reclamação do email, marcações do PPTX e achados novos. Cobertura medida na Sugestão não foi atribuída aos motores de correção. Próximo passo passa a ser matriz esperado/evidência/regra existente/resultado/lacuna no Corretor, antes de escolher implementação; P0–P3 não autorizados integralmente. Sem código de produto, execução, IA paga ou push nesta destilação.
+
+## 19/10/2026 — Luna/high e consumo por modelo preparados para produção
+
+Executado plano L0–L6 e handoff L7 por autorização de Gabriel: flag técnica seleciona gpt-6-luna/high para novas sugestões, teto total32.768 tokens por chamada e retrato imutável de perfil/preços no contexto. Mini legado conserva contrato, limites e hashes na retomada. Prompts de negócio idênticos; motores de correção, materiais, versões, decisões e UI preservados. Guarda de schema/contrato e timeout110s/130s; desconhecidos conservam reserva/evidência, sem repetção ou fallback automático.
+
+Migration aditiva `20261019203600_corretor_recommendation_model_profiles.sql` preparada, não aplicada: esforço/raciocínio, perfil, preços, origem e consumo por chamada/geração; agregado técnico service_role e consulta SQL versionada. Tokens de raciocínio não são cobrados duas vezes. Modelo solicitado e efetivo preservados; custos continuam fora da jornada do analista. Tipos app/Edge, lint, build41,14s e parser SQL/PLpgSQL aprovados. Nenhuma suíte, browser, IA paga, SQL remoto ou deploy executado. Qualidade, latência real e produção não verificados. Publicação: Gabriel aplica migration, depois deploy analyze-consulting-suggestion, corretor-execution e Publish frontend. Relatório: `design/RESULTADO_LUNA_METRICAS_PRODUCAO_2026-10-19.md` na documentação do Corretor. Estado preparado e checado estaticamente; push autorizado nesta rodada, não equivale a ativação remota.
+
+## 19/10/2026 — Plano de adoção Luna com consumo por modelo
+
+Gabriel decidiu adotar Luna na Sugestão de análise sem comparação prévia, priorizando utilidade para A&R. Plano técnico L0–L7 preparado em `PLAN_LUNA_SUGESTAO_METRICAS_PRODUCAO_2026-10-19.md`: padrão proposto gpt-6-luna/high, flag técnica versionada, retrato imutável de modelo/esforço/preços por execução, compatibilidade de retomadas legadas e migration aditiva para detalhar consumo. Comparativos observacionais nos envios reais, sem executar os dois modelos ou exibir custos ao analista. Duas Edge Functions mais frontend exigem publicação; SQL remoto fica com Gabriel. Estado preparado, sem código/migration implementados, sem teste/IA paga/deploy/push nesta rodada. CTA de execução integral incluído no plano. Chat indicado continua indisponível pela consulta e não há navegador conectado para o login atual; texto copiado utilizado, sem afirmar acesso à base integral de Diego.
+
+## 19/10/2026 — Transição contínua no início da avaliação
+
+Gabriel confirmou aplicação da migration de exclusão, Publish e teste positivo (relato, sem verificação independente). Novo problema: preparação reaparecia entre registro e indicador de análise. Estado visual independente agora cobre registro, processamento e finalização, em envio novo e retomada. Erros/pausa mantêm tratamento existente; motores, decisões e controles preservados. Browser com PPTX real e11 Excel, registro atrasado e serviços simulados aprovado em duas verificações, sem erros ou IA paga. TypeScript aprovado. Sem migration/Edge nova. Falta Publish e conferir em produção. Diagnóstico: `CORRECAO_TRANSICAO_INICIO_AVALIACAO_2026-10-19.md`, na pasta de design do Corretor.
+
+## 19/10/2026 — Exclusão acessível para estudos incompletos
+
+Gabriel pediu mapear a exclusão e dar acesso por lixeira antes de concluir análise. Diagnóstico: preparação incompleta retornava antes do cabeçalho com lixeira; carteira não oferecia a ação. DELETE antigo podia falhar por referências de cadastro/materiais ou apagar consumo em cascade. Implementada exclusão lógica preservando materiais, decisões e registros de uso. Lixeira na carteira/cabeçalho e na preparação autenticada; rascunho apenas local tem descarte local com confirmação. Login e confirmação obrigatórios para registro salvo; estudo só some após true do banco. Execuções prepared/running bloqueiam remoção. Limpeza local compara hash para preservar rascunho de outro estudo. Reenvio idêntico inicia outro registro ativo, sem ressuscitar o removido.
+
+**Dependência nova:** aplicar manualmente `supabase/migrations/20261019182241_corretor_study_trash.sql` antes do Publish. RPC invoker com helper privado para ler execuções protegidas, validando identidade; sem expor tabelas de consumo ou ampliar leitura. Sem migration aplicada, exclusão informa pendência e preserva o estudo. Nenhum SQL remoto ou registro real excluído. Não requer Edge nova. [Mapeamento, segurança e limites](design/EXCLUSAO_ESTUDOS_INCOMPLETOS_2026-10-19.md).
+
+Validação local:341 testes aprovados/zero falhas/2 ignorados;8 focados;7 casos PostgreSQL em memória com migration real;4 percursos browser simulados sem erros/IA. Tipos/lint/build46,84s aprovados. Push solicitado também inclui e333a25 (decisão sem planilhas na ação principal). Estado validado localmente, pronto para envio; aplicação SQL, Publish e teste de estudo descartável em produção pendentes. Exclusão lógica não libera storage nem representa eliminação física dos originais. Outras frentes preservadas.
+
+## 19/10/2026 — Decisão sem planilhas na ação principal
+
+Gabriel relatou que o botão separado Continuar sem planilhas escondia o requisito para iniciar. Removido do painel Excel. Ação principal mostra Continuar sem planilhas enquanto a escolha estiver pendente; primeiro clique só confirma a escolha, sem onStart/processamento. Depois vira Iniciar avaliação; validações de cidade/UF e controles internos preservados. Aviso A comparação com os cálculos de origem não será feita aparece ao lado, entrada suave pela esquerda e vermelho breve passando à cor de texto, sem animação quando movimento reduzido. Rascunho restaurado mostra aviso estático; fonte anterior na retomada preservada e não gera aviso falso de ausência. Remover todas as planilhas pede nova escolha; planilhas selecionadas continuam no fluxo normal.
+
+TypeScript e ESLint dirigidos aprovados. Expectativas do teste existente ajustadas ao botão único, sem executar nova suíte ou teste browser nesta rodada. Estado preparado localmente, sem push/produção; próximo publicar com autorização e conferir duas etapas, envio/remoção de Excel e retomada. Sem IA paga, migration, Edge ou alteração de motores/custos/decisões. Documentação e outras frentes preservadas.
+
+## 19/10/2026 — Carregamento estável e atenuado
+
+Gabriel relatou listas/componentes surgindo em momentos distintos, com impressão de travamento. Aplicado LoadingSurface reutilizável na carteira/versões, sugestões e materiais: esqueleto estático na primeira leitura, conteúdo anterior atenuado nas atualizações, indicador operacional sobreposto sem deslocar a altura, aria-busy/status e inert para não clicar/teclar em ações com dados em atualização. Estado anterior não é apagado durante refresh; resumo da carteira aguarda metadados de sugestão para liberar os destinos. Contagem não some em toda atualização. Busca/filtros permanecem operacionais durante atualização de metadados; só links de abertura aguardam destino confirmado. Troca de conta limpa dados pessoais, e materiais são remontados por estudo para não reaproveitar contexto de outro estudo.
+
+Transição curta de opacidade180ms, sem shimmer/pulsação ou atraso artificial de rede; respeita redução de movimento. Tokens Geobrain preservados. Sem alteração de motor/custo/prompt/banco/decisões. TypeScript e lint dirigidos aprovados; compilação local registrada em `.local-inputs/loading-build.log`. Sem nova suíte de testes ou ensaio browser nesta mudança; não reutilizar337 testes da rodada anterior como validação deste lote. Estado preparado para teste humano após push/Publish; observar primeira abertura, agrupamento/paginação, atualização de sugestão e materiais em rede lenta. Sem IA paga, migration ou Edge nova. Outras frentes preservadas.
+
+## 19/10/2026 — Sugestão em blocos e cópia limpa
+
+Feedback Diego/Gabriel: saída com tamanhos inconsistentes e espaço vazio. Referência a901df2 tinha texto único; parser posterior promovia parágrafo inteiro a heading quando título e texto vinham sem linha vazia, além de max-width85ch. Substituído por blocos por título, contexto, corpo uniforme16px e largura útil inteira. Copiar bloco, Copiar tudo e TXT em texto simples removem Markdown sem editar o original persistido. Aplica ao histórico carregado, sem nova geração/migração; resultados sem divisões ficam em um bloco, sem inventar estrutura.
+
+337 testes aprovados/zero falhas/2 ignorados;12 focados; quatro verificações browser com serviços simulados, incluindo clipboard real/TXT, registro bruto inalterado e reabertura sem novas chamadas. Quatro larguras1440/1024/390/320, sem overflow e fonte16px; captura1440 inspecionada. Tipos/lint/build34,27s aprovados. Sem IA paga/banco remoto/Edge/prompt/controle de custo alterados. [Diagnóstico e evidências](design/SAIDA_SUGESTAO_BLOCOS_2026-10-19.md). Estado validado localmente, push autorizado; Publish frontend e conferência em produção pendentes. Limite automático/intervenção técnica mantidos.
+
+## 19/10/2026 — Custos somente no controle interno
+
+Por sugestão de Diego e autorização de Gabriel, removida apresentação de gastos/consumo do percurso dos analistas: preparo/limite editável, confirmações, progresso, avisos, sugestões salvas, cabeçalho/relatório, arquivo antigo, teste de ata e painel financeiro da calibração. Ações continuam explícitas; limite calculado automaticamente pela mesma fórmula anterior. Gasto, tokens, reservas, replays, bloqueios e persistência continuam nos módulos/servidor existentes. Valores do estudo preservados. Mensagens financeiras do processamento recebem orientação operacional no frontend, sem editar registros do servidor.
+
+Evidência: [mapa completo e validação](design/REVISAO_CUSTOS_INTERFACE_2026-10-19.md).331 testes aprovados/zero falhas/2 ignorados; dez passes materiais; seis verificações browser com PPTX real e serviços simulados, zero erros, zero IA real. Teste afirma limite positivo e gasto/tokens mantidos no resultado simulado sem exibição; reabrir não duplica execução. Tipos/lint aprovados; build local. Sem diff em supabase, prompts, preços, execution/db/recommendations. Nenhuma migration/Edge nova/banco remoto. Estado validado localmente, push solicitado; Publish e conferência do site ainda pendentes. Registros de gestão permanecem preservados; não se trata de restringir leitura da API nem de criar novo acesso administrativo.
+
+## 19/10/2026 — Escolha grande na entrada e preparação focada
+
+Direção posterior de Gabriel substitui a entrada unificada de96f19f0: home com dois cards grandes Revisar estudo/Sugestão de análise e estudos salvos agrupados abaixo. Escolher card abre preparação no objetivo indicado; carteira sai da tela e não há repetição de botões pequenos para selecionar novamente. Título identifica o objetivo; voltar aos estudos conserva organização da carteira. Rascunho/material preservados pelo mecanismo existente, sem alterar motor/custo/prompt/decisões. Removida montagem desnecessária do preparador na home. ESLint dos dois componentes aprovado; sem novo teste browser/IA/produção. Estado preparado localmente para aprovação, sem push nesta rodada. Nenhuma migration/Edge. Anotações anteriores preservam o histórico; esta é a composição vigente.
+
+## 19/10/2026 — Preparação do comunicado e remoção de rótulos de release
+
+Gabriel pediu rollout sem número de versão na interface/comunicado. Busca no código local encontrou V1 no link/histórico e v2 na demonstração antiga; rótulos trocados por Análises anteriores/Estudos anteriores/Demonstração. Comentários, tipos, rotas internas e versões dos arquivos preservados para rastreabilidade. Revisão textual estática, sem teste novo ou conferência em produção. Email curto preparado na conversa para A&R, sem envio: interface unificada, Excel opcional antes da avaliação, evidências e histórico, organização/Meus estudos pela conta Geobrain e Sugestão de análise. Publicação/aceite real ainda pendentes: enviar comunicado só depois de confirmar frontend publicado. Nenhuma IA paga, migration, Edge ou mensagem externa. Lote preparado localmente, sem novo push autorizado nesta solicitação.
+
+## 19/10/2026 — Consolidação do fechamento e mudança de entrada
+
+**Estado atual:** código enviado ao Git até `96f19f0`, main/origin0–0 na conferência desta sessão. Publicação e comportamento em produção ainda não verificados. Este registro atualiza os estados anteriores de preparado/sem push; preserva-os como histórico.
+
+**Motivos e decisões:** feedback de Diego levou à comunicação somente Sugestão de análise, login único no menu e simplificação da revisão, preservando avanços do Excel e custo. O teste posterior de Gabriel mostrou login pouco perceptível: `034e3f4` adicionou aviso na carteira e botão de foco no formulário existente. Depois, as duas entradas levavam à mesma preparação e criavam uma passagem redundante: **a decisão vigente substitui os cards separados pela preparação diretamente na entrada**, com estudos salvos abaixo (`96f19f0`). Objetivos Revisar estudo/Sugestão de análise permanecem na preparação, sem outro formulário de acesso. Carteira oferece Recentes/Por cidade/Por mês, grupos/contagens e calendário de recebimento, sem exigir cadastro ou inventar tags.
+
+**Evidências por lote:** `5dbdd85`/`02af50d` retorno de usabilidade:327 testes aprovados/2 ignorados, dez passes materiais e32 verificações browser com serviços simulados; tipos/lint/build. `034e3f4` indicador: revisão de código/documentação, sem teste novo. `96f19f0` entrada/carteira: TypeScript e lint aprovados; sem novo browser/regressão. Não atribuir os32 percursos anteriores à entrada mais recente. Motores, prompts, custos, versões, materiais e decisões preservados; sem IA paga ou banco remoto. Relatório consolidado: `docs/features/corretor-vocacionais/design/RESULTADO_RETORNO_USABILIDADE_ASSISTENTE_2026-10-19.md`.
+
+**Pendências/próximo passo:** Publish frontend no Lovable e conferir entrada unificada, agrupamentos/calendário, aviso de acesso, login real pelo menu, Meus estudos incompletos e ida/volta de estudo. Sem iniciar IA paga nesse aceite. Nenhuma migration ou Edge nova exigida por estes lotes; ponte existente corretor-access segue dependência do acesso autenticado. Planejamento19–23 continua provisório; esta execução foi solicitada por Gabriel e não aprova a ordem integral/novas reservas. Sem horas retroativas, Monday ou atribuições a Lucas/Edgar. Documentação desta consolidação preparada localmente.
+
+## 19/10/2026 — Entrada unificada e estudos agrupados
+
+Gabriel pediu eliminar a passagem redundante pelos dois cards. A carteira agora incorpora a preparação existente (PowerPoint, Excel e objetivo), seguida dos estudos salvos. Organização Recentes/Por cidade/Por mês com grupos visíveis, seletores de grupo/contagens e calendário nativo para data de recebimento. Busca, escopo pessoal/compartilhado, paginação e filtros preservados; retorno ao estudo conserva grupo e data na URL. Preparar com conta atualiza a carteira na mesma página. Cidade ausente/data ausente não são inventadas; tags derivam dos registros existentes. Sem nova taxonomia persistida ou cadastro obrigatório. Reutiliza preparação e pipeline, sem alterar motores/prompts/decisões/custos. Tipos TypeScript e ESLint dirigidos aprovados; sem novo ensaio browser ou regressão de materiais nesta mudança. Não transferir os resultados da rodada anterior para este recorte. Push autorizado; frontend no Lovable e verificação visual em produção pendentes. Sem migration, Edge nova ou IA paga.
+
+## 19/10/2026 — Login pendente vis?vel na carteira
+
+Ajuste solicitado por Gabriel: ao pedir Meus estudos sem autenticação, aviso na própria carteira informa que falta entrar, orienta ao menu esquerdo e oferece Ir ao login no menu (rola/foca o campo existente). Desaparece ao cancelar ou concluir; não cria segundo formulário. Fundação Geobrain, sem barra amarela decorativa; adaptação mobile. Somente apresentação, sem motor/prompt/banco/Edge/IA. Revisão de código, sem testes novos ou verificação em produção nesta alteração. Push autorizado; Publish Lovable e conferência visual continuam pendentes.
+
+## 19/10/2026 — Retorno de usabilidade do Assistente: validado localmente
+
+T0–T7 executados no recorte local: duas entradas diretas, somente Sugestão de análise, autenticação compartilhada no menu, Meus estudos incompletos, Excel antes da análise e retomada contínua, revisão direta e três áreas. Base d3463d7 sincronizada preservando documentos FIERGS/ZIP. 327 testes aprovados/2 ignorados, dez passes materiais, navegador15+9+8 verificações com serviços simulados, tipos/lint/build aprovados. Teste adicional de retomada com fonte preservada aprovado. Motores/prompts/servidor intactos. Sem IA paga, banco remoto, deploy ou push. Login real e produção pendentes; nenhuma migration/Edge nova para este lote. Evidência: docs/features/corretor-vocacionais/design/RESULTADO_RETORNO_USABILIDADE_ASSISTENTE_2026-10-19.md. Próximo: revisar resultado, autorizar push e publicar frontend; retestar acesso real sem processamento pago. Reservas não são horas medidas; não aprova a ordem integral da semana provisória.
+
+## 19/10/2026 — proposta de recuperar entrada direta e autenticação única (PREPARADA)
+
+**Plano detalhado posterior:** [T0–T7 — retorno da usabilidade](design/PLAN_RETORNO_USABILIDADE_ASSISTENTE_2026-10-19.md), com contratos de autenticação/intenções, carteira, rotas legadas, preparação/retomada, regressão e entrega. Gabriel aprovou a direção e pediu somente o título **Sugestão de análise**, sem frase adicional sobre o papel do analista. Prompt, motores e resultados salvos permanecem no escopo de preservação. CTA único preparado, incluindo autorização futura de sincronização; execução, testes e push ainda não realizados.
+
+Após feedback de Diego/Gabriel, recuperada referência `a901df2` de 17/09: duas opções Avaliar erros/Sugestão de Análise e lista abaixo. Comparadas mudanças posteriores de motores, Excel, pré-análise, carteira, cadastro, identidade, bancada, execução/custo e comunicação. Proposta: duas entradas destacadas no System Design SE, apoio ao analista, login somente no menu existente, Meus estudos associado à mesma autenticação, preparo/execução contínuos com Excel, revisão direta e cadastro/histórico secundários. Preservar regras, decisões humanas e dez passes; zero não comprova completude. [Mapa, evidências e U0–U4](design/REVISAO_USABILIDADE_E_PROPOSTA_RETORNO_2026-10-19.md).
+
+Diagnóstico de código: token API e sessão de estudos podem divergir; menu usa o acesso combinado apenas em rotas Corretor, enquanto carteira oferece segundo formulário. Render do menu também pode manter Autenticado com token expirado armazenado. Captura de zero minutos não comprova expiração exata nem a causa da sessão de Diego. Proposta resolve orquestração/apresentação preservando identidade validada no servidor.
+
+Sem mudança de produto, teste, IA ou escrita remota. `bb0f22a` confirmado no histórico remoto; deploy/migration da entrega anterior não verificados novamente. Main local 30 commits atrás de origin (`d3463d7`), sem novo Corretor nesse intervalo; checkout e outras frentes preservados, sem pull sobre árvore suja. Proposta local sem commit/push; implementação e sincronização aguardam autorização conforme protocolo. Esta orientação substitui a direção de carteira como entrada principal somente quando aprovada/implementada; não marca a proposta como RUNTIME.
+
+## Versão 0.74 — 16/10/2026 — recomendação consultiva com custo e histórico
+
+**RUNTIME local; backend preparado, publicação pendente.** Novo estudo compartilha materiais entre Revisar estudo e Gerar recomendação. Arquivos preparados têm preenchimento oliva/check; não significam armazenamento remoto. Aba Recomendação guarda resultado por versão, com reabertura gratuita, cobertura, previsão/limite e uso real; originais e Excel locais por hash preservados.
+
+Prompt Brain preservado. Somente textos/tabelas nativas: Excel/PDF/raster não entram na recomendação. Contrato compartilhado de lotes/bytes/janela e preço versionado; confirmação antes do provedor. `corretor-execution` orquestra/reserva e `analyze-consulting-suggestion` aceita só servidor; replay/memos retomados sem repetir IA, desconhecido retém reserva. Resultado, tokens/cache/custo/latência/modelo/prompt contabilizados atomicamente em execução, `ia_passes` e custo do estudo. Não modifica relatório/achados/decisões ou conclui revisão.
+
+Migration `20261016153609_corretor_recommendation_metrics.sql`, resultados com leitura da biblioteca pública e escrita pelo servidor; contexto intermediário privado. Métricas dos últimos 30 dias integradas à calibração, sem falso zero em erro e sem misturar gasto com acurácia. 320 testes/2 pulados, dez passes reais gratuitos,13 novos controles SQL/Edge e13+9 legados com schema novo, jornadas9+15+8 com serviços simulados; app/Deno/lint/build aprovados. [Plano e relatório](design/RESULTADO_RECOMENDADOR_E_METRICAS_2026-10-16.md).
+
+Zero IA real ou escrita remota. Próximo: revisão/push autorizado, migration e duas funções/frontend no Lovable, disponibilidade do GPT-4o mini (documentação o marca Deprecated) e lote real previamente orçado. Qualidade consultiva/produção não homologadas; demais pendências A2/A3 preservadas.
+
+## Versão 0.73.2 — 16/10/2026 — Meus estudos desde a preparação autenticada
+
+Por orientação de Gabriel, apresentar PowerPoint válido com identidade Geobrain verificada registra o estudo V3 pendente, com autoria da conta, **antes** de exigir cidade, planilhas, cadastro comercial ou confirmação de IA. Selecionar materiais continua sem executar IA; o registro inicial autenticado substitui a regra anterior de só criar estudo ao iniciar avaliação. Visitante continua com preparação local, sem autoria inventada.
+
+Meus estudos inclui registros pendentes/interrompidos e cadastros parciais, sem depender da conclusão. Ao confirmar o início, a mesma preparação autenticada é reutilizada e identidade/hash/versão/ausência de análise completa são reconferidos; não se cria versão adicional nem se repete análise concluída. Dupla abertura de arquivo preserva deduplicação global e decisões. Original continua local por hash, sem promessa de cópia remota automática.
+
+Estado **validado localmente, sem push/IA real**:295 testes/2 pulados, oito verificações de carteira incluindo preparação sem cidade/cadastro/IA e falha simulada de início, quinze controles do percurso anterior; tipos/lint/build aprovados. Sem migration/Edge nova, dez passes da entrega anterior preservados sem alteração de gabaritos ou motores. Evidências no complemento do [resultado da carteira](design/RESULTADO_RASCUNHO_CARTEIRA_2026-10-16.md). Conta real/produção a conferir após publicar frontend.
+
+## Versão 0.73.1 — 16/10/2026 — rascunho consumido e carteira atualizada
+
+Estado **validado localmente, antes de push**. Registro durável/abertura confirmada de duplicata consomem somente o rascunho; planilhas selecionadas conservadas por hash com download em Materiais, prévias/originais existentes preservados. Rascunho antigo já analisado oferece resultado. Descarte explícito tem confirmação; V2 não substitui avaliação V3.
+
+Meus estudos une autoria autenticada e cadastro pertencente à conta, sem reatribuir autoria/permissões. Salvar cadastro/retornar atualiza consultas. Filtro inicial inclui concluídos; vazios distinguem filtro e vínculo ausente. PPTX/Excel têm ícones e superfície clicável; PDF continua prévia complementar. Motores/decisões intactos; nenhuma IA paga, migration ou função nova.
+
+Evidência: [resultado rascunho/carteira](design/RESULTADO_RASCUNHO_CARTEIRA_2026-10-16.md),289 testes/2 pulados, dez passes, jornadas de materiais/carteira com serviços simulados, tipos/lint/build. Produção/conta real a retestar após publicação do frontend. Deploy anterior e análise funcionando foram informados por Lovable/Gabriel, sem verificação independente desta correção.
+
+## Versão 0.73 — 15/10/2026 — preparação contínua e evidência única
+
+Estado **validado localmente, antes de push**. Preparar PPTX/Excel/cidade/custo na mesma página; selecionar arquivo não executa IA nem cria estudo. Criação atômica por hash, rascunho local e confirmação anterior à ata/texto/imagem. Novo registro privado de execução reserva custo por lote, persiste respostas e bloqueia retorno desconhecido; funções pagas passam a chamada interna pelo controlador. Nenhuma migration/Edge ativada nesta sessão.
+
+Bancada e triagem compartilham uma prévia, com texto/decisões abaixo. PDF local por hash/manifesto e confirmação de versão; conversão local real153páginas com ocultos, não serviço automático hospedado. Português em padrões legados/prompt, literal e payload bruto preservados; triagem aguarda salvamento, login cancelado não avança, progresso por itens únicos, sem comando genérico de grupo. Catálogo acessível pela carteira. Ordem interna incompatível é recusada antes da análise, até remapeamento geral dos leitores.
+
+Evidência: [resultado F1–F6](design/RESULTADO_FLUXO_CONTINUO_E_REVISAO_2026-10-15.md),288 testes/2 pulados, dez passes,13 controles SQL e9 Edge/banco local, jornada com PPTX/11Excel/PDF reais e serviços interceptados; build/tipos/lint aprovados. Zero IA real ou alteração remota de decisões. F2/F3/ativação e suíte geral têm limites explícitos no relatório; redução de contadores não foi usada como melhoria.
+
+## 15/10/2026 — revisão do fluxo após uso humano (PLANEJADA)
+Gabriel rejeitou a transição automática após upload, o aviso decorativo amarelo, imagens duplicadas, inglês, achados sem página completa e a triagem estreita. Plano novo `design/PLAN_FLUXO_CONTINUO_E_REVISAO_2026-10-15.md` substitui essas decisões de apresentação. Preparação na mesma página e confirmação de custo antes de toda IA, inclusive ata; visualizador único com texto abaixo; português; catálogo na carteira; retomada persistente. Código de produto não alterado nesta rodada. Simulação local não é aceite do runtime nem conversão automática de PPTX. Preferências de usabilidade e evidências atualizadas, motores/decisões reais preservados.
+
+## Complemento 0.72.2 — aviso persistente pós-pré-análise — 15/10/2026
+Resumo e revisão sem relatório completo exibem “Este estudo ainda não foi avaliado por completo”, com instrução de confirmar cidade/UF e escolha das planilhas antes de Rodar análise; reabertura orienta retomar. Componente compartilhado sem fechar/ocultar. Não altera motores, custo ou decisões. Preparado localmente, sem push/produção.
+
+## Versão 0.72.2 — 15/10/2026 — revisão visível
+Validado localmente: mapa e evidências sempre abertos, preenchimento por confiança em toda a célula, sem placeholder de prévia quando não há conteúdo. Achados sem imagem preservados. Cartões SE, primeira pendência na entrada e continuação explícita. Nenhuma alteração de motores/decisões. Inventário publicado17V3/4 incompletos, somente ata/DET registrados; não iniciada IA paga. Ver `design/REVISAO_VISIVEL_E_PRE_ANALISE_2026-10-15.md`. Retomada durável de execução continua pendente.
+
+## Versão 0.72.1 — 15/10/2026 — interface única
+Estado: validado localmente, publicação ainda a conferir. Removida a landing operacional antiga de Novo estudo e a alternância V1/V2/V3. Carteira canônica preserva Arquivo para estudos anteriores. Envio no design SE com Excel opcional, ligado à pré-análise. Revisão sempre na bancada; parâmetros antigos de lista não reabrem composição legada. Sem mudança em regras/decisões humanas/IA. Ver `design/RETIRADA_LANDING_LEGADA_2026-10-15.md`.
+
+## Versão 0.72 — 2026-10-15 — primeira bancada real e materiais A2/A3 (RUNTIME local / backend preparado)
+
+- **Publicação anterior:**416488d enviado com autorização, fetch0/0; A0/A1 no Git, deploy não presumido. [Continuidade e limites](./design/RESULTADO_CONTINUIDADE_A2_A3_BANCADA_2026-10-15.md).
+- **Interface/fluxo:** login contextual Geobrain para decisões/versões/conclusão e materiais; cancelamento/erro/troca de rota não executam ação. Organização pessoal depende da autoria verificada de novos envios; legado sem autoria inventada. Gates na UI não substituem autorização REST legada: A2 permanece parcial.
+- **Materiais:** migration nova `20261015150739_corretor_materials_workspace.sql`, bucket privado independente do cadastro comercial, originais por versão, conjunto imutável de fontes, ativação transacional e snapshot manual. Não aplicada remotamente. Ingestão visitante controlada, snapshots automáticos e deduplicação global são próximas partes de A2/A3.
+- **Bancada:** PDF complementar real renderizado lazy, uma página por vez, observações ao lado, mapa/zoom/reflow e filtro de confiança existente. Sem prévia há recorte parcial rotulado ou pedido do arquivo. PDF com páginas diferentes do estudo é bloqueado; igualdade de páginas não comprova conteúdo. Não há conversão PPTX automática no servidor.
+- **Evidência:**283 testes/2 condicionais pulados,17 controles SQL isolados,11 Excel reais→15 blocos/conjunto/snapshot em browser com armazenamento simulado; PDF real153páginas e slides23/68/153, erro de ocultos146páginas reproduzido/corrigido. Dez passes offline preservados, build/tipos/lint. [Manifesto](./design/EVIDENCIAS_A2_A3_BANCADA_2026-10-15.json). Zero IA paga/alteração de decisões reais.
+- **Próximo:** revisar lote local, aplicar migration/publicar `corretor-material-preview` e retestar material real com conta no site; concluir autorização servidor nas tabelas legadas antes de homologar A2. A5 novos estados/conclusão e A6 entrega continuam abertos, decisões legadas preservadas.
+
+## Versão 0.71 — 2026-10-15 — carteira, resumo e navegação A0/A1 (RUNTIME local)
+
+- **Fluxo:** carteira compacta abre resumo; áreas Resumo/Revisão/Materiais/Histórico com rotas canônicas e retorno explícito preservando busca/filtro/página. URLs antigas redirecionam sem reabrir estudo após Voltar; novo envio também tem retorno. Revisão legada permanece integrada como transição, não é bancada A4.
+- **Cadastro:** opcional; ausência neutra “Sem cadastro prévio”/completar. Somente campos preenchidos aparecem, cidade desconhecida omitida e tipo de estudo não é inferido por default no cadastro novo. Contrato de originais ainda depende de vínculo autenticado; separar persistência/cadastro é A2/A3.
+- **Resumo/DET:** só leitura de registros atuais, confiança existente (erro/provável/verificar) distinta de gravidade, categorias/slides e cobertura limitada explícita. Falha de leitura gera erro/retry, não zero; `loadFindings` recebe modo estrito opcional, mantendo default das chamadas antigas.
+- **Evidência:** [resultado A0/A1](./design/RESULTADO_A0_A1_INTERFACE_V3_2026-10-15.md),279 testes/2 condicionais pulados, dez passes dos cinco estudos com Excel bruto, browser de snapshots/navegação sem tentativa de escrita/IA e regressão de upload/recuperação sintética. Motores, prompts, decisões e gabaritos preservados. Build/tipos/lint locais.
+- **Estado:** A0 baseline disponível e A1 validados localmente, antes do push; tokens SE idênticos. Paginação ainda cliente/consulta existente, biblioteca pública e escrita autenticada futuras, sem migration. Próximo publicar com autorização e retestar ida/volta no site; A2–A6 planejados.
+
+## Planejamento de assimilação da interface — 2026-10-15 — PLANEJADO
+
+- [Plano A0–A6](./design/PLAN_ASSIMILACAO_INTERFACE_V3_2026-10-15.md) consolida entrevista e conceito Claude: carteira→resumo→bancada, cadastro opcional, biblioteca pública, autoria pelo login Geobrain e escrita de revisões existentes autenticada. Biblioteca pública/compartilhamento organizacional substituem o modelo privado como intenção de produto, ainda não como política aplicada.
+- Materiais/fontes por versão/execução, renderização real, mapa para estudos longos, decisão humana separada de correção confirmada, conclusão atômica e relatório opcional. “Já ajustei” continua provisório e não habilita conclusão. Histórico legado não ganha autoria ou prova de correção por inferência.
+- Primeiro lote proposto A0+A1: navegação e cadastro neutro com carteira/resumo. Sem código, migration, teste ou publicação nesta preparação; motores/regressões preservados. Dependências: Lovable, renderer, schema/políticas e orçamento antes de IA nova. CTA no plano, implementação depende da execução solicitada.
+
+## Versão 0.70.2 — 2026-10-15 — acesso por login GeoBrain sem lista adicional
+
+- **Fluxo/DET:** por decisão de Gabriel, removida exigência de `CORRETOR_ALLOWED_EMAILS` da função `corretor-access`. Qualquer conta com credenciais validadas no GeoBrain pode obter identidade privada no app. Sem credenciais ou login inválido não há emissão de sessão. Não existe liberação anônima.
+- **Arquivos:** proprietário/membros, permissão assinada com validade e políticas privadas preservados. Não muda autenticação das APIs, schema, motores ou decisões humanas. Nenhuma migration nova necessária; secret antigo, se configurado, deixa de ser consultado.
+- **Evidência local:**17 testes focados aprovados (núcleo Edge, cliente de sessão, AuthBlock e materiais): conta fora da antiga lista aceita após login upstream, credenciais ausentes/inválidas não emitem sessão e identidade divergente é rejeitada. Políticas reais não foram retestadas nesta alteração sem schema.
+- **Publicação/aceite:** requer republicar `corretor-access` após sincronizar este código. Registro de deploy Lovable `8ae0338` anterior não prova execução desta mudança. Validar login e isolamento com identidades reais segue pendente; sem IA paga.
+
+## Versão 0.70.1 — 2026-10-15 — identidade e navegação (RUNTIME local / ativação pendente)
+
+- **Fechamento para push autorizado em 15/10:** Gabriel informou migration complementar aplicada; políticas reais não verificadas. Três commits Lovable sincronizados com autorização por fast-forward, sem conflito. Validação final desbloqueada: build/tipagem,276 testes/2 pulados e Chromium local aprovados, recuperação apenas sintética. Registro histórico do bloqueio abaixo preservado. Próximo publicar `corretor-access`/frontend e verificar original real/isolamento. Nenhuma IA paga.
+
+- **Fluxo/DET:** login GeoBrain integrado à sessão privada por `corretor-access`, lista de emails no servidor e permissão assinada/expirável em app_metadata. Migration complementar `20261014213854_corretor_access_claims.sql` preparada, não aplicada. Função ausente preserva login legado com aviso; autorização recusada não tem fallback.
+- **Navegação:** busca/filtro/página/aba/versão na URL; paginação cliente20. Motores/decisões humanas preservados.
+- **Publicação anterior:** `08d70dd`/`eb0faa1` enviados, fetch0/0; migration inicial informada aplicada e tabelas privadas existentes/restritas ao papel público. Deploy do frontend e acesso real de duas identidades não comprovados.
+- **Evidência/limites:** [continuidade](./design/CONTINUIDADE_ACESSO_E_MATERIAIS_2026-10-15.md), 270 testes/2 pulados na suíte registrada, oito testes focados posteriores,12 controles SQL isolados e browser simulado. Repetição final de build/browser bloqueada por falta de créditos do serviço de aprovação; último ajuste de versão na URL passou tipos/lint. Sem IA paga. Continuação sem commit/push.
+- **Próximo:** concluir validação final, ativar função/permissão no Lovable e recuperar original real por hash em outro contexto com isolamento comprovado. Custos em GB/tarifa ainda abertos.
+
+## Versão 0.70 — 2026-10-14 — carteira e contrato de originais (RUNTIME local / backend preparado)
+
+- **Fluxo:** `/corretor` abre carteira; links antigos com `study` continuam revisão, também disponível em `/corretor/analise`. Cadastro progressivo/área do estudo, materiais por versão e histórico limitado aos registros atuais. Sem alteração de motor/prompt/decisões humanas.
+- **Originais:** armazenamento privado proposto com identidade validada, vínculo SHA-1 à versão e SHA-256/tamanho na recuperação. Upload retomável TUS; RPC confirma objeto/vínculo, retry não sobrescreve original. Cache local confirma commit antes de anunciar disponibilidade.
+- **Persistência:** migration aditiva `20261014210853_corretor_projects_originals.sql`, proprietário/membros leitores; nenhum autor legado inferido. Não aplicada no Lovable; ponte entre token GeoBrain e identidade Supabase não está confirmada. Cadastro/recuperação não declarados funcionando em produção.
+- **Evidência/etapas:** [execução D0/D1](./design/EXECUCAO_D0_D1_CARTEIRA_2026-10-14.md): 262 testes/dez passes, dez controles SQL em Postgres isolado, browser com snapshots e transferência de PPTX sintético em novo contexto. Tipos/lint/build locais aprovados. Custo real do print25,32 créditos do projeto inteiro, período/plano/GB desconhecidos; tarifa Lovable por GB não confirmada. Zero IA nova.
+- **Próximo:** integrar identidade/aplicar migration, verificar duas identidades reais e recuperar um original conhecido por hash; depois fontes brutas/snapshots de execução/entrega. Limites de adjudicação das versões anteriores preservados.
+
+## Versão 0.69.1 — 2026-10-14 — agrupamento por acusação e revisão ampliada (RUNTIME local)
+
+- **Texto/DET:** conter a mesma evidência não basta para agrupar. Categorias distintas, palavras citadas diferentes e correções explícitas conflitantes permanecem cartões separados; compatibilidade demonstrada da acusação é exigida. Pares reais CJ23/CJ68 continuam agrupados, sem excluir IDs/decisões humanas. Não pretende interpretar toda linguagem livre.
+- **Revisão:** 134 registros históricos inventariados, 43 com classificação delimitada e 91 sem adjudicação (72 encerrados/19 pendentes). 47 PPTX locais pesquisados por hash/texto/SVG; original Daniele não localizado por essa busca limitada. Três erros reais de unidade confirmados com Excel/IR; transcrições por coluna renda VAP, Curitiba e UsHome congeladas com limites explícitos.
+- **Evidência:** [plano](./PLAN_REVISAO_AMPLIADA_2026-10-14.md), [relatório](./RELATORIO_REVISAO_AMPLIADA_2026-10-14.md), 258 testes/dez passes aprovados, tipos/lint/build locais. Três testes novos reproduziram união indevida antes da correção. Nenhum gabarito dos dez passes alterado.
+- **Estado/etapas:** v0.69 em `6073ba3` enviada ao Git; deploy não confirmado nesta sessão. v0.69.1 validada localmente, antes de push. Alertas humanos/banco/prompt/Edge Functions inalterados, custo novo zero. Próximo: publicação/reteste CJ e adjudicar 19 pendentes/72 históricos; aceite integral aberto.
+
+## Versão 0.69 — 2026-10-14 — fechamento delimitado (RUNTIME local, publicação pendente)
+
+- **Custo/fluxo:** reconferência com imagens a reler exige confirmação de lote/estimativa; cancelar mantém DET gratuito. Modal existente/tokens SE preservados, confirmação não é autorização recorrente.
+- **Texto/DET:** apresentação revalida `iatxt` contra PPTX pareado incluindo SVG/tabelas; ausência vira Verificar, não corrigido. Âncora por palavras completas. Agrupa evidências equivalentes/contidas do mesmo slide/tipo sem decisões humanas, preserva IDs/ocorrências e explicita ação do grupo. Acusações editoriais sem demonstração ficam Verificar.
+- **Visão:** percentual incompatível que fecha em outra coluna é associação suspeita, sem mover valores; limites literais sem leituras concordantes ficam Verificar. Guardas na geração/apresentação dos antigos, sem editar status/payload.
+- **Persistência:** reconciliação/diff preservam vereditos/revisão humana. Nenhuma migração ou prompt alterado.
+- **Evidência:** [plano](./PLAN_FECHAMENTO_V3_2026-10-14.md), [resultado](./RESULTADO_FECHAMENTO_V3_2026-10-14.md), 248 testes, dez replays, sete caches/31 textos, Chromium local com APIs simuladas, tipos/lint/build. Sem IA nova. Teste histórico reconciliado com v0.67 publicada, sem alterar expectativas dos dez passes.
+- **Materiais:** 80 arquivos Drive diretos catalogados; GO132 slides/31 imagens e XLSX testados, zero bloco de fonte reconhecido. Novo para suíte, não vocacional/gabarito validado. Daniele original/OCR amplo/aceite integral continuam abertos.
+
+## Versão 0.68.1 — 2026-10-13 — escopo da reconferência (RUNTIME — verificada em produção em Rolândia)
+
+**Revisão pós-reanálise:** [texto nativo e nove PNG](./REVISAO_POS_REANALISE_2026-10-13.md); quatro FP confirmados (Concorrentes Compactos, dois limites ,01 inventados, percentual 19,2% de coluna errada), dois pares de duplicatas CJ e dois textos legados sem âncora no slide atual. Controles reais preservados: sobreposição de faixas, anos com ponto, Arté, erros textuais literais e soma de renda com divergência real mas OCR errado. Manifesto visual rastreável versionado. Sem mutação de vereditos/IA nova/código; propostas de gate de custo, revalidação textual/deduplicação e âncora de coluna continuam PLANEJADAS. Não declarar todas as somas inseguras ou encerramentos automáticos adjudicados.
+
+**Reanálise autorizada — teto US$ 2:** [CJ/SJC concluídos](./REANALISE_ORCAMENTO_2USD_2026-10-13.md). Três relatórios novos verificados; US$ 1,397146 por tokens + US$ 0,065703 reservados por respostas incompletas, total conservador US$ 1,462849. Nenhuma regra/prompt alterado. 15/16/10 novos IDs, 28/26/13 encerramentos automáticos, sem exclusão do histórico; não são acertos adjudicados. Duplicatas textuais e alerta sem sentido em “Concorrentes Compactos” priorizados para revisão. Gate de confirmação de custo da reconferência permanece PLANEJADO; controle desta rodada externo ao produto.
+
+**Ampliação do reteste — CJ/SJC em 13/10:** [três estudos pareados por hash](./RETESTE_CJ_SJC_2026-10-13.md), fontes brutas iguais ao inventário persistido, cruzamentos no site concluídos sem IA nova: 57/93/74 leituras reaproveitadas; 38/33/22 registros preservados. SJC encerrou dois cruzamentos legados de mesmo slide ao abrir; não foi efeito de nova leitura. Limite novo: reconferência CJ com cache legado iniciou automaticamente fase paga; 43 requisições bloqueadas pela automação, custo zero. **PLANEJADA — confirmação de custo:** DET gratuito deve terminar antes de confirmação explícita de lote pago quando cache exige releitura. Não repetir reconferência de cache legado sem proteção até corrigir esse gate.
+
+**Verificação após publicação no Lovable, 15:44 Brasília:** bundle CorretorV3Page-D46qbc_d e db-RpgUw7Cm contêm a proteção. Reteste real criou v4: 15 achados idênticos antes/depois, quatro controles preservados pendentes, nenhum falso corrigido; 32 imagens em cache, custo novo zero e acumulado US$ 0,2506. [Resultado observável](./RETESTE_SITE_ROLANDIA_2026-10-13.md#verificação-após-publicação-no-lovable--1310-1544-brasília). Caso completo/Daniele/OCR pendentes; não extrapolar este aceite.
+
+**Push autorizado:** `e230070` enviado a origin/main, fetch 0/0. Três consultas posteriores ainda carregam bundle v0.68; proteção nova não identificada no site. Reteste gratuito não iniciado, nenhuma mutação/custo nessas consultas. [Registro de publicação e limite](./RETESTE_SITE_ROLANDIA_2026-10-13.md#push-autorizado-e-conferência-posterior--1310). Próximo: confirmar site atualizado no Lovable e repetir a reconferência para proteger os quatro alertas restaurados.
+
+- **DET — persistência:** reconferência direta só pode resolver identificadores das regras efetivamente executadas (IR nativo/fonte direta quando disponível). Ausência de ata, raios da fonte, revisão sem cobertura, visão ou regra futura no diff não comprova correção. Sem escopo informado, preserva DET existentes.
+- **Reteste real v0.68:** [Rolândia no site](./RETESTE_SITE_ROLANDIA_2026-10-13.md), bundle CorretorV3Page-C4xyNz2S confirma v0.68. PPTX/13 Excel reais, 32 imagens reaproveitadas, nenhuma chamada IA. FP Sociodemografia removido, mas reconferência resolveu indevidamente quatro DET de fases não executadas. Registros restaurados com autorização de Gabriel; correção v0.68.1 local protege esse alcance, 19 testes adicionais/47 focados aprovados. Não repetir a reconferência em produção antes de publicar a proteção.
+- **Limites:** regra tabela/conclusão não é executada na reconferência gratuita; confirmação de presença no bundle não substitui teste do caso Daniele extraído do original. Reanálise completa exige orçamento do passe textual.
+
+## Versão 0.68 — 2026-10-13 — evidências persistidas (frontend publicado confirmado no reteste abaixo)
+
+- **DET — ano:** exige cabeçalho temporal ou série de pelo menos três anos consecutivos distintos; repetição de quantidades não comprova ano. Contexto de coluna preservado tanto em tabela nativa quanto em leitura de imagem.
+- **DET — conclusão:** `narrative-total.ts`, integrado ao pipeline/rechecagem, compara novos domicílios na conclusão ao total municipal do mesmo slide e janela. Leitura confiável, cidade exata e total único obrigatórios; tolerância de uma unidade. Formulação inicial dirigida ao caso Daniele; não cobre prosa arbitrária nem conclusão somente em imagem.
+- **DET — identidade:** fichas de bairro/região/zona/cidade/total não são empreendimentos.
+- **Rastreabilidade:** registro de novos passes textuais usa TEXT_REVIEW_MODEL; não altera histórico nem prompt.
+- **Evidência:** [antes/depois e limitações](./RESULTADO_CORRECOES_EVIDENCIAS_2026-10-13.md), 28 testes, dez passes de regressão e build aprovados, sem IA nova. Seis negativos Salvador e positivo Daniele controlados; validação visual integral desses casos pendente. Cache UsHome com cidade inventada e soma de fatia continuam sem solução comprovada; controle Curitiba preservado. Nenhuma mudança de Edge Function.
+
+## Versão 0.67.1 — 2026-10-13 — baseline e Sociodemografia no checklist (validado localmente)
+
+**Plano de correção preparado — 13/10:** [casos e retestes em evidências persistidas](./PLAN_CORRECOES_EVIDENCIAS_PERSISTIDAS_2026-10-13.md). Ordem: corrigir quantidade confundida com ano; implementar igualdade tabela/conclusão; retestar cidade inferida, total de fatia e identidade de entidade nos registros existentes. Três imagens UsHome/Curitiba inspecionadas; controles positivos preservam divergência 1.197×1.399 e Boulevard. Critérios separam regra, OCR, contexto e registro histórico; Salvador/caso Daniele sem print local têm aceite visual pendente. Plano PLANEJADO, sem mudança de regra/prompt ou deploy nesta preparação.
+
+**Auditoria de resultados/persistência — 13/10:** [balanço por análise](./REVISAO_RESULTADOS_E_PERSISTENCIA_2026-10-13.md). Banco V3: 14 estudos, 269 achados, 71 marcados FP e nenhum `verdict=bug`; status Corrigido pode vir de reconciliação automática, não comprova edição do arquivo. Salvador revelou seis FP da regra de ano com ponto (quantidades confundidas com anos), e SP/Salvador têm Excel inventariado sem blocos reconhecidos. O app preserva achados, fonte derivada e evidências parciais; PPTX integral fica no cofre local do navegador. Caso Daniele: total municipal 56.808 × conclusão 17.566; igualdade tabela × conclusão registrada como cobertura **PLANEJADA**, sem alteração do motor nesta auditoria.
+
+**Automação de validação — 13/10:** [rodada de materiais](./AUTOMACAO_TESTES_CORRETOR.md), cinco decks e dez passes offline (fonte congelada + Excel bruto), comparação integral de achados/cobertura e consulta Playwright de resultados salvos. Fixtures/expectativas versionadas, hashes verificados, relatórios por execução e catálogo de materiais não testados. Sem alterar regras do produto nem acionar IA nova. `pass` significa regressão preservada, não homologação humana; Toledo indisponível na lista V3 e PATCH de reconciliação automática bloqueados pelo teste em SJC deixam o navegador parcial. As falhas de fetch decorrem desses bloqueios; nenhuma mutação ocorreu.
+
+Fonte: [baseline e handoff](./BASELINE_2026-10-13_ROLANDIA.md). Commit C/D anterior: `35c0656`, confirmado em origin/main; bundle público contém C/D. A nota histórica “local” da v0.67 abaixo não descreve mais a sincronização Git atual. Revisão atual das Edge Functions permanece não identificada.
+
+- **DET — checklist:** conteúdo `SOCIO` com população, domicílios, renda ou moradores comprova Sociodemografia sem exigir título literal do capítulo. Sumários e menções em outras seções não bastam. Corrige FP visto no estudo real de Rolândia.
+- **Evidência:** replay com PPTX e 13 Excel brutos, sem IA nova: 11 cartões; somente seções 04/05 no alerta dinâmico; outros dez achados idênticos. Quatro replays adicionais preservam linhas anteriores; 21 testes focados, tipos, lint e build aprovados.
+- **Produção observada, sem reprocessamento:** estudo Rolândia de 02/10 possui os dois achados textuais esperados em E10, 15 registros/13 cartões revisáveis e 29/30 tabelas conferidas. Seu checklist ainda traz o FP corrigido localmente. Não declarar v0.67.1 publicada até reteste após publicação.
+
+## Versão 0.67 — 2026-10-01 — revisão textual, confirmação literal e checklist estrutural (RUNTIME local)
+
+Plano e resultados: [PLAN_v067_rolandia.md](./PLAN_v067_rolandia.md). Alterações locais ainda não publicadas.
+
+- **IA/LLM — E10, pendente de deploy:** o passe textual usa `gpt-4o`, independente do modelo de visão; a estimativa considera o modelo textual. O prompt solicita concordância verbal/nominal e erro em nome próprio somente quando identificável pelo contexto. Evidência continua literal e validada no cliente. `analyze-text-batch` precisa de deploy e teste real no site.
+- **Visão — E11:** símbolo duplicado (`//`, `%%`) só é apontado quando duas leituras concordam na anomalia e posição. Uma leitura isolada não basta. Cache atualizado para schema 10.
+- **DET — E12:** sumários consecutivos são inspecionados para seções sem conteúdo; slides finais vazios ficam como “a conferir”. Replay Rolândia: 3 seções sem conteúdo e slide final a conferir; aceite visual permanece pendente.
+- **DET — E7–E9:** texto SVG preservado em campo separado; divergências equivalentes agrupadas mantendo slides e procedência; formatos literais incluem ano com separador indevido e limite superior `,01` quando confirmado pelo texto.
+
+**Validação local:** cinco estudos reexecutados com leituras em fixture; suíte focada 45/45 e build aprovados. Isso não valida a revisão textual ao vivo: não houve deploy nem chamadas de IA.
+
+## Versão 0.66 — 2026-09-30 — rodada de Toledo: texto, faixa omitida, raios, lacunas e resumo de acertos (RUNTIME local)
+
+Plano e resultado medido: [PLAN_v066_toledo.md](./PLAN_v066_toledo.md).
+
+- **Revisão de texto (crítico):** o prompt de `analyze-text-batch` nunca incluía o texto dos slides (desde 09/jul); o modelo revisava só as instruções. Agora inclui título, texto e tabelas de cada slide. **Requer deploy da Edge Function.**
+- **Faixa omitida** (`omittedBand`): todas as colunas abaixo do total na mesma proporção vira Provável mesmo com leituras discordantes e não entra no aviso agrupado (Toledo s30: −8,4% em todas as colunas).
+- **Raios:** tempo com distância até ponto de interesse (“2 min 950 m”, “1,8 km | 5 min”) não conta como raio do estudo (Toledo s14).
+- **Totais de lacunas:** além do consenso, um par basta quando só um slide tem a nota de exclusão e a diferença tem forma de exclusão (sem nota = maior, ≤ 20%).
+- **Resumo “O que bateu”:** bloco no topo da lista com tabelas-imagem que fecham, tabelas nativas conferidas, valores iguais às planilhas e cruzamentos que batem; contagens gravadas no snapshot (`relatorio.fonte`, `relatorio.cruzamentos`) e atualizadas quando as planilhas entram depois da análise.
+
+**Verificação:** 188 testes verdes (incl. `toledo-v066.test.ts`), `tsc`, lint e build ok; replay de Toledo, CJ e SJC (tabela no plano); captura local do bloco de acertos no Toledo.
+
+## Versão 0.65 — 2026-09-30 — cabeçalho enxuto, filtros claros, estimativa com releitura, sem barra lateral (RUNTIME local)
+
+**Fonte:** revisão do Gabriel sobre a v0.64 (capturas do estudo de João Pessoa).
+
+- **Cabeçalho:** a faixa de 6 passos, a caixa âmbar e os contadores deram lugar a UMA linha de estado. Na pré-análise ela só aponta para o cartão (sem o botão duplicado “Confirmar cidade e analisar”); com análise pendente e cartão fechado, traz o único botão “Continuar para a pré-análise”; depois da análise diz “Análise completa · N para revisar · M bloqueiam a entrega · sem planilhas” e “o que foi conferido” num tooltip. Planilhas deixaram de ser etapa com alerta antes da decisão.
+- **Filtros:** as abas Completude/Problemas/Por slide viraram um filtro de nível com contagem (Todos · Erros · Prováveis · Verificar) e a organização da lista (Por slide · Por tipo de problema); estrutura e cobertura ficam no topo da lista; nenhuma lista aparece enquanto a análise não roda.
+- **Fim da análise:** nova etapa “Gravando resultados” no banner e aviso “Os alertas aparecem aqui quando a análise terminar” — antes o banner mostrava tudo concluído e a lista ficava vazia por alguns segundos.
+- **Estimativa:** passa a incluir a releitura no gpt-4o de 17% das imagens novas (medido: 60 de 359 leituras); o cartão diz quantas imagens já foram lidas antes e não são cobradas. O R$ 0,03 do teste era correto (138 de 138 imagens em cache, só texto), mas não era explicado.
+- **Visual:** removida a barra lateral colorida dos cartões (achados, grupos, regras, V1); borda neutra e nível só no selo; ícone ⚠ repetido saiu.
+
+**Verificação:** 182 testes verdes, `tsc` do Corretor, lint e build ok; capturas locais de João Pessoa (por slide e por tipo) e de Tijucas (pendente).
+
+## Versão 0.64 — 2026-09-30 — um único upload, pré-análise e planilhas depois (RUNTIME local)
+
+**Fonte:** pedido do Gabriel após o teste de João Pessoa: subir o estudo uma vez, pré-avaliar (cidade,
+outras cidades, planilhas, perfil de imagens) e poder incluir as planilhas depois da análise.
+
+- **Cofre local do PPTX** (`pptx-store.ts`, IndexedDB por sha1, 8 estudos mais recentes): o arquivo não vai ao servidor; retomar a análise e vincular planilhas depois usam o cofre. Em outro navegador a interface pede o arquivo uma vez.
+- **Pré-análise** (`PreAnalysisCard`, substitui o portão): cidade/UF sugeridas; outras cidades citadas com UF no texto (`otherCities`) para confirmar — as confirmadas vão para a regra de contexto (`expected.outras`, lembradas no navegador); **decisão obrigatória sobre planilhas** (vincular agora / não tem / vincular depois); perfil de imagens (`imageProfile`: tabelas nativas, tabelas em imagem, mapas/fotos, ilegíveis) com aviso de que tabela colada como imagem pode gerar alerta falso.
+- **Planilhas depois da análise:** o cruzamento com a fonte (DET e visão) roda sobre as leituras do `vision_cache` (`loadVisionReadings` + `replayVisionPass`), sem IA e sem custo.
+
+**Verificação:** 182 testes verdes (incl. `pre-analise.test.tsx`, que renderiza o cartão), `tsc` do Corretor, lint e build ok. **Não verificado:** o fluxo completo no navegador com upload real (cria estudo e cobra a ata).
+
+## Versão 0.63 — 2026-09-30 — análise resiliente e persistência reconciliada (RUNTIME local)
+
+**Fonte:** rodada de João Pessoa (30/set): erro de edge na imagem 114 de 148 (limite de 30 chamadas/min por IP), 28 somas soltas e 7 alertas de cidade.
+
+- **Visão resiliente:** nova tentativa com espera (2–16 s) em 429/5xx; imagem que falha vira “não lida” no aviso de cobertura em vez de derrubar a análise; `VISION_CONCURRENCY` 5 → 3.
+- **Persistência reconciliada:** os achados de visão só são gravados depois da reconciliação do deck (antes eram gravados brutos na etapa “visão” e a reconciliação da v0.61 não valia no site); ao fim da análise, achados de visão pendentes fora do conjunto final são encerrados.
+- **Pausa** não grava mais o snapshot: o estudo continua “análise pendente”.
+- **Contexto errado (visão):** cidade da mesma UF não é acusada; cidades confirmadas pelo analista também não; cidade única só com âncora no texto transcrito; duas ou mais de outra UF bastam (mapa copiado); um achado por imagem. Caso real: s135 de João Pessoa (Novo Hamburgo, São Leopoldo, Esteio — RS) mantido; s73 (Cabedelo, “São Paulo” inexistente) descartado.
+
+**Diagnóstico registrado:** o custo de R$ 0,10 não inclui a 1ª tentativa (o gasto só era registrado ao fim da análise); o passe de texto parou após 1 de 13 lotes (o laço só é interrompido pelo botão Pausar). Documento de interface: `UX_REVISAO_corretor_2026-09-30.md`.
+
+## Versão 0.62 — 2026-09-30 — fluxo explícito: análise pendente, portão persistente, passos (RUNTIME local)
+
+**Fonte:** estudo de João Pessoa (Ana, 30/set). O painel mostrava “0 erros · 0 prováveis”, barra verde e
+“Entregar” liberado, mas só a triagem inicial tinha rodado: a ata não trouxe a cidade, o portão pedia a
+cidade num campo vazio e a análise paga nunca foi disparada. Na lista, outros dois estudos do dia
+(Francisco Beltrão e Tijucas) estavam no mesmo estado.
+
+- **Estado persistido:** `analysisPending(study)` = geração V3, não entregue e sem `relatorio` (snapshot da fase 2). Enquanto pendente, os contadores e a barra dão lugar à faixa “Análise completa pendente”, “Triar” some e “Entregar” fica bloqueado (também no handler).
+- **Retomada:** o PPTX não fica no servidor; “Selecionar o PPTX e analisar” reabre o portão com o MESMO arquivo (sha1 conferido contra a versão registrada). Arquivo diferente é recusado e orientado para “Reconferir”.
+- **Cidade sugerida:** `city-suggestion.ts` lê “Cidade - UF” do nome do arquivo (maior casamento contra os municípios da UF) ou da capa; o portão chega preenchido e diz de onde veio.
+- **Portão:** título “Falta um passo”, explica que os contadores ainda não valem, avisa quando não há planilhas e permite vinculá-las ali; as planilhas vinculadas no portão entram na fase 2 (inclusive o cruzamento DET com a fonte).
+- **Passos numerados** (Planilhas › Apresentação › Cidade › Análise completa › Revisão › Entrega) e **linha de cobertura** (texto, tabelas nativas, imagens, planilhas) após a análise.
+- **Limpeza:** “Vincular fonte” (fonte.json) virou “Vincular planilhas” (.xlsx/.xlsm, json por compatibilidade); o painel “Ata do projeto (β — teste de extração)” só aparece com `?debug`.
+- **Lista de estudos:** “Análise pendente · só a triagem inicial rodou” no lugar de “Revisar e entregar”.
+
+**Verificação:** 175 testes verdes (170 → 175, `fluxo-analise.test.ts`), `tsc`, lint e `vite build` ok; captura local (Playwright) do estudo de João Pessoa e da lista confirmou faixa, passos, “Entregar” desativado e painel de teste oculto. **Não verificado:** o clique de retomada com o PPTX real e a fase 2 completa pela interface — escrevem no estudo da Ana e têm custo; ficam para o teste manual.
+
+## Versão 0.61 — 2026-09-30 — reconciliação no nível do deck (RUNTIME local)
+
+**Fonte:** triagem manual de Campos do Jordão (38 achados: 6 válidos, 22 FP, 10 avisos de totais não
+conferidos, 5 erros reais não apontados). Medido por **replay sem custo** sobre as leituras cacheadas
+(`__tests__/replay-real.test.ts`, roda só com `CORRETOR_REPLAY_PPTX`), e conferido contra o SJC para
+evitar sobreajuste.
+
+| Estudo | Antes | Depois | FP restantes |
+|---|---|---|---|
+| Campos do Jordão | 38 (22 FP) | 9 | 0 |
+| SJC VAP | 33 | 6 | 0 |
+| SJC v2 | 22 | 8 (7 + 1 aviso de cobertura) | 0 |
+
+### Regras novas ou alteradas
+
+- **Replay puro:** `analyzeVisionPayload`, `replayVisionPass` e `combineVisionFindings` extraídos; o site e o replay rodam o mesmo código.
+- **Costura de fatias por coluna:** tabelas vizinhas com os mesmos rótulos de linha (≥3, não tipologias, sem título de bloco) viram uma tabela larga. Achado de soma em tabela costurada sem releitura fica em “Verificar”.
+- **Faixas:** “Abaixo de X” é faixa aberta; faixa repetida (Absoluto/%) é removida antes da regra de cortes cumulativos; rótulo “Faixa | Absoluto” exibe só a faixa.
+- **Totais compactos alinhados pelo valor** (soma a até 20% ou total dentro do intervalo); acusação vale no máximo “Provável”.
+- **Leitura incompleta:** coluna que falha com célula vazia em linha com outros valores vai para “Verificar”.
+- **Mescla repetida:** só conta uma vez quando a sub-linha tem outra contagem própria diferente (32 unidades em cada tipologia continuam somando).
+- **Deck (`deck-reconcile.ts`):** erro de digitação some se o rótulo aparece escrito certo em outra tabela; furo de faixa some se outra tabela tem a faixa que faltou; o mesmo problema de faixa em vários slides vira um achado; somas de leitura insegura viram UM aviso de cobertura (somas explicadas por nota de exclusão continuam individuais).
+- **Totais entre lacunas (`TOTALS_EQUALITY`):** só dentro do mesmo recorte declarado no slide (“ZI total”, “Compactos”, cidade), total confirmado por uma margem, e por consenso (dois slides concordando contra um). Cita a falta de nota de exclusão quando é o caso. Sem consenso, o total entra como contexto no achado de faixas.
+- **Texto:** a evidência citada pela IA de texto tem de existir no slide; Z.I. não atravessa “)”.
+- **Formato:** “//” repetido em 3+ células é artefato de transcrição; rótulo embaralhado (várias faixas grudadas) não passa pela regra de digitação.
+- **Imagens não lidas:** um aviso único com a lista de slides.
+
+**Limites conhecidos (Campos do Jordão):** “R$ 7.716,00,00” (s37) e “42%” sem casa decimal (s87) não são pegos — a leitura cacheada normalizou o rótulo e entregou o % como número. Os totais 462 × 447 (s86) aparecem como contexto no achado de faixas s86×s88, não como achado próprio, porque só uma outra leitura confirma o 447.
+
+**Verificação:** 170 testes verdes (157 → 170), `tsc`, lint e `vite build` ok. Sem mudança de prompt: **não requer deploy** da Edge Function.
+
+## Versão 0.60 — 2026-09-29 — correções da 2ª rodada do SJC (RUNTIME local)
+
+**Fonte:** reanálise pós-deploy da v0.59 (SJC v2 e VAP). O nível “Erro” ficou confiável (4 de 5 reais),
+mas o prompt de blocos fez a visão cortar tabelas por coluna e repetir células mescladas (perdeu o
+erro real do s60 e criou somas 77+77+77), e o nível “Provável” ganhou ruído. Regras gerais, testadas
+com dados sintéticos (`precisao-generica.test.ts`) para não sobreajustar ao SJC.
+
+- **Prompt:** blocos só quando empilhados na vertical; nunca dividir tabela por colunas; célula mesclada em coluna de quantidade só na 1ª sub-linha (null nas demais). `CACHE_SCHEMA` 9. **Requer deploy da Edge Function.**
+- **Soma:** mesmo rótulo + mesmo valor em linhas seguidas conta uma vez (proteção se a visão repetir a mescla).
+- **Concordância para todos os achados de visão:** `%↔absoluto`, faixas e plausibilidade só são “Erro” com releitura concordante; `%↔absoluto` discordante vai para “Verificar”.
+- **`anomalias_formato`:** só vira achado quando regra fixa confirma (decimal sem % ou símbolo duplicado).
+- **Faixas:** palavra de abertura com erro de digitação é lida pela palavra-chave mais próxima (não desalinha a régua); rótulos quase idênticos com o mesmo número (“3 Dormatórios” × “3 Dormitórios”) não são divergência; mesmo furo em blocos da mesma imagem vira um achado.
+- **Domicílios entre tabelas:** tabela com vários recortes lado a lado não é comparada; o achado cita os dois totais.
+
+**Verificação:** 157 testes verdes (149 → 157), `tsc` e lint limpos, `vite build` ok. **Não verificado:** efeito do prompt com a Edge Function publicada — próximo teste em estudo novo (Campos do Jordão), sem retestar o SJC.
+
+## Versão 0.59 — 2026-09-29 — precisão dos achados após triagem do SJC (RUNTIME local)
+
+**Fonte:** triagem manual das duas rodadas de São José dos Campos (v2 31/jul e VAP 03/ago, 29/set),
+conferindo cada achado contra a imagem do slide e as planilhas. Na VAP, 3 de 15 alertas eram reais;
+3 erros reais não foram apontados. Fixture: `__tests__/fixtures/sjc-vision-readings.json`.
+
+### Falsos positivos removidos (DET)
+
+- **Arredondamento:** percentual da fonte comparado na precisão EXIBIDA (28,85% aceita 28,9% e 29%). `toFixed` foi removido: 0,2885×100 = 28,8499… virava 28,8 (FP s33/s34).
+- **Soma por linha:** linha de taxa/percentual (valores fracionários ≤ 100) e linha cujo total cai entre os valores (média) não são conferidas como soma (FP s76/s82 “Dispon. S/O.L.”).
+- **Tabela nativa de indicadores:** “Total de …” só é linha de total quando é a última linha; “Total”/“Total geral” valem em qualquer posição (FP s127).
+- **Faixas entre lacunas:** títulos de bloco (Oferta Lançada/Final, Dispon., Total) e tipologias repetidas saem da comparação (3 FPs s76×s80, s81×s76, s81×s80).
+
+### Leitura por imagem (IA_visao)
+
+- **“Erro” exige leituras concordantes:** quando mini e 4o falham na soma, o achado só é nível 1 se as duas leituras tiverem a mesma assinatura de divergência; senão vai para “Verificar” dizendo que as leituras discordam. Guardado em `vision_cache.payload.releitura` (`CACHE_SCHEMA` 8: imagens serão relidas uma vez).
+- **Coerência das margens:** se a própria leitura não fecha (soma dos totais de linha ≠ soma dos de coluna ≠ total geral), o achado desce para “Verificar” com a explicação (s80/s81/s82).
+- **Prompt (`analyze-table-image`):** tabela empilhada em blocos vira uma tabela por bloco; célula mesclada e sub-linhas são repetidas; barras coloridas ignoradas; rótulos transcritos literalmente (com erros); novo campo `anomalias_formato`. **Requer deploy da Edge Function.**
+- **BMP:** imagens BMP (colar do Excel) passam a ser convertidas para PNG no navegador. Na v2 do SJC eram 39 tabelas descartadas em silêncio.
+
+### Novas regras (erros reais que passavam)
+
+- `IMAGE_NOT_READ` (DET, Verificar): imagem com cara de tabela em seção numérica que não foi lida (formato não suportado ou conversão falhou), com arquivo e motivo.
+- `BINNING_RULE` nas **linhas** e faixa aberta fora do fim: «Acima de R$ 8.000» antes de «De 9.001 a 10.000» (s82). Rótulos com unidade colada (“9.001/m²”) passam a ser lidos como faixa.
+- `FORMAT_MISMATCH` (Provável): decimal sem % entre percentuais (“0,076” = 7,6%) e casas decimais divergentes (“13%” entre “11,9%”), pelas strings transcritas e pelo campo da visão (s81).
+- `SPELLING` em rótulo de faixa: palavra inicial a uma edição de Até/Acima/Abaixo (“Arté 35 m²”, s76/s80).
+
+### Mensagens explícitas
+
+- Unidade trocada: “O número 75.298.796 está correto, mas o slide o rotula como habitantes (hab.); na planilha ele é de domicílios (dom.)”.
+- Soma: a conta aparece (“44 + 112 + 236 = 392 … diferença de 48”); todas as colunas abaixo na mesma proporção viram “provável linha ou faixa omitida” (s28).
+- Verticalização e oferta: valor do slide, da planilha, arredondado na precisão do slide e diferença em p.p.
+
+**Arquivos:** `audit/engine.ts`, `audit/ir-rules.ts`, `audit/model.ts`, `error-catalog.ts`, `v3/source-crosscheck.ts`, `v3/ia-vision.ts`, `v3/cross-table.ts`, `v3/table-images.ts`, `v3/pptx-media.ts`, `v3/pipeline.ts`, `v3/confidence.ts`, `v3/format-checks.ts` (novo), `supabase/functions/analyze-table-image/index.ts`, testes `sjc-real.test.ts` e `source-crosscheck.test.ts`.
+
+**Verificação:** 149 testes do Corretor verdes (133 → 149), lint sem erros, `vite build` ok; `tsc` acusa só o erro pré-existente de `generation` em `db.ts`. Varredura headless dos PPTX reais: v2 detecta 39 BMP antes invisíveis, VAP sem perdas. **Não verificado:** conversão BMP→PNG no navegador, efeito do prompt novo e as leituras concordantes com a Edge Function publicada — exigem deploy e nova rodada do SJC.
+
+## Versão 0.58 — 2026-09-28 — V1 integrada ao seletor de gerações (RUNTIME local)
+
+O arquivo legado deixou de ocupar um expansor isolado abaixo da lista principal. A landing agora
+apresenta as três gerações no mesmo seletor: `V3 · Atual`, `V2 · Testes anteriores` e
+`V1 · Legado`. A V1 continua estritamente somente leitura e seus registros só são carregados quando
+a aba correspondente é selecionada.
+
+**Arquivos:** `CorretorV3Page.tsx` e `LegacyV1Panel.tsx`.
+
+## Versão 0.57 — 2026-09-27 — gerações V1/V2/V3 e ingestão dos Excel brutos (RUNTIME local)
+
+### Organização do histórico
+
+- **V1 · Legado:** permanece no painel próprio do fluxo anterior.
+- **V2 · Testes anteriores:** os estudos já existentes em `studies_v3` recebem `generation = v2` pela migration.
+- **V3 · Atual:** todo novo estudo criado no fluxo vigente recebe `generation = v3`; a landing alterna entre V3 e V2 sem misturar a fila operacional atual com os aproximadamente 30 ensaios históricos.
+
+`generation` identifica a geração do produto, e não a versão do arquivo PPTX. As versões sucessivas de um mesmo estudo continuam em `study_versions`.
+
+### Planilhas-fonte
+
+O fluxo V3 aceita seleção múltipla de `.xlsx`/`.xlsm` antes do PPTX. A extração acontece no navegador e gera internamente o contrato `fonte_version: 2`; os Excel brutos não são enviados nem persistidos. O banco recebe somente o JSON derivado, com inventário, hash, procedência por arquivo/aba/linha, blocos reconhecidos e avisos explícitos.
+
+Cobertura runtime desta primeira etapa: oferta por padrão/ano/tipologia, sociodemografia e população/domicílios. Absorção é reconhecida e marcada como `cobertura_parcial`; revenda, locação, lazer, anúncios e demais arquivos permanecem inventariados sem serem usados como verdade numérica. O upload manual de `fonte.json` continua disponível apenas como compatibilidade técnica.
+
+**Arquivos:** `src/features/corretor/lib/v3/fonte-extractor-browser.ts`, `fonte.ts`, `source-crosscheck.ts`, `db.ts`, `CorretorV3Page.tsx`, `supabase/migrations/20260927100000_corretor_generations.sql` e `fonte-extractor-browser.test.ts`.
+
+**Verificação:** 133 testes do Corretor aprovados e build de produção aprovado. O smoke test real de Rolândia depende de aplicar a migration de gerações no ambiente publicado e selecionar o PPTX final com as planilhas originais, que não estão versionadas no workspace.
+
 ## Versão 0.56 — 2026-09-17 — identidade Brain no carregamento (RUNTIME local)
 
 O indicador circular de carregamento da área de upload do Corretor foi substituído pela logo Brain pulsante, seguindo o padrão visual de operações longas da plataforma. As mensagens, a barra de progresso dos lotes e a prevenção de reenvio permanecem inalteradas.
@@ -107,7 +598,51 @@ o escopo errado em silêncio.
 **Verificação:** tsc limpo, **131 testes verdes** (117 → 131; 14 de `fonte-real.test.ts` sobre os 3
 pacotes), lint limpo, build ok. Sem migration e sem deploy — nada disso está em runtime ainda.
 
-**Próximo passo:** o `SOURCE_CROSSCHECK` em si, casando `fonte.json` × IR/visão do deck.
+## Versão 0.53 — 2026-09-24 — `SOURCE_CROSSCHECK` no motor e na interface (BETA)
+
+O Corretor agora aceita um `fonte.json` opcional antes da primeira avaliação ou antes de uma
+reconferência. O arquivo passa por validação de schema na fronteira; fonte inválida nunca entra no
+motor como verdade. A camada determinística compara somente métricas com mapeamento semântico
+explícito e se abstém quando o recorte é ausente ou ambíguo.
+
+Primeira cobertura comprovada contra o estudo real de Rolândia: índice de verticalização por recorte,
+séries de população/domicílios e unidade publicada. O motor recupera as duas ocorrências de
+5,7% × 5,16%, o total do PR 4.216.017 × 4.216.107 e o total brasileiro de domicílios rotulado
+incorretamente como habitantes, preservando os valores corretos. Cada achado cita arquivo, aba e
+linha da planilha-fonte. Na reconferência, um achado de fonte só pode ser resolvido quando a fonte é
+anexada novamente; sem ela, permanece aberto em vez de virar falso corrigido.
+
+A fase de visão também cruza oferta por padrão, ano e tipologia quando consegue identificar
+simultaneamente o título, um único recorte, a categoria e as colunas de oferta lançada/atual. O
+resultado conserva a imagem como evidência e recebe confiança 2 porque depende de OCR; qualquer
+ambiguidade faz o motor se abster.
+
+A fonte validada é persistida separadamente em `study_sources_v3` e carregada somente ao abrir o
+estudo, evitando aumentar a resposta da listagem geral. A migration
+`20260924170000_corretor_v3_sources.sql` foi aplicada por Gabriel em 24/09/2026. A interface ainda
+mantém a degradação segura: se a persistência estiver indisponível em outro ambiente, conserva a
+fonte na sessão e segue a análise, exibindo um aviso em vez de interromper o estudo.
+
+**Arquivos:** `lib/v3/fonte.ts`, `lib/v3/source-crosscheck.ts`, `lib/v3/pipeline.ts`,
+`pages/CorretorV3Page.tsx`, `lib/v3/__tests__/source-crosscheck.test.ts`.
+
+**Próxima expansão:** absorção; depois revenda, locação, lazer e anúncios, que ainda não são extraídos. A extração automática dos Excel brutos no
+ambiente publicado continua separada da validação do comparador.
+
+## Versão 0.54 — 2026-09-24 — Landing operacional do Assistente de Projetos
+
+A entrada do Corretor deixa de apresentar uma grade extensa de cards equivalentes e passa a organizar
+o trabalho como painel operacional. O topo resume estudos em correção, prontos, pendências abertas e
+custo acumulado de IA. As ações `Avaliar novo estudo` e `Gerar sugestão de análise` têm hierarquia
+visual própria e preservam os fluxos anteriores.
+
+Os estudos aparecem em lista compacta, com abas Em correção/Prontos/Todos, busca por nome ou cidade
+e ordenação por data, pendências, nome ou custo. Cada linha mostra cidade, versão, número de slides,
+situação, data e custo; estudos ativos com zero pendências são explicitamente apresentados como
+`Revisar e entregar`. A composição possui estados responsivos e estado vazio de busca.
+
+**Verificação:** 131 testes do Corretor aprovados, lint direcionado sem erros e build de produção
+aprovado. Nenhuma migration adicional.
 
 ## Versão 0.51 — 2026-08-12 — Alinhamento da linha de totais e agrupamento tolerante de fatias (RUNTIME)
 

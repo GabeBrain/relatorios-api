@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import type { PanoramaReportModel } from './types';
+import type { ReportPageDefinition } from './report/manifest';
 
 /**
  * Estado do export do Panorama fora da árvore da rota: a rasterização das lâminas pode levar alguns minutos e
@@ -8,10 +9,15 @@ import type { PanoramaReportModel } from './types';
  */
 export type PanoramaExportStatus = 'idle' | 'preparing' | 'capturing' | 'assembling' | 'done' | 'error';
 export type PanoramaExportFormat = 'pdf' | 'pptx';
+export type PanoramaPptxMode = 'mirror' | 'editable';
 
 export interface PanoramaExportResult { url: string; name: string; pages: number }
 
 interface PanoramaExportState {
+  pptxMode: PanoramaPptxMode;
+  manifest: ReportPageDefinition[] | null;
+  startedAt: number | null;
+  consistencyAcknowledged: boolean;
   status: PanoramaExportStatus;
   progress: number;
   total: number;
@@ -22,7 +28,7 @@ interface PanoramaExportState {
   result: PanoramaExportResult | null;
   controller: AbortController | null;
 
-  start: (report: PanoramaReportModel, format: PanoramaExportFormat) => void;
+  start: (report: PanoramaReportModel, format: PanoramaExportFormat, options?: { consistencyAcknowledged?: boolean; pptxMode?: PanoramaPptxMode; manifest?: readonly ReportPageDefinition[] }) => void;
   markCapturing: (total: number) => void;
   reportProgress: (current: number, total: number) => void;
   markAssembling: () => void;
@@ -34,7 +40,28 @@ interface PanoramaExportState {
 
 const isRunning = (status: PanoramaExportStatus) => status === 'preparing' || status === 'capturing' || status === 'assembling';
 
+/** Decisão única usada pela interface, pelo estado e pelo host imediatamente antes da captura. */
+export function panoramaExportBlockReason(report: Pick<PanoramaReportModel, 'scope' | 'reconciliation' | 'provenance'>, options: { consistencyAcknowledged?: boolean } = {}): string | null {
+  if (!report.provenance) return 'Exportação bloqueada: a proveniência de cobertura municipal não está disponível.';
+  const requested = new Set([...report.provenance.requestedCities, ...report.scope.cities]);
+  const completed = new Set(report.provenance.completedCities);
+  const missing = [...requested].filter((city) => !completed.has(city));
+  if (missing.length || report.provenance.failedCities.length) {
+    return `Exportação bloqueada: coleta incompleta para ${missing.join(', ') || report.provenance.failedCities.map(({ city }) => city).join(', ')}.`;
+  }
+  // User-directed export policy: numeric checks stay intact; a reviewed alert permits this job.
+  // Coverage/provenance are checked above and cannot be bypassed by this acknowledgement.
+  if (report.scope.entity !== 'fiergs-rs' || options.consistencyAcknowledged) return null;
+  const critical = report.reconciliation?.rows?.filter((row) => row.critical && row.status !== 'match') ?? [];
+  if (report.reconciliation?.homologable && critical.length === 0) return null;
+  const metrics = critical.slice(0, 3).map((row) => row.metricId).join(', ');
+  const detail = critical.length ? ` ${critical.length} invariantes: ${metrics}${critical.length > 3 ? '…' : ''}.` : '';
+  return `Exportação bloqueada: o relatório FIERGS possui invariantes críticas não reconciliadas.${detail}`;
+}
+
 export const usePanoramaExportStore = create<PanoramaExportState>()((set, get) => ({
+  pptxMode: 'mirror', manifest: null, startedAt: null,
+  consistencyAcknowledged: false,
   status: 'idle',
   progress: 0,
   total: 0,
@@ -44,28 +71,36 @@ export const usePanoramaExportStore = create<PanoramaExportState>()((set, get) =
   result: null,
   controller: null,
 
-  start: (report, format) => {
+  start: (report, format, options = {}) => {
     if (isRunning(get().status)) return;
+    const consistencyAcknowledged = options.consistencyAcknowledged === true;
+    const blockReason = panoramaExportBlockReason(report, { consistencyAcknowledged });
+    if (blockReason) {
+      set({ status: 'error', progress: 0, total: 0, error: blockReason, format, report: null, result: null, controller: null, consistencyAcknowledged: false });
+      return;
+    }
     const previous = get().result;
     if (previous) URL.revokeObjectURL(previous.url);
-    set({ status: 'preparing', progress: 0, total: 0, error: '', format, report, result: null, controller: new AbortController() });
+    set({ status: 'preparing', progress: 0, total: 0, error: '', format, report, result: null, controller: new AbortController(), consistencyAcknowledged,
+      pptxMode: format === 'pptx' ? options.pptxMode ?? 'mirror' : 'mirror',
+      manifest: options.manifest?.map((page) => ({ ...page, scopeCities: page.scopeCities ? [...page.scopeCities] : undefined })) ?? null, startedAt: Date.now() });
   },
   markCapturing: (total) => set({ status: 'capturing', total }),
   reportProgress: (current, total) => set({ progress: current, total }),
   markAssembling: () => set({ status: 'assembling' }),
-  succeed: (result) => set({ status: 'done', result, report: null, controller: null }),
-  fail: (error) => set({ status: 'error', error, report: null, controller: null }),
+  succeed: (result) => set({ status: 'done', result, report: null, controller: null, consistencyAcknowledged: false, manifest: null, startedAt: null }),
+  fail: (error) => set({ status: 'error', error, report: null, controller: null, consistencyAcknowledged: false, manifest: null, startedAt: null }),
   cancel: () => {
     const { controller, status } = get();
     if (!isRunning(status)) return;
     controller?.abort();
-    set({ status: 'idle', progress: 0, total: 0, report: null, controller: null });
+    set({ status: 'idle', progress: 0, total: 0, report: null, controller: null, consistencyAcknowledged: false, manifest: null, startedAt: null });
   },
   dismiss: () => {
     const { result, status } = get();
     if (isRunning(status)) return;
     if (result) URL.revokeObjectURL(result.url);
-    set({ status: 'idle', progress: 0, total: 0, error: '', result: null });
+    set({ status: 'idle', progress: 0, total: 0, error: '', result: null, consistencyAcknowledged: false, manifest: null, startedAt: null });
   },
 }));
 

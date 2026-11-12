@@ -13,15 +13,16 @@ const textOf = (ir: Ir) => ir.slides.map((s) => ({ n: s.n, section: toAuditSecti
 const num = (v: Cell): v is number => typeof v === 'number' && Number.isFinite(v);
 
 /** WS3: checklist da Ata. Match exige ao menos duas palavras relevantes no mesmo slide. */
-export function ataCoverageFindings(ir: Ir, ata: AtaData | null): Finding[] {
+export function ataCoverageFindings(ir: Ir, ata: AtaData | null, legacy = false): Finding[] {
   if (!ata) return [];
   const items = [...(ata.pedidos_analista ?? []), ...(ata.duvidas_cliente ?? [])].filter(Boolean);
   if (ata.produto) items.push('Produto proposto');
   if (!items.length) return [];
-  const slides = textOf(ir);
+  // A própria ata e a repetição literal do pedido não comprovam atendimento.
+  const slides = textOf(ir).filter(s => legacy || !/\bata\b|briefing|reuniao de abertura/.test(normalize(ir.slides.find(x=>x.n===s.n)?.titulo ?? '')));
   const checklist = items.map((item) => {
     const keys = words(item).filter((word) => !['trazer', 'analise', 'cliente', 'necessario', 'possivel', 'qual'].includes(word));
-    const hit = slides.find((slide) => keys.length > 0 && keys.filter((key) => slide.text.includes(key)).length >= Math.min(2, keys.length));
+    const hit = slides.find((slide) => (legacy || !slide.text.includes(normalize(item))) && keys.length > 0 && keys.filter((key) => slide.text.includes(key)).length >= Math.min(2, keys.length));
     return { label: item, status: hit ? 'ok' as const : 'missing' as const, slide: hit?.n };
   });
   // Produto proposto é uma regra canônica: título/seção explícita, não só número em tabela.
@@ -34,7 +35,7 @@ export function ataCoverageFindings(ir: Ir, ata: AtaData | null): Finding[] {
   return [{
     id: 'ata-coverage', type: 'ATA_COVERAGE', section: 'ATA', slideRef: 'ata',
     title: `Cobertura dos pedidos da ata (${items.length - missing.length}/${items.length})`,
-    detail: missing.length ? `Conferir itens sem evidência textual: ${missing.map((m) => `“${m.label}”`).join('; ')}.` : 'Todos os pedidos da ata têm evidência textual no estudo.',
+    detail: legacy ? (missing.length ? `Conferir itens sem evidência textual: ${missing.map((m) => `“${m.label}”`).join('; ')}.` : 'Todos os pedidos da ata têm evidência textual no estudo.') : missing.length ? `Conferir itens sem evidência textual localizada: ${missing.map((m) => `“${m.label}”`).join('; ')}. Conteúdo apenas em imagem pode exigir conferência visual.` : 'Foram localizadas referências textuais aos pedidos. Isso não comprova atendimento integral; confira o conteúdo indicado.',
     ok: missing.length === 0,
     viz: { kind: 'text', checklist: checklist.map((item) => ({ label: item.slide ? `${item.label} (s${item.slide})` : item.label, status: item.status })) },
   }];

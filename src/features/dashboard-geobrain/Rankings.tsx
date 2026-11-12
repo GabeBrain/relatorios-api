@@ -1,7 +1,7 @@
 import { useMemo, useRef, useState, type ReactNode } from 'react';
 import { ArrowDownAZ, ArrowDownUp, ArrowUpAZ, Download, Info, Search } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import type { RankRow } from './aggregate';
+import { GEOGRAPHIC_GROUP_LABEL, type GeographicGroupBy, type RankRow } from './aggregate';
 import { exportGeoBrainSvg } from './Charts';
 
 interface Props {
@@ -12,12 +12,14 @@ interface Props {
   /** Se true, defaults to Top 10; toggle to show all. */
   topDefault?: boolean;
   info?: ReactNode;
+  geographicGroupBy?: GeographicGroupBy;
+  onGeographicGroupByChange?: (groupBy: GeographicGroupBy) => void;
 }
 
 type SortBy = 'value' | 'label';
 type Dir = 'asc' | 'desc';
 
-export function RankingCard({ title, rows, formatValue, searchable = true, topDefault = true, info }: Props) {
+export function RankingCard({ title, rows, formatValue, searchable = true, topDefault = true, info, geographicGroupBy, onGeographicGroupByChange }: Props) {
   const cardRef = useRef<HTMLElement>(null);
   const [query, setQuery] = useState('');
   const [topOnly, setTopOnly] = useState(topDefault);
@@ -58,6 +60,22 @@ export function RankingCard({ title, rows, formatValue, searchable = true, topDe
           )}
         </div>
         <div className="flex items-center gap-1">
+          {geographicGroupBy && onGeographicGroupByChange && (
+            <div className="dg-chip-group">
+              {(Object.keys(GEOGRAPHIC_GROUP_LABEL) as GeographicGroupBy[]).map((groupBy) => (
+                <button
+                  key={groupBy}
+                  type="button"
+                  className="dg-chip"
+                  data-active={groupBy === geographicGroupBy}
+                  onClick={() => onGeographicGroupByChange(groupBy)}
+                  style={{ padding: '2px 6px', fontSize: '9px' }}
+                >
+                  {GEOGRAPHIC_GROUP_LABEL[groupBy]}
+                </button>
+              ))}
+            </div>
+          )}
           {searchable && (
             <div className="relative">
               <Search className="pointer-events-none absolute left-2 top-1/2 h-3 w-3 -translate-y-1/2 text-[hsl(var(--dg-muted))]" />

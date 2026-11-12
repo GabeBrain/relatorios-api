@@ -14,6 +14,7 @@ export interface ValidationHistory extends HistoryEntry {
 }
 export interface ValidationTypology extends Omit<Typology, 'history'> { history: ValidationHistory[]; }
 export interface ValidationBuilding extends Omit<Building, 'typologies'> {
+  validation_zipcode_missing?: boolean;
   typologies: ValidationTypology[];
   installment_value: number | null;
   building_created_at: string;
@@ -92,6 +93,7 @@ function normalizeBuilding(raw: Record<string, unknown>): ValidationBuilding {
   const year = releaseDate.match(/\d{4}/);
 
   return {
+    validation_zipcode_missing: raw.zipcode == null,
     building_id: stringValue(raw.building_id), name: stringValue(raw.name), status: stringValue(raw.status),
     city: stringValue(raw.city), state: stringValue(raw.state), neighborhood: text(raw.neighborhood),
     building_type: stringValue(raw.building_type), standard, release_date: releaseDate,

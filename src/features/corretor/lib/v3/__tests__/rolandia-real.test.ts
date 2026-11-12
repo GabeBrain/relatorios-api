@@ -37,12 +37,17 @@ describe('Rolândia — deck real (baseline: 17 achados, 17 FP)', () => {
     const items = checklist?.viz?.kind === 'text' ? checklist.viz.checklist ?? [] : [];
     const missing = items.filter((i) => i.status === 'missing').map((i) => i.label);
     // Os 15 itens que a analista sublinhou (mapas, endereço, acessos, consolidada…)
-    // saíram de "ausente". Sobra a ausência real de 7.1 — que ela não contestou.
-    expect(missing).toEqual(['7.1 — Futuros lançamentos']);
+    // saíram de "ausente". Sobra 7.1 e, desde 35c0656 (v0.67), os dois
+    // capítulos anunciados em sumários sem conteúdo. Não confundir esses
+    // controles novos com os antigos FPs de mapa. Evidência: reteste Rolândia
+    // 13/10, v4, documentado em RETESTE_SITE_ROLANDIA_2026-10-13.md.
+    expect(missing).toEqual(['7.1 — Futuros lançamentos', 'Seção 04 (Avaliação da Consultoria)', 'Seção 05 (Recomendação)']);
   });
 
-  it('o estudo real produz 1 achado (era 17, todos FP)', () => {
-    expect(findings).toHaveLength(1);
+  it('o estudo real produz 2 achados (era 17, todos FP)', () => {
+    // v0.67: + s17 “950 km | 3 min” — erro real (são 950 m), conferido no slide.
+    expect(findings).toHaveLength(2);
+    expect(findings.find((f) => f.id === 'travel-speed-17')?.detail).toContain('950 km');
   });
 
   it('slide de mapa não é cobrado por fonte — nenhum leva FONTE por convenção', () => {

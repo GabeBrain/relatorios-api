@@ -1,0 +1,120 @@
+import type { SpObservation, SpPriceValue } from './granular-details';
+import type { SpPreview } from './model';
+import { SP_SEGMENT_RULE } from './segments';
+
+export const SP_MARKET_SLIDES = [63,64,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80] as const;
+export const SP_MARKET_STANDARDS = ['Compacto','Econômico','Standard','Médio','Médio-Alto','Alto','Luxo'] as const;
+export const SP_STAGES = ['Planta','Construção','Pronto'] as const;
+export const SP_STOCK_AREAS = ['Até 34m²','35–39m²','40–44m²','45–49m²','50–59m²','60–69m²','70–84m²','85–99m²','100–150m²','151–200m²','201–250m²','251m² ou mais'] as const;
+export interface SpStockRow { label:string; units:number; share:number|null }
+export interface SpMapProject { id:string; name:string; standard:string; latitude:number|null; longitude:number|null; stock:number; meter:number|null; vgv:number|null; ticket:number|null }
+export interface SpStageGroup { label:string; values:Record<typeof SP_STAGES[number],number>; total:number }
+export interface SpVgvRow { label:string; qty:number; sold:number; stock:number; ticket:number|null; offeredVgv:number|null; soldVgv:number|null; stockVgv:number|null }
+export interface SpMarketDetails {
+  classificationIssues?: { patterns?: string; mcmv?: string; segments?: string; mapPatterns?:string };
+  status:'ready'|'blocked'; issues:string[]; total:number;
+  prices:(SpPriceValue&{bedroom:number; mcmv:SpPriceValue; map:SpPriceValue})[];
+  cohorts:SpStockRow[]; recentShare:number|null; standards:SpStockRow[]; bedrooms:SpStockRow[];
+  matrix:{status:'ready'|'blocked';issues:string[];columns:string[];rows:{label:string;values:number[];total:number}[];totals:number[]}; smallAreaShare:number|null;
+  stages:{launched:{ready:boolean;issues:string[];typologies:SpStageGroup[];segments:SpStageGroup[]}; final:{ready:boolean;issues:string[];typologies:SpStageGroup[];segments:SpStageGroup[]}};
+  vgv:{ready:boolean;issues:string[];warnings?:string[];partial?:boolean;priceMissingCount?:number;calculatedDifferenceCount?:number;rows:SpVgvRow[];total:SpVgvRow|null}; projects:SpMapProject[]; priceBandShare:number|null;
+  priceBand?:{numerator:number|null;denominator:number;minimum:number;maximum:number;selection:'standard-project-ticket-v1'};
+  capacityUniverse?:{selection:'projects-with-positive-stock';includedProjects:number;excludedProjects:number};
+}
+const norm=(value:unknown)=>String(value??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim().toLowerCase();
+const number=(value:unknown)=>typeof value==='number'||typeof value==='string'&&value.trim()?Number(value):NaN;
+const stage=(value:unknown):typeof SP_STAGES[number]|null=>{
+  const raw=norm(value); if(['planta','na planta','em planta'].includes(raw))return 'Planta';
+  if(['construcao','em construcao','em obras','obras'].includes(raw))return 'Construção';
+  return ['pronto','pronta','concluido','concluida','entregue','finalizado'].includes(raw)?'Pronto':null;
+};
+const bedroom=(value:number|null)=>value===1?'1 dormitório':value===2?'2 dormitórios':value===3?'3 dormitórios':value!==null&&value>=4?'4 ou mais dormitórios':value===0?'Studio / 0 dormitórios':'Não informado';
+function price(rows:SpObservation[]):SpPriceValue {
+  const selected=rows.filter(row=>row.stock!>0),units=selected.reduce((s,r)=>s+r.stock!,0);
+  const average=(field:'price'|'meter')=>{if(!Number.isSafeInteger(units)||units<=0||!selected.every(row=>row[field]!==null&&row[field]!>0))return null;const weighted=selected.reduce((s,r)=>s+r.stock!*r[field]!,0);return Number.isFinite(weighted)&&weighted<=Number.MAX_SAFE_INTEGER/100?weighted/units:null;};
+  const ticket=average('price'),meter=average('meter'); return {units,ticket,meter,issues:ticket===null||meter===null?['Sem oferta ou medição completa para esta média.']:[]};
+}
+export function spMarketSlideIssue(market:SpMarketDetails|undefined,slide:number):string|undefined {
+  if(market?.status!=='ready')return undefined;
+  return [70,71].includes(slide)?market?.classificationIssues?.patterns??market?.classificationIssues?.mapPatterns:[69,78].includes(slide)?market?.classificationIssues?.patterns:slide===77?market?.classificationIssues?.segments:undefined;
+}
+export function buildSpMarketDetails(rows:SpObservation[], buildings:Record<string,unknown>[],report:SpPreview,problem:string|null,classificationIssues:NonNullable<SpMarketDetails['classificationIssues']>={}):SpMarketDetails {
+  const total=report.metrics.stock??0, share=(value:number)=>total>0?value/total*100:null;
+  const emptyStage={ready:false,issues:['Falta estágio ou quantidade na fotografia.'],typologies:[],segments:[]};
+  const result:SpMarketDetails={status:problem?'blocked':'ready',issues:problem?[problem]:[],total,prices:[],cohorts:[],recentShare:null,standards:[],bedrooms:[],matrix:{status:'blocked',issues:['Há oferta sem área privativa válida.'],columns:[],rows:[],totals:[]},smallAreaShare:null,stages:{launched:{...emptyStage},final:{...emptyStage}},vgv:{ready:false,issues:['Falta capacidade, venda acumulada ou preço compatível na fotografia.'],rows:[],total:null},projects:[],priceBandShare:null};
+  result.classificationIssues=classificationIssues;
+  if(problem)return result;
+  const available=rows.filter(row=>row.stock!>0), year=Number(report.throughMonth!.slice(0,4));
+  // Capacity belongs to the enterprises represented in the current offer, including
+  // their sold-out typologies. Fully sold-out enterprises are outside this universe.
+  const activeProjects=new Set(available.map(row=>row.project));
+  const capacityRows=rows.filter(row=>activeProjects.has(row.project));
+  result.capacityUniverse={selection:'projects-with-positive-stock',includedProjects:activeProjects.size,excludedProjects:new Set(rows.filter(row=>!activeProjects.has(row.project)).map(row=>row.project)).size};
+  result.prices=[1,2,3,4].map(value=>({bedroom:value,...price(rows.filter(row=>row.bedrooms===value)),mcmv:price(rows.filter(row=>row.bedrooms===value&&row.standard==='Econômico')),map:price(rows.filter(row=>row.bedrooms===value&&row.standard!=='Econômico'))}));
+  if(classificationIssues.mcmv)for(const item of result.prices)for(const key of ['mcmv','map'] as const){item[key].ticket=null;item[key].meter=null;item[key].issues=[classificationIssues.mcmv];}
+  if(available.some(row=>row.bedrooms===null))for(const item of result.prices){item.ticket=null;item.meter=null;item.mcmv.ticket=null;item.mcmv.meter=null;item.map.ticket=null;item.map.meter=null;}
+  result.cohorts=[{label:`Até ${year-3}`,test:(r:SpObservation)=>Number(r.release.slice(0,4))<=year-3},...[year-2,year-1,year].map(y=>({label:String(y),test:(r:SpObservation)=>Number(r.release.slice(0,4))===y}))].map(item=>{const units=available.filter(item.test).reduce((s,r)=>s+r.stock!,0);return {label:item.label,units,share:share(units)};});
+  result.recentShare=share(available.filter(row=>Number(row.release.slice(0,4))>=year-1).reduce((s,r)=>s+r.stock!,0));
+  result.standards=SP_MARKET_STANDARDS.map(label=>{const units=available.filter(row=>row.standard===label).reduce((s,r)=>s+r.stock!,0);return {label,units,share:share(units)};});
+  const labels=['1 dormitório','2 dormitórios','3 dormitórios','4 ou mais dormitórios',...(['Studio / 0 dormitórios','Não informado'].filter(label=>available.some(row=>bedroom(row.bedrooms)===label)))];
+  result.bedrooms=labels.map(label=>{const units=available.filter(row=>bedroom(row.bedrooms)===label).reduce((s,r)=>s+r.stock!,0);return {label,units,share:share(units)};});
+  if(available.every(row=>row.area!==null&&row.area>0)){
+    const limits=[35,40,45,50,60,70,85,100,151,201,251,Infinity];
+    const matrix=SP_STOCK_AREAS.map((label,i)=>{const values=labels.map(bed=>available.filter(row=>bedroom(row.bedrooms)===bed&&row.area!>= (i===0?0:limits[i-1])&&row.area!<limits[i]).reduce((s,r)=>s+r.stock!,0));return {label,values,total:values.reduce((a,b)=>a+b,0)};});
+    const totals=labels.map((_,i)=>matrix.reduce((s,r)=>s+r.values[i],0));
+    if(totals.reduce((a,b)=>a+b,0)===total){result.matrix={status:'ready',issues:[],columns:labels,rows:matrix,totals};result.smallAreaShare=share(matrix[0].total+matrix[1].total);}
+  }
+  for(const key of ['launched','final'] as const){
+    const field=key==='launched'?'qty':'stock';
+    const missing=capacityRows.find(row=>row[field]===null||row[field]!<0||row[field]!>0&&!stage(row.stage));
+    if(missing){
+      const issue=`Empreendimento ${missing.project}, tipologia ${missing.typology??'não informada'}, competência ${missing.month}: ${missing[field]===null||missing[field]!<0?`${field==='qty'?'quantidade (qty)':'estoque (typology_stock)'} ausente ou inválido`:`estágio construtivo ausente ou não reconhecido; valor recebido ${typeof missing.stage==='string'?JSON.stringify(missing.stage.slice(0,60)):'vazio'}`}. Ativo/Esgotado não representam Planta/Construção/Pronto.`;
+      result.stages[key]={ready:false,issues:[issue],typologies:[],segments:[]};continue;
+    }
+    const selected=capacityRows.filter(row=>row[field]!>0);
+    const group=(label:string,test:(row:SpObservation)=>boolean):SpStageGroup=>{const values={Planta:0,Construção:0,Pronto:0};for(const row of selected.filter(test))values[stage(row.stage)!]+=row[field]!;return {label,values,total:Object.values(values).reduce((a,b)=>a+b,0)};};
+    const stageLabels=[...new Set([...labels,...selected.map(row=>bedroom(row.bedrooms))])];
+    const typologies=stageLabels.map(label=>group(label,row=>bedroom(row.bedrooms)===label)),segments=Object.entries(SP_SEGMENT_RULE.groups).map(([label,standards])=>group(label,row=>(standards as readonly string[]).includes(row.standard)));
+    if([...typologies,...segments].some(row=>!Number.isSafeInteger(row.total)))continue;
+    result.stages[key]={ready:true,issues:[],typologies,segments};
+  }
+  const meta=new Map(buildings.map(building=>[String(building.building_id??building.id),building]));
+  const byProject=new Map<string,SpObservation[]>();for(const row of available){const group=byProject.get(row.project)??[];group.push(row);byProject.set(row.project,group);}
+  const segmentOf=(standard:string)=>Object.entries(SP_SEGMENT_RULE.groups).find(([,patterns])=>(patterns as readonly string[]).includes(standard))?.[0];
+  const mixed=[...byProject].find(([,list])=>new Set(list.map(row=>segmentOf(row.standard))).size>1);
+  if(mixed)result.classificationIssues.mapPatterns=`Empreendimento ${mixed[0]}: tipologias em segmentos diferentes na mesma competência. O mapa aguarda representação por tipologia; nenhum segmento único foi presumido.`;
+  for(const [id,list] of byProject){const p=price(list),building=meta.get(id)!;const stock=list.reduce((s,r)=>s+r.stock!,0),lat=number(building.latitude),lon=number(building.longitude);const geographic=Number.isFinite(lat)&&Number.isFinite(lon)&&lat>=-34&&lat<=6&&lon>=-74&&lon<=-34;result.projects.push({id,name:String(building.name??`Empreendimento ${id}`),standard:list[0].standard,latitude:geographic?lat:null,longitude:geographic?lon:null,stock,meter:p.meter,ticket:p.ticket,vgv:p.ticket===null?null:p.ticket*stock});}
+  const standardProjects=[...byProject.values()].map(list=>price(list.filter(row=>row.standard==='Standard'))).filter(item=>item.units>0);
+  const denominator=standardProjects.reduce((sum,item)=>sum+item.units,0);
+  const numerator=standardProjects.some(item=>item.ticket===null)?null:standardProjects.filter(item=>item.ticket!>=400000&&item.ticket!<=500000).reduce((sum,item)=>sum+item.units,0);
+  result.priceBand={numerator,denominator,minimum:400000,maximum:500000,selection:'standard-project-ticket-v1'};
+  result.priceBandShare=denominator>0&&numerator!==null?numerator/denominator*100:null;
+  const capacityWarnings:string[]=[];
+  const capacityIssues=capacityRows.flatMap(row=>{
+    const label=`Empreendimento ${row.project}, tipologia ${row.typology??'não informada'}, competência ${row.month}`;
+    const issues:string[]=[];
+    if(row.qty===null||!Number.isSafeInteger(row.qty)||row.qty<0)issues.push('capacidade qty ausente ou inválida');
+    if(row.stock===null||!Number.isSafeInteger(row.stock)||row.stock<0)issues.push('estoque da fotografia ausente, negativo ou inválido');
+    if(row.qty!==null&&row.stock!==null&&row.stock>row.qty)issues.push(`estoque ${row.stock} superior à capacidade qty ${row.qty}`);
+    if(!issues.length&&row.sold!==row.qty!-row.stock!)capacityWarnings.push(`${label}: vendido calculado ${row.qty!-row.stock!} = capacidade ${row.qty} − oferta ${row.stock}; sold original ${row.sold??'ausente'}${row.sold===null?'':` (diferença ${row.qty!-row.stock!-row.sold})`}, preservado para auditoria. Não altera vendas líquidas mensais.`);
+    return issues.length?[`${label}: ${issues.join('; ')}.`]:[];
+  });
+  const safeCapacity=!capacityIssues.length;
+  if(capacityIssues.length)result.vgv.issues=capacityIssues;
+  if(safeCapacity){
+    const calculated=capacityRows.map(row=>({...row,sold:row.qty!-row.stock!}));
+    const unpriced=calculated.filter(row=>row.qty!>0&&(row.price===null||row.price<=0));
+    const priceWarnings=unpriced.map(row=>`Empreendimento ${row.project}, tipologia ${row.typology??'não informada'}, competência ${row.month}: preço price ausente ou inválido; contagens preservadas e valores monetários dependentes indisponíveis (—), inclusive nos totais. Nenhum preço zero foi presumido.`);
+    const aggregate=(label:string,list:SpObservation[]):SpVgvRow=>{
+      const money=(field:'qty'|'sold'|'stock')=>{
+        const contributing=list.filter(row=>row[field]!>0);
+        return contributing.some(row=>row.price===null||row.price<=0)?null:contributing.reduce((sum,row)=>sum+row[field]!*row.price!,0);
+      };
+      return {label,qty:list.reduce((s,r)=>s+r.qty!,0),sold:list.reduce((s,r)=>s+r.sold!,0),stock:list.reduce((s,r)=>s+r.stock!,0),ticket:price(list).ticket,offeredVgv:money('qty'),soldVgv:money('sold'),stockVgv:money('stock')};
+    };
+    const entries=SP_MARKET_STANDARDS.map(label=>aggregate(label,calculated.filter(row=>row.standard===label))), sum=aggregate('Total residenciais',calculated);
+    if([sum,...entries].every(row=>[row.qty,row.sold,row.stock].every(Number.isSafeInteger)&&[row.offeredVgv,row.soldVgv,row.stockVgv].every(value=>value===null||Number.isFinite(value)&&value<=Number.MAX_SAFE_INTEGER/100)))result.vgv={ready:true,issues:[],warnings:[...capacityWarnings,...priceWarnings],partial:unpriced.length>0,priceMissingCount:unpriced.length,calculatedDifferenceCount:capacityWarnings.length,rows:entries,total:sum};
+    else result.vgv.issues=['As somas de capacidade ou VGV excedem a precisão numérica segura.'];
+  }
+  return result;
+}

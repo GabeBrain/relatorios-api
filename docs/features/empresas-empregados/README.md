@@ -22,7 +22,7 @@ origem neste README e mantê-lo fora do Git após produzir fixtures ou documenta
 
 ## Referência técnica já localizada
 
-O protótipo atual está fora deste repositório, em `Sistema-Quanti/Sistema Novo`:
+O protótipo atual está fora deste repositório, em `Quanti/quanti-system-hub`:
 
 - `scripts/build-rais-municipio-workbook.mjs` — gerador municipal baseado em vínculos RAIS;
 - `Detalhes de Desenvolvimento/Docs/datagoal/16-workbook-rais-municipal-bigquery.md` — contrato e validação de Rio Verde/GO.

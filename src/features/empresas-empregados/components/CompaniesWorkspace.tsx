@@ -124,6 +124,7 @@ function SectorSizeTable({ rows }: { rows: CompaniesAggregatedRow[] }) {
 export default function CompaniesWorkspace({ municipality, meta, rows }: Props) {
   const total = useMemo(() => totalEstablishments(rows), [rows]);
   const breakdown = useMemo(() => buildCompaniesBreakdown(rows), [rows]);
+  const isFallback = Boolean(meta.targetCompetencia && meta.competencia < meta.targetCompetencia);
   const [exporting, setExporting] = useState<string | null>(null);
 
   async function handleExport(kind: 'xlsx' | 'csv' | 'svg') {
@@ -146,6 +147,14 @@ export default function CompaniesWorkspace({ municipality, meta, rows }: Props) 
 
   return (
     <section className="space-y-5 animate-fade-in" aria-label="Relatório de empresas">
+      {isFallback && (
+        <Alert>
+          <Info className="h-4 w-4" />
+          <AlertDescription>
+            Dados de {formatCompetencia(meta.targetCompetencia)} indisponíveis no acesso atual à fonte. Exibimos {formatCompetencia(meta.competencia)}, a competência mais recente obtida para este município. A Base dos Dados informa que períodos recentes podem exigir BD Pro; estamos verificando a mudança de acesso.
+          </AlertDescription>
+        </Alert>
+      )}
       <div className="flex flex-col gap-3 rounded-xl border border-primary/15 bg-card p-5 shadow-sm sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h2 className="flex items-center gap-2 font-semibold">

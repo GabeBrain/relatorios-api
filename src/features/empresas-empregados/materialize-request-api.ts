@@ -4,9 +4,6 @@ const SUPABASE_URL = String(import.meta.env.VITE_SUPABASE_URL ?? '').replace(/\/
 const SUPABASE_KEY = String(import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ?? '');
 const FUNCTION_URL = `${SUPABASE_URL}/functions/v1/empresas-materialize-request`;
 
-/** Partições do piloto Empresas (competência julho/2026). */
-export const MATERIALIZE_PARTITION = '2026-07-12';
-
 export type MaterializeStatus = 'ok' | 'published' | 'processing' | 'rate_limited' | 'error';
 
 export interface MaterializeRequestResult {
@@ -36,8 +33,6 @@ export async function requestCompaniesMaterialization(
       headers: { Accept: 'application/json', 'Content-Type': 'application/json', apikey: SUPABASE_KEY },
       body: JSON.stringify({
         municipality: { ibgeCode: municipality.ibgeCode, name: municipality.name, uf: municipality.uf },
-        establishmentsPartition: MATERIALIZE_PARTITION,
-        companiesPartition: MATERIALIZE_PARTITION,
       }),
       signal,
     });

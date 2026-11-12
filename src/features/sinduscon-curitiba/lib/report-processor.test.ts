@@ -17,6 +17,15 @@ function workbookBuffer(rows: unknown[][]) {
 }
 
 describe('processWorkbook', () => {
+  it.each(['alvaras', 'cvco'] as const)('preserva 168 residenciais e 3 comerciais para revisão em %s', (kind) => {
+    const report = processWorkbook(workbookBuffer([
+      ['Comércio e Serviço de Bairro', 'CONSTRUÇÃO', 17100, 168, 3, 17100, 'Total'],
+    ]), 'Alvaras_AGO_2026.xlsx', kind);
+    expect(report.reviews).toHaveLength(1);
+    expect(report.rows[0]['Quantidade de Unidades Residênciais']).toBe(168);
+    expect(report.rows[0]['Quantidade Unidades Não Residênciais']).toBe(3);
+    expect(report.decisions).toHaveLength(0);
+  });
   it('identifica a competência no nome do arquivo', () => {
     expect(periodFromFileName('RelatorioMensal_ALV_SET_SET2026_17.09.xls')).toEqual({ month: 'Setembro', year: 2026 });
   });
@@ -40,10 +49,9 @@ describe('processWorkbook', () => {
     expect(sheet['!cols']?.at(-1)?.wch).toBe(12);
     expect(sheet['!rows']?.[1]?.hpt).toBe(34);
 
-    const originalPackage = unzipSync(new Uint8Array(source));
     const output = buildStylePreservingWorkbook(source, report);
     const outputPackage = unzipSync(output);
-    expect(strFromU8(outputPackage['xl/styles.xml'])).toBe(strFromU8(originalPackage['xl/styles.xml']));
+    const originalPackage = unzipSync(new Uint8Array(source));
     expect(strFromU8(outputPackage['xl/theme/theme1.xml'])).toBe(strFromU8(originalPackage['xl/theme/theme1.xml']));
 
     const preserved = XLSX.read(output, { type: 'array', cellStyles: true });
@@ -54,6 +62,7 @@ describe('processWorkbook', () => {
     expect(matrix[0].at(-1)).toBe('Ano');
     expect(matrix[1][0]).toBe('Setembro');
     expect(matrix[1].at(-1)).toBe(2026);
+    expect(preservedSheet[`${XLSX.utils.encode_col(headers.length + 4)}2`].z).toBe('0');
     expect(preservedSheet['!cols']).toHaveLength(headers.length + 5);
   });
 

@@ -9,6 +9,7 @@ import { ResumoPorCidade } from '@/features/validacao-fechamento/ResumoPorCidade
 import { DetalhamentoGrid } from '@/features/validacao-fechamento/DetalhamentoGrid';
 import { DivergencesGrid } from '@/features/validacao-fechamento/DivergencesGrid';
 import { validateBuildings } from '@/features/validacao-fechamento/validation-rules';
+import { filterDivergences } from '@/features/validacao-fechamento/filter-divergences';
 import { ActiveFiltersBar } from '@/features/validacao-fechamento/ActiveFiltersBar';
 import { useVFData } from '@/features/validacao-fechamento/use-vf-data';
 import {
@@ -30,6 +31,7 @@ export default function ValidacaoFechamento() {
   const [filters, setFilters] = useState<VFFilters>(EMPTY_VF_FILTERS);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [tab, setTab] = useState<Tab>('resumo');
+  const [unapprovedDivergenceCount, setUnapprovedDivergenceCount] = useState<number | null>(null);
 
   // Persistência de sessão
   useEffect(() => {
@@ -54,9 +56,7 @@ export default function ValidacaoFechamento() {
   const { status, buildings, loadedCities, failures, error, progress, load, reset } = useVFData();
 
   const allRows = useMemo(() => flattenBuildings(buildings ?? []), [buildings]);
-  // Validação roda sobre o conjunto completo (medianas e médias de cidade dependem dele);
-  // os filtros são aplicados depois, sobre as divergências encontradas.
-  const divergences = useMemo(() => status === 'ready' ? validateBuildings(buildings ?? []) : [], [buildings, status]);
+  const allDivergences = useMemo(() => status === 'ready' ? validateBuildings(buildings ?? []) : [], [buildings, status]);
   const options = useMemo(() => extractVFOptions(allRows), [allRows]);
 
   // Cidade ativa do header ('' = todas) aplicada sobre os filtros da sidebar
@@ -65,8 +65,9 @@ export default function ValidacaoFechamento() {
     [filters, activeCity],
   );
 
-  const filteredDivergences = useMemo(() => applyVFFilters(divergences, effectiveFilters), [divergences, effectiveFilters]);
   const filtered = useMemo(() => applyVFFilters(allRows, effectiveFilters), [allRows, effectiveFilters]);
+  const divergences = useMemo(() => filterDivergences(allDivergences, filtered), [allDivergences, filtered]);
+  useEffect(() => setUnapprovedDivergenceCount(null), [divergences]);
 
   // Para AA/PA usamos filtros de dimensão apenas (sem temporais)
   const filteredDimOnly = useMemo(() => applyVFFilters(allRows, {
@@ -78,8 +79,8 @@ export default function ValidacaoFechamento() {
     [filtered, filteredDimOnly, granularity],
   );
   const resumoEmail = useMemo(
-    () => computeResumoEmail(filtered, filteredDimOnly),
-    [filtered, filteredDimOnly],
+    () => computeResumoEmail(filtered, filteredDimOnly, granularity),
+    [filtered, filteredDimOnly, granularity],
   );
 
   // Cidades exibidas na guia "Resumo por cidade"
@@ -151,7 +152,7 @@ export default function ValidacaoFechamento() {
             <button type="button" className="vf-tab" data-active={tab === 'resumo-cidade'} onClick={() => setTab('resumo-cidade')}>Resumo por cidade</button>
             <button type="button" className="vf-tab" data-active={tab === 'resumo-email'} onClick={() => setTab('resumo-email')}>Resumo email</button>
             <button type="button" className="vf-tab" data-active={tab === 'detalhamento'} onClick={() => setTab('detalhamento')}>Detalhamento</button>
-            <button type="button" className="vf-tab" data-active={tab === 'divergencias'} onClick={() => setTab('divergencias')}>Divergências ({filteredDivergences.length})</button>
+            <button type="button" className="vf-tab" data-active={tab === 'divergencias'} onClick={() => setTab('divergencias')}>Divergências ({unapprovedDivergenceCount ?? divergences.length})</button>
           </div>
         </div>
 
@@ -187,7 +188,7 @@ export default function ValidacaoFechamento() {
             <ResumoPorCidade rows={allRows} filters={filters} granularity={granularity} cities={cityBlocks} />
           )}
           {tab === 'detalhamento' && <DetalhamentoGrid rows={filtered} />}
-          {tab === 'divergencias' && <DivergencesGrid rows={filteredDivergences} />}
+          <div hidden={tab !== 'divergencias'}><DivergencesGrid rows={divergences} onDivergenceCountChange={setUnapprovedDivergenceCount} /></div>
         </div>
       </main>
     </div>

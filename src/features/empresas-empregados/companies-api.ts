@@ -45,7 +45,7 @@ function normalizeRows(payload: unknown): CompaniesAggregatedRow[] {
  * reconsultado, senão a cidade nunca sairia desse estado.
  */
 const CACHE_TTL_MS = 12 * 60 * 60 * 1000;
-const CACHE_PREFIX = 'empresas-report-cache:v1:';
+const CACHE_PREFIX = 'empresas-report-cache:v2:';
 const memoryCache = new Map<string, { at: number; report: CompaniesReportResponse }>();
 
 function readCache(ibge: string): CompaniesReportResponse | null {
@@ -134,6 +134,7 @@ export async function fetchCompaniesReport(
     available: true,
     meta: {
       competencia: String(meta.competencia ?? ''),
+      targetCompetencia: String(meta.targetCompetencia ?? meta.competencia ?? ''),
       source: String(meta.source ?? 'Base dos Dados · CNPJ · BigQuery'),
       queryVersion: String(meta.queryVersion ?? ''),
       methodologyVersion: String(meta.methodologyVersion ?? ''),

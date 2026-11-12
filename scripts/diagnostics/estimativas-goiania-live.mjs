@@ -1,0 +1,30 @@
+import {readFile,writeFile,mkdir} from 'node:fs/promises';
+import {chromium} from '@playwright/test';
+const raw=await readFile('.secrets/geobrain.env','utf8');
+const env=Object.fromEntries(raw.split(/\r?\n/).flatMap(line=>{const m=/^\s*([A-Z0-9_]+)\s*=\s*(.*)$/.exec(line);return m?[[m[1],m[2].trim().replace(/^(['"])(.*)\1$/,'$2')]]:[];}));
+let token=env.GEOBRAIN_TOKEN;
+const probe=()=>fetch('https://geobrain.com.br/public-api/monitored-cities?per_page=1&page=1',{headers:{Authorization:`Bearer ${token}`,Accept:'application/json'},signal:AbortSignal.timeout(30000)});
+if(!token||!(await probe()).ok){
+ const r=await fetch('https://geobrain.com.br/public-api/auth/login',{method:'POST',headers:{'Content-Type':'application/json',Accept:'application/json'},body:JSON.stringify({email:env.GEOBRAIN_EMAIL,password:env.GEOBRAIN_PASSWORD}),signal:AbortSignal.timeout(30000)});
+ if(!r.ok)throw new Error(`Login HTTP ${r.status}`);token=(await r.json()).token;if(!token)throw new Error('Login sem token');
+}
+const output='.local-inputs/estimativas-vendas/goiania-live';await mkdir(output,{recursive:true});
+const browser=await chromium.launch({headless:true});const page=await browser.newPage({viewport:{width:1440,height:1000},reducedMotion:'reduce'});
+const errors=[],network=[];page.on('pageerror',e=>errors.push(String(e)));
+page.on('response',r=>{if(r.url().includes('building-with-history-internal'))network.push({page:Number(new URL(r.url()).searchParams.get('page')),status:r.status()});});
+await page.addInitScript(({token})=>{const now=Date.now();localStorage.setItem('brain-auth',JSON.stringify({state:{token,email:'',issuedAt:now,expiresAt:now+3600000},version:0}));},{token});
+await page.goto('http://127.0.0.1:8081/rebrain/estimativas-vendas');
+await page.getByRole('combobox').first().click();await page.getByRole('option',{name:'GO',exact:true}).click();
+await page.getByRole('combobox').nth(1).click();await page.getByPlaceholder(/Buscar munic/).fill('Goiânia');await page.getByText('Goiânia',{exact:true}).last().click();
+await page.locator('label').filter({hasText:'Tipo na API'}).getByRole('combobox').click();await page.getByRole('option',{name:'Vertical',exact:true}).click();
+const start=performance.now();await page.getByRole('button',{name:'Consultar empreendimentos',exact:true}).click();
+await page.getByTestId('forecast-card').nth(11).waitFor({timeout:180000});const elapsedSeconds=(performance.now()-start)/1000;
+const summary=await page.getByRole('heading',{name:/empreendimentos · .* com previsão/}).innerText();
+const curves=await page.getByTestId('forecast-card').locator('.recharts-line-curve').count();
+await page.screenshot({path:`${output}/grid.png`});
+await page.getByRole('button',{name:'Finotti por tipo · referência completa',exact:true}).click();
+const bands=await page.locator('.recharts-area').count();await page.getByRole('button',{name:/Ver detalhe/}).first().click();
+await page.getByRole('dialog').waitFor();await page.screenshot({path:`${output}/reference-detail.png`});
+const result={mode:'local UI and live authenticated API; no mocked routes',city:'Goiânia',type:'Vertical',elapsedSeconds,summary,visibleCards:await page.getByTestId('forecast-card').count(),curves,bands,network,errors};
+await writeFile(`${output}/report.json`,JSON.stringify(result,null,2));console.log(JSON.stringify(result,null,2));await browser.close();
+if(errors.length||network.length!==7||network.some(r=>r.status!==200)||!curves||!bands)process.exitCode=1;
