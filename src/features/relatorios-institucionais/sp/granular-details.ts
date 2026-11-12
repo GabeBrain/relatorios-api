@@ -122,7 +122,10 @@ class DetailBuilder {
   price(month: string, filter: (row: Observation) => boolean = () => true, groups?: readonly string[]): SpPriceValue {
     const problem = groups ? this.classification(month,groups) : this.validate(month);
     const frame=this.frames.get(month)!, expected=this.expected(month),observedStock=frame.rows.reduce((sum,row)=>sum+(row.stock??0),0);
-    const partial=!!problem&&month!==this.report.throughMonth&&frame.missing.size>0&&!frame.issues.size&&!this.issues.size&&frame.rows.length>0&&frame.rows.every(row=>row.stock!==null)&&expected.length===SP_API_PATTERNS.length&&Number.isSafeInteger(observedStock)&&observedStock>=0&&observedStock<=expected.reduce((sum,row)=>sum+row.value,0);
+    // Historical sample means do not claim the municipal population is
+    // reconciled. An overcount is also a coverage discrepancy: preserve it,
+    // mark the sample partial, and never compute variations across it.
+    const partial=!!problem&&!!this.validate(month)&&month!==this.report.throughMonth&&!frame.issues.size&&!this.issues.size&&frame.rows.length>0&&frame.rows.every(row=>row.stock!==null&&(row.stock>=0||this.stockProjection.has(month)))&&expected.length===SP_API_PATTERNS.length&&Number.isSafeInteger(observedStock)&&observedStock>=0;
     if (problem&&!partial) return { units: 0, ticket: null, meter: null, issues: [problem] };
     const rows = this.frames.get(month)!.rows.filter(row => row.stock! > 0 && filter(row)), units = rows.reduce((sum,row) => sum + row.stock!,0);
     const weighted = (field: 'price' | 'meter') => {
@@ -134,7 +137,7 @@ class DetailBuilder {
     const missing=rows.find(row=>ticket===null&&(row.price===null||row.price<=0)||meter===null&&(row.meter===null||row.meter<=0));
     const detail=missing?`Empreendimento ${missing.project}, tipologia ${missing.typology}, competência ${month}: ${ticket===null&&(missing.price===null||missing.price<=0)?'preço ausente ou inválido em price':'preço por m² ou área privativa ausentes ou inválidos'}.`:null;
     const issues=!units ? ['Sem unidades em oferta para calcular o preço.'] : ticket === null || meter === null ? [detail??'Há oferta sem preço ou área privativa válidos para esta média.'] : [];
-    if(partial)issues.push(`Amostra observada em ${month}, sem ${frame.missing.size} empreendimento(s). ${[...frame.missing][0]} Variações não calculadas sobre cobertura parcial.`);
+    if(partial)issues.push(`Amostra observada em ${month}; cobertura parcial. ${problem} Variações não calculadas sobre cobertura parcial.`);
     return { units, ticket, meter, issues,...(partial?{partial:true}:{}) };
   }
   finish(): SpGranularDetails {

@@ -392,6 +392,17 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 12/11/2026 — SP: médias históricas observadas e manchetes — Codex
+
+- **Ambiente/funcionalidade:** SP institucional, séries53/55/57e destaques9–11; regra aplicada a todos os períodos.
+- **Mudança:** divergência do total municipal deixa de ocultar automaticamente a média histórica da amostra observada quando estoques/preços são válidos. Pontos parciais ficam amarelos, com motivo na auditoria e sem variação envolvendo parcial. Fechamento, dados inválidos/conflitantes e estoques negativos sem projeção conciliada continuam bloqueados. Nenhum preço é copiado do original ou interpolado. Manchetes dinâmicas enfatizam liderança, avanço/recuo/estabilidade e lançamentos em12meses conforme dados reais do recorte.
+- **Referência:** revisadas51planilhas embutidas no original de hash1350f82cb1d9386487ca1a9aee110fb19cf3d6ea7cb40d4a0205025802d9939b; sem conexões externas.53/55/57têm13valores colados, com últimos15.896/18.713/13.673. Não revelam o cálculo das médias. Concordância de55/57com cartõesMAP64é evidência de consistência interna, não prova da fórmula.
+- **Validação:**346testesSP/38arquivos aprovados; build/tipos/lint.24cenáriosEdgeoffline1440/390claro/escuro,13pontos observados nos históricos sintéticos e manchetes9–11; capturas53/9inspecionadas. Na primeira rodada, regressão de estoque negativo identificou guarda que precisava ser preservada; corrigida antes da rodada final. Sem nova consultaGeoBrain ou geração real. Padrões de gráficos/feedback preservados, sem mudar carregamento.
+- **Etapas/Pendências:** usuário autorizou publicação. Isto amplia exibição da amostra válida; não comprova cobertura completa ou preço equivalente ao analista. Fonte/cálculo geral e cruzamento dormitório×MCMV continuam em investigação. Após publicação, gerar novamente e conferir o JSON. Fortaleza permanece pausado e fora do commit.
+- **Commits:** commit desta entrada; base `57e24837`.
+- **Monday:** [DESAFIO — Estudos Entidades e Institucionais](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`, referência apenas.
+
+
 ### 12/11/2026 — SP: recuperar preços e cartões com método explícito — Codex
 
 - **Ambiente/funcionalidade:** SP institucional, slides53/55–59/61–64, revisão e diagnóstico em todos os períodos.
@@ -1415,6 +1426,8 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 
 ## 2. Etapas
 
+- 🟡 **SP — amostra histórica/manchetes12/11:**346testes e24ensaiosEdgeaprovados; envio autorizado. Exibe observações históricas parciais válidas com método explícito; equivalência com os13preços do analista ainda não concluída.
+
 - 🟡 **SP — preços12/11:** seleção corrigida localmente com diagnóstico real,342testes e50ensaiosEdge.53parcial,55/57com oito lacunas preservadas;59aceita4exatos,61–64recuperam cálculos identificados. Publicação e nova geração/JSON pendentes.
 
 - 🟡 **Fortaleza mensal —11/11:**60posições e PDF/PPTX de conferência implementados localmente; ensaios sintéticos/Office/PDF aprovados. Sem homologação real. Trimestral10/89, próximo11–20. [Estado atual](../features/relatorios-institucionais/fortaleza/MENSAL_EXPORTACAO_2026-11-11.md); supera pendências de implementação mensal nas entradas históricas abaixo.
@@ -1531,6 +1544,8 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 ---
 
 ## 3. Pendências
+
+- **SP — após publicação12/11:** nova geração/JSON para observar pontos recuperados; identificar consulta/universo/ponderação da média geral e recortes semMCMV. Mostrar amostra parcial não resolve divergência com o original. Não declarar falta de dados naAPIapenas pela divergência de conciliação.
 
 - **SP — preços12/11:** seleção de fontes corrigida localmente após JSON real; autorizar envio e gerar novamente. Confirmar grupo4e linha/série calculada; oito lacunas antigas53/55/57e agregado municipal único continuam em aberto. Estado supera a pausa aguardando JSON registrada abaixo.
 

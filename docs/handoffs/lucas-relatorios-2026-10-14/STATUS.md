@@ -1,5 +1,9 @@
 # Estado do handoff
 
+## 12/11/2026 — publicação autorizada de amostras históricas e manchetes SP
+
+Base57e24837,main/origin0–0após fetch; script Fortaleza não rastreado preservado. Usuário autorizou publicar as alterações locais após explicação dos limites. Médias históricas válidas com divergência de população são exibidas como parciais, sem comparações; fechamento e guardas críticas preservados. Manchetes9–11dinâmicas.346testes/38arquivos,build/tipos/lint e24cenáriosEdgeofflineaprovados; sem consultaGeoBrain/geraçãoreal/Monday. Original revisado:51planilhas sem conexão; valores colados não comprovam cálculo. Próximo nova geração/JSON e investigação do método do analista; não declarar séries completas/equivalência homologada. Fortaleza continua pausado.
+
 ## 12/11/2026 — SP: diagnóstico recebido e seleção de preços corrigida
 
 JSON2T2026recebido e analisado; [contrato/hash/limites](../../features/relatorios-institucionais/sp/DIAGNOSTICO_PRECOS_2026-11-12.md). Fonte geral tem sete linhas anônimas, Tipologia entrega4exatos e adaptador apagava cartões MCMV/MAP. Correção local recupera série geral granular inteira com lacunas, linha geral calculada identificada e quadros granulares; aceita4com rótulo correto.55/57continuam com oito lacunas reais;56já disponível. Basea4ea3a25,main/origin0–0após fetch; script Fortaleza não rastreado preservado. 342testes/38arquivosSP,build/tipos/lint e50ensaiosEdgeoffline aprovados; teste de geração aguarda conclusão real por até4segundos. Sem nova API/geração real/push/Monday. Próximo envio autorizado e novo JSON; não homologar média geral editorial ou presumir preço numérico do grupo4antes da nova geração. Fortaleza permanece pausado.

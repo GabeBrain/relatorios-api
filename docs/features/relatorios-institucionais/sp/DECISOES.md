@@ -1,5 +1,9 @@
 # Decisões e pontos abertos — SP
 
+## 12/11/2026 — amostra histórica observada e manchetes
+
+Permitir média da amostra histórica com divergência de estoque, inclusive sobrecontagem, desde que os registros usados tenham campos válidos e não haja conflito de identidade. Identificar parcial em amarelo, preservar o motivo e omitir variações envolvendo parcial. Estoques negativos sem projeção comprovada, dados inválidos e fechamento mantêm bloqueios. Nenhum valor antigo vira dado novo. Isso substitui a exigência de soma observada menor ou igual à municipal para apresentar amostra histórica, sem alterar reconciliação de área/IVV/fechamento. Objetivo de reproduzir13períodos completos e método do analista continua aberto; a parcial não significa homologação. Manchetes destacam fatos do recorte, com liderança somente acima de50% e verbos de avanço/recuo conforme sinal observado, sem alegar recordes.
+
 ## 12/11/2026 — preços: fonte disponível por recorte e método identificado
 
 [Diagnóstico real e contrato](DIAGNOSTICO_PRECOS_2026-11-12.md). JSON do usuário comprova sete linhas anônimas na consulta geral e categorias 1/2/3/4 na Tipologia. Sem média municipal única, recuperar a série geral granular inteira e a linha geral conferida, identificando o método e preservando lacunas; barras por padrão continuam municipais e são identificadas separadamente. Não recompor total por médias dos padrões ou interpolar pontos. Grupo 4 significa quatro, somente 4+ explícito significa quatro ou mais. Quadros 63/64 usam o cálculo granular completo, mantendo mesmo universo para total/MCMV/MAP. Esta decisão substitui o apagamento dos cartões e a exclusividade da média municipal descritos em 11/11; não homologa a equivalência com o relatório manual.

@@ -23,6 +23,10 @@ report.launchSeries=buildSpLaunchSeries(syntheticLaunchSeries(input),report);
 report.salesSeries=buildSpSalesSeries(syntheticSalesSeries(input),report);
 report.vglSeries=buildSpVglSeries(syntheticLaunchSeries(input),report);
 report.vgvSeries=buildSpVgvSeries(syntheticSalesSeries(input),report);
+if(new URLSearchParams(location.search).has('historical-sample')){
+  const rows=buildings[0].typologies_history as Record<string,unknown>[];
+  for(const row of rows)if(String(row.period)>='2023-06'&&String(row.period)<'2025-04')row.typology_stock=Number(row.typology_stock)+24;
+}
 report.granularDetails=buildSpGranularDetails(buildings,report);
 report.projects=buildSpProjects(buildings,report);
 // Invented native responses for offline UI QA, never market observations.

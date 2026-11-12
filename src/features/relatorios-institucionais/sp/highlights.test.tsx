@@ -27,11 +27,22 @@ function setup(quarter:SpPreview['quarter']='2T2026',partial=3){
 }
 const count=(n:number)=>n.toLocaleString('pt-BR');
 describe('SP — coerência dos destaques e referência visual',()=>{
+  it('usa manchetes sem inventar liderança, crescimento ou recorde',()=>{
+    const report=setup();
+    const sales=report.salesSeries!.breakdown!.mcmv!.quarterlyComparisons.at(-1)!;
+    for(const [variation,word] of [[12,'avançam'],[-12,'recuam'],[0,'mantêm']] as const){
+      sales.variation=variation;
+      const svg=renderToStaticMarkup(<SpHighlightsSlide report={report} slide={10}/>);
+      expect(svg).toContain(word);expect(svg).not.toMatch(/recorde|histórico de alta/);
+    }
+    const svg=renderToStaticMarkup(<SpHighlightsSlide report={report} slide={11}/>);
+    expect(svg).toContain('São Paulo lança');expect(svg).toContain('em 12 meses');
+  });
   it.each([['2T2026',3],['2T2026',2],['1T2027',3],['4T2025',3]] as const)('calcula acumulado janeiro-fechamento em%s com%smeses do trimestre', (quarter,partial)=>{
     const report=setup(quarter,partial),end=report.throughMonth!,year=spFlowWindow(report.launchSeries,`${end.slice(0,4)}-01`,end)!;
     expect(report.launchSeries!.status).toBe('ready');expect(year.months).toHaveLength(Number(end.slice(5)));
     const svg=renderToStaticMarkup(<SpHighlightsSlide report={report} slide={9}/>);
-    expect(svg).toContain(count(year.mcmv));expect(svg).toContain(count(year.total));expect(svg).toContain('acumulado do ano');
+    expect(svg).toContain(count(year.mcmv));expect(svg).toContain(count(year.total));expect(svg).toContain('São Paulo');expect(svg).toContain('no ano');
     expect(svg).not.toContain('informado pela API');expect(svg).not.toContain('padrão Econômico');
     const rolling=spReviewSnapshot(report,reviewSpSlides(report)).highlightAudit.launches.last12Months!;
     expect(rolling.months).toHaveLength(12);expect(rolling.start).toBe(shiftSpMonth(end,-11));
