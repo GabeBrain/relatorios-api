@@ -392,6 +392,15 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+## 12/11/2026 — SP: preços históricos observados sem barras vazias
+
+Novo diagnóstico do usuário (SHA-256 `504aa4d5fd114879fb8ff4af4719655b0ea94af64e2086a9da20f006f4ae27fd`) confirma médias por estoque positivo nos 13 períodos de cada slide 53/55/57. A guarda de estoque negativo em uma tipologia bloqueava as amostras históricas, inclusive o recorte de dois dormitórios sem negativo próprio. Agora permite exibir a média observada com cobertura parcial; negativos não ponderam preços e permanecem na auditoria. Não reconcilia estoque/população, não altera o fechamento nem calcula variações envolvendo parciais. Validação: 351 testes SP em 39 arquivos, tipos e lint dirigidos aprovados. Teste novo confere 13 pontos em 53/55/57 e preserva bloqueio de fechamento inválido. Sem nova observação em navegador autenticado; verificação headless do cálculo, com dados sintéticos. Métodos com esgotadas continuam indisponíveis por preços ausentes (99 tipologias no geral, 25 em um dormitório e 24 em dois no fechamento); não comprovam equivalência ao analista. Sem novas consultas API ou mudança de coleta. Fortaleza preservado.
+
+- **Autor/origem:** Codex, diagnóstico fornecido pelo usuário; base `1d3b88ac`.
+- **Etapas/pendências:** correção local para exibir 13 observações; cobertura completa e média do analista continuam pendentes. Conferir geração real após publicação.
+- **Monday:** [DESAFIO — Estudos Entidades e Institucionais](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`, referência apenas.
+
+
 ### 12/11/2026 — SP: comparar pesos de preço incluindo tipologias esgotadas — Codex
 
 - **Ambiente/funcionalidade:** SP institucional, diagnóstico e Insights do analista / Memória de cálculo.

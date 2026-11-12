@@ -13,6 +13,19 @@ function setup(){const report=buildSpTemporalPreview(recordedInput(),'3T2026');r
 const histories=(building:Record<string,unknown>)=>building.typologies_history as Record<string,unknown>[];
 
 describe('SP — projeção de oferta comprovada e VGV monetário parcial',()=>{
+  it('preserva os 13 preços observados apesar de estoque negativo histórico, sem homologar a população',()=>{
+    const {report,buildings}=setup();
+    for(const row of histories(buildings[0]))if(String(row.period).slice(0,7)!==report.throughMonth&&row.number_bedroom===1)row.typology_stock=-1;
+    const data=buildSpGranularDetails(buildings,report);
+    for(const slide of [53,55,57]){
+      expect(data.prices.series[slide]).toHaveLength(13);
+      expect(data.prices.series[slide].every(point=>point.value!==null)).toBe(true);
+      expect(data.prices.series[slide].slice(0,-1).every(point=>point.partial&&point.variation===null)).toBe(true);
+    }
+    histories(buildings[0]).find(row=>String(row.period).slice(0,7)===report.throughMonth)!.typology_stock=-1;
+    const invalidClosing=buildSpGranularDetails(buildings,report);
+    for(const slide of [53,55,57])expect(invalidClosing.prices.series[slide].at(-1)!.value).toBeNull();
+  });
   it('aplica projeção não negativa somente quando ela fecha exatamente com o município',()=>{
     const {report,buildings}=setup(),row=histories(buildings[0]).find(row=>row.period==='2026-06-01')!,old=Number(row.typology_stock);
     row.typology_stock=-1;
@@ -25,7 +38,10 @@ describe('SP — projeção de oferta comprovada e VGV monetário parcial',()=>{
     report.stockSeries!.observations!.find(row=>row.month==='2026-06'&&row.group==='Alto')!.value++;
     report.monthly![0].openingStock++;
     const mismatch=buildSpGranularDetails(buildings,report);
-    expect(mismatch.area.status).toBe('blocked');expect(mismatch.prices.series[53].find(row=>row.month==='2026-06')!.value).toBeNull();
+    expect(mismatch.area.status).toBe('blocked');
+    const sample=mismatch.prices.series[53].find(row=>row.month==='2026-06')!;
+    expect(sample.value).not.toBeNull();expect(sample.partial).toBe(true);expect(sample.variation).toBeNull();
+    expect(sample.issue).toContain('Estoques negativos não ponderam');
   });
   it('mantém quantidades e VGV final quando falta preço apenas em tipologia esgotada',()=>{
     const {report,buildings}=setup();
