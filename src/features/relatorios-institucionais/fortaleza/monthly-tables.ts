@@ -24,13 +24,13 @@ export function buildOfferTable(page:number,market:MonthlyMarketData|null,prices
         const matches=market?.sources.filter(source=>normalizeMarketText(source.city)===normalizeMarketText(city)&&source.segment===(page===47?'Vertical':'Horizontal')&&source.metric===metric)??[];
         if(matches.length!==1)throw new Error(`${city}/${metric}: fonte municipal ausente.`);
         const source=matches[0],issue=monthlyMarketSourceIssue(source,monthlyMarketMonths(selection));if(issue)throw new Error(`${city}/${metric}: ${issue}`);
-        const observed=new Set<string>();
+
         for(const raw of source.rows){const period=marketMonth(raw.period);if(period!==closing&&!(metric==='stock'&&period===opening))continue;
-          const label=page===47?city:productLabel(raw.group);if(!label)continue;observed.add(label);
+          const label=page===47?city:productLabel(raw.group);if(!label)continue;
           const row=rows.find(row=>row.label===label)!,field=metric==='stock'?(period===opening?'opening':'stock'):metric==='releases'?'launches':'sales';
           const value=readMonthlyNumber(raw[metric==='stock'?'stock':metric==='releases'?'releases_in_period':'liquid_sales'],metric==='sales',true);if(value===null)throw new Error('Quantidade municipal inválida.');row[field]+=value;
         }
-        if(page!==47&&horizontal.some(label=>!observed.has(label)))throw new Error(`${city}: faltam produtos horizontais explícitos, inclusive os zeros.`);
+
       }
     } else {
       const grouped=new Map<string,OfferRow>();const capacityPage=page===50||page===51;

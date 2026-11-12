@@ -1,0 +1,1793 @@
+﻿{
+    "78":  [
+               {
+                   "italic":  false,
+                   "text":  "TEMPO MÉDIO DA OFERTA LANÇADA E FINAL\u000b",
+                   "color":  "#1A3D57",
+                   "bold":  true,
+                   "y":  42.566614786783852,
+                   "x":  54.266667683919273,
+                   "size":  40
+               },
+               {
+                   "italic":  false,
+                   "text":  "Por Tipologia – Região Metropolitana",
+                   "color":  "#1A3D57",
+                   "bold":  false,
+                   "y":  85.766611735026046,
+                   "x":  54.266667683919273,
+                   "size":  40
+               }
+           ],
+    "77":  [
+               {
+                   "italic":  false,
+                   "text":  "PART. DO TEMPO MÉDIO DA OFERTA LANÇADA E ",
+                   "color":  "#1A3D57",
+                   "bold":  true,
+                   "y":  42.566614786783852,
+                   "x":  54.266667683919273,
+                   "size":  40
+               },
+               {
+                   "italic":  false,
+                   "text":  "FINAL\u000b",
+                   "color":  "#1A3D57",
+                   "bold":  true,
+                   "y":  85.766611735026046,
+                   "x":  54.266667683919273,
+                   "size":  40
+               },
+               {
+                   "italic":  false,
+                   "text":  "Por Padrão – Região Metropolitana",
+                   "color":  "#1A3D57",
+                   "bold":  false,
+                   "y":  128.96661376953125,
+                   "x":  54.266667683919273,
+                   "size":  40
+               }
+           ],
+    "63":  [
+               {
+                   "italic":  false,
+                   "text":  "TEMPO MÉDIO DA OFERTA LANÇADA E FINAL\u000b",
+                   "color":  "#1A3D57",
+                   "bold":  true,
+                   "y":  42.566614786783852,
+                   "x":  54.266667683919273,
+                   "size":  40
+               },
+               {
+                   "italic":  false,
+                   "text":  "Por Tipologia",
+                   "color":  "#1A3D57",
+                   "bold":  false,
+                   "y":  85.766611735026046,
+                   "x":  54.266667683919273,
+                   "size":  40
+               }
+           ],
+    "30":  [
+               {
+                   "italic":  false,
+                   "text":  "VGV VENDIDO POR PADRÃO (EM MILHÕES)\u000b",
+                   "color":  "#1A3D57",
+                   "bold":  true,
+                   "y":  24.80010477701823,
+                   "x":  54.272023518880211,
+                   "size":  40
+               },
+               {
+                   "italic":  false,
+                   "text":  "Fortaleza",
+                   "color":  "#1A3D57",
+                   "bold":  false,
+                   "y":  68.000106811523438,
+                   "x":  54.272023518880211,
+                   "size":  40
+               },
+               {
+                   "italic":  false,
+                   "text":  "Residencial Vertical",
+                   "color":  "#1A3D57",
+                   "bold":  true,
+                   "y":  128.80881754557291,
+                   "x":  43.099421183268227,
+                   "size":  24
+               }
+           ],
+    "20":  [
+               {
+                   "italic":  false,
+                   "text":  "LANÇAMENTOS ",
+                   "color":  "#FFFFFF",
+                   "bold":  false,
+                   "y":  126.6373799641927,
+                   "x":  660.90087890625,
+                   "size":  65.333333333333329
+               },
+               {
+                   "italic":  false,
+                   "text":  "Loteamentos",
+                   "color":  "#FFFFFF",
+                   "bold":  false,
+                   "y":  197.19736735026041,
+                   "x":  859.56754557291663,
+                   "size":  53.333333333333336
+               }
+           ],
+    "49":  [
+               {
+                   "italic":  false,
+                   "text":  "Localização dos Empreendimentos Verticais  -  Fortaleza",
+                   "color":  "#FFFFFF",
+                   "bold":  true,
+                   "y":  528.53328450520837,
+                   "x":  29.327033996582031,
+                   "size":  24
+               }
+           ],
+    "22":  [
+               {
+                   "italic":  false,
+                   "text":  "VGV LANÇADO POR TRIMESTRE (EM MILHÕES) - ",
+                   "color":  "#1A3D57",
+                   "bold":  true,
+                   "y":  3.2001050313313804,
+                   "x":  54.266667683919273,
+                   "size":  40
+               },
+               {
+                   "italic":  false,
+                   "text":  "LOTEAMENTOS\u000b",
+                   "color":  "#1A3D57",
+                   "bold":  true,
+                   "y":  46.400105794270836,
+                   "x":  54.266667683919273,
+                   "size":  40
+               },
+               {
+                   "italic":  false,
+                   "text":  "Fortaleza e Região Metropolitana",
+                   "color":  "#1A3D57",
+                   "bold":  false,
+                   "y":  89.600107828776046,
+                   "x":  54.266667683919273,
+                   "size":  40
+               }
+           ],
+    "13":  [
+               {
+                   "italic":  false,
+                   "text":  "UNIDADES LANÇADAS POR PADRÃO\u000b",
+                   "color":  "#1A3D57",
+                   "bold":  true,
+                   "y":  24.80010477701823,
+                   "x":  54.272023518880211,
+                   "size":  40
+               },
+               {
+                   "italic":  false,
+                   "text":  "Fortaleza",
+                   "color":  "#1A3D57",
+                   "bold":  false,
+                   "y":  68.000106811523438,
+                   "x":  54.272023518880211,
+                   "size":  40
+               },
+               {
+                   "italic":  false,
+                   "text":  "Residencial Vertical",
+                   "color":  "#1A3D57",
+                   "bold":  true,
+                   "y":  167.01280721028647,
+                   "x":  43.099421183268227,
+                   "size":  24
+               }
+           ],
+    "47":  [
+               {
+                   "italic":  false,
+                   "text":  "Loteamento Fechado",
+                   "color":  "#1A3D57",
+                   "bold":  true,
+                   "y":  141.22682698567709,
+                   "x":  127.65175374348958,
+                   "size":  24
+               }
+           ],
+    "73":  [
+               {
+                   "italic":  false,
+                   "text":  "OFERTA FINAL TOTAL E IVV POR ",
+                   "color":  "#1A3D57",
+                   "bold":  true,
+                   "y":  78.053965250651046,
+                   "x":  54.266667683919273,
+                   "size":  40
+               },
+               {
+                   "italic":  false,
+                   "text":  "MUNICÍPIO\u000b",
+                   "color":  "#1A3D57",
+                   "bold":  true,
+                   "y":  121.25396728515625,
+                   "x":  54.266667683919273,
+                   "size":  40
+               },
+               {
+                   "italic":  false,
+                   "text":  "Residencial Vertical - Região Metropolitana",
+                   "color":  "#1A3D57",
+                   "bold":  false,
+                   "y":  164.45395914713541,
+                   "x":  54.266667683919273,
+                   "size":  40
+               }
+           ],
+    "68":  [
+               {
+                   "italic":  false,
+                   "text":  "PREÇO MÉDIO DO M² PRIVATIVO POR TIPOLOGIA ",
+                   "color":  "#1A3D57",
+                   "bold":  true,
+                   "y":  48.727666219075523,
+                   "x":  54.266560872395836,
+                   "size":  40
+               },
+               {
+                   "italic":  false,
+                   "text":  "(R$/m²)",
+                   "color":  "#1A3D57",
+                   "bold":  true,
+                   "y":  91.9276631673177,
+                   "x":  54.266560872395836,
+                   "size":  40
+               },
+               {
+                   "italic":  false,
+                   "text":  "Fortaleza",
+                   "color":  "#1A3D57",
+                   "bold":  false,
+                   "y":  135.12766520182291,
+                   "x":  54.266560872395836,
+                   "size":  40
+               }
+           ],
+    "12":  [
+               {
+                   "italic":  false,
+                   "text":  "UNIDADES LANÇADAS POR TRIMESTRE\u000b",
+                   "color":  "#1A3D57",
+                   "bold":  true,
+                   "y":  24.80010477701823,
+                   "x":  54.272023518880211,
+                   "size":  40
+               },
+               {
+                   "italic":  false,
+                   "text":  "Fortaleza e Região Metropolitana",
+                   "color":  "#1A3D57",
+                   "bold":  false,
+                   "y":  68.000106811523438,
+                   "x":  54.272023518880211,
+                   "size":  40
+               }
+           ],
+    "65":  [
+               {
+                   "italic":  false,
+                   "text":  "ANÁLISE GERAL\u000b",
+                   "color":  "#FFFFFF",
+                   "bold":  true,
+                   "y":  171.337646484375,
+                   "x":  709.708740234375,
+                   "size":  58.666666666666664
+               },
+               {
+                   "italic":  false,
+                   "text":  "DO MERCADO HORIZONTAL",
+                   "color":  "#FFFFFF",
+                   "bold":  true,
+                   "y":  234.6976318359375,
+                   "x":  362.0421142578125,
+                   "size":  58.666666666666664
+               },
+               {
+                   "italic":  false,
+                   "text":  "Fortaleza",
+                   "color":  "#FFFFFF",
+                   "bold":  false,
+                   "y":  343.79683430989581,
+                   "x":  1004.7320963541666,
+                   "size":  42.666666666666664
+               }
+           ],
+    "40":  [
+               {
+                   "italic":  false,
+                   "text":  "OFERTA FINAL POR PADRÃO\u000b",
+                   "color":  "#1A3D57",
+                   "bold":  true,
+                   "y":  22.102256774902344,
+                   "x":  43.099421183268227,
+                   "size":  40
+               }
+           ],
+    "14":  [
+               {
+                   "italic":  false,
+                   "text":  "UNIDADES LANÇADAS POR TRIMESTRE \u000b",
+                   "color":  "#1A3D57",
+                   "bold":  true,
+                   "y":  24.80010477701823,
+                   "x":  51.352020263671875,
+                   "size":  40
+               },
+               {
+                   "italic":  false,
+                   "text":  "Região Metropolitana",
+                   "color":  "#1A3D57",
+                   "bold":  false,
+                   "y":  68.000106811523438,
+                   "x":  51.352020263671875,
+                   "size":  40
+               }
+           ],
+    "26":  [
+               {
+                   "italic":  false,
+                   "text":  "VENDAS LÍQUIDAS E LANÇAMENTOS\u000b",
+                   "color":  "#1A3D57",
+                   "bold":  true,
+                   "y":  24.80010477701823,
+                   "x":  54.272023518880211,
+                   "size":  40
+               },
+               {
+                   "italic":  false,
+                   "text":  "Fortaleza – Acumulado 12 meses",
+                   "color":  "#1A3D57",
+                   "bold":  false,
+                   "y":  68.000106811523438,
+                   "x":  54.272023518880211,
+                   "size":  40
+               },
+               {
+                   "italic":  false,
+                   "text":  "Residencial Vertical",
+                   "color":  "#1A3D57",
+                   "bold":  true,
+                   "y":  140.04409790039063,
+                   "x":  43.099421183268227,
+                   "size":  24
+               }
+           ],
+    "17":  [
+               {
+                   "italic":  false,
+                   "text":  "VGV LANÇADO POR TRIMESTRE (EM MILHÕES)\u000b",
+                   "color":  "#1A3D57",
+                   "bold":  true,
+                   "y":  24.80010477701823,
+                   "x":  54.266667683919273,
+                   "size":  40
+               },
+               {
+                   "italic":  false,
+                   "text":  "Fortaleza e Região Metropolitana",
+                   "color":  "#1A3D57",
+                   "bold":  false,
+                   "y":  68.000106811523438,
+                   "x":  54.266667683919273,
+                   "size":  40
+               }
+           ],
+    "28":  [
+               {
+                   "italic":  false,
+                   "text":  "VENDAS LÍQUIDAS E LANÇAMENTOS\u000b",
+                   "color":  "#1A3D57",
+                   "bold":  true,
+                   "y":  24.80010477701823,
+                   "x":  54.272023518880211,
+                   "size":  40
+               },
+               {
+                   "italic":  false,
+                   "text":  "Região Metropolitana – Acumulado 12 meses",
+                   "color":  "#1A3D57",
+                   "bold":  false,
+                   "y":  68.000106811523438,
+                   "x":  54.272023518880211,
+                   "size":  40
+               },
+               {
+                   "italic":  false,
+                   "text":  "Residencial Vertical",
+                   "color":  "#1A3D57",
+                   "bold":  true,
+                   "y":  140.04409790039063,
+                   "x":  43.099421183268227,
+                   "size":  24
+               }
+           ],
+    "76":  [
+               {
+                   "italic":  false,
+                   "text":  "TEMPO MÉDIO DA OFERTA LANÇADA E ",
+                   "color":  "#1A3D57",
+                   "bold":  true,
+                   "y":  31.633384704589844,
+                   "x":  54.266667683919273,
+                   "size":  40
+               },
+               {
+                   "italic":  false,
+                   "text":  "FINAL\u000b",
+                   "color":  "#1A3D57",
+                   "bold":  true,
+                   "y":  74.833384195963546,
+                   "x":  54.266667683919273,
+                   "size":  40
+               },
+               {
+                   "italic":  false,
+                   "text":  "Por Padrão – Região Metropolitana",
+                   "color":  "#1A3D57",
+                   "bold":  false,
+                   "y":  118.03338623046875,
+                   "x":  54.266667683919273,
+                   "size":  40
+               }
+           ],
+    "36":  [
+               {
+                   "italic":  false,
+                   "text":  "OFERTA FINAL \u000b",
+                   "color":  "#FFFFFF",
+                   "bold":  false,
+                   "y":  128.99958292643228,
+                   "x":  691.337646484375,
+                   "size":  65.333333333333329
+               },
+               {
+                   "italic":  false,
+                   "text":  "Vertical e Horizontal ",
+                   "color":  "#FFFFFF",
+                   "bold":  false,
+                   "y":  199.5595703125,
+                   "x":  703.87760416666663,
+                   "size":  53.333333333333336
+               }
+           ],
+    "31":  [
+
+           ],
+    "50":  [
+               {
+                   "italic":  false,
+                   "text":  "Empreendimentos Verticais / Preço por m²",
+                   "color":  "#FFFFFF",
+                   "bold":  true,
+                   "y":  528.53328450520837,
+                   "x":  29.327033996582031,
+                   "size":  24
+               }
+           ],
+    "45":  [
+               {
+                   "italic":  false,
+                   "text":  "Para cálculo do preço médio são desconsiderados:",
+                   "color":  "#181717",
+                   "bold":  true,
+                   "y":  146.27973429361978,
+                   "x":  791.16943359375,
+                   "size":  16
+               },
+               {
+                   "italic":  false,
+                   "text":  "Tipologias com estoque zerado",
+                   "color":  "#181717",
+                   "bold":  false,
+                   "y":  184.67972819010416,
+                   "x":  974.18937174479163,
+                   "size":  16
+               },
+               {
+                   "italic":  false,
+                   "text":  "Coberturas, Lajes, Duplex e Gardens.",
+                   "color":  "#181717",
+                   "bold":  false,
+                   "y":  203.87974039713541,
+                   "x":  929.02278645833337,
+                   "size":  16
+               },
+               {
+                   "italic":  false,
+                   "text":  "Vertical",
+                   "color":  "#1A3D57",
+                   "bold":  true,
+                   "y":  141.22682698567709,
+                   "x":  122.18839518229167,
+                   "size":  24
+               }
+           ],
+    "60":  [
+               {
+                   "italic":  false,
+                   "text":  "OFERTA LANÇADA E FINAL POR TIPOLOGIA – ",
+                   "color":  "#1A3D57",
+                   "bold":  true,
+                   "y":  71.784042358398438,
+                   "x":  54.266667683919273,
+                   "size":  40
+               },
+               {
+                   "italic":  false,
+                   "text":  "VERTICAL\u000b",
+                   "color":  "#1A3D57",
+                   "bold":  true,
+                   "y":  114.98403930664063,
+                   "x":  54.266667683919273,
+                   "size":  40
+               },
+               {
+                   "italic":  false,
+                   "text":  "Fortaleza – Sem Econômico",
+                   "color":  "#1A3D57",
+                   "bold":  false,
+                   "y":  158.18404134114584,
+                   "x":  54.266667683919273,
+                   "size":  40
+               }
+           ],
+    "38":  [
+               {
+                   "italic":  false,
+                   "text":  "OFERTA FINAL POR PADRÃO\u000b",
+                   "color":  "#1A3D57",
+                   "bold":  true,
+                   "y":  22.102256774902344,
+                   "x":  43.099421183268227,
+                   "size":  40
+               },
+               {
+                   "italic":  false,
+                   "text":  "Fortaleza – Residencial Vertical",
+                   "color":  "#1A3D57",
+                   "bold":  false,
+                   "y":  65.302256266276046,
+                   "x":  43.099421183268227,
+                   "size":  40
+               }
+           ],
+    "83":  [
+               {
+                   "italic":  false,
+                   "text":  "PREÇO MÉDIO DO M² PRIVATIVO POR TIPOLOGIA ",
+                   "color":  "#1A3D57",
+                   "bold":  true,
+                   "y":  31.633384704589844,
+                   "x":  54.266560872395836,
+                   "size":  40
+               },
+               {
+                   "italic":  false,
+                   "text":  "(R$/m²)",
+                   "color":  "#1A3D57",
+                   "bold":  true,
+                   "y":  74.833384195963546,
+                   "x":  54.266560872395836,
+                   "size":  40
+               },
+               {
+                   "italic":  false,
+                   "text":  "Região Metropolitana",
+                   "color":  "#1A3D57",
+                   "bold":  false,
+                   "y":  118.03338623046875,
+                   "x":  54.266560872395836,
+                   "size":  40
+               }
+           ],
+    "85":  [
+               {
+                   "italic":  false,
+                   "text":  "CONSULTORES\u000b",
+                   "color":  "#FFFFFF",
+                   "bold":  true,
+                   "y":  175.59647623697916,
+                   "x":  699.98502604166663,
+                   "size":  58.666666666666664
+               },
+               {
+                   "italic":  false,
+                   "text":  "DO ESTUDO",
+                   "color":  "#FFFFFF",
+                   "bold":  true,
+                   "y":  238.95648193359375,
+                   "x":  791.48494466145837,
+                   "size":  58.666666666666664
+               }
+           ],
+    "82":  [
+               {
+                   "italic":  false,
+                   "text":  "OFERTA LANÇADA E FINAL POR ANO DE ",
+                   "color":  "#1A3D57",
+                   "bold":  true,
+                   "y":  48.921681722005211,
+                   "x":  54.266560872395836,
+                   "size":  40
+               },
+               {
+                   "italic":  false,
+                   "text":  "LANÇAMENTO",
+                   "color":  "#1A3D57",
+                   "bold":  true,
+                   "y":  92.121683756510421,
+                   "x":  54.266560872395836,
+                   "size":  40
+               },
+               {
+                   "italic":  false,
+                   "text":  "Região Metropolitana",
+                   "color":  "#1A3D57",
+                   "bold":  false,
+                   "y":  135.32167561848959,
+                   "x":  54.266560872395836,
+                   "size":  40
+               },
+               {
+                   "italic":  false,
+                   "text":  "*Até junho",
+                   "color":  "#1A3D57",
+                   "bold":  false,
+                   "y":  588.4359130859375,
+                   "x":  54.266560872395836,
+                   "size":  14.666666666666666
+               }
+           ],
+    "23":  [
+               {
+                   "italic":  false,
+                   "text":  "VENDAS \u000b",
+                   "color":  "#FFFFFF",
+                   "bold":  false,
+                   "y":  75.380157470703125,
+                   "x":  801.65047200520837,
+                   "size":  89.333333333333329
+               },
+               {
+                   "italic":  false,
+                   "text":  "Vertical e ",
+                   "color":  "#FFFFFF",
+                   "bold":  false,
+                   "y":  171.86014811197916,
+                   "x":  809.25048828125,
+                   "size":  89.333333333333329
+               },
+               {
+                   "italic":  false,
+                   "text":  "Horizontal",
+                   "color":  "#FFFFFF",
+                   "bold":  false,
+                   "y":  268.34014892578125,
+                   "x":  775.25048828125,
+                   "size":  89.333333333333329
+               }
+           ],
+    "51":  [
+               {
+                   "italic":  false,
+                   "text":  "Empreendimentos Verticais / Preço por m²",
+                   "color":  "#FFFFFF",
+                   "bold":  true,
+                   "y":  543.14200846354163,
+                   "x":  29.326929728190105,
+                   "size":  24
+               }
+           ],
+    "27":  [
+               {
+                   "italic":  false,
+                   "text":  "UNIDADES VENDIDAS POR PADRÃO\u000b",
+                   "color":  "#1A3D57",
+                   "bold":  true,
+                   "y":  24.80010477701823,
+                   "x":  54.272023518880211,
+                   "size":  40
+               },
+               {
+                   "italic":  false,
+                   "text":  "Região Metropolitana",
+                   "color":  "#1A3D57",
+                   "bold":  false,
+                   "y":  68.000106811523438,
+                   "x":  54.272023518880211,
+                   "size":  40
+               },
+               {
+                   "italic":  false,
+                   "text":  "Residencial Vertical",
+                   "color":  "#1A3D57",
+                   "bold":  true,
+                   "y":  167.01280721028647,
+                   "x":  43.099421183268227,
+                   "size":  24
+               }
+           ],
+    "71":  [
+               {
+                   "italic":  false,
+                   "text":  "Localização dos Empreendimentos Verticais  -  ",
+                   "color":  "#FFFFFF",
+                   "bold":  true,
+                   "y":  514.13330078125,
+                   "x":  29.327033996582031,
+                   "size":  24
+               },
+               {
+                   "italic":  false,
+                   "text":  "Região Metropolitana de Fortaleza",
+                   "color":  "#FFFFFF",
+                   "bold":  true,
+                   "y":  542.93326822916663,
+                   "x":  29.327033996582031,
+                   "size":  24
+               }
+           ],
+    "59":  [
+               {
+                   "italic":  false,
+                   "text":  "OFERTA LANÇADA E FINAL POR TIPOLOGIA – ",
+                   "color":  "#1A3D57",
+                   "bold":  true,
+                   "y":  71.784042358398438,
+                   "x":  54.266667683919273,
+                   "size":  40
+               },
+               {
+                   "italic":  false,
+                   "text":  "VERTICAL\u000b",
+                   "color":  "#1A3D57",
+                   "bold":  true,
+                   "y":  114.98403930664063,
+                   "x":  54.266667683919273,
+                   "size":  40
+               },
+               {
+                   "italic":  false,
+                   "text":  "Fortaleza",
+                   "color":  "#1A3D57",
+                   "bold":  false,
+                   "y":  158.18404134114584,
+                   "x":  54.266667683919273,
+                   "size":  40
+               }
+           ],
+    "86":  [
+               {
+                   "italic":  false,
+                   "text":  "EQUIPE TÉCNICA ",
+                   "color":  "#1A3D57",
+                   "bold":  true,
+                   "y":  294.04461669921875,
+                   "x":  847.79833984375,
+                   "size":  37.333333333333336
+               },
+               {
+                   "italic":  false,
+                   "text":  "BRAIN ",
+                   "color":  "#1A3D57",
+                   "bold":  true,
+                   "y":  329.88462320963544,
+                   "x":  847.79833984375,
+                   "size":  37.333333333333336
+               }
+           ],
+    "69":  [
+               {
+                   "italic":  false,
+                   "text":  "MÍNIMO, MÉDIA E MÁXIMA\u000b",
+                   "color":  "#1A3D57",
+                   "bold":  true,
+                   "y":  34.4667714436849,
+                   "x":  63.657847086588539,
+                   "size":  40
+               },
+               {
+                   "italic":  false,
+                   "text":  "Fortaleza",
+                   "color":  "#1A3D57",
+                   "bold":  false,
+                   "y":  77.666773478190109,
+                   "x":  63.657847086588539,
+                   "size":  40
+               }
+           ],
+    "54":  [
+               {
+                   "italic":  false,
+                   "text":  "ÍNDICE DE VELOCIDADE DE VENDAS ",
+                   "color":  "#1A3D57",
+                   "bold":  true,
+                   "y":  50.347610473632813,
+                   "x":  54.266667683919273,
+                   "size":  40
+               },
+               {
+                   "italic":  false,
+                   "text":  "LÍQUIDAS (IVV)\u000b",
+                   "color":  "#1A3D57",
+                   "bold":  true,
+                   "y":  93.547607421875,
+                   "x":  54.266667683919273,
+                   "size":  40
+               },
+               {
+                   "italic":  false,
+                   "text":  "Fortaleza",
+                   "color":  "#1A3D57",
+                   "bold":  false,
+                   "y":  136.74760945638022,
+                   "x":  54.266667683919273,
+                   "size":  40
+               }
+           ],
+    "66":  [
+               {
+                   "italic":  false,
+                   "text":  "OFERTA LANÇADA E FINAL POR TIPO\u000b",
+                   "color":  "#1A3D57",
+                   "bold":  true,
+                   "y":  71.784042358398438,
+                   "x":  54.266667683919273,
+                   "size":  40
+               },
+               {
+                   "italic":  false,
+                   "text":  "Fortaleza",
+                   "color":  "#1A3D57",
+                   "bold":  false,
+                   "y":  114.98403930664063,
+                   "x":  54.266667683919273,
+                   "size":  40
+               }
+           ],
+    "57":  [
+               {
+                   "italic":  false,
+                   "text":  "OFERTA FINAL TOTAL E IVV - POR ",
+                   "color":  "#1A3D57",
+                   "bold":  true,
+                   "y":  46.633280436197914,
+                   "x":  54.266667683919273,
+                   "size":  40
+               },
+               {
+                   "italic":  false,
+                   "text":  "BAIRRO\u000b",
+                   "color":  "#1A3D57",
+                   "bold":  true,
+                   "y":  89.833282470703125,
+                   "x":  54.266667683919273,
+                   "size":  40
+               },
+               {
+                   "italic":  false,
+                   "text":  "Fortaleza – 3/4 | Residencial Vertical",
+                   "color":  "#1A3D57",
+                   "bold":  false,
+                   "y":  133.03328450520834,
+                   "x":  54.266667683919273,
+                   "size":  40
+               }
+           ],
+    "43":  [
+               {
+                   "italic":  false,
+                   "text":  "PREÇO MÉDIO/M² \u000b",
+                   "color":  "#1A3D57",
+                   "bold":  true,
+                   "y":  17.769344329833984,
+                   "x":  56.992441813151039,
+                   "size":  40
+               },
+               {
+                   "italic":  false,
+                   "text":  "Fortaleza",
+                   "color":  "#1A3D57",
+                   "bold":  false,
+                   "y":  60.969345092773438,
+                   "x":  56.992441813151039,
+                   "size":  40
+               }
+           ],
+    "80":  [
+               {
+                   "italic":  false,
+                   "text":  "ANÁLISE GERAL\u000b",
+                   "color":  "#FFFFFF",
+                   "bold":  true,
+                   "y":  150.14519246419272,
+                   "x":  700.89713541666663,
+                   "size":  58.666666666666664
+               },
+               {
+                   "italic":  false,
+                   "text":  "DO MERCADO HORIZONTAL",
+                   "color":  "#FFFFFF",
+                   "bold":  true,
+                   "y":  213.50518798828125,
+                   "x":  353.23042805989581,
+                   "size":  58.666666666666664
+               },
+               {
+                   "italic":  false,
+                   "text":  "Região Metropolitana",
+                   "color":  "#FFFFFF",
+                   "bold":  false,
+                   "y":  343.79683430989581,
+                   "x":  777.03304036458337,
+                   "size":  42.666666666666664
+               }
+           ],
+    "35":  [
+               {
+                   "italic":  false,
+                   "text":  "VGV VENDIDO POR TRIMESTRE (EM MILHÕES) – ",
+                   "color":  "#1A3D57",
+                   "bold":  true,
+                   "y":  3.2001050313313804,
+                   "x":  54.266667683919273,
+                   "size":  40
+               },
+               {
+                   "italic":  false,
+                   "text":  "LOTEAMENTOS\u000b",
+                   "color":  "#1A3D57",
+                   "bold":  true,
+                   "y":  46.400105794270836,
+                   "x":  54.266667683919273,
+                   "size":  40
+               },
+               {
+                   "italic":  false,
+                   "text":  "Fortaleza e Região Metropolitana",
+                   "color":  "#1A3D57",
+                   "bold":  false,
+                   "y":  89.600107828776046,
+                   "x":  54.266667683919273,
+                   "size":  40
+               }
+           ],
+    "41":  [
+               {
+                   "italic":  false,
+                   "text":  "PREÇOS\u000b",
+                   "color":  "#FFFFFF",
+                   "bold":  true,
+                   "y":  122.68588256835938,
+                   "x":  798.12784830729163,
+                   "size":  89.333333333333329
+               },
+               {
+                   "italic":  false,
+                   "text":  "Fortaleza",
+                   "color":  "#FFFFFF",
+                   "bold":  false,
+                   "y":  219.16587320963541,
+                   "x":  805.847900390625,
+                   "size":  89.333333333333329
+               }
+           ],
+    "74":  [
+               {
+                   "italic":  false,
+                   "text":  "OFERTA LANÇADA E FINAL POR TIPOLOGIA\u000b",
+                   "color":  "#1A3D57",
+                   "bold":  true,
+                   "y":  81.442626953125,
+                   "x":  54.266667683919273,
+                   "size":  40
+               },
+               {
+                   "italic":  false,
+                   "text":  "Residencial Vertical - Região Metropolitana",
+                   "color":  "#1A3D57",
+                   "bold":  false,
+                   "y":  124.6426289876302,
+                   "x":  54.266667683919273,
+                   "size":  40
+               }
+           ],
+    "34":  [
+               {
+                   "italic":  false,
+                   "text":  "UNIDADES VENDIDAS POR TRIMESTRE - ",
+                   "color":  "#1A3D57",
+                   "bold":  true,
+                   "y":  -0.47128609816233319,
+                   "x":  54.272023518880211,
+                   "size":  40
+               },
+               {
+                   "italic":  false,
+                   "text":  "LOTEAMENTOS \u000b",
+                   "color":  "#1A3D57",
+                   "bold":  true,
+                   "y":  42.728713989257813,
+                   "x":  54.272023518880211,
+                   "size":  40
+               },
+               {
+                   "italic":  false,
+                   "text":  "Fortaleza e Região Metropolitana",
+                   "color":  "#1A3D57",
+                   "bold":  false,
+                   "y":  85.9287109375,
+                   "x":  54.272023518880211,
+                   "size":  40
+               }
+           ],
+    "62":  [
+               {
+                   "italic":  false,
+                   "text":  "PART. DO TEMPO MÉDIO DA OFERTA LANÇADA E ",
+                   "color":  "#1A3D57",
+                   "bold":  true,
+                   "y":  42.566614786783852,
+                   "x":  54.266667683919273,
+                   "size":  40
+               },
+               {
+                   "italic":  false,
+                   "text":  "FINAL\u000b",
+                   "color":  "#1A3D57",
+                   "bold":  true,
+                   "y":  85.766611735026046,
+                   "x":  54.266667683919273,
+                   "size":  40
+               },
+               {
+                   "italic":  false,
+                   "text":  "Por Padrão",
+                   "color":  "#1A3D57",
+                   "bold":  false,
+                   "y":  128.96661376953125,
+                   "x":  54.266667683919273,
+                   "size":  40
+               }
+           ],
+    "53":  [
+               {
+                   "italic":  false,
+                   "text":  "Empreendimentos Verticais / Preço por m²",
+                   "color":  "#FFFFFF",
+                   "bold":  true,
+                   "y":  535.86083984375,
+                   "x":  19.773858388264973,
+                   "size":  24
+               }
+           ],
+    "44":  [
+               {
+                   "italic":  false,
+                   "text":  "PREÇOS\u000b",
+                   "color":  "#FFFFFF",
+                   "bold":  false,
+                   "y":  46.183832804361977,
+                   "x":  844.70255533854163,
+                   "size":  80
+               },
+               {
+                   "italic":  false,
+                   "text":  "Região ",
+                   "color":  "#FFFFFF",
+                   "bold":  false,
+                   "y":  132.58383178710938,
+                   "x":  931.81591796875,
+                   "size":  80
+               },
+               {
+                   "italic":  false,
+                   "text":  "Metropolitana",
+                   "color":  "#FFFFFF",
+                   "bold":  false,
+                   "y":  218.98382568359375,
+                   "x":  687.52921549479163,
+                   "size":  80
+               }
+           ],
+    "72":  [
+               {
+                   "italic":  false,
+                   "text":  "ÍNDICE DE VELOCIDADE DE VENDAS ",
+                   "color":  "#1A3D57",
+                   "bold":  true,
+                   "y":  50.347610473632813,
+                   "x":  54.266667683919273,
+                   "size":  40
+               },
+               {
+                   "italic":  false,
+                   "text":  "LÍQUIDAS (IVV)\u000b",
+                   "color":  "#1A3D57",
+                   "bold":  true,
+                   "y":  93.547607421875,
+                   "x":  54.266667683919273,
+                   "size":  40
+               },
+               {
+                   "italic":  false,
+                   "text":  "Região Metropolitana",
+                   "color":  "#1A3D57",
+                   "bold":  false,
+                   "y":  136.74760945638022,
+                   "x":  54.266667683919273,
+                   "size":  40
+               }
+           ],
+    "11":  [
+               {
+                   "italic":  false,
+                   "text":  "EMPREENDIMENTOS LANÇADOS POR TRIMESTRE\u000b",
+                   "color":  "#1A3D57",
+                   "bold":  true,
+                   "y":  24.80010477701823,
+                   "x":  54.272023518880211,
+                   "size":  40
+               },
+               {
+                   "italic":  false,
+                   "text":  "Por Padrão | Fortaleza",
+                   "color":  "#1A3D57",
+                   "bold":  false,
+                   "y":  68.000106811523438,
+                   "x":  54.272023518880211,
+                   "size":  40
+               },
+               {
+                   "italic":  false,
+                   "text":  "Residencial Vertical",
+                   "color":  "#1A3D57",
+                   "bold":  true,
+                   "y":  167.01280721028647,
+                   "x":  43.099421183268227,
+                   "size":  24
+               }
+           ],
+    "70":  [
+               {
+                   "italic":  false,
+                   "text":  "ANÁLISE GERAL\u000b",
+                   "color":  "#FFFFFF",
+                   "bold":  true,
+                   "y":  170.99979654947916,
+                   "x":  700.90266927083337,
+                   "size":  58.666666666666664
+               },
+               {
+                   "italic":  false,
+                   "text":  "DO MERCADO",
+                   "color":  "#FFFFFF",
+                   "bold":  true,
+                   "y":  234.35978190104166,
+                   "x":  767.90266927083337,
+                   "size":  58.666666666666664
+               },
+               {
+                   "italic":  false,
+                   "text":  "Região Metropolitana",
+                   "color":  "#FFFFFF",
+                   "bold":  false,
+                   "y":  343.79683430989581,
+                   "x":  777.03304036458337,
+                   "size":  42.666666666666664
+               }
+           ],
+    "58":  [
+               {
+                   "italic":  false,
+                   "text":  "OFERTA FINAL TOTAL E IVV - POR ",
+                   "color":  "#1A3D57",
+                   "bold":  true,
+                   "y":  46.633280436197914,
+                   "x":  54.266667683919273,
+                   "size":  40
+               },
+               {
+                   "italic":  false,
+                   "text":  "BAIRRO\u000b",
+                   "color":  "#1A3D57",
+                   "bold":  true,
+                   "y":  89.833282470703125,
+                   "x":  54.266667683919273,
+                   "size":  40
+               },
+               {
+                   "italic":  false,
+                   "text":  "Fortaleza – 4/4 | Residencial Vertical",
+                   "color":  "#1A3D57",
+                   "bold":  false,
+                   "y":  133.03328450520834,
+                   "x":  54.266667683919273,
+                   "size":  40
+               }
+           ],
+    "87":  [
+               {
+                   "italic":  false,
+                   "text":  "EQUIPE TÉCNICA ",
+                   "color":  "#1A3D57",
+                   "bold":  true,
+                   "y":  294.04461669921875,
+                   "x":  847.79833984375,
+                   "size":  37.333333333333336
+               },
+               {
+                   "italic":  false,
+                   "text":  "SINDUSCON-CE",
+                   "color":  "#1A3D57",
+                   "bold":  true,
+                   "y":  329.88462320963544,
+                   "x":  847.79833984375,
+                   "size":  37.333333333333336
+               }
+           ],
+    "33":  [
+               {
+                   "italic":  false,
+                   "text":  "VENDAS ",
+                   "color":  "#FFFFFF",
+                   "bold":  false,
+                   "y":  123.62015787760417,
+                   "x":  792.12784830729163,
+                   "size":  89.333333333333329
+               },
+               {
+                   "italic":  false,
+                   "text":  "Loteamentos",
+                   "color":  "#FFFFFF",
+                   "bold":  false,
+                   "y":  220.10015869140625,
+                   "x":  654.96126302083337,
+                   "size":  89.333333333333329
+               }
+           ],
+    "88":  [
+               {
+                   "italic":  false,
+                   "text":  "EQUIPE TÉCNICA ",
+                   "color":  "#1A3D57",
+                   "bold":  true,
+                   "y":  69.696797688802079,
+                   "x":  64.146143595377609,
+                   "size":  37.333333333333336
+               },
+               {
+                   "italic":  false,
+                   "text":  "BRAIN ",
+                   "color":  "#1A3D57",
+                   "bold":  true,
+                   "y":  105.5367940266927,
+                   "x":  64.146143595377609,
+                   "size":  37.333333333333336
+               }
+           ],
+    "67":  [
+               {
+                   "italic":  false,
+                   "text":  "OFERTA LANÇADA E FINAL POR ANO DE ",
+                   "color":  "#1A3D57",
+                   "bold":  true,
+                   "y":  48.921681722005211,
+                   "x":  54.266560872395836,
+                   "size":  40
+               },
+               {
+                   "italic":  false,
+                   "text":  "LANÇAMENTO",
+                   "color":  "#1A3D57",
+                   "bold":  true,
+                   "y":  92.121683756510421,
+                   "x":  54.266560872395836,
+                   "size":  40
+               },
+               {
+                   "italic":  false,
+                   "text":  "Fortaleza",
+                   "color":  "#1A3D57",
+                   "bold":  false,
+                   "y":  135.32167561848959,
+                   "x":  54.266560872395836,
+                   "size":  40
+               },
+               {
+                   "italic":  false,
+                   "text":  "*Até junho",
+                   "color":  "#1A3D57",
+                   "bold":  false,
+                   "y":  588.4359130859375,
+                   "x":  54.266560872395836,
+                   "size":  14.666666666666666
+               }
+           ],
+    "56":  [
+               {
+                   "italic":  false,
+                   "text":  "OFERTA FINAL TOTAL E IVV - POR ",
+                   "color":  "#1A3D57",
+                   "bold":  true,
+                   "y":  46.633280436197914,
+                   "x":  54.266667683919273,
+                   "size":  40
+               },
+               {
+                   "italic":  false,
+                   "text":  "BAIRRO\u000b",
+                   "color":  "#1A3D57",
+                   "bold":  true,
+                   "y":  89.833282470703125,
+                   "x":  54.266667683919273,
+                   "size":  40
+               },
+               {
+                   "italic":  false,
+                   "text":  "Fortaleza – 2/4 | Residencial Vertical",
+                   "color":  "#1A3D57",
+                   "bold":  false,
+                   "y":  133.03328450520834,
+                   "x":  54.266667683919273,
+                   "size":  40
+               }
+           ],
+    "16":  [
+
+           ],
+    "64":  [
+               {
+                   "italic":  false,
+                   "text":  "PART. DO TEMPO MÉDIO DA OFERTA LANÇADA E ",
+                   "color":  "#1A3D57",
+                   "bold":  true,
+                   "y":  42.566614786783852,
+                   "x":  54.266667683919273,
+                   "size":  40
+               },
+               {
+                   "italic":  false,
+                   "text":  "FINAL\u000b",
+                   "color":  "#1A3D57",
+                   "bold":  true,
+                   "y":  85.766611735026046,
+                   "x":  54.266667683919273,
+                   "size":  40
+               },
+               {
+                   "italic":  false,
+                   "text":  "Por Tipologia",
+                   "color":  "#1A3D57",
+                   "bold":  false,
+                   "y":  128.96661376953125,
+                   "x":  54.266667683919273,
+                   "size":  40
+               }
+           ],
+    "24":  [
+               {
+                   "italic":  false,
+                   "text":  "UNIDADES VENDIDAS POR TRIMESTRE \u000b",
+                   "color":  "#1A3D57",
+                   "bold":  true,
+                   "y":  24.80010477701823,
+                   "x":  54.272023518880211,
+                   "size":  40
+               },
+               {
+                   "italic":  false,
+                   "text":  "Fortaleza e Região Metropolitana",
+                   "color":  "#1A3D57",
+                   "bold":  false,
+                   "y":  68.000106811523438,
+                   "x":  54.272023518880211,
+                   "size":  40
+               }
+           ],
+    "19":  [
+
+           ],
+    "29":  [
+               {
+                   "italic":  false,
+                   "text":  "VGV VENDIDO POR TRIMESTRE (EM MILHÕES)\u000b",
+                   "color":  "#1A3D57",
+                   "bold":  true,
+                   "y":  24.80010477701823,
+                   "x":  54.266667683919273,
+                   "size":  40
+               },
+               {
+                   "italic":  false,
+                   "text":  "Fortaleza e Região Metropolitana",
+                   "color":  "#1A3D57",
+                   "bold":  false,
+                   "y":  68.000106811523438,
+                   "x":  54.266667683919273,
+                   "size":  40
+               }
+           ],
+    "61":  [
+               {
+                   "italic":  false,
+                   "text":  "TEMPO MÉDIO DA OFERTA LANÇADA E FINAL\u000b",
+                   "color":  "#1A3D57",
+                   "bold":  true,
+                   "y":  42.566614786783852,
+                   "x":  54.266667683919273,
+                   "size":  40
+               },
+               {
+                   "italic":  false,
+                   "text":  "Por Padrão",
+                   "color":  "#1A3D57",
+                   "bold":  false,
+                   "y":  85.766611735026046,
+                   "x":  54.266667683919273,
+                   "size":  40
+               }
+           ],
+    "37":  [
+               {
+                   "italic":  false,
+                   "text":  "OFERTA FINAL POR TRIMESTRE\u000b",
+                   "color":  "#1A3D57",
+                   "bold":  true,
+                   "y":  22.102256774902344,
+                   "x":  43.099421183268227,
+                   "size":  40
+               },
+               {
+                   "italic":  false,
+                   "text":  "Fortaleza e Região Metropolitana",
+                   "color":  "#1A3D57",
+                   "bold":  false,
+                   "y":  65.302256266276046,
+                   "x":  43.099421183268227,
+                   "size":  40
+               }
+           ],
+    "52":  [
+               {
+                   "italic":  false,
+                   "text":  "Empreendimentos Verticais / Preço por m²",
+                   "color":  "#FFFFFF",
+                   "bold":  true,
+                   "y":  535.86083984375,
+                   "x":  19.773858388264973,
+                   "size":  24
+               }
+           ],
+    "81":  [
+               {
+                   "italic":  false,
+                   "text":  "OFERTA LANÇADA E FINAL POR TIPO\u000b",
+                   "color":  "#1A3D57",
+                   "bold":  true,
+                   "y":  61.914433797200523,
+                   "x":  54.266667683919273,
+                   "size":  40
+               },
+               {
+                   "italic":  false,
+                   "text":  "Região Metropolitana",
+                   "color":  "#1A3D57",
+                   "bold":  false,
+                   "y":  105.1144307454427,
+                   "x":  54.266667683919273,
+                   "size":  40
+               }
+           ],
+    "39":  [
+               {
+                   "italic":  false,
+                   "text":  "OFERTA FINAL POR PADRÃO\u000b",
+                   "color":  "#1A3D57",
+                   "bold":  true,
+                   "y":  22.102256774902344,
+                   "x":  43.099421183268227,
+                   "size":  40
+               },
+               {
+                   "italic":  false,
+                   "text":  "Região Metropolitana – Residencial Vertical",
+                   "color":  "#1A3D57",
+                   "bold":  false,
+                   "y":  65.302256266276046,
+                   "x":  43.099421183268227,
+                   "size":  40
+               }
+           ],
+    "48":  [
+               {
+                   "italic":  false,
+                   "text":  "Loteamento Aberto",
+                   "color":  "#1A3D57",
+                   "bold":  true,
+                   "y":  141.22682698567709,
+                   "x":  126.2797342936198,
+                   "size":  24
+               }
+           ],
+    "21":  [
+               {
+                   "italic":  false,
+                   "text":  "UNIDADES LANÇADAS POR TRIMESTRE – ",
+                   "color":  "#1A3D57",
+                   "bold":  true,
+                   "y":  31.633384704589844,
+                   "x":  54.266667683919273,
+                   "size":  40
+               },
+               {
+                   "italic":  false,
+                   "text":  "LOTEAMENTOS \u000b",
+                   "color":  "#1A3D57",
+                   "bold":  true,
+                   "y":  74.833384195963546,
+                   "x":  54.266667683919273,
+                   "size":  40
+               },
+               {
+                   "italic":  false,
+                   "text":  "Fortaleza e Região Metropolitana",
+                   "color":  "#1A3D57",
+                   "bold":  false,
+                   "y":  118.03338623046875,
+                   "x":  54.266667683919273,
+                   "size":  40
+               }
+           ],
+    "46":  [
+               {
+                   "italic":  false,
+                   "text":  "Condomínio de Casas e Sobrados",
+                   "color":  "#1A3D57",
+                   "bold":  true,
+                   "y":  141.22682698567709,
+                   "x":  130.24524943033853,
+                   "size":  24
+               }
+           ],
+    "75":  [
+               {
+                   "italic":  false,
+                   "text":  "OFERTA LANÇADA E FINAL POR TIPOLOGIA – ",
+                   "color":  "#1A3D57",
+                   "bold":  true,
+                   "y":  99.6072489420573,
+                   "x":  54.266667683919273,
+                   "size":  40
+               },
+               {
+                   "italic":  false,
+                   "text":  "RESIDENCIAL VERTICAL\u000b",
+                   "color":  "#1A3D57",
+                   "bold":  true,
+                   "y":  142.80724080403647,
+                   "x":  54.266667683919273,
+                   "size":  40
+               },
+               {
+                   "italic":  false,
+                   "text":  "Região Metropolitana | Sem Econômico",
+                   "color":  "#1A3D57",
+                   "bold":  false,
+                   "y":  186.00724283854166,
+                   "x":  54.266667683919273,
+                   "size":  40
+               }
+           ],
+    "79":  [
+               {
+                   "italic":  false,
+                   "text":  "PART. DO TEMPO MÉDIO DA OFERTA LANÇADA E ",
+                   "color":  "#1A3D57",
+                   "bold":  true,
+                   "y":  42.566614786783852,
+                   "x":  54.266667683919273,
+                   "size":  40
+               },
+               {
+                   "italic":  false,
+                   "text":  "FINAL\u000b",
+                   "color":  "#1A3D57",
+                   "bold":  true,
+                   "y":  85.766611735026046,
+                   "x":  54.266667683919273,
+                   "size":  40
+               },
+               {
+                   "italic":  false,
+                   "text":  "Por Tipologia – Região Metropolitana",
+                   "color":  "#1A3D57",
+                   "bold":  false,
+                   "y":  128.96661376953125,
+                   "x":  54.266667683919273,
+                   "size":  40
+               }
+           ],
+    "84":  [
+               {
+                   "italic":  false,
+                   "text":  "MÍNIMO, MÉDIA E MÁXIMA\u000b",
+                   "color":  "#1A3D57",
+                   "bold":  true,
+                   "y":  61.914433797200523,
+                   "x":  54.266667683919273,
+                   "size":  40
+               },
+               {
+                   "italic":  false,
+                   "text":  "Região Metropolitana",
+                   "color":  "#1A3D57",
+                   "bold":  false,
+                   "y":  105.1144307454427,
+                   "x":  54.266667683919273,
+                   "size":  40
+               }
+           ],
+    "32":  [
+
+           ],
+    "89":  [
+               {
+                   "italic":  false,
+                   "text":  "OBRIGADO",
+                   "color":  "#FFFFFF",
+                   "bold":  true,
+                   "y":  156.14404296875,
+                   "x":  403.64554850260419,
+                   "size":  80
+               }
+           ],
+    "55":  [
+               {
+                   "italic":  false,
+                   "text":  "OFERTA FINAL TOTAL E IVV - POR ",
+                   "color":  "#1A3D57",
+                   "bold":  true,
+                   "y":  46.633280436197914,
+                   "x":  54.266667683919273,
+                   "size":  40
+               },
+               {
+                   "italic":  false,
+                   "text":  "BAIRRO\u000b",
+                   "color":  "#1A3D57",
+                   "bold":  true,
+                   "y":  89.833282470703125,
+                   "x":  54.266667683919273,
+                   "size":  40
+               },
+               {
+                   "italic":  false,
+                   "text":  "Fortaleza – 1/4 | Residencial Vertical",
+                   "color":  "#1A3D57",
+                   "bold":  false,
+                   "y":  133.03328450520834,
+                   "x":  54.266667683919273,
+                   "size":  40
+               }
+           ],
+    "15":  [
+               {
+                   "italic":  false,
+                   "text":  "UNIDADES LANÇADAS POR PADRÃO\u000b",
+                   "color":  "#1A3D57",
+                   "bold":  true,
+                   "y":  24.80010477701823,
+                   "x":  51.352020263671875,
+                   "size":  40
+               },
+               {
+                   "italic":  false,
+                   "text":  "Região Metropolitana",
+                   "color":  "#1A3D57",
+                   "bold":  false,
+                   "y":  68.000106811523438,
+                   "x":  51.352020263671875,
+                   "size":  40
+               },
+               {
+                   "italic":  false,
+                   "text":  "Residencial Vertical",
+                   "color":  "#1A3D57",
+                   "bold":  true,
+                   "y":  167.01280721028647,
+                   "x":  43.099421183268227,
+                   "size":  24
+               }
+           ],
+    "25":  [
+               {
+                   "italic":  false,
+                   "text":  "UNIDADES VENDIDAS POR PADRÃO\u000b",
+                   "color":  "#1A3D57",
+                   "bold":  true,
+                   "y":  24.80010477701823,
+                   "x":  54.272023518880211,
+                   "size":  40
+               },
+               {
+                   "italic":  false,
+                   "text":  "Fortaleza",
+                   "color":  "#1A3D57",
+                   "bold":  false,
+                   "y":  68.000106811523438,
+                   "x":  54.272023518880211,
+                   "size":  40
+               },
+               {
+                   "italic":  false,
+                   "text":  "Residencial Vertical",
+                   "color":  "#1A3D57",
+                   "bold":  true,
+                   "y":  167.01280721028647,
+                   "x":  43.099421183268227,
+                   "size":  24
+               }
+           ],
+    "18":  [
+               {
+                   "italic":  false,
+                   "text":  "VGV LANÇADO POR PADRÃO (EM MILHÕES)\u000b",
+                   "color":  "#1A3D57",
+                   "bold":  true,
+                   "y":  24.80010477701823,
+                   "x":  54.266667683919273,
+                   "size":  40
+               },
+               {
+                   "italic":  false,
+                   "text":  "Fortaleza",
+                   "color":  "#1A3D57",
+                   "bold":  false,
+                   "y":  68.000106811523438,
+                   "x":  54.266667683919273,
+                   "size":  40
+               },
+               {
+                   "italic":  false,
+                   "text":  "Residencial Vertical",
+                   "color":  "#1A3D57",
+                   "bold":  true,
+                   "y":  121.95159912109375,
+                   "x":  43.099421183268227,
+                   "size":  24
+               }
+           ],
+    "42":  [
+               {
+                   "italic":  false,
+                   "text":  "PREÇO MÉDIO/M² \u000b",
+                   "color":  "#1A3D57",
+                   "bold":  true,
+                   "y":  17.769344329833984,
+                   "x":  56.992441813151039,
+                   "size":  40
+               },
+               {
+                   "italic":  false,
+                   "text":  "Fortaleza – Residencial Vertical",
+                   "color":  "#1A3D57",
+                   "bold":  false,
+                   "y":  60.969345092773438,
+                   "x":  56.992441813151039,
+                   "size":  40
+               }
+           ]
+}

@@ -1,3 +1,4 @@
+import { FortalezaArtwork } from './FortalezaArtwork';
 import { introMonth } from './intro-view';
 import type { FortalezaSelection } from './model';
 import type { MonthlyBin, MonthlySlideData } from './monthly-market';
@@ -49,7 +50,7 @@ export default function FortalezaMonthlyMarketSlide({ page,selection,cities,data
   const scope = layouts.find(layout => layout.page === page)?.scope;
   const money = data?.unit === 'milhões';
   return <svg className="fortaleza-intro-slide block aspect-video h-auto w-full" viewBox="0 0 1280 720" role="img" aria-label={`Fortaleza · slide ${page}`}>
-    <image href={artwork[`./assets/monthly/${page}.png`]} width={1280} height={720} aria-hidden="true" />
+    <FortalezaArtwork href={artwork[`./assets/monthly/${page}.png`]} kind="monthly" page={page}/>
     {divider ? <>
       {scope && <text x={scope.x + scope.width} y={scope.y + 30} textAnchor="end" fill="white" fontSize={cities.join(', ').length > 70 ? 20 : 25}>{cities.length ? cities.join(', ') : 'Selecione o recorte autorizado'}</text>}
       <text x={1180} y={scope ? Math.max(365,scope.y + scope.height + 36) : 400} textAnchor="end" fill="white" fontSize={18}>{introMonth(selection.position)} de {selection.year}</text>

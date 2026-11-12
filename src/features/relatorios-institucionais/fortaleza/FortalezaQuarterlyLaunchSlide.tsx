@@ -1,3 +1,4 @@
+import { FortalezaArtwork } from './FortalezaArtwork';
 import type { FortalezaSlideProps } from './FortalezaReportSlide';
 import { FORTALEZA_CITIES } from './model';
 import { introMonth } from './intro-view';
@@ -17,7 +18,7 @@ export default function FortalezaQuarterlyLaunchSlide({page,selection,cities,dat
   const chart=divider||table?null:buildQuarterlyLaunchSlide(page,monthlyLaunches?.market??null,data,selection,cities);
   const endMonth=selection.position*3,layout=layouts.find(item=>item.page===page),scope=layout?.scope;
   return <svg className="fortaleza-intro-slide block aspect-video h-auto w-full" viewBox="0 0 1280 720" role="img" aria-label={`Fortaleza · slide ${page}`}>
-    <image href={artwork[`./assets/quarterly/${page}.png`]} width={1280} height={720} aria-hidden="true"/>
+    <FortalezaArtwork href={artwork[`./assets/quarterly/${page}.png`]} kind="quarterly" page={page}/>
     {page===40?<StockTable table={table!}/>:divider?<><text x={1180} y={scope?scope.y+30:330} textAnchor="end" fill="white" fontSize={22}>{cities.join(', ')}</text><text x={1180} y={410} textAnchor="end" fill="white" fontSize={22}>{selection.position}º trimestre de {selection.year}</text></>:table?<>
       <text x={53} y={59} fill="#1B4059" fontSize={31} fontWeight={700}>{page===16?'UNIDADES LANÇADAS POR MUNICÍPIO':page===19?'VGV UNIDADES LANÇADAS POR MUNICÍPIO':page===31?'UNIDADES VENDIDAS POR MUNICÍPIO':'VGV UNIDADES VENDIDAS POR MUNICÍPIO'}</text>
       <text x={53} y={88} fill="#1B4059" fontSize={26}>{introMonth(endMonth)} / {selection.year}{page===19||page===32?' · R$ milhões nominais':''}</text>

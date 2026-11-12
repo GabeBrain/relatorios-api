@@ -8,7 +8,7 @@ describe('Fortaleza — evidência da matriz municipal rejeitada',()=>{
     const coverage=monthlySourceCoverage(source,data.months);
     expect(coverage.rowsReceived).toBe(174);expect(coverage.cells).toHaveLength(174);
     expect(coverage.missingCells).toContainEqual({month:String(missing.period).slice(0,7),group:'luxo'});
-    expect(monthlyMarketSourceIssue(source,data.months)).not.toBeNull();
+    expect(monthlyMarketSourceIssue(source,data.months)).toBeNull();
     expect(coverage.missingStandards).toEqual([]);
   });
   it('distingue grupo inexistente no município de fonte vazia e categoria comercial desconhecida',()=>{

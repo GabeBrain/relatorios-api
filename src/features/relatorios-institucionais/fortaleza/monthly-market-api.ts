@@ -41,6 +41,7 @@ export async function fetchMonthlyMarket(selection: FortalezaSelection, authoriz
           if (page === last) throw new Error();
         }
         if (!source.complete) throw new Error();
+        source.emptyResult=source.segment==='Comercial'&&total===0&&source.rows.length===0;
         source.coverage=monthlySourceCoverage(source,months);
         const issue = monthlyMarketSourceIssue(source,months);
         if (issue) { source.complete = false; source.issue = issue; source.rows = []; }

@@ -39,7 +39,7 @@ describe('Fortaleza mensal56–60 e diagnóstico',()=>{
   });
   it('diagnóstico cobre60slides, conta estados e usa o horário do fechamento',async()=>{
     const state=await generation(),snapshot=buildFortalezaDiagnostic(selection,state);
-    expect(snapshot.slides.map(slide=>slide.number)).toEqual(Array.from({length:60},(_,index)=>index+1));expect(Object.values(snapshot.summary).reduce((sum,count)=>sum+count,0)).toBe(60);expect(snapshot.summary['not-implemented']).toBe(0);expect(snapshot.generatedAt).toBe(state.finishedAt);expect(snapshot.homologated).toBe(false);expect(snapshot.slides[1].status).toBe('source-pending');expect(snapshot.slides[56].status).toBe('editorial-review');
+    expect(snapshot.slides.map(slide=>slide.number)).toEqual(Array.from({length:60},(_,index)=>index+1));expect(Object.values(snapshot.summary).reduce((sum,count)=>sum+count,0)).toBe(60);expect(snapshot.summary['not-implemented']).toBe(0);expect(snapshot.generatedAt).toBe(state.finishedAt);expect(snapshot.homologated).toBe(false);expect(snapshot.slides[1].status).toBe('available');expect(snapshot.slides[56].status).toBe('editorial-review');
     expect(snapshot.slides[21].values).toEqual(buildMonthlySlide(22,state.monthlyLaunches!.market!,selection,cities));
     for(const number of [1,8,9])expect(snapshot.slides[number-1]).toMatchObject({status:'editorial-review',values:null});
   });

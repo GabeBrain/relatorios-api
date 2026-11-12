@@ -8,7 +8,7 @@ import { monthlyLaunchMonths } from '../../src/features/relatorios-institucionai
 import { buildIntroProject } from '../../src/features/relatorios-institucionais/fortaleza/intro-data';
 const query=new URLSearchParams(location.search),selection={...monthlyMarketSelection,periodicity:'quarterly' as const,position:2};
 const market=monthlyMarketFixture(selection),prices=quarterlyPriceFixture(selection);
-if(query.has('missing'))market.sources[0].rows.pop();
+if(query.has('missing')){const last=String(market.sources[0].rows.at(-1)?.period).slice(0,7);market.sources[0].rows=market.sources[0].rows.filter(row=>String(row.period).slice(0,7)!==last);}
 const intro={status:'ready' as const,issues:[],requests:0,startedAt:'',finishedAt:'',projects:monthlyLaunchMonths(selection).map((month,index)=>buildIntroProject({building_id:index+1,city:'Fortaleza',building_type:'Vertical',standard:index%2?'Econômico':'Standard',release_date:`${month}-01`}))};
 void prepareFortalezaBlueprint(selection,[...FORTALEZA_CITIES],{yieldControl:async()=>{}}).then(blueprint=>{
 const monthlyLaunches=query.has('empty')?null:{market,prices,sources:[],issues:[]};

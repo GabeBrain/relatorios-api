@@ -1,5 +1,7 @@
-param([int]$First = 11, [int]$Last = 89)
+﻿param([int]$First = 11, [int]$Last = 89)
+. (Join-Path $PSScriptRoot 'fortaleza-static-text.ps1')
 $ErrorActionPreference = 'Stop'
+$staticText = @{}
 $fortQuarterRoot = (Resolve-Path '.local-inputs/relatorios-lucas/fortaleza').Path
 $fortQuarterAssets = Join-Path (Get-Location) 'src/features/relatorios-institucionais/fortaleza/assets/quarterly'
 New-Item -ItemType Directory -Path $fortQuarterAssets -Force | Out-Null
@@ -39,6 +41,7 @@ try {
           }
         }
       }
+      $staticText[[string]$number] = Get-FortalezaStaticText $slide
       $slide.Export((Join-Path $fortQuarterAssets "$number.png"), 'PNG', 1280, 720)
       $records += @{page=$number;charts=$charts;changes=$changes;table=$table;scope=$scope}
     }
@@ -46,3 +49,5 @@ try {
 } finally { $office.Quit() }
 $records | ConvertTo-Json -Depth 10 | Set-Content -LiteralPath (Join-Path $fortQuarterAssets 'layout.json') -Encoding UTF8
 Write-Output 'Slides trimestrais: arte trimestral sem cifras historicas; original aberto em leitura.'
+
+$staticText | ConvertTo-Json -Depth 10 | Set-Content -LiteralPath (Join-Path $fortQuarterAssets 'static-text.json') -Encoding UTF8

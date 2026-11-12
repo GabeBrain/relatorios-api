@@ -1,3 +1,4 @@
+import { FortalezaArtwork } from './FortalezaArtwork';
 import type { FortalezaSelection } from './model';
 import type { PriceSlideData } from './monthly-prices';
 import { introMonth } from './intro-view';
@@ -15,7 +16,7 @@ export default function FortalezaMonthlyAnalysisSlide({page,selection,data,origi
   const y=(value:number)=>bottom-(value-min)/(max-min)*230;
   const count=bar?bars.length:lines[0]?.points.length??1,step=1170/count,x=(index:number)=>55+step*(index+.5);
   return <svg className="fortaleza-intro-slide block aspect-video h-auto w-full" viewBox="0 0 1280 720" role="img" aria-label={`Fortaleza · slide ${originalPage??page}`}>
-    <image href={originalPage?quarterlyArtwork[`./assets/quarterly/${originalPage}.png`]:artwork[`./assets/monthly/${page}.png`]} width={1280} height={720} aria-hidden="true"/>
+    <FortalezaArtwork href={originalPage?quarterlyArtwork[`./assets/quarterly/${originalPage}.png`]:artwork[`./assets/monthly/${page}.png`]} kind={originalPage?"quarterly":"monthly"} page={originalPage??page}/>
     {divider?<text x={1180} y={580} textAnchor="end" fill="white" fontSize={20}>{selection.periodicity==='quarterly'?`${selection.position}º trimestre`:introMonth(selection.position)} de {selection.year}</text>:<>
       {page>=40&&page<=43&&<text x={57} y={57} fontSize={32} fontWeight={700} fill="#1B4059">PREÇO MÉDIO/M²</text>}
       <text x={page>=40&&page<=43?57:43} y={page>=40&&page<=43?86:220} fontSize={16} fill="#1B4059">{page>=40&&page<=43?'Região Metropolitana · ':''}{selection.periodicity==='quarterly'?`${selection.position}º trimestre`:introMonth(selection.position)} de {selection.year}{ivv?' · Residencial vertical':''}</text>

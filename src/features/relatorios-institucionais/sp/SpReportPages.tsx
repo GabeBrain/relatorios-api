@@ -1,3 +1,5 @@
+import {useSlidePreviewEditing} from '../shared/useSlidePreviewEditing';
+import { EditableSlideSurface, SlidePreviewEditor } from '../shared/SlidePreviewEditor';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog';
@@ -65,6 +67,7 @@ function SlideFrame({ children }: { children: ReactNode }) {
 
 /** Original 85-slide order; pending content occupies its original position. */
 export function SpReportPages({ report, onSelectSlide }: { report: SpPreview; onSelectSlide?: (number: number) => void }) {
+  const editing=useSlidePreviewEditing(report);
   const [page, setPage] = useState(1);
   const [expanded, setExpanded] = useState(false);
   const [people,setPeople]=useState(createSpPeople);
@@ -75,12 +78,14 @@ export function SpReportPages({ report, onSelectSlide }: { report: SpPreview; on
   const reviews=reviewSpSlides(report);
   const currentReview=reviews[page-1];
   const referenceNote=SP_INSTITUTIONAL_ASSETS[page] ? (page===82||page===83?'Equipe inicial da edição de referência 2T2026. Nomes, cargos e fotos podem ser personalizados nesta prévia; confira os responsáveis antes de exportar.':page===7?'O mês e o ano acompanham o período conferido. Percentuais preservados da referência de junho/2026, editáveis no PowerPoint; não foram recalculados pela API.':page===5?'Indicadores institucionais da edição de referência 2T2026. Números e legendas dos seis cartões são editáveis no PowerPoint; não são atualizados pela API municipal.':'Conteúdo institucional reproduzido da edição de referência 2T2026; nomes, contatos e números conservam essa edição.') : null;
-  const slide = <SpSlideContent report={report} page={page} onNavigate={setPage} people={people}/>;
+  const renderSlide=(number:number,interactive=false)=><EditableSlideSurface page={number} edits={editing.edits[number]} enabled={interactive&&editing.enabled} onElements={interactive?editing.setElements:undefined} onSelect={interactive?editing.setSelected:undefined}><SpSlideContent report={report} page={number} onNavigate={interactive?setPage:undefined} people={people}/></EditableSlideSurface>;
+  const slide = renderSlide(page,true);
   const navigation = <nav aria-label="Navegação dos slides originais" className="flex max-h-48 flex-wrap gap-2 overflow-y-auto">{SP_ORIGINAL_SLIDES.map(item => <Button className="h-auto min-h-10 max-w-full whitespace-normal py-2 text-left" key={item.number} variant={page === item.number ? 'default' : 'outline'} aria-pressed={page === item.number} onClick={() => setPage(item.number)}>{item.number}. {item.title}</Button>)}</nav>;
   return <section aria-label="Páginas do relatório" className="space-y-4">
     <div><h2 className="text-lg font-semibold">Montagem do relatório</h2><p className="text-sm text-muted-foreground">Ordem e numeração dos 85 slides do modelo original · {report.quarter} · {real ? period : 'Dados fictícios'}. Os indicadores dependem da conferência de cada fonte. PowerPoint disponível para conferência; homologação pendente.</p><p className="text-sm text-muted-foreground">Séries e comparativos são preenchidos após a conferência das fontes. As etapas automáticas compartilham os históricos de bairros, áreas, preços e mapas. Abrir um slide não inicia uma nova coleta. VGL lançado e VGV vendido por período usam INCC-DI e base única no último mês disponível. Preços e VGV da fotografia atual são nominais.</p></div>
     <SpPeopleEditor people={people} onChange={setPeople} onPreview={setPage}/>
-    <SpPptxExport report={report} renderSlide={number=><SpSlideContent report={report} page={number} people={people}/>}/>
+    <SlidePreviewEditor page={page} state={editing}/>
+    <SpPptxExport report={report} renderSlide={renderSlide} manualEdits={editing.edits}/>
     <SpReviewPanel report={report} slides={reviews} onOpen={setPage}/>
     {!expanded && navigation}
     <p role="status" className="text-sm">Slide {page}: <strong>{SP_SLIDE_STATE_LABELS[currentReview.state]}</strong> · {currentReview.reason}</p>

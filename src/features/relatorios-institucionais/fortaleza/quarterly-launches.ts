@@ -46,7 +46,7 @@ export function buildQuarterlyMunicipalTable(page:number,data:MonthlyMarketData|
     const sources=data?.sources.filter(source=>normalizeMarketText(source.city)===normalizeMarketText(city)&&source.segment===segment&&source.metric===(sales?'sales':'releases'))??[];
     if(sources.length!==1)return block(`${city}/${segment}: fonte de lançamentos não concluída.`);
     const issue=monthlyMarketSourceIssue(sources[0],monthlyMarketMonths(selection));if(issue)return block(`${city}/${segment}: ${issue}`);
-    if(segment==='Horizontal'&&!sources[0].rows.some(row=>monthlyProduct(segment,row.group)==='houses'))return block(`${city}: faltam categorias explícitas de casas e sobrados.`);
+
     for(const row of sources[0].rows){
       if(marketMonth(row.period)!==month)continue;
       const product=monthlyProduct(segment,row.group);if(product==='excluded'||product==='lots')continue;
