@@ -1,5 +1,11 @@
 # Estado do handoff
 
+## 12/11/2026 — Grafia Geobrain
+
+**Commit/evidência:** `1611347d` (12/11/2026), local.46testes existentes em6arquivos e build de produção aprovados; busca estática confirma a grafia corrigida, mantendo apenas o contraexemplo negativo no teste. Sem publicação nesta entrega.
+
+Pedido de Lucas: Geobrain em todos os textos visíveis de páginas e relatórios. Corrigidos SP/Fortaleza, Home, API Explorer, Excel, validação de fechamento, Empresas e mensagens de sessão; convenção permanente no Design System. Ajuste editorial, sem cálculo/API/permissão modificados. Fontes/evidências históricas e identificadores técnicos preservados. Correção local; publicação depende de autorização, e mensagens server-side dependem do deploy das funções. Sem escrita Monday.
+
 ## 12/11/2026 — PPTX com objetos editáveis: SP85, Fortaleza60/89
 
 **Implementação:** `cd473deb`, local em12/11/2026. Publicação ainda não autorizada nesta entrega.

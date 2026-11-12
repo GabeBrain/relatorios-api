@@ -1,5 +1,9 @@
 # Design System — Brain Inteligência Estratégica
 
+## Nomenclatura do produto — 12/11/2026
+
+A grafia oficial é **Geobrain**, com G maiúsculo e b minúsculo. Aplicar em páginas, menus, autenticação, acessibilidade, mensagens, fontes dos relatórios, prévias e arquivos exportados. Identificadores técnicos, URLs e evidências históricas mantêm seus contratos e conteúdo original.
+
 Guia de referência completo para reprodução da identidade visual e padrões de layout em novos projetos React + Tailwind CSS + shadcn/ui.
 
 ---

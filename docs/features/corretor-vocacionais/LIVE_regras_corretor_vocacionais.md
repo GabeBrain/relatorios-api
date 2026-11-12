@@ -4,6 +4,10 @@ Documento vivo para acompanhar regras determinísticas, regras de LLM, artefatos
 
 Este arquivo deve ser atualizado sempre que uma regra for adicionada, removida, renomeada, reclassificada entre `DET`/`IA`, ou quando o fluxo do corretor mudar em `src/features/corretor/`, `supabase/functions/analyze-slide/`, `supabase/migrations/` ou `docs/features/corretor-vocacionais/`.
 
+## 12/11/2026 — Ajuste editorial da marca
+
+**Autor/origem:** Codex, pedido de Lucas. Mensagem de autenticação em `supabase/functions/corretor-access/core.ts` e referências textuais nos comentários/testes passam a usar Geobrain. Não altera regras DET/IA, prompts, extração, permissões, classificação ou fluxo; sem nova versão de regras. Evidências originais e identificadores mantidos. Publicação depende de autorização/deploy da função para a mensagem server-side.
+
 ## Como atualizar
 
 1. Nunca apagar o histórico de versões anteriores sem motivo explícito.

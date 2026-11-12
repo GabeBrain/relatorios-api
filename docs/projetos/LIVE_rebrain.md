@@ -451,6 +451,16 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 12/11/2026 — Grafia Geobrain em páginas e relatórios — Codex/Lucas
+
+**Commit/evidência:** `1611347d` (12/11/2026), local.46testes existentes em6arquivos e build de produção aprovados; busca estática confirma a grafia corrigida, mantendo apenas o contraexemplo negativo no teste. Sem publicação nesta entrega.
+
+- **Mudança:** grafia oficial Geobrain nos textos de Home, API Explorer, relatório Excel, validação de fechamento, Empresas/Empregados, SP e Fortaleza (prévia/exportação), mensagens de autenticação e títulos/metadados de slides. Diretriz registrada no Design System; seletores dos diagnósticos e expectativas dos testes atualizados.
+- **Escopo:** ajuste editorial, sem mudança de dados, cálculo, permissão ou fluxo. Identificadores técnicos e evidências históricas permanecem intactos; o teste negativo mantém a grafia incorreta para verificar regressões. Mensagens das funções Supabase entram no próximo deploy dessas funções.
+- **Etapas/Pendências:** implementação local; publicar após autorização. Preservados componentes, estados e layouts existentes; sem escrita Monday.
+
+
+
 ### 12/11/2026 — Relatórios: tabelas nativas e objetos editáveis nos PPTX — Codex/Lucas
 
 - **Commit:** `cd473deb` (12/11/2026), local; documentação de fechamento em commit separado.
@@ -1577,6 +1587,9 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 
 ## 2. Etapas
 
+- **12/11 — Grafia:** Geobrain padronizado nos textos visíveis; entrega editorial local.
+
+
 - **12/11 — PPTX SP/Fortaleza60/89:** exportação com objetos editáveis validada em arquivo real e PowerPoint; listas nativas e consultoria individual. Publicação desta correção pendente.
 
 
@@ -1707,6 +1720,9 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 ---
 
 ## 3. Pendências
+
+- **12/11 — Grafia:** publicar o ajuste editorial Geobrain após autorização; mensagens server-side dependem do deploy das funções correspondentes.
+
 
 - **12/11 — Exportação de relatórios, correção atual:** autorizar push e conferir os três relatórios reais após deploy. Gráficos exportados como formas; eventual exigência de planilha Excel/Editar Dados precisa de um contrato adicional de gráficos nativos.
 
