@@ -1,0 +1,2 @@
+# Arquivos do serviço sempre com LF: o build roda em Linux e um  quebra o Dockerfile e os scripts.
+* text=auto eol=lf
