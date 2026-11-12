@@ -13,8 +13,8 @@ Roteiro para quem publica (Gabriel). Decisões de origem: `INSTRUCOES_DESENVOLVI
 | Projeto | a definir por quem publica; abaixo, `$PROJETO` |
 | Supabase | projeto `mxinpvcqzbfbzjodhgtz` (o mesmo do Rebrain) |
 
-O roteiro tem três partes. **A** e **B** podem ser feitas já; **C** depende do código da Fase 2 e será
-completada quando ele estiver pronto.
+O roteiro tem três partes, em ordem: **A** (banco), **B** (preparação do GCP) e **C** (build, deploy e
+verificações do serviço com o agente simulado da Fase 2).
 
 ---
 
@@ -158,27 +158,89 @@ uma versão ativa. **Não envie o valor dos segredos.**
 
 ---
 
-## Parte C — Publicação do serviço *(completar no fim da Fase 2)*
+## Parte C — Publicação do serviço (Fase 2: agente simulado)
 
-O código de `gcp/slide-maker-agent/` ainda não existe. Esta parte será detalhada com os comandos
-finais junto com ele. O que já está decidido:
+Nesta fase o serviço roda com o **agente simulado**: percorre as etapas sem chamar o modelo e sem
+custo. Serve para provar a infraestrutura (fila, OIDC, Storage, Realtime) e para medir o isolamento
+no Cloud Run antes da Fase 4.
 
-- **Build pela raiz do repositório**, não por `--source gcp/slide-maker-agent` como no Sinduscon: a
-  imagem copia a base de conhecimento de `docs/features/apresentacoes/base-conhecimento/` e a máquina
-  de estados de `src/features/slide-maker/lib/`. O build roda com `--service-account=$BUILD` e baixa
-  `gs://$PROJETO-slide-maker-marca/marca/`. Se faltar a Neo Sans ou a Montserrat, o build falha.
-- **Cloud Run:** ambiente de execução **gen2**, conta `$RUNTIME`, mínimo de 0 instâncias,
-  concorrência 1–2, memória ≥ 4 GiB, segredos montados como variáveis
-  (`ANTHROPIC_API_KEY`, `SUPABASE_SERVICE_ROLE_KEY`) via `--set-secrets`.
-- **Acesso:** `--allow-unauthenticated`, porque as rotas `/jobs/*` são chamadas pelo navegador e
-  protegidas pelo token de cada trabalho. A rota `/internal/fase` valida no próprio serviço o token
-  OIDC do Cloud Tasks (audiência = URL do serviço; e-mail = `$TASKS`).
-- **Isolamento (§12, §15.1 item 7):** na subida, o serviço executa um autoteste (comando do agente sem
-  rede, sem leitura de `/app` nem das chaves). Se falhar, o health check falha e a revisão não recebe
-  tráfego. **Este é o primeiro ponto a observar no primeiro deploy.**
-- **Frontend:** depois do deploy, `VITE_SLIDE_MAKER_AGENT_URL` com a URL do serviço entra no `.env`
-  versionado (o Lovable lê de lá) e o frontend é publicado.
+### C1. Build da imagem (da raiz do repositório)
+
+```bash
+gcloud builds submit --config gcp/slide-maker-agent/cloudbuild.yaml --region="$REGIAO" \
+  --service-account="projects/$PROJETO/serviceAccounts/$BUILD" \
+  --substitutions=_MARCA_BUCKET="$PROJETO-slide-maker-marca" .
+```
+
+- O primeiro passo baixa `gs://$PROJETO-slide-maker-marca/marca/` para dentro do build; os ativos não
+  ficam no repositório.
+- O build **falha** se faltar Neo Sans, Montserrat, um slide final ou o logo, e roda o teste de
+  fumaça: o LibreOffice renderiza um slide e o build confere que as duas fontes estão de fato
+  embutidas no PDF (não substituídas). A saída aparece no log do build ("Fumaça OK").
+- Se o build reclamar de permissão no bucket de origem do Cloud Build (`${PROJETO}_cloudbuild`),
+  conceda `roles/storage.objectViewer` nele à conta `$BUILD`.
+
+### C2. Deploy no Cloud Run
+
+A URL do serviço é determinística (`https://<serviço>-<número do projeto>.<região>.run.app`), então
+`SERVICE_URL` já entra no primeiro deploy. Confira depois de publicar.
+
+```bash
+IMAGEM="$REGIAO-docker.pkg.dev/$PROJETO/slide-maker/slide-maker-agent:latest"
+URL="https://slide-maker-agent-$NUMERO.$REGIAO.run.app"
+
+gcloud run deploy slide-maker-agent --image="$IMAGEM" --region="$REGIAO" \
+  --execution-environment=gen2 --service-account="$RUNTIME" --allow-unauthenticated \
+  --min-instances=0 --max-instances=5 --concurrency=2 --cpu=2 --memory=4Gi --timeout=1800 \
+  --set-secrets=SUPABASE_SERVICE_ROLE_KEY=slide-maker-supabase-service-role-key:latest,ANTHROPIC_API_KEY=slide-maker-anthropic-api-key:latest \
+  --set-env-vars=SUPABASE_URL=https://mxinpvcqzbfbzjodhgtz.supabase.co,GCP_PROJECT=$PROJETO,GCP_REGION=$REGIAO,TASKS_QUEUE=slide-maker-fases,TASKS_SERVICE_ACCOUNT=$TASKS,SERVICE_URL=$URL
+
+gcloud run services describe slide-maker-agent --region="$REGIAO" --format='value(status.url)'   # deve bater com $URL
+```
+
+- `--allow-unauthenticated`: as rotas `/jobs/*` são chamadas pelo navegador e protegidas pelo token
+  de cada trabalho. `/internal/fase` valida no próprio serviço o token OIDC do Cloud Tasks
+  (audiência = `$URL`, e-mail = `$TASKS`) e responde 403 a qualquer outro chamador.
+- `--timeout=1800`: igual ao prazo máximo da tarefa no Cloud Tasks (30 min); o serviço corta a fase
+  em 25 min.
+
+### C3. Verificações depois do deploy
+
+1. **Saúde e isolamento (spike da §15.1 item 7):**
+
+   ```bash
+   curl -s "$URL/healthz"
+   ```
+
+   Esperado: `"ok":true` e um bloco `isolamento`. **Envie esse JSON ao Diego.** Ele mostra se o
+   `bubblewrap` funciona no Cloud Run gen2 (`"bwrap":"ok"` e `"aprovado":true`) ou não
+   (`"bwrap":"falhou"`, com o motivo em `detalhe`). É a evidência que decide o isolamento da Fase 4.
+   Na Fase 2 o resultado é só informativo e não bloqueia o serviço.
+
+2. **Ensaio do fluxo com o agente simulado** (troque o e-mail e use qualquer PDF):
+
+   ```bash
+   R=$(curl -s -X POST "$URL/jobs" -H 'content-type: application/json' \
+         -d '{"colaborador_email":"seu.nome@brain.srv.br","titulo":"Ensaio Slide Maker"}')
+   JOB=$(echo "$R" | jq -r .jobId); TOKEN=$(echo "$R" | jq -r .token)
+   curl -s -X POST "$URL/jobs/$JOB/arquivos" -H "x-job-token: $TOKEN" -F "arquivos=@algum.pdf" | jq .trabalho.estado
+   sleep 15
+   curl -s "$URL/jobs/$JOB" -H "x-job-token: $TOKEN" | jq '.trabalho.estado, [.mensagens[].tipo]'
+   ```
+
+   Esperado: `"analisando"` logo após o upload e, em seguida, `"aguardando_respostas"` com as
+   mensagens `arquivos`, `progresso` e `perguntas`. Se ficar em `analisando`, veja a fila
+   (`gcloud tasks list --queue=slide-maker-fases --location=$REGIAO`) e os logs do serviço.
+
+3. **"Todos os trabalhos"** (`curl -s "$URL/jobs/equipe" | jq`) lista o ensaio só com metadados.
+
+### C4. O que ainda não está nesta publicação
+
+- **Agente real (Fase 4):** troca o simulado pelo Agent SDK com `claude-opus-5-5`, effort `medium` e a
+  trava `maxBudgetUsd` por fase. A partir daí, o diagnóstico de isolamento reprovado **derruba** o
+  health check.
+- **Frontend (Fase 5):** `VITE_SLIDE_MAKER_AGENT_URL=$URL` entra no `.env` versionado (o Lovable lê de
+  lá), junto com o item "Slide Maker" no menu.
 - **Alternativa registrada:** se o corte de 25 min não bastar para a produção (F3), a fase passa a
   rodar como **Cloud Run Job** (§8 item 5, §15.1 item 8).
-- **Limpeza de 180 dias** de `entrada/` e `trabalho/` (§15.1 item 2): job agendado, entra numa fase
-  posterior.
+- **Limpeza de 180 dias** de `entrada/` e `trabalho/` (§15.1 item 2): job agendado, numa fase posterior.

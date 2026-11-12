@@ -1,0 +1,4 @@
+node_modules/
+dist/
+# Ativos de marca baixados do bucket privado pelo Cloud Build — nunca versionar (repo público).
+.marca/

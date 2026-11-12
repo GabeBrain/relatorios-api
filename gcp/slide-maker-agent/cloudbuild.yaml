@@ -1,0 +1,38 @@
+# Build da imagem do Slide Maker. Executar da RAIZ do repositório (ver README.md):
+#   gcloud builds submit --config gcp/slide-maker-agent/cloudbuild.yaml \
+#     --region=southamerica-east1 --service-account=projects/$PROJETO/serviceAccounts/slide-maker-build@$PROJETO.iam.gserviceaccount.com \
+#     --substitutions=_MARCA_BUCKET=$PROJETO-slide-maker-marca .
+substitutions:
+  _REGIAO: southamerica-east1
+  _MARCA_BUCKET: ''
+  _IMAGEM: ${_REGIAO}-docker.pkg.dev/${PROJECT_ID}/slide-maker/slide-maker-agent
+
+steps:
+  # Ativos de marca do bucket privado (DEPLOY_GCP.md B1). Nunca entram no repositório público.
+  - id: marca
+    name: gcr.io/google.com/cloudsdktool/cloud-sdk:slim
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        set -eu
+        test -n "${_MARCA_BUCKET}" || { echo "Defina _MARCA_BUCKET"; exit 1; }
+        mkdir -p gcp/slide-maker-agent/.marca
+        gcloud storage cp -r "gs://${_MARCA_BUCKET}/marca/*" gcp/slide-maker-agent/.marca/
+        ls -R gcp/slide-maker-agent/.marca
+
+  - id: imagem
+    name: gcr.io/cloud-builders/docker
+    args: ['build', '-f', 'gcp/slide-maker-agent/Dockerfile', '-t', '${_IMAGEM}:${BUILD_ID}', '-t', '${_IMAGEM}:latest', '.']
+
+images:
+  - ${_IMAGEM}:${BUILD_ID}
+  - ${_IMAGEM}:latest
+
+options:
+  # _IMAGEM usa ${PROJECT_ID}: exige substituições dinâmicas.
+  dynamicSubstitutions: true
+  logging: CLOUD_LOGGING_ONLY
+  machineType: E2_HIGHCPU_8
+
+timeout: 3600s
