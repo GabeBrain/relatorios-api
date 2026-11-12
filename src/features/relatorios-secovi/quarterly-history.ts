@@ -37,7 +37,7 @@ export function toNumber(value: unknown): number | null {
   return Number.isFinite(parsed) ? parsed : null;
 }
 
-/** Aceita o ISO vindo da API e formatos legíveis usados no histórico do GeoBrain. */
+/** Aceita o ISO vindo da API e formatos legíveis usados no histórico do Geobrain. */
 export function periodToQuarter(period: unknown): string | null {
   const raw = String(period ?? '').trim();
   let year: number;

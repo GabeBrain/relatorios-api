@@ -8,13 +8,14 @@ import { ambienteDoAgente, type ParametrosAgente } from '../src/agent/agente.js'
 import { AgenteClaude, MODELO, ORCAMENTO_USD, podePesquisar } from '../src/agent/claude.js';
 import { FERRAMENTAS_POR_FASE } from '../src/agent/ferramentas.js';
 import type { ExecutorComandos } from '../src/isolamento.js';
+import { VERSAO_PROMPT } from '../src/prompt.js';
 import type { JobRow } from '../src/repo/tipos.js';
 import type { Fase } from '../src/shared/state-machine.js';
 
 /** Agente real com o query() do SDK substituído: confere as opções enviadas e o tratamento do resultado. */
 
 const base = {
-  kbDir: fileURLToPath(new URL('../../../docs/features/apresentacoes/base-conhecimento/', import.meta.url)),
+  kbDir: fileURLToPath(new URL('../../../docs/features/slide-maker/base-conhecimento/', import.meta.url)),
   libDir: fileURLToPath(new URL('../lib/', import.meta.url)),
 };
 const job: JobRow = {
@@ -203,6 +204,8 @@ describe('resultado do agente', () => {
     const t = montar({ mensagens: [resultado('success', { total_cost_usd: 4.2, result: 'texto do deck' })] });
     await t.agente.executar(t.p);
     expect(t.log.join()).not.toMatch(/4\.2|texto do deck|cost/);
+    // Mas traz a versão do prompt, para ligar o resultado às regras vigentes (LIVE_regras_slide_maker.md)
+    expect(t.log.join()).toContain(`prompt=${VERSAO_PROMPT} `);
   });
 });
 

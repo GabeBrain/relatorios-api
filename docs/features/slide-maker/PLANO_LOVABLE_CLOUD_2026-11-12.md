@@ -1,6 +1,6 @@
 # Slide Maker — implementação da integração Lovable Cloud
 
-Estado: implementação concluída e validada localmente em 12/11/2026 sobre `06a179ee`; publicação/migrations remotas pendentes. Propósito: substituir a dependência de service role externa preservando o produto das fases 1–6. Este plano registra escopo e critérios; `DEPLOY_GCP.md` é o roteiro operacional atualizado, incluindo instruções manuais e recuperação.
+Estado: implementação concluída e validada localmente em 12/11/2026; integração autorizada com a Fase8 de Diego e os commits até `fc3dda87`. Publicação da ponte e migration complementar pendentes; a base tem aplicação/conferência relatada por Diego/Lovable. Propósito: substituir a dependência de service role externa preservando o produto. `DEPLOY_GCP.md` é o roteiro operacional atualizado, incluindo instruções manuais e recuperação.
 
 ## Resultado esperado
 
@@ -31,7 +31,7 @@ Arquivos grandes trafegam por URLs assinadas restritas ao bucket, trabalho e obj
 
 - Criar handler da ponte, contratos compartilhados e adaptadores HTTP do Cloud Run.
 - Alterar `server.ts`, `config.ts`, repositório, armazenamento e emissão de eventos para eliminar a exigência de service role no Cloud Run, inclusive no simulado. Não deixar fallback implícito para acesso administrativo.
-- Reutilizar migration original `20261112160000_slide_maker.sql`. Antes de aplicá-la, conferir se já existe no Lovable; não repetir cegamente nem executar todas as migrations pendentes.
+- Conferir a base original, já relatada como aplicada. Lovable registrou o DDL em `drizzle/migrations/0000_slide_maker.sql` e criou os buckets pela ferramenta Storage; o INSERT de buckets da migration original não é aceito nesse ambiente. Não repetir a base nem executar todas as migrations pendentes.
 - Criar migration complementar pelo mecanismo de geração do projeto/CLI para nonce, idempotência e operações atômicas necessárias. O nome real só será definido quando o arquivo for gerado. Inspecionar policies genéricas de Storage que possam alcançar buckets novos, preservando as outras ferramentas.
 - Atualizar `DEPLOY_GCP.md`, README do serviço e LIVE com nomes finais, ordem de publicação e rollback. Gerar pacote manual reproduzível com preflight, migrations exatas e verificações; não inventar aplicação remota.
 
@@ -63,7 +63,7 @@ Os arquivos abaixo foram implementados. Seguir a seção final de `DEPLOY_GCP.md
 - Migration complementar: `supabase/migrations/20261112200554_slide_maker_bridge.sql`, gerada pela CLI; nonce, idempotência, RPCs e reserva transacional.
 - Função: `supabase/functions/slide-maker-bridge/index.ts` e dependências necessárias, com instrução para o Lovable publicar a versão correta.
 - `DEPLOY_GCP.md` revisado, com passo a passo manual, preflight e consultas que confirmem tabelas, permissões, buckets, idempotência e versão publicada. O pacote local não substitui os arquivos versionados.
-- Conferência SQL: `docs/features/apresentacoes/VERIFICAR_LOVABLE_CLOUD_2026-11-12.sql`. Credencial: `scripts/slide-maker/cadastrar-bridge.py`, executado por Gabriel, com opção explícita de recopia sem criar outra versão.
+- Conferência SQL: `docs/features/slide-maker/VERIFICAR_LOVABLE_CLOUD_2026-11-12.sql`. Credencial: `scripts/slide-maker/cadastrar-bridge.py`, executado por Gabriel, com opção explícita de recopia sem criar outra versão.
 
 ### Chaves e configurações
 
@@ -79,4 +79,4 @@ Aplicar as migrations exatas após preflight; inserir a credencial no formulári
 
 ## CTA de implementação
 
-Implemente integralmente o plano `docs/features/apresentacoes/PLANO_LOVABLE_CLOUD_2026-11-12.md` no Rebrain. Leia AGENTS.md, confira remotos/identidade e prepare a conciliação da main preservando todas as alterações locais. Resolva a etapa Git conforme a regra de autorização do projeto, sem reset ou mistura de trabalho paralelo. Implemente a ponte autenticada Lovable Cloud, os adaptadores de dados/Storage/eventos, migrations complementares necessárias e testes. Atualize o roteiro de deploy e entregue o pacote manual para Gabriel com caminhos reais, nomes de chaves, geração/transferência segura e consultas de verificação. Aproveite o projeto Google e a chave Anthropic já preparados. Não extraia service role, não faça migrations diretamente no Lovable, não publique nem faça push sem a autorização aplicável e não execute chamadas pagas. Conclua todo o trabalho local autorizado e apresente os passos manuais concretos que bloqueiam a validação remota. Registre a execução no LIVE e no acompanhamento da raiz SE.
+Implemente integralmente o plano `docs/features/slide-maker/PLANO_LOVABLE_CLOUD_2026-11-12.md` no Rebrain. Leia AGENTS.md, confira remotos/identidade e prepare a conciliação da main preservando todas as alterações locais. Resolva a etapa Git conforme a regra de autorização do projeto, sem reset ou mistura de trabalho paralelo. Implemente a ponte autenticada Lovable Cloud, os adaptadores de dados/Storage/eventos, migrations complementares necessárias e testes. Atualize o roteiro de deploy e entregue o pacote manual para Gabriel com caminhos reais, nomes de chaves, geração/transferência segura e consultas de verificação. Aproveite o projeto Google e a chave Anthropic já preparados. Não extraia service role, não faça migrations diretamente no Lovable, não publique nem faça push sem a autorização aplicável e não execute chamadas pagas. Conclua todo o trabalho local autorizado e apresente os passos manuais concretos que bloqueiam a validação remota. Registre a execução no LIVE e no acompanhamento da raiz SE.

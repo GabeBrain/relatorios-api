@@ -1,5 +1,35 @@
 # Rebrain (Plataforma) — Documento Vivo
 
+## 12/11/2026 — Slide Maker: banco aplicado no Lovable Cloud (DEPLOY_GCP Parte A) — Diego Cabrero, com Lovable
+
+- **Mudança:** a migration `supabase/migrations/20261112160000_slide_maker.sql` foi aplicada pelo Lovable no banco do Rebrain. Os buckets foram criados pela ferramenta de Storage do Lovable, porque ela não aceita `INSERT` em `storage.buckets` numa migration; nomes, privacidade e limites são os do arquivo. Nenhum arquivo do frontend nem de `supabase/functions/` foi alterado.
+- **Validação (consultas no SQL Editor, 12/11/2026 17h23):**
+  - as 6 tabelas `slide_maker_*` existem;
+  - os buckets `slide-maker-entrada`, `slide-maker-saida` e `slide-maker-trabalho` estão com `public = false`;
+  - **nenhuma** policy em `pg_policies` para as tabelas `slide_maker_*` nem para esses buckets.
+- **Achados do verificador de segurança do Lovable:** nenhum dos 5 é do Slide Maker. São dívidas já registradas em `docs/architecture/SECURITY_NOTES.md`: RLS do Corretor aberta a `anon` (§1), a edge function `analyze-slide` (§2), policies de Storage sem dono, atualização paga de dados de empresas e prévias de estudos. **Não usar "Fix all"**: ele pode criar policies ou mudar acessos de outras ferramentas sem revisão.
+- **Pendências:** Gabriel segue da Parte B do `docs/features/slide-maker/DEPLOY_GCP.md`. A chave `service_role` do banco do Lovable Cloud precisa ir para o Secret Manager (B3); confirmar como obtê-la. A `CLAUDE_API_KEY` dos Secrets do Lovable não chega ao Cloud Run.
+- **Monday:** —
+
+## 12/11/2026 — Slide Maker: Fase 8 (documentação) — Claude (sessão de Diego Cabrero)
+
+- **Mudança:**
+  - A documentação mudou de pasta com `git mv`: de `docs/features/apresentacoes/` para `docs/features/slide-maker/`. Atualizei as referências no Dockerfile, nos testes, no README do serviço, no `SECURITY_NOTES.md` e na especificação. A migration ficou intocada, e as entradas antigas deste documento citam o caminho antigo.
+  - Novo `docs/features/slide-maker/LIVE_regras_slide_maker.md`, no modelo do Corretor: versão 1.0 do prompt, como o prompt é montado, regras DET (orquestrador, ferramentas `brain`, isolamento e lint), regras IA/LLM e calibrações pendentes (D2, T3).
+  - `VERSAO_PROMPT` em `src/prompt.ts`, que entra no log de cada fase (`prompt=1.0`).
+  - README do serviço com o resumo da publicação (A → C5).
+- **Arquivos compartilhados:**
+  - `scripts/check-live-docs.mjs`: mudanças em `src/features/slide-maker/` ou `gcp/slide-maker-agent/` passam a exigir este documento. Mudanças no prompt, nas ferramentas, no lint ou na base de conhecimento passam a exigir também o `LIVE_regras_slide_maker.md`.
+  - `AGENTS.md`: nova seção "Slide Maker", no mesmo formato da do Corretor.
+- **Validação:**
+  - 71 testes do serviço, inclusive a versão do prompt no log; o snapshot do prompt não mudou.
+  - 48 testes da `lib/` com a referência no caminho novo; 3 seguem pulados por falta do LibreOffice local.
+  - Typecheck e ESLint limpos.
+  - A checagem de documentação acusa a falta do documento de regras no commit da Fase 4, que mudou o prompt sem ele.
+  - Sem verificação: o `docker build` com os novos caminhos do `COPY`.
+- **Pendências:** Fase 7 (trabalhos dourados 2 e 3) depois do deploy (`DEPLOY_GCP.md` C1–C5); `VITE_SLIDE_MAKER_AGENT_URL` no `.env` depois do C2; limpeza de 180 dias.
+- **Monday:** —
+
 ## 12/11/2026 — Slide Maker: Fase 6 (histórico de versões e relatório ao analista) — Claude (sessão de Diego Cabrero)
 
 - **Mudança:**
@@ -451,14 +481,30 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 12/11/2026 — Slide Maker: integração final da ponte com Fase8 e base Lovable — Gabriel / Codex
+
+- **Integração autorizada:** preservadas a ponte local `e1a69879` e as entregas remotas até `fc3dda87`, inclusive a renomeação de documentação, branding e registros do Lovable. Conflitos resolvidos mantendo `docs/features/slide-maker/` como fonte. Todas as linhas não vazias do LIVE remoto foram conferidas como preservadas; mudanças locais paralelas continuam em backup/stash para reaplicação após o merge.
+- **Estado operacional:** base de seis tabelas e três buckets privados aplicada/conferida segundo Diego/Lovable em17h23, conforme entrada dele acima. Esta sessão não verificou o banco diretamente. Não reaplicar a base; conferir o preflight e aplicar somente o complemento `20261112200554_slide_maker_bridge.sql` se ausente. Buckets são administrados pela ferramenta Storage do Lovable, sem INSERT direto nesse schema.
+- **Fonte atual:** [DEPLOY_GCP.md](../features/slide-maker/DEPLOY_GCP.md) e [regras live](../features/slide-maker/LIVE_regras_slide_maker.md). Substituída a premissa de exportar service role por credencial da ponte. Nenhum prompt ou regra de conteúdo alterado; versão1.0 preservada.
+- **Validação:** serviço integrado com78testes aprovados/2condicionaisLinuxpulados, tipos e build; documentação/manual ajustados. Build do Rebrain e regressões frontend reexecutados no fechamento. Publicação da ponte, complementoSQL, segredo de integração e validação remota permanecem pendentes; sem push, deploy ou consumoAnthropic nesta integração.
+
 ### 12/11/2026 — Slide Maker: infraestrutura Google e ponte Lovable Cloud — Gabriel / Codex
 
 - **Problema/resultado:** o Rebrain usa Lovable Cloud, sem service role exportável. Cloud Run agora usa `slide-maker-bridge` para dados, autorização de Storage e Broadcast; credencial gerenciada permanece na Edge. Arquivos grandes são transferidos diretamente por URLs assinadas restritas. API pública por token do trabalho preservada.
 - **Implementação:** HMAC/versionamento/prazo/nonce, lista fechada de operações, erros sanitizados, idempotência transacional e reserva CAS+fase com limites serializados no banco. Migration complementar `20261112200554_slide_maker_bridge.sql`: duas tabelas privadas e duas RPCs invoker, sem execução pública. Recuperação da credencial via script pessoal com clipboard, sem chat, arquivo ou argumento de processo contendo segredo.
 - **Infraestrutura preparada antes desta fatia:** projeto `brain-rebrain-slide-maker`, número `475189392075`, São Paulo, mesma organização/cobrança profissional do BigQuery; bucket privado, contas runtime/tasks/build, repositório e fila (1 tentativa/4 concorrentes). Anthropic1enabled conforme capturaGabriel. Nenhum deploy. Bucket vazio na última conferência; 20 ativos com Diego. Segredo antigo de service role vazio e sem uso no novo deploy.
 - **Validação local:** 78 testes do serviço aprovados, 2 condicionais Linux/bwrap pulados; fluxo API→HMAC→handler→PostgreSQL/PGlite→F1–F4/v1/v2, incluindo resposta perdida após commit sem duplicação. 31 verificações SQL de permissões/CAS/idempotência/limites/rollback. 92 regressões da feature frontend, 3 testes do cadastro seguro, tipos Node/Deno, lint dirigido, builds do serviço/Rebrain aprovados. Storage/fila/Broadcast são simulados no teste integrado; concorrência multi-conexão e isolamento Cloud Run ainda precisam ensaio real. Nenhuma chamada paga.
-- **Entrega/manual:** [roteiro de deploy](../features/apresentacoes/DEPLOY_GCP.md), [plano e estado](../features/apresentacoes/PLANO_LOVABLE_CLOUD_2026-11-12.md), [SQL de conferência](../features/apresentacoes/VERIFICAR_LOVABLE_CLOUD_2026-11-12.sql). Gabriel aplica migrations e publica função manualmente no Lovable, cadastra `SLIDE_MAKER_BRIDGE_SECRET` com o valor gerado por `scripts/slide-maker/cadastrar-bridge.py`; Google usa `slide-maker-bridge-secret`. Depois validar simulado/isolamento e URLfrontend; agente real só com autorização de consumo. Estado **validado localmente**, sem migration remota, push ou publicação.
+- **Entrega/manual:** [roteiro de deploy](../features/slide-maker/DEPLOY_GCP.md), [plano e estado](../features/slide-maker/PLANO_LOVABLE_CLOUD_2026-11-12.md), [SQL de conferência](../features/slide-maker/VERIFICAR_LOVABLE_CLOUD_2026-11-12.sql). Gabriel aplica migrations e publica função manualmente no Lovable, cadastra `SLIDE_MAKER_BRIDGE_SECRET` com o valor gerado por `scripts/slide-maker/cadastrar-bridge.py`; Google usa `slide-maker-bridge-secret`. Depois validar simulado/isolamento e URLfrontend; agente real só com autorização de consumo. Estado **validado localmente**, sem migration remota, push ou publicação.
 - **Preservação:** main atualizada por fast-forward até06a179ee com autorização; nove arquivos locais salvos e reaplicados sem conflito, untracked preservados. Backup/stash mantidos. Alterações paralelas de FIERGS/estimativas/segurança ficam fora deste commit.
+### 12/11/2026 — Grafia Geobrain em páginas e relatórios — Codex/Lucas
+
+**Commit/evidência:** `1611347d` (12/11/2026), local.46testes existentes em6arquivos e build de produção aprovados; busca estática confirma a grafia corrigida, mantendo apenas o contraexemplo negativo no teste. Sem publicação nesta entrega.
+
+- **Mudança:** grafia oficial Geobrain nos textos de Home, API Explorer, relatório Excel, validação de fechamento, Empresas/Empregados, SP e Fortaleza (prévia/exportação), mensagens de autenticação e títulos/metadados de slides. Diretriz registrada no Design System; seletores dos diagnósticos e expectativas dos testes atualizados.
+- **Escopo:** ajuste editorial, sem mudança de dados, cálculo, permissão ou fluxo. Identificadores técnicos e evidências históricas permanecem intactos; o teste negativo mantém a grafia incorreta para verificar regressões. Mensagens das funções Supabase entram no próximo deploy dessas funções.
+- **Etapas/Pendências:** implementação local; publicar após autorização. Preservados componentes, estados e layouts existentes; sem escrita Monday.
+
+
 
 ### 12/11/2026 — Relatórios: tabelas nativas e objetos editáveis nos PPTX — Codex/Lucas
 
@@ -1586,6 +1632,9 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 
 ## 2. Etapas
 
+- **12/11 — Grafia:** Geobrain padronizado nos textos visíveis; entrega editorial local.
+
+
 - **12/11 — PPTX SP/Fortaleza60/89:** exportação com objetos editáveis validada em arquivo real e PowerPoint; listas nativas e consultoria individual. Publicação desta correção pendente.
 
 
@@ -1716,6 +1765,9 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 ---
 
 ## 3. Pendências
+
+- **12/11 — Grafia:** publicar o ajuste editorial Geobrain após autorização; mensagens server-side dependem do deploy das funções correspondentes.
+
 
 - **12/11 — Exportação de relatórios, correção atual:** autorizar push e conferir os três relatórios reais após deploy. Gráficos exportados como formas; eventual exigência de planilha Excel/Editar Dados precisa de um contrato adicional de gráficos nativos.
 

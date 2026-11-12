@@ -8,7 +8,7 @@ it('não altera sessão quando a validação de acesso falha', async () => {
   vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: false, json: async () => ({ error: 'Não autorizado' }) }));
   await expect(loginCorretor('fixture@example.invalid', 'fixture')).rejects.toThrow('Não autorizado'); expect(session).not.toHaveBeenCalled();
 });
-it('não devolve token GeoBrain se a sessão do app falhar', async () => {
+it('não devolve token Geobrain se a sessão do app falhar', async () => {
   vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, json: async () => ({ token: 'geo-fixture', session: { access_token: 'app-fixture', refresh_token: 'refresh-fixture' } }) }));
   session.mockResolvedValue({ error: { message: 'fixture' } });
   await expect(loginCorretor('fixture@example.invalid', 'fixture')).rejects.toThrow('guardar');

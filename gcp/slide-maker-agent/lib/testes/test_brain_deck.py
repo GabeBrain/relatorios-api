@@ -19,7 +19,7 @@ from pptx.util import Emu
 import lint_pptx as L
 
 # No repositório: docs/…/referencia. No build da imagem: copiada para fora de /app (SLIDE_MAKER_REFERENCIA).
-REFERENCIA = Path(os.environ.get("SLIDE_MAKER_REFERENCIA", SERVICO.parents[1] / "docs" / "features" / "apresentacoes" / "referencia"))
+REFERENCIA = Path(os.environ.get("SLIDE_MAKER_REFERENCIA", SERVICO.parents[1] / "docs" / "features" / "slide-maker" / "referencia"))
 
 
 def conteudo(caminho: Path) -> list:

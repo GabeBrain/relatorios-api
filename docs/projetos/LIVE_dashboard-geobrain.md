@@ -1,4 +1,4 @@
-# Dashboard GeoBrain — Documento Vivo
+# Dashboard Geobrain — Documento Vivo
 
 **Responsável:** Edgar · **Rota:** `/dash-geobrain` · **Código:** [`src/features/dashboard-geobrain/`](../../src/features/dashboard-geobrain/) · Página: [`src/pages/DashboardGeobrain.tsx`](../../src/pages/DashboardGeobrain.tsx)
 
@@ -32,6 +32,15 @@ gráficos e painel de filtros funcionais em runtime.
 ---
 
 ## 1. Desenvolvimentos
+
+### 12/11/2026 — Grafia oficial Geobrain na navegação — Codex/Lucas
+
+**Commit/evidência:** `1611347d` (12/11/2026), local.46testes existentes em6arquivos e build de produção aprovados; busca estática confirma a grafia corrigida, mantendo apenas o contraexemplo negativo no teste. Sem publicação nesta entrega.
+
+- **Mudança:** card da Home passa a Dashboard Geobrain; convenção de grafia no Design System estende-se às páginas, fontes e relatórios. A tela do dashboard já usava Geobrain. Identificador técnico exportGeoBrainSvg preservado.
+- **Escopo/Etapas:** ajuste editorial, sem alteração de filtros, mapas, cálculos ou estados; publicação desta correção pendente de autorização. Sem escrita Monday.
+
+
 
 ### 2026-09-25 — Filtro geográfico das bolhas e classificação de dormitórios — Codex
 - **Ambiente/funcionalidade:** `/dash-geobrain` — Preço/m² × Área privativa, filtros de dormitórios e mapas de oportunidades.
@@ -252,6 +261,9 @@ gráficos e painel de filtros funcionais em runtime.
 
 ## 2. Etapas
 
+- **12/11 — Grafia:** Geobrain padronizado nos textos visíveis; entrega editorial local.
+
+
 | # | Etapa | Status |
 |---|---|---|
 | 1 | Conexão à API pública GeoBrain (auth + paginação) | ✅ |
@@ -263,6 +275,9 @@ gráficos e painel de filtros funcionais em runtime.
 ---
 
 ## 3. Pendências
+
+- **12/11 — Grafia:** publicar o ajuste editorial Geobrain após autorização; mensagens server-side dependem do deploy das funções correspondentes.
+
 
 - [ ] Definir com o Edgar os próximos indicadores/visualizações desejados.
 - [ ] Confirmar cobertura de testes (Vitest) para `aggregate.ts` e `normalizeBuilding`.

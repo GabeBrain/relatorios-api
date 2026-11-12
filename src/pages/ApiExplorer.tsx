@@ -38,7 +38,7 @@ export default function ApiExplorer() {
             <div>
               <h1 className="text-lg font-semibold">API Explorer</h1>
               <p className="text-xs text-muted-foreground mt-0.5">
-                Documentação e console das APIs GeoBrain e Sócio — teste qualquer endpoint sem sair da página.
+                Documentação e console das APIs Geobrain e Sócio — teste qualquer endpoint sem sair da página.
               </p>
             </div>
             <TabsList className="h-8">

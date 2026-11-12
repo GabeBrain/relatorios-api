@@ -20,15 +20,20 @@ verificações do serviço com o agente simulado da Fase 2).
 
 ## Parte A — Banco (Supabase)
 
-1. Pelo Lovable Cloud, conferir o preflight e aplicar manualmente a migration `supabase/migrations/20261112160000_slide_maker.sql` (não executar db push contra o backend gerenciado). Ela cria 6 tabelas `slide_maker_*` e 3 buckets privados (`slide-maker-entrada`,
-   `slide-maker-saida`, `slide-maker-trabalho`).
+1. **Base já aplicada segundo Diego/Lovable:** registro de 12/11 às 17h23 em `docs/projetos/LIVE_rebrain.md`
+   e DDL em `drizzle/migrations/0000_slide_maker.sql`. Conferir as seis tabelas e os três buckets antes
+   de qualquer alteração; não reaplicar a migration original. O SQL original de referência é
+   `supabase/migrations/20261112160000_slide_maker.sql`, mas o Lovable executou somente o DDL das
+   tabelas. O bloco `INSERT INTO storage.buckets` não é aceito nesse ambiente: os buckets
+   `slide-maker-entrada`, `slide-maker-saida` e `slide-maker-trabalho` são criados pela ferramenta de
+   Storage do Lovable, privados, com limites de 50 MB, 200 MB e sem limite específico, respectivamente.
 2. Conferir depois de aplicar:
    - nenhuma policy nas tabelas `slide_maker_*` nem em `storage.objects` para esses buckets;
    - os 3 buckets aparecem como **privados** no painel de Storage.
 
-A migration foi executada localmente num Postgres 18.6 (PGlite 0.5.16) com os grants padrão do Supabase
-simulados: 46 verificações de restrição e de acesso (`anon`/`authenticated` sem leitura nem escrita,
-`service_role` com acesso). Não foi aplicada no projeto real.
+A base tem relato de aplicação e conferência remota por Diego/Lovable. Esta sessão não consultou
+diretamente o banco gerenciado. A validação local da ponte usa PostgreSQL/PGlite, sem substituir o
+preflight manual ou a conferência de policies genéricas de Storage no ambiente real.
 
 ### A2. Ponte Lovable Cloud (obrigatória antes do Cloud Run)
 
@@ -49,10 +54,9 @@ Broadcast é sinalização de melhor esforço; o frontend também consulta o est
 PROJETO=brain-rebrain-slide-maker
 REGIAO=southamerica-east1
 # Prefira --project="$PROJETO" em cada comando; não altere a configuração do BigQuery.
-export CLOUDSDK_CORE_PROJECT="$PROJETO" # somente neste shell; remova ao terminar
-NUMERO=$(gcloud projects describe "$PROJETO" --format='value(projectNumber)')
+NUMERO=$(gcloud --project="$PROJETO" projects describe "$PROJETO" --format='value(projectNumber)')
 
-gcloud services enable run.googleapis.com cloudtasks.googleapis.com secretmanager.googleapis.com \
+gcloud --project="$PROJETO" services enable run.googleapis.com cloudtasks.googleapis.com secretmanager.googleapis.com \
   cloudbuild.googleapis.com artifactregistry.googleapis.com storage.googleapis.com iamcredentials.googleapis.com
 ```
 
@@ -62,7 +66,7 @@ O repositório é público: fontes, slides finais (têm telefone e e-mail dos co
 **não** entram no git. A imagem do serviço baixa esses arquivos daqui durante o build.
 
 ```bash
-gcloud storage buckets create "gs://$PROJETO-slide-maker-marca" --location="$REGIAO" \
+gcloud --project="$PROJETO" storage buckets create "gs://$PROJETO-slide-maker-marca" --location="$REGIAO" \
   --uniform-bucket-level-access --public-access-prevention
 ```
 
@@ -88,13 +92,13 @@ atual:
 
 ```bash
 B="gs://$PROJETO-slide-maker-marca/marca"
-gcloud storage cp "Manual de Marca Brain Inteligência Estratégica-compactado.pdf" "$B/manual-de-marca.pdf"
-gcloud storage cp logo_brain/*.png "$B/logos/"
-gcloud storage cp "slide_final_consultores/slide final_fábio.png"     "$B/slides-finais/fabio.png"
-gcloud storage cp "slide_final_consultores/slide final_guilherme.png" "$B/slides-finais/guilherme.png"
-gcloud storage cp "slide_final_consultores/slide final_finoti.png"    "$B/slides-finais/finoti.png"
-gcloud storage cp Neo-sans/*.OTF "$B/fontes/"
-gcloud storage ls -r "gs://$PROJETO-slide-maker-marca/"   # conferir: 1 + 4 + 3 + 12 = 20 arquivos
+gcloud --project="$PROJETO" storage cp "Manual de Marca Brain Inteligência Estratégica-compactado.pdf" "$B/manual-de-marca.pdf"
+gcloud --project="$PROJETO" storage cp logo_brain/*.png "$B/logos/"
+gcloud --project="$PROJETO" storage cp "slide_final_consultores/slide final_fábio.png"     "$B/slides-finais/fabio.png"
+gcloud --project="$PROJETO" storage cp "slide_final_consultores/slide final_guilherme.png" "$B/slides-finais/guilherme.png"
+gcloud --project="$PROJETO" storage cp "slide_final_consultores/slide final_finoti.png"    "$B/slides-finais/finoti.png"
+gcloud --project="$PROJETO" storage cp Neo-sans/*.OTF "$B/fontes/"
+gcloud --project="$PROJETO" storage ls -r "gs://$PROJETO-slide-maker-marca/"   # conferir: 1 + 4 + 3 + 12 = 20 arquivos
 ```
 
 A Montserrat (licença OFL) não vai para o bucket: o build baixa do Google Fonts.
@@ -109,26 +113,26 @@ A Montserrat (licença OFL) não vai para o bucket: o build baixa do Google Font
 
 ```bash
 for SA in slide-maker-runtime slide-maker-tasks slide-maker-build; do
-  gcloud iam service-accounts create "$SA" --display-name="$SA"
+  gcloud --project="$PROJETO" iam service-accounts create "$SA" --display-name="$SA"
 done
 RUNTIME="slide-maker-runtime@$PROJETO.iam.gserviceaccount.com"
 TASKS="slide-maker-tasks@$PROJETO.iam.gserviceaccount.com"
 BUILD="slide-maker-build@$PROJETO.iam.gserviceaccount.com"
 
 # Build: ler ativos de marca, publicar imagem e escrever logs
-gcloud storage buckets add-iam-policy-binding "gs://$PROJETO-slide-maker-marca" \
+gcloud --project="$PROJETO" storage buckets add-iam-policy-binding "gs://$PROJETO-slide-maker-marca" \
   --member="serviceAccount:$BUILD" --role=roles/storage.objectViewer
-gcloud artifacts repositories create slide-maker --repository-format=docker --location="$REGIAO"
-gcloud artifacts repositories add-iam-policy-binding slide-maker --location="$REGIAO" \
+gcloud --project="$PROJETO" artifacts repositories create slide-maker --repository-format=docker --location="$REGIAO"
+gcloud --project="$PROJETO" artifacts repositories add-iam-policy-binding slide-maker --location="$REGIAO" \
   --member="serviceAccount:$BUILD" --role=roles/artifactregistry.writer
-gcloud projects add-iam-policy-binding "$PROJETO" --member="serviceAccount:$BUILD" --role=roles/logging.logWriter
+gcloud --project="$PROJETO" projects add-iam-policy-binding "$PROJETO" --member="serviceAccount:$BUILD" --role=roles/logging.logWriter
 
 # Runtime: enfileirar tarefas que se identificam como slide-maker-tasks
-gcloud projects add-iam-policy-binding "$PROJETO" --member="serviceAccount:$RUNTIME" --role=roles/cloudtasks.enqueuer
-gcloud iam service-accounts add-iam-policy-binding "$TASKS" \
+gcloud --project="$PROJETO" projects add-iam-policy-binding "$PROJETO" --member="serviceAccount:$RUNTIME" --role=roles/cloudtasks.enqueuer
+gcloud --project="$PROJETO" iam service-accounts add-iam-policy-binding "$TASKS" \
   --member="serviceAccount:$RUNTIME" --role=roles/iam.serviceAccountUser
 # Agente de serviço do Cloud Tasks gera o token OIDC em nome de slide-maker-tasks
-gcloud iam service-accounts add-iam-policy-binding "$TASKS" \
+gcloud --project="$PROJETO" iam service-accounts add-iam-policy-binding "$TASKS" \
   --member="serviceAccount:service-$NUMERO@gcp-sa-cloudtasks.iam.gserviceaccount.com" --role=roles/iam.serviceAccountUser
 ```
 
@@ -164,7 +168,7 @@ no deploy. Remover esse recurso obsoleto somente depois de confirmar que nenhuma
 ### B4. Fila do Cloud Tasks
 
 ```bash
-gcloud tasks queues create slide-maker-fases --location="$REGIAO" \
+gcloud --project="$PROJETO" tasks queues create slide-maker-fases --location="$REGIAO" \
   --max-attempts=1 --max-concurrent-dispatches=4
 ```
 
@@ -176,7 +180,7 @@ gcloud tasks queues create slide-maker-fases --location="$REGIAO" \
 ### Retorno esperado da Parte B
 
 Envie ao Diego (ou registre no doc vivo): o `$PROJETO`, a saída de
-`gcloud storage ls -r gs://$PROJETO-slide-maker-marca/` e a confirmação de que os segredos Anthropic e ponte têm
+`gcloud --project="$PROJETO" storage ls -r gs://$PROJETO-slide-maker-marca/` e a confirmação de que os segredos Anthropic e ponte têm
 uma versão ativa (nunca a service role gerenciada). **Não envie o valor dos segredos.**
 
 ---
@@ -189,7 +193,7 @@ no Cloud Run antes da Fase 4.
 ### C1. Build da imagem (da raiz do repositório)
 
 ```bash
-gcloud builds submit --config gcp/slide-maker-agent/cloudbuild.yaml --region="$REGIAO" \
+gcloud --project="$PROJETO" builds submit --config gcp/slide-maker-agent/cloudbuild.yaml --region="$REGIAO" \
   --service-account="projects/$PROJETO/serviceAccounts/$BUILD" \
   --substitutions=_MARCA_BUCKET="$PROJETO-slide-maker-marca" .
 ```
@@ -214,13 +218,13 @@ PONTE_URL=<url-da-funcao-slide-maker-bridge>
 IMAGEM="$REGIAO-docker.pkg.dev/$PROJETO/slide-maker/slide-maker-agent:latest"
 URL="https://slide-maker-agent-$NUMERO.$REGIAO.run.app"
 
-gcloud run deploy slide-maker-agent --image="$IMAGEM" --region="$REGIAO" \
+gcloud --project="$PROJETO" run deploy slide-maker-agent --image="$IMAGEM" --region="$REGIAO" \
   --execution-environment=gen2 --service-account="$RUNTIME" --allow-unauthenticated \
   --min-instances=0 --max-instances=5 --concurrency=2 --cpu=2 --memory=4Gi --timeout=1800 \
   --set-secrets=SLIDE_MAKER_BRIDGE_SECRET=slide-maker-bridge-secret:latest,ANTHROPIC_API_KEY=slide-maker-anthropic-api-key:latest \
   --set-env-vars=AGENTE=simulado,SLIDE_MAKER_BRIDGE_URL=$PONTE_URL,GCP_PROJECT=$PROJETO,GCP_REGION=$REGIAO,TASKS_QUEUE=slide-maker-fases,TASKS_SERVICE_ACCOUNT=$TASKS,SERVICE_URL=$URL
 
-gcloud run services describe slide-maker-agent --region="$REGIAO" --format='value(status.url)'   # deve bater com $URL
+gcloud --project="$PROJETO" run services describe slide-maker-agent --region="$REGIAO" --format='value(status.url)'   # deve bater com $URL
 ```
 
 - `--allow-unauthenticated`: as rotas `/jobs/*` são chamadas pelo navegador e protegidas pelo token
@@ -256,7 +260,7 @@ gcloud run services describe slide-maker-agent --region="$REGIAO" --format='valu
 
    Esperado: `"analisando"` logo após o upload e, em seguida, `"aguardando_respostas"` com as
    mensagens `arquivos`, `progresso` e `perguntas`. Se ficar em `analisando`, veja a fila
-   (`gcloud tasks list --queue=slide-maker-fases --location=$REGIAO`) e os logs do serviço.
+   (`gcloud --project="$PROJETO" tasks list --queue=slide-maker-fases --location=$REGIAO`) e os logs do serviço.
 
 3. **"Todos os trabalhos"** (`curl -s "$URL/jobs/equipe" | jq`) lista o ensaio só com metadados.
 
@@ -281,14 +285,14 @@ F3 = 10 e F4 = 5 US$).
 
    ```bash
    read -rs CHAVE   # cole a chave e tecle Enter; ela não aparece na tela nem fica no histórico
-   printf '%s' "$CHAVE" | gcloud secrets versions add slide-maker-anthropic-api-key --data-file=-
+   printf '%s' "$CHAVE" | gcloud --project="$PROJETO" secrets versions add slide-maker-anthropic-api-key --data-file=-
    unset CHAVE
    ```
 
 2. **Ligar o agente real:**
 
    ```bash
-   gcloud run services update slide-maker-agent --region="$REGIAO" --update-env-vars=AGENTE=claude
+   gcloud --project="$PROJETO" run services update slide-maker-agent --region="$REGIAO" --update-env-vars=AGENTE=claude
    curl -s -o /dev/null -w '%{http_code}\n' "$URL/healthz"; curl -s "$URL/healthz" | jq
    ```
 
@@ -312,15 +316,17 @@ F3 = 10 e F4 = 5 US$).
    (`POST /jobs/$JOB/narrativa` com `{"acao":"aprovar"}`) seguem a §8; até o frontend (Fase 5), o
    Diego pode conduzir essa parte junto. Ao chegar em `entregue`, baixe o deck com
    `GET /jobs/$JOB/versoes/1/download` e envie ao Diego o `.pptx`, o `jobId` e os logs da fase
-   (`gcloud logging read 'resource.labels.service_name="slide-maker-agent" AND textPayload:"agente job="' --limit=20`).
+   (`gcloud --project="$PROJETO" logging read 'resource.labels.service_name="slide-maker-agent" AND textPayload:"agente job="' --limit=20`).
 
 
 ## Passos manuais de Gabriel — entrega da ponte Lovable Cloud
 
-1. **Preflight:** executar `docs/features/apresentacoes/VERIFICAR_LOVABLE_CLOUD_2026-11-12.sql`
-   no ambiente do Rebrain, projeto `mxinpvcqzbfbzjodhgtz`. Se não houver tabelas Slide Maker, aplicar
-   `supabase/migrations/20261112160000_slide_maker.sql`. Se as seis já existirem, conferir e pular essa
-   migration. Estado parcial exige diagnóstico; não fazer DROP nem reaplicar cegamente.
+1. **Preflight:** executar `docs/features/slide-maker/VERIFICAR_LOVABLE_CLOUD_2026-11-12.sql`
+   no ambiente do Rebrain, projeto `mxinpvcqzbfbzjodhgtz`. As seis tabelas e os três buckets já foram
+   relatados como conferidos por Diego/Lovable. Se existirem, pular a base e seguir para o complemento.
+   Se houver ausência ou estado parcial, diagnosticar antes: DDL base em
+   `drizzle/migrations/0000_slide_maker.sql`; buckets pela ferramenta de Storage, nunca por INSERT SQL
+   no Lovable. Não fazer DROP nem reaplicar cegamente a migration original.
 2. **Complemento:** aplicar `supabase/migrations/20261112200554_slide_maker_bridge.sql` apenas se
    ainda ausente. Cria duas tabelas privadas e duas RPCs invoker acessíveis somente a service_role.
    Repetir o preflight: oito tabelas com RLS, três buckets privados, sem grants públicos nas tabelas

@@ -38,7 +38,7 @@ Deno.serve(async (request) => {
   const json = (data: unknown, status = 200) => new Response(JSON.stringify(data), { status, headers: { ...cors, 'Content-Type': 'application/json' } });
   if (request.method === 'OPTIONS') return new Response(null, { headers: cors });
   if (request.method !== 'POST') return json({ error: 'Método não permitido.' }, 405);
-  if (!(await hasValidGeoToken(request))) return json({ error: 'Autenticação GeoBrain inválida ou expirada.' }, 401);
+  if (!(await hasValidGeoToken(request))) return json({ error: 'Autenticação Geobrain inválida ou expirada.' }, 401);
 
   let body: Record<string, unknown>;
   try { body = await request.json(); } catch { return json({ error: 'JSON inválido.' }, 400); }

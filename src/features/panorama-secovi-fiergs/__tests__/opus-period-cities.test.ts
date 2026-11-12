@@ -125,12 +125,12 @@ describe('OP-3 · coleta multi-cidade (G-01)', () => {
 
   it('falha parcial nomeia a cidade e produz partial, nunca consolidado silencioso', async () => {
     const result = await collectByCity(['Jundiaí', 'Piracicaba'], async (city) => {
-      if (city === 'Piracicaba') throw new Error('HTTP 500 na API GeoBrain');
+      if (city === 'Piracicaba') throw new Error('HTTP 500 na API Geobrain');
       return `dados de ${city}`;
     });
     expect(result.state).toBe('partial');
     expect(result.completedCities).toEqual(['Jundiaí']);
-    expect(result.failedCities).toEqual([{ city: 'Piracicaba', error: 'HTTP 500 na API GeoBrain' }]);
+    expect(result.failedCities).toEqual([{ city: 'Piracicaba', error: 'HTTP 500 na API Geobrain' }]);
     // O valor da cidade que deu certo continua disponível: falha parcial não descarta o que fechou.
     expect(completedValues(result)).toEqual(['dados de Jundiaí']);
   });

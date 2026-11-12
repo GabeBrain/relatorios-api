@@ -1,5 +1,5 @@
 /**
- * Fronteira com o serviço `slide-maker-agent` (INSTRUCOES §8). Sem relação com a API GeoBrain:
+ * Fronteira com o serviço `slide-maker-agent` (INSTRUCOES §8). Sem relação com a API Geobrain:
  * o acesso a cada trabalho é o token devolvido uma única vez no `POST /jobs`, enviado em `x-job-token`.
  */
 import type { DetalheTrabalho, ResumoTrabalho, Trabalho, TrabalhoCriado } from '../types';

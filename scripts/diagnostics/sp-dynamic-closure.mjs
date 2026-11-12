@@ -5,7 +5,7 @@ import { resolve } from 'node:path';
 import assert from 'node:assert/strict';
 import { spGranularFixture } from './sp-granular-fixture.mjs';
 
-// Own local app, synthetic authentication and mixed-date replays, GeoBrain calls intercepted; only Mapbox basemap requests allowed.
+// Own local app, synthetic authentication and mixed-date replays, Geobrain calls intercepted; only Mapbox basemap requests allowed.
 const output = resolve('.local-inputs/relatorios-lucas/sp/dynamic-closure');
 await mkdir(output, { recursive: true });
 const recorded = JSON.parse(await readFile('src/features/relatorios-institucionais/sp/__tests__/fixtures/sp-municipal-2026.json', 'utf8'));

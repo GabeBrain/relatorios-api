@@ -11,6 +11,13 @@ import type { JobRow } from './repo/tipos.js';
  * marcador de cache do SDK; o que muda por trabalho (título, data, fase) vem depois.
  */
 
+/**
+ * Versão do prompt e das regras do agente. Mude a cada alteração de comportamento (prompt, base de
+ * conhecimento, ferramentas, lint) e registre em docs/features/slide-maker/LIVE_regras_slide_maker.md.
+ * Vai no log de cada fase para ligar um resultado à versão que o produziu.
+ */
+export const VERSAO_PROMPT = '1.0';
+
 /** Mesmo valor de `SYSTEM_PROMPT_DYNAMIC_BOUNDARY` do Agent SDK (sdk.d.ts); conferido em teste. */
 export const LIMITE_DINAMICO = '__SYSTEM_PROMPT_DYNAMIC_BOUNDARY__';
 

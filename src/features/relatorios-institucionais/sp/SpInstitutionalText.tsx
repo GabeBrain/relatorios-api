@@ -46,7 +46,7 @@ export function SpInstitutionalText({page,report}:{page:number;report:SpPreview}
     <text x={p(434)} y={p(384)} fontSize={p(21)} fontWeight="bold" fill="#ffffff">{SP_INSTITUTIONAL_FIGURES.population} da população do estado</text>
     <text x={p(434)} y={p(408)} fontSize={p(21)} fontWeight="bold" fill="#ffffff">{SP_INSTITUTIONAL_FIGURES.consumption} do potencial de consumo do estado</text>
   </svg>;
-  if(page===5)return <svg role="img" aria-label="Indicadores institucionais GeoBrain editáveis" viewBox="0 0 1280 720" className="absolute inset-0 h-full w-full" style={{fontFamily:'Tahoma, sans-serif'}}>
+  if(page===5)return <svg role="img" aria-label="Indicadores institucionais Geobrain editáveis" viewBox="0 0 1280 720" className="absolute inset-0 h-full w-full" style={{fontFamily:'Tahoma, sans-serif'}}>
     <TextBackground page={page}/>{['Tenha acesso à base','de dados imobiliários','mais qualificada e','completa do país.'].map((line,i)=><text key={i} x={p(635)} y={p(405+i*22)} fontSize={p(20)} fill="#fff">{line}</text>)}
     {SP_INSTITUTIONAL_FIGURES.geobrain.map(card=><g key={card.value}>
       <rect x={p(card.x+10)} y={p(card.y+22)} width={p(166)} height={p(55)} fill="#f2f2f2"/>

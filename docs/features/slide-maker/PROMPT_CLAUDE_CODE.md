@@ -5,9 +5,9 @@ O colaborador da Brain envia arquivos (pptx, xlsx, pdf, docx, png), responde a a
 **Antes de qualquer coisa**
 1. Rode o Protocolo de sessão do CLAUDE.md. A cópia local estava desatualizada (último fetch em 15/10/2026) e o menu lateral da produção já mudou. Faça `git fetch --all` e `git pull --ff-only` se a árvore estiver limpa; se não estiver, me avise antes.
 2. Leia, nesta ordem:
-   - docs/features/apresentacoes/INSTRUCOES_DESENVOLVIMENTO.md (a especificação; ela manda em caso de dúvida)
-   - todos os arquivos de docs/features/apresentacoes/base-conhecimento/, exceto 06-arquitetura-claude-code.md e comando-qualificar.md, que estão substituídos
-   - docs/features/apresentacoes/referencia/build_domicilios_v3.js
+   - docs/features/slide-maker/INSTRUCOES_DESENVOLVIMENTO.md (a especificação; ela manda em caso de dúvida)
+   - todos os arquivos de docs/features/slide-maker/base-conhecimento/, exceto 06-arquitetura-claude-code.md e comando-qualificar.md, que estão substituídos
+   - docs/features/slide-maker/referencia/build_domicilios_v3.js
    - CLAUDE.md, docs/architecture/FRONTEND_GUIDELINES.md, DESIGN_SYSTEM.md e SECURITY_NOTES.md
    - o padrão do serviço gcp/sinduscon-workbook-processor/
 3. Confirme na documentação atual do `@anthropic-ai/claude-agent-sdk` as assinaturas de `query()` (model, effort, maxBudgetUsd, sandbox, settingSources, AbortController), `tool()`/`createSdkMcpServer()` e das mensagens de resultado. Não escreva código com base em suposição.

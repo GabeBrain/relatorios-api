@@ -95,7 +95,7 @@ export async function fetchCompaniesReport(
     if (cached) return cached;
   }
   const token = useAuthStore.getState().getToken();
-  if (!token) throw new CompaniesApiError('Faça login GeoBrain para consultar Empresas.', 401, 'UNAUTHORIZED');
+  if (!token) throw new CompaniesApiError('Faça login Geobrain para consultar Empresas.', 401, 'UNAUTHORIZED');
   if (!SUPABASE_URL || !SUPABASE_KEY) throw new CompaniesApiError('Backend não configurado neste ambiente.', null, 'CONFIGURATION');
 
   let response: Response;
@@ -120,7 +120,7 @@ export async function fetchCompaniesReport(
 
   if (!response.ok) {
     if (response.status === 401 || response.status === 403) {
-      throw new CompaniesApiError('Sua sessão GeoBrain não está autorizada para consultar Empresas.', response.status, 'UNAUTHORIZED');
+      throw new CompaniesApiError('Sua sessão Geobrain não está autorizada para consultar Empresas.', response.status, 'UNAUTHORIZED');
     }
     throw new CompaniesApiError(String(payload.error ?? 'A fonte de Empresas não respondeu corretamente.'), response.status, String(payload.code ?? 'UPSTREAM'));
   }

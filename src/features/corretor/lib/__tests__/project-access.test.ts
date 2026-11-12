@@ -1,7 +1,7 @@
 import { expect, it, vi } from 'vitest';
 import { authorizeCorretor } from '../../../../../supabase/functions/corretor-access/core';
 const setup = () => ({ geoLogin: vi.fn().mockResolvedValue('geo-fixture'), exchange: vi.fn().mockResolvedValue({ access_token: 'app-fixture', refresh_token: 'refresh-fixture', userEmail: 'staff@example.invalid' }) });
-it('aceita qualquer conta validada pelo GeoBrain sem lista adicional de emails', async () => {
+it('aceita qualquer conta validada pelo Geobrain sem lista adicional de emails', async () => {
   const deps = setup(); deps.exchange.mockResolvedValue({ access_token: 'app-fixture', refresh_token: 'refresh-fixture', userEmail: 'outside@example.invalid' });
   expect((await authorizeCorretor({ email: 'outside@example.invalid', password: 'fixture' }, deps)).status).toBe(200);
   expect(deps.geoLogin).toHaveBeenCalledWith('outside@example.invalid', 'fixture'); expect(deps.exchange).toHaveBeenCalledWith('outside@example.invalid');

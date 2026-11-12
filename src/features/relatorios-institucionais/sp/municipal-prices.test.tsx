@@ -43,7 +43,7 @@ describe('SP preços informados pela fonte municipal', () => {
     expect(reviewSpSlides(r).find(slide => slide.number === 54)!.state).toBe('available');
     const svg = renderToStaticMarkup(<SpDetailSlide report={r} slide={54}/>);
     expect(svg).toContain('19.300'); expect(svg).not.toContain('Áreas e preços em conferência');
-    expect(svg).toContain('Preços nominais informados pela GeoBrain');
+    expect(svg).toContain('Preços nominais informados pela Geobrain');
   });
   it('não inventa média geral quando a consulta sem agrupamento retorna padrões', () => {
     const data = sources();
