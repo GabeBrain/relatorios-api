@@ -1,4 +1,4 @@
-import { readFile, stat } from 'node:fs/promises';
+import { lstat, readFile, realpath } from 'node:fs/promises';
 import { basename, sep } from 'node:path';
 import { z } from 'zod';
 import { transicionar, type Fase } from '../shared/state-machine.js';
@@ -94,10 +94,11 @@ export interface ResultadoFerramenta {
 }
 
 /**
- * Validação extra do deck antes de aceitar a entrega. A Fase 3/4 acrescenta aqui `python-pptx`,
- * `lint_pptx.py` (zero 🔒) e o hash do slide final do responsável. Devolve a mensagem de recusa ou null.
+ * Validação extra do deck antes de aceitar a entrega: em produção, `lint_pptx.py` com zero 🔒, que
+ * inclui o slide final do responsável (validador.ts). `raiz` é o diretório do trabalho. Devolve a
+ * mensagem de recusa ou null.
  */
-export type ValidadorDeck = (arquivoAbsoluto: string, job: JobRow) => Promise<string | null>;
+export type ValidadorDeck = (arquivoAbsoluto: string, job: JobRow, raiz: string) => Promise<string | null>;
 
 export const validadorBasico: ValidadorDeck = async () => null;
 
@@ -110,12 +111,12 @@ interface Dependencias {
 }
 
 const ZIP = [0x50, 0x4b, 0x03, 0x04];
+const ARQ_FONTES = 'trabalho/fontes.json';
 
 export class SessaoFase {
   terminal: Terminal | null = null;
   private perguntou = false;
   private relatorio: string | null = null;
-  private readonly fontes: z.infer<typeof ESQUEMAS.registrar_fonte>[] = [];
 
   constructor(
     private readonly d: Dependencias,
@@ -143,9 +144,7 @@ export class SessaoFase {
       case 'submeter_narrativa': return this.submeterNarrativa(r.data as z.infer<typeof ESQUEMAS.submeter_narrativa>);
       case 'entregar_deck': return this.entregarDeck(r.data as z.infer<typeof ESQUEMAS.entregar_deck>);
       case 'registrar_relatorio': return this.registrarRelatorio(r.data as z.infer<typeof ESQUEMAS.registrar_relatorio>);
-      case 'registrar_fonte':
-        this.fontes.push(r.data as z.infer<typeof ESQUEMAS.registrar_fonte>);
-        return aceite('Fonte registrada.');
+      case 'registrar_fonte': return this.registrarFonte(r.data as z.infer<typeof ESQUEMAS.registrar_fonte>);
       case 'informar_etapa': return this.informarEtapa((r.data as z.infer<typeof ESQUEMAS.informar_etapa>).etapa);
     }
   }
@@ -175,6 +174,15 @@ export class SessaoFase {
     return aceite('Relatório registrado.');
   }
 
+  /** trabalho/fontes.json acumula entre fases (o workspace é salvo no fim de cada fase): o lint (D2) e o relatório leem daí. */
+  private async registrarFonte(e: z.infer<typeof ESQUEMAS.registrar_fonte>) {
+    const atuais = await lerJson(this.d.workspace.caminho(ARQ_FONTES));
+    const lista = Array.isArray(atuais) ? atuais : [];
+    lista.push(e);
+    await this.d.workspace.gravarLocal(ARQ_FONTES, JSON.stringify(lista, null, 1));
+    return aceite(`Fonte registrada (${lista.length} no total).`);
+  }
+
   private async informarEtapa(etapa: (typeof ETAPAS)[number]) {
     await this.d.repo.inserirMensagem({ job_id: this.jobId, autor: 'sistema', tipo: 'progresso', conteudo: { etapa, fase: this.fase } });
     let job = await this.d.repo.obterJob(this.jobId);
@@ -201,18 +209,25 @@ export class SessaoFase {
       return recusa('O arquivo precisa estar dentro do diretório do trabalho.');
     }
     if (!absoluto.startsWith(this.d.workspace.caminho('saida') + sep)) return recusa('Salve o deck em saida/.');
-    const info = await stat(absoluto).catch(() => null);
-    if (!info?.isFile()) return recusa(`Arquivo não encontrado: ${e.arquivo}`);
-    const dados = await readFile(absoluto);
+    // lstat: um link simbólico (criado por um comando do agente) não é seguido; e o caminho real,
+    // com links de diretório resolvidos, precisa continuar dentro de saida/ do trabalho.
+    const info = await lstat(absoluto).catch(() => null);
+    if (!info) return recusa(`Arquivo não encontrado: ${e.arquivo}`);
+    if (!info.isFile()) return recusa('O deck precisa ser um arquivo comum em saida/ (links não são aceitos).');
+    const saidaReal = await realpath(this.d.workspace.caminho('saida')).catch(() => null);
+    const arquivoReal = await realpath(absoluto).catch(() => null);
+    if (!saidaReal || !arquivoReal || !arquivoReal.startsWith(saidaReal + sep)) return recusa('Salve o deck em saida/.');
+    const dados = await readFile(arquivoReal);
     if (!ZIP.every((b, i) => dados[i] === b)) return recusa('O arquivo não é um PPTX válido.');
-    const recusaValidador = await this.d.validadorDeck(absoluto, job);
+    const recusaValidador = await this.d.validadorDeck(arquivoReal, job, this.d.workspace.dir);
     if (recusaValidador) return recusa(recusaValidador);
 
     const caminho = `${this.jobId}/v${e.versao}/${basename(absoluto)}`;
     await this.d.arm.gravar(BUCKETS.saida, caminho, dados, 'application/vnd.openxmlformats-officedocument.presentationml.presentation');
     await this.d.repo.inserirArquivo({ job_id: this.jobId, nome: basename(absoluto), mime: 'application/vnd.openxmlformats-officedocument.presentationml.presentation', bytes: dados.length, storage_path: `${BUCKETS.saida}/${caminho}`, origem: 'saida' });
     await this.d.repo.inserirVersao({ job_id: this.jobId, versao: e.versao, storage_path: caminho, deck_spec: await lerJson(this.d.workspace.caminho('trabalho/deck_spec.json')), mudancas: e.mudancas, qa: e.qa });
-    await this.d.repo.salvarRelatorio({ job_id: this.jobId, versao: e.versao, markdown: this.relatorio, fontes: this.fontes });
+    const fontes = await lerJson(this.d.workspace.caminho(ARQ_FONTES));
+    await this.d.repo.salvarRelatorio({ job_id: this.jobId, versao: e.versao, markdown: this.relatorio, fontes: Array.isArray(fontes) ? fontes : [] });
     await this.d.repo.inserirMensagem({ job_id: this.jobId, autor: 'agente', tipo: 'entrega', conteudo: { entrega: { versao: e.versao, mudancas: e.mudancas, qa: e.qa } } });
     return this.concluir({ evento: 'deck_entregue', versao: e.versao }, `Deck v${e.versao} registrado.`);
   }

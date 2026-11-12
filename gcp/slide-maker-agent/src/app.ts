@@ -122,7 +122,12 @@ export async function criarApp(d: DependenciasApp): Promise<FastifyInstance> {
 
   const responder = (reply: FastifyReply, job: JobRow, status = 202) => reply.status(status).send({ trabalho: publico(job) });
 
-  app.get('/healthz', async () => ({ ok: true, ...(d.saude ? await d.saude() : {}) }));
+  // Com o agente real, isolamento reprovado = serviço não saudável (503): nenhuma fase roda (§15.1 item 7).
+  app.get('/healthz', async (_req, reply) => {
+    const s = d.saude ? await d.saude() : {};
+    const ok = s.ok !== false;
+    return reply.status(ok ? 200 : 503).send({ ...s, ok });
+  });
 
   app.post('/jobs', async (req, reply) => {
     const corpo = validar(CorpoCriar, req.body);
