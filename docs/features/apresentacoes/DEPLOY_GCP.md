@@ -216,7 +216,8 @@ gcloud run services describe slide-maker-agent --region="$REGIAO" --format='valu
    Esperado: `"ok":true` e um bloco `isolamento`. **Envie esse JSON ao Diego.** Ele mostra se o
    `bubblewrap` funciona no Cloud Run gen2 (`"bwrap":"ok"` e `"aprovado":true`) ou não
    (`"bwrap":"falhou"`, com o motivo em `detalhe`). É a evidência que decide o isolamento da Fase 4.
-   Na Fase 2 o resultado é só informativo e não bloqueia o serviço.
+   Com o agente simulado (padrão), o resultado é só informativo; com `AGENTE=claude` (Parte C5),
+   isolamento reprovado deixa o `/healthz` em 503 e nenhuma fase roda.
 
 2. **Ensaio do fluxo com o agente simulado** (troque o e-mail e use qualquer PDF):
 
@@ -237,11 +238,53 @@ gcloud run services describe slide-maker-agent --region="$REGIAO" --format='valu
 
 ### C4. O que ainda não está nesta publicação
 
-- **Agente real (Fase 4):** troca o simulado pelo Agent SDK com `claude-opus-5-5`, effort `medium` e a
-  trava `maxBudgetUsd` por fase. A partir daí, o diagnóstico de isolamento reprovado **derruba** o
-  health check.
 - **Frontend (Fase 5):** `VITE_SLIDE_MAKER_AGENT_URL=$URL` entra no `.env` versionado (o Lovable lê de
   lá), junto com o item "Slide Maker" no menu.
 - **Alternativa registrada:** se o corte de 25 min não bastar para a produção (F3), a fase passa a
   rodar como **Cloud Run Job** (§8 item 5, §15.1 item 8).
 - **Limpeza de 180 dias** de `entrada/` e `trabalho/` (§15.1 item 2): job agendado, numa fase posterior.
+
+### C5. Ativar o agente real (Fase 4)
+
+Só depois de C3 com `"aprovado": true` no bloco `isolamento`. Cada trabalho completo usa o Claude e
+**tem custo** (estimativa da base, doc 07: US$ 5–9 por deck; a trava por fase é F1 = 2, F2 = 6,
+F3 = 10 e F4 = 5 US$).
+
+1. **Chave da API no Secret Manager.** A chave que está nos Secrets do Lovable (`CLAUDE_API_KEY`) fica
+   nas funções do Supabase e o Cloud Run não a enxerga. Grave a mesma chave (ou uma chave própria
+   do Slide Maker, criada no Console da Anthropic) como nova versão do segredo:
+
+   ```bash
+   read -rs CHAVE   # cole a chave e tecle Enter; ela não aparece na tela nem fica no histórico
+   printf '%s' "$CHAVE" | gcloud secrets versions add slide-maker-anthropic-api-key --data-file=-
+   unset CHAVE
+   ```
+
+2. **Ligar o agente real:**
+
+   ```bash
+   gcloud run services update slide-maker-agent --region="$REGIAO" --update-env-vars=AGENTE=claude
+   curl -s -o /dev/null -w '%{http_code}\n' "$URL/healthz"; curl -s "$URL/healthz" | jq
+   ```
+
+   Esperado: `200`, `"agente":"claude"` e `"isolamento": {…, "aprovado": true}`. Se vier `503`, o
+   isolamento reprovou nesta revisão: nenhuma fase roda (as fases terminam em erro com "Tentar
+   novamente"). Volte com `--update-env-vars=AGENTE=simulado` e envie o JSON ao Diego.
+
+3. **Trabalho dourado 1** (§13): com o arquivo `domicilios_vagos_2010_2022.xlsx` da pasta do Diego,
+   repita o ensaio de C3 com contexto real, responda às perguntas e aprove a narrativa:
+
+   ```bash
+   R=$(curl -s -X POST "$URL/jobs" -H 'content-type: application/json' \
+         -d '{"colaborador_email":"seu.nome@brain.srv.br","titulo":"Dourado 1 — domicílios vagos","contexto":"Palestra de 15 min para incorporadores, apresentada pelo Fábio"}')
+   JOB=$(echo "$R" | jq -r .jobId); TOKEN=$(echo "$R" | jq -r .token); echo "$JOB $TOKEN"
+   curl -s -X POST "$URL/jobs/$JOB/arquivos" -H "x-job-token: $TOKEN" -F "arquivos=@domicilios_vagos_2010_2022.xlsx" | jq .trabalho.estado
+   # acompanhe: estado e mensagens (as perguntas chegam em "aguardando_respostas")
+   curl -s "$URL/jobs/$JOB" -H "x-job-token: $TOKEN" | jq '.trabalho.estado, .mensagens[-1]'
+   ```
+
+   Respostas (`POST /jobs/$JOB/respostas`, uma chave por pergunta) e aprovação
+   (`POST /jobs/$JOB/narrativa` com `{"acao":"aprovar"}`) seguem a §8; até o frontend (Fase 5), o
+   Diego pode conduzir essa parte junto. Ao chegar em `entregue`, baixe o deck com
+   `GET /jobs/$JOB/versoes/1/download` e envie ao Diego o `.pptx`, o `jobId` e os logs da fase
+   (`gcloud logging read 'resource.labels.service_name="slide-maker-agent" AND textPayload:"agente job="' --limit=20`).

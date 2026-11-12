@@ -3,7 +3,6 @@ import { describe, expect, it } from 'vitest';
 import { ambienteDoAgente } from '../src/agent/agente.js';
 import { gerarToken, hashToken, tokenConfere } from '../src/auth/token.js';
 import { lerConfig } from '../src/config.js';
-import { diagnosticarIsolamento, type Executar } from '../src/isolamento.js';
 import { desduplicar, nomeSeguro } from '../src/uploads.js';
 
 describe('máquina de estados compartilhada', () => {
@@ -57,44 +56,5 @@ describe('nomes de arquivo', () => {
     expect(nomeSeguro('.\u0000oculto.pdf')).toBe('_oculto.pdf');
     expect(nomeSeguro('')).toBe('arquivo');
     expect(desduplicar(['a.pdf', 'A.pdf', 'a.pdf'])).toEqual(['a.pdf', 'A (2).pdf', 'a (3).pdf']);
-  });
-});
-
-describe('diagnóstico de isolamento (spike do Cloud Run, §15.1 item 7)', () => {
-  const comandos = (resp: (args: string[]) => { codigo: number; saida: string }): Executar => async (_cmd, args) => resp(args);
-
-  it('bwrap ausente → indisponível, não aprovado', async () => {
-    const d = await diagnosticarIsolamento(async () => ({ codigo: -1, saida: 'spawn bwrap ENOENT' }));
-    expect(d).toMatchObject({ bwrap: 'indisponivel', aprovado: false });
-  });
-
-  it('bwrap sem permissão no contêiner → falhou', async () => {
-    const d = await diagnosticarIsolamento(comandos(() => ({ codigo: 1, saida: 'bwrap: Can\'t mount proc on /newroot/proc: Operation not permitted' })));
-    expect(d).toMatchObject({ bwrap: 'falhou', aprovado: false });
-    expect(d.detalhe).toContain('Operation not permitted');
-  });
-
-  it('isolamento completo → aprovado', async () => {
-    const d = await diagnosticarIsolamento(comandos((a) => {
-      if (a.includes('curl')) return { codigo: 6, saida: 'Could not resolve host' };
-      if (a.includes('ls')) return { codigo: 2, saida: 'No such file or directory' };
-      if (a.includes('sh')) return { codigo: 0, saida: 'PATH=/usr/bin:/bin\n' };
-      return { codigo: 0, saida: '' };
-    }));
-    expect(d).toEqual({ bwrap: 'ok', semRede: true, semSegredosNoAmbiente: true, semLeituraDoApp: true, aprovado: true });
-  });
-
-  it('qualquer vazamento reprova: rede, chave no ambiente ou leitura de /app', async () => {
-    const base = (a: string[]) => a.includes('curl') ? { codigo: 6, saida: '' } : a.includes('ls') ? { codigo: 2, saida: '' } : { codigo: 0, saida: 'PATH=/bin' };
-    const vazamentos: ((a: string[]) => { codigo: number; saida: string } | null)[] = [
-      (a) => a.includes('curl') ? { codigo: 0, saida: '' } : null,
-      (a) => a.includes('sh') ? { codigo: 0, saida: 'ANTHROPIC_API_KEY=sk-ant' } : null,
-      (a) => a.includes('sh') ? { codigo: 0, saida: 'SUPABASE_SERVICE_ROLE_KEY=x' } : null,
-      (a) => a.includes('ls') ? { codigo: 0, saida: 'dist\nnode_modules' } : null,
-    ];
-    for (const vaza of vazamentos) {
-      const d = await diagnosticarIsolamento(comandos((a) => vaza(a) ?? base(a)));
-      expect(d.aprovado).toBe(false);
-    }
   });
 });

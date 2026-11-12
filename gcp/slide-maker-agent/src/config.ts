@@ -17,7 +17,16 @@ const Esquema = z.object({
   WORK_ROOT: z.string().default('/work'),
   /** §15.1 item 8: o Cloud Tasks espera até 30 min; o serviço corta a fase antes. */
   FASE_TIMEOUT_MS: z.coerce.number().int().positive().default(25 * 60 * 1000),
-  AGENTE: z.enum(['simulado']).default('simulado'),
+  /** `simulado`: sem modelo (testes e ensaios). `claude`: Agent SDK (Fase 4); exige a chave e o isolamento aprovado. */
+  AGENTE: z.enum(['simulado', 'claude']).default('simulado'),
+  /** Pastas da imagem (Dockerfile). */
+  APP_DIR: z.string().default('/app'),
+  DIR_FONTES: z.string().default('/usr/local/share/fonts/brain'),
+  PYTHON: z.string().default('python3'),
+}).superRefine((c, ctx) => {
+  if (c.AGENTE === 'claude' && !c.ANTHROPIC_API_KEY) {
+    ctx.addIssue({ code: 'custom', path: ['ANTHROPIC_API_KEY'], message: 'obrigatória com AGENTE=claude' });
+  }
 });
 
 export type Config = z.infer<typeof Esquema>;

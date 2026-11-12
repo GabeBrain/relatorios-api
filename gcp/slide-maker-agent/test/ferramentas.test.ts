@@ -1,4 +1,4 @@
-import { mkdtempSync } from 'node:fs';
+import { mkdtempSync, readFileSync, symlinkSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
@@ -103,6 +103,27 @@ describe('ferramentas brain (§5.1)', () => {
     expect(arm.objetos.has(`slide-maker-saida/${job.id}/v1/deck_v1.pptx`)).toBe(true);
     expect((await repo.listarVersoes(job.id))[0]).toMatchObject({ versao: 1, storage_path: `${job.id}/v1/deck_v1.pptx` });
     expect(repo.relatorios[0]).toMatchObject({ versao: 1, markdown: '# Relatório' });
+  });
+
+  it('registrar_fonte acumula em trabalho/fontes.json (o lint e as próximas fases leem daí)', async () => {
+    const { s, ws } = await sessao('F1');
+    const fonte = { indicador: 'vagos 2022', valor: '11,4 mi', fonte: 'IBGE', periodo: '2022', origem: 'entrada' as const };
+    await ws.gravarLocal('trabalho/fontes.json', JSON.stringify([{ ...fonte, indicador: 'de uma fase anterior' }]));
+    expect((await s.chamar('registrar_fonte', fonte)).texto).toBe('Fonte registrada (2 no total).');
+    const gravado = JSON.parse(readFileSync(ws.caminho('trabalho/fontes.json'), 'utf8'));
+    expect(gravado.map((f: { indicador: string }) => f.indicador)).toEqual(['de uma fase anterior', 'vagos 2022']);
+  });
+
+  it('entregar_deck recusa link simbólico, mesmo apontando para um pptx válido', async () => {
+    const { s, ws, arm } = await sessao('F3');
+    const fora = mkdtempSync(join(tmpdir(), 'fora-'));
+    writeFileSync(join(fora, 'deck_v1.pptx'), pptxFicticio());
+    await s.chamar('registrar_relatorio', { markdown: '# R' });
+    symlinkSync(fora, ws.caminho('saida/pasta'), 'junction');
+    const r = await s.chamar('entregar_deck', entrega('saida/pasta/deck_v1.pptx'));
+    expect(r.ok).toBe(false);
+    expect(r.texto).toContain('saida/');
+    expect(arm.objetos.size).toBe(0);
   });
 
   it('informar_etapa "Revisando o visual" move produzindo → revisando', async () => {
