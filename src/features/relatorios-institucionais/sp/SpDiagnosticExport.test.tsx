@@ -33,7 +33,7 @@ describe('SP diagnóstico da geração atual', () => {
     const result = JSON.parse(json);
     expect(result).toMatchObject({ quarter: '3T2026', throughMonth: '2026-08', analystApproval: false });
     expect(result.slides).toHaveLength(85);
-    expect(result.slides.find((row: { number: number }) => row.number === 59).state).toBe('blocked');
+    expect(result.slides.find((row: { number: number }) => row.number === 59).state).toBe('partial');
     expect(result.numericAudit.details.priceSource.sources[0].coverage).toEqual([{ month: '2026-08', groups: ['4 Quartos'], ticketValues: 0, meterValues: 1 }]);
     expect(json).not.toMatch(/SECRET|Authorization|typologies_history/);
   });

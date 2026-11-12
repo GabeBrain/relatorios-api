@@ -72,7 +72,9 @@ afterEach(()=>{cleanup();vi.useRealTimers();});
 
 describe('Geração automática SP institucional', () => {
   const generate=()=>{fireEvent.click(screen.getByText('Escolher capital'));fireEvent.click(screen.getByRole('button',{name:'Gerar relatório'}));};
-  const finished=()=>screen.findByRole('heading',{name:/Relatório gerado/});
+  // The shared history processor yields between batches. Wait for its actual
+  // completion instead of the default one-second DOM lookup deadline.
+  const finished=()=>screen.findByRole('heading',{name:/Relatório gerado/},{timeout:4000});
   it('executa todas as etapas com um clique e compartilha históricos',async()=>{
     render(<SpInstitutionalPage/>);generate();await finished();
     expect(access.neighborhoodCalls).toBe(1);

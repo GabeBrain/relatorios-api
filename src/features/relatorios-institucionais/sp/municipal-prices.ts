@@ -12,6 +12,7 @@ export interface SpPriceSource {
 }
 export interface SpMunicipalPrices {
   method: 'geobrain-reported-prices-v1';
+  bedroomFourGroup?: '4' | '4+';
   sources: { metric: SpPriceMetric; grouping: SpPriceGrouping; rows: number; issue?: string; coverage?: { month: string; groups: string[]; ticketValues: number; meterValues: number }[] }[];
   series: Record<number, SpPricePoint[]>;
   annualChanges: Record<number, number | null>;
@@ -32,6 +33,7 @@ function groupOf(row: Record<string, unknown>, grouping: SpPriceGrouping): strin
   if (grouping === 'Padrão') return SP_PRICE_STANDARDS.find(label => normalize(label) === group) ?? null;
   if (/^(1|2|3)$/.test(group)) return group;
   if (/^([123])\s*(quartos?|dormitorios?)$/.test(group)) return group[0];
+  if (/^4\s*(quartos?|dormitorios?)?$/.test(group)) return '4';
   if (/^4\s*\+\s*(quartos?|dormitorios?)?$/.test(group) || /^4 ou mais (quartos|dormitorios)$/.test(group) || /^4 (quartos|dormitorios) ou mais$/.test(group)) return '4+';
   return null;
 }
@@ -41,6 +43,9 @@ const change = (now: number | null, before: number | null) => {
 };
 export function buildSpMunicipalPrices(sources: SpPriceSource[], report: SpPreview): SpMunicipalPrices {
   const periods = spPricePeriods(report);
+  // Keep exactly four distinct from an explicit four-or-more category. Never
+  // fill gaps in one category with the other category's observations.
+  const bedroomFourGroup = sources.some(source => source.grouping === 'Tipologia' && source.rows.some(row => groupOf(row, 'Tipologia') === '4+')) ? '4+' : '4';
   const read = (metric: SpPriceMetric, grouping: SpPriceGrouping, group: string, month: string) => {
     const source = sources.find(item => item.metric === metric && item.grouping === grouping);
     const missing = { value: null, issue: source?.issue ?? `Preço municipal de ${group} não informado em ${month}; nenhuma média de grupos foi presumida.` };
@@ -54,17 +59,17 @@ export function buildSpMunicipalPrices(sources: SpPriceSource[], report: SpPrevi
     return Number.isFinite(value) && value > 0 && value <= Number.MAX_SAFE_INTEGER / 100 ? { value, issue: undefined } : { value: null, issue: `Preço municipal ausente ou inválido para ${group} em ${month}.` };
   };
   const series: SpMunicipalPrices['series'] = {}, annualChanges: SpMunicipalPrices['annualChanges'] = {};
-  for (const [slide, grouping, group] of [[53, 'overall', 'Geral'], [54, 'Tipologia', '1'], [56, 'Tipologia', '2'], [58, 'Tipologia', '3'], [59, 'Tipologia', '4+']] as const) {
+  for (const [slide, grouping, group] of [[53, 'overall', 'Geral'], [54, 'Tipologia', '1'], [56, 'Tipologia', '2'], [58, 'Tipologia', '3'], [59, 'Tipologia', bedroomFourGroup]] as const) {
     const all = periods.map(period => ({ ...period, ...read('medium-prices-meter', grouping, group, period.month) }));
     series[slide] = all.slice(1).map((point, i) => ({ ...point, variation: change(point.value, all[i].value) }));
     const before = `${Number(report.throughMonth!.slice(0, 4)) - 1}${report.throughMonth!.slice(4)}`;
     annualChanges[slide] = change(all.at(-1)!.value, read('medium-prices-meter', grouping, group, before).value);
   }
-  const closing = ([['overall', ['Geral']], ['Padrão', SP_PRICE_STANDARDS], ['Tipologia', ['1', '2', '3', '4+']]] as const).flatMap(([grouping, groups]) => groups.map(group => {
+  const closing = ([['overall', ['Geral']], ['Padrão', SP_PRICE_STANDARDS], ['Tipologia', ['1', '2', '3', bedroomFourGroup]]] as const).flatMap(([grouping, groups]) => groups.map(group => {
     const ticket = read('medium-prices', grouping, group, report.throughMonth!), meter = read('medium-prices-meter', grouping, group, report.throughMonth!);
     return { grouping, group, ticket: ticket.value, meter: meter.value, issues: [ticket.issue, meter.issue].filter((issue): issue is string => !!issue) };
   }));
-  return { method: 'geobrain-reported-prices-v1', sources: sources.map(source => {
+  return { method: 'geobrain-reported-prices-v1', bedroomFourGroup, sources: sources.map(source => {
     const months = [...new Set(source.rows.map(row => monthOf(row.period)).filter((month): month is string => !!month))].sort();
     const coverage = months.map(month => {
       const rows = source.rows.filter(row => monthOf(row.period) === month && normalize(row.building_type) === 'vertical');
@@ -75,22 +80,48 @@ export function buildSpMunicipalPrices(sources: SpPriceSource[], report: SpPrevi
   }), series, annualChanges, closing };
 }
 
-/** Preserve the granular calculation as an audit baseline, never a silent fallback. */
+export type SpPriceMethod = 'municipal-reported' | 'granular-stock-weighted';
+
+/** Select whole series, not individual points: gaps never bridge two methods. */
 export function spDisplayPrices(report: SpPreview) {
-  const granular = report.granularDetails?.prices, municipal = report.municipalPrices;
-  if (!municipal) return granular;
-  const overall = municipal.closing.find(row => row.grouping === 'overall')!;
-  return { series: { ...granular?.series, ...municipal.series }, annualChanges: { ...granular?.annualChanges, ...municipal.annualChanges },
-    overall: { units: report.metrics.stock ?? 0, ticket: overall.ticket, meter: overall.meter, issues: overall.issues },
-    standards: SP_PRICE_STANDARDS.map(group => { const row = municipal.closing.find(row => row.grouping === 'Padrão' && row.group === group)!; return { ...row, units: report.patterns?.rows.find(row => row.group === group)?.stock ?? 0 }; }) };
+  const granular = report.granularDetails?.status === 'ready' ? report.granularDetails.prices : undefined;
+  const municipal = report.municipalPrices;
+  const seriesMethods: Record<number, SpPriceMethod> = {};
+  for (const slide of [53,54,55,56,57,58,59]) seriesMethods[slide] = 'granular-stock-weighted';
+  const overallMethods: Record<'ticket' | 'meter', SpPriceMethod> = { ticket:'granular-stock-weighted', meter:'granular-stock-weighted' };
+  const notices: { slides:number[]; reason:string }[] = [];
+  if (!municipal) return granular ? { ...granular, seriesMethods, overallMethods, notices } : undefined;
+  const series = { ...granular?.series, ...municipal.series };
+  const annualChanges = { ...granular?.annualChanges, ...municipal.annualChanges };
+  for (const slide of [53,54,56,58,59]) seriesMethods[slide] = 'municipal-reported';
+  // The live ungrouped endpoint returned seven anonymous rows per month. It
+  // does not establish a city mean. Keep the existing checked calculation,
+  // identify its method everywhere, and retain all of its historical gaps.
+  if (!municipal.series[53]?.some(point => point.value !== null) && granular?.series[53]?.some(point => point.value !== null)) {
+    series[53] = granular.series[53];
+    annualChanges[53] = granular.annualChanges[53];
+    seriesMethods[53] = 'granular-stock-weighted';
+    notices.push({ slides:[53], reason:'Sem média geral municipal única. Série calculada pelas unidades em oferta, com as lacunas da conferência granular preservadas.' });
+  }
+  const municipalOverall = municipal.closing.find(row => row.grouping === 'overall');
+  const overall = { units:report.metrics.stock ?? 0, ticket:municipalOverall?.ticket ?? null, meter:municipalOverall?.meter ?? null, issues:municipalOverall?.issues ?? [] };
+  for (const field of ['ticket','meter'] as const) {
+    overallMethods[field] = 'municipal-reported';
+    const checked = granular?.overall;
+    if (overall[field] === null && checked && !checked.partial && checked[field] !== null) {
+      overall[field] = checked[field];
+      overallMethods[field] = 'granular-stock-weighted';
+      notices.push({ slides:[field === 'ticket' ? 61 : 62], reason:'A linha geral é calculada pelas unidades em oferta; as barras por padrão são informadas pela GeoBrain. Métodos distintos para conferência, sem média das médias dos padrões.' });
+    }
+  }
+  return { series, annualChanges, seriesMethods, overallMethods, notices, overall,
+    standards: SP_PRICE_STANDARDS.map(group => { const row = municipal.closing.find(row => row.grouping === 'Padrão' && row.group === group); return { group, ticket:row?.ticket ?? null, meter:row?.meter ?? null, issues:row?.issues ?? [], units:report.patterns?.rows.find(row => row.group === group)?.stock ?? 0 }; }) };
 }
 
+/** Bedroom cards require a common population and method for total/MCMV/MAP.
+ * The municipal endpoint has no such cross-tabulation; keep the checked
+ * granular card intact instead of blanking its calculated components.
+ */
 export function spDisplayMarket(report: SpPreview) {
-  const market = report.granularDetails?.market;
-  if (!market || !report.municipalPrices) return market;
-  return { ...market, prices: market.prices.map(price => {
-    const source = report.municipalPrices!.closing.find(row => row.grouping === 'Tipologia' && row.group === (price.bedroom === 4 ? '4+' : String(price.bedroom)))!;
-    const unavailable = { ticket: null, meter: null, issues: ['Detalhamento municipal por dormitório e MCMV/MAP ainda não informado.'] };
-    return { ...price, ticket: source.ticket, meter: source.meter, issues: source.issues, mcmv: { ...price.mcmv, ...unavailable }, map: { ...price.map, ...unavailable } };
-  }) };
+  return report.granularDetails?.market;
 }

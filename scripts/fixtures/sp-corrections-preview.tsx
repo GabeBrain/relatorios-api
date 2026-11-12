@@ -29,6 +29,10 @@ report.projects=buildSpProjects(buildings,report);
 const priceMode=new URLSearchParams(location.search).get('native-prices');
 if(priceMode){
   const sources=(['medium-prices','medium-prices-meter'] as const).flatMap(metric=>(['overall','Padrão','Tipologia'] as const).map(grouping=>({metric,grouping,rows:spPricePeriods(report).flatMap((period,index)=>(grouping==='overall'?['Geral']:grouping==='Tipologia'?['1 Quarto','2 Quartos','3 Quartos','4+ Quartos']:['Compacto','Econômico','Standard','Médio','Médio-Alto','Alto','Luxo']).map(group=>({period:`${period.month}-01`,building_type:'Vertical',group,[metric==='medium-prices'?'average_price':'average_price_per_meter']:(metric==='medium-prices'?800000:18000)+index*100}))),...(priceMode==='error'?{issue:'Fonte de preços temporariamente indisponível.'}:{})})));
+  if(priceMode==='observed-shape')for(const source of sources){
+    if(source.grouping==='overall')source.rows=source.rows.flatMap(row=>Array.from({length:7},(_,index)=>({...row,[source.metric==='medium-prices'?'average_price':'average_price_per_meter']:20000+index,group:''})));
+    if(source.grouping==='Tipologia')for(const row of source.rows)if(row.group==='4+ Quartos')row.group='4';
+  }
   if(priceMode==='empty')sources.forEach(source=>{source.rows=[];});
   if(priceMode==='gap')sources.forEach(source=>{source.rows=source.rows.filter(row=>!row.period.startsWith('2024-06'));});
   report.municipalPrices=buildSpMunicipalPrices(sources,report);

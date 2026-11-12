@@ -392,6 +392,16 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 12/11/2026 — SP: recuperar preços e cartões com método explícito — Codex
+
+- **Ambiente/funcionalidade:** SP institucional, slides53/55–59/61–64, revisão e diagnóstico em todos os períodos.
+- **Evidência/mudança:** JSON2T2026do usuário comprovou sete preços anônimos na consulta geral, grupo4ignorado e adaptador apagando MCMV/MAP calculados. Série53recupera método granular inteiro com lacunas; linha61/62recupera média granular conferida, separada das barras municipais;59aceita4sem chamá-lo4+;63/64mantêm quadro granular completo. Métodos e avisos na prévia/JSON/insights, sem média dos padrões ou mistura de fontes por ponto. [Contrato, hash e limites](../features/relatorios-institucionais/sp/DIAGNOSTICO_PRECOS_2026-11-12.md).
+- **Etapas/Pendências:** correção local;53passa a parcial com oito competências ausentes/divergentes;55/57continuam parciais,56já estava disponível no arquivo. Média geral calculada não é equivalência homologada com o manual. Falta publicar com autorização e conferir nova geração/JSON, incluindo preços do grupo4que não vieram numericamente no diagnóstico recebido. Fortaleza pausado, sem alteração runtime.
+- **Validação:** regressões com agregados reais e fontes sintéticas;50casosEdge1440/390sem rede externa, erro ou overflow. Build/tipos e lint aprovados;342testes/38arquivosSPaprovados, com concorrência limitada após timeout na primeira rodada. Reutilizados gráficos/quadros e feedback existentes; consultas, BrainLoadingState e cancelamento preservados. Sem API nova/geração real/push/Monday.
+- **Commits:** commit desta entrada; base `a4ea3a25`.
+- **Monday:** [DESAFIO — Estudos Entidades e Institucionais](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`.
+
+
 ### 12/11/2026 ? SP: diagn?stico JSON vis?vel para investigar pre?os ? Codex
 
 - **Ambiente/funcionalidade:** SP institucional, resultado da gera??o e diagn?stico dos 85 slides.
@@ -1405,6 +1415,8 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 
 ## 2. Etapas
 
+- 🟡 **SP — preços12/11:** seleção corrigida localmente com diagnóstico real,342testes e50ensaiosEdge.53parcial,55/57com oito lacunas preservadas;59aceita4exatos,61–64recuperam cálculos identificados. Publicação e nova geração/JSON pendentes.
+
 - 🟡 **Fortaleza mensal —11/11:**60posições e PDF/PPTX de conferência implementados localmente; ensaios sintéticos/Office/PDF aprovados. Sem homologação real. Trimestral10/89, próximo11–20. [Estado atual](../features/relatorios-institucionais/fortaleza/MENSAL_EXPORTACAO_2026-11-11.md); supera pendências de implementação mensal nas entradas históricas abaixo.
 
 - 🟡 **SP Institucional — revisão11/11:** correções visuais/Top10/fotos/exportação verificadas localmente; publicação pendente. Escoamento adiado por Lucas, preços/histórico aguardam conciliação de método/base. [Entrega](../features/relatorios-institucionais/sp/CORRECOES_ANALISTA_2026-11-11.md).
@@ -1519,6 +1531,8 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 ---
 
 ## 3. Pendências
+
+- **SP — preços12/11:** seleção de fontes corrigida localmente após JSON real; autorizar envio e gerar novamente. Confirmar grupo4e linha/série calculada; oito lacunas antigas53/55/57e agregado municipal único continuam em aberto. Estado supera a pausa aguardando JSON registrada abaixo.
 
 - **Fortaleza —11/11:** autorizar envio da exportação mensal, gerar/inspecionar dados reais e diagnostico pareado; fechar amostra/empresas, universo/capacidade, preços/IVV/INCC e equipe. PDF/PPTX mensal não é mais pendência de implementação. Próxima fatia trimestral11–20, com janela/fonte próprias; demais estados abaixo são históricos.
 

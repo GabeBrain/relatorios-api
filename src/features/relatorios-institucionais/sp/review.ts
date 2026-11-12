@@ -42,6 +42,7 @@ function trend(report:SpPreview, number:number):Finding {
 
 /** Availability of the current generation, never a claim of market validation or analyst approval. */
 export function reviewSpSlides(report:SpPreview, mapToken=import.meta.env.VITE_MAPBOX_ACCESS_TOKEN??''):SpSlideReview[] {
+  const prices=spDisplayPrices(report);
   function check(number:number):Finding {
     if(number===82||number===83)return {state:'reference',reason:'Equipe inicial da edição de referência 2T2026. Personalize nomes, cargos e fotos na prévia e revise os responsáveis antes de exportar.'};
     if(SP_INSTITUTIONAL_ASSETS[number])return {state:'reference',reason:number===7?'Data acompanha o período conferido; percentuais preservados de junho/2026 e editáveis no PowerPoint. Confirmar a atualização com o responsável editorial.':number===5?'Seis indicadores e legendas editáveis no PowerPoint; valores institucionais preservados da edição 2T2026, sem atualização pela API municipal.':'Arte da edição 2T2026. Confirmar pessoas, contatos e números institucionais.'};
@@ -64,7 +65,6 @@ export function reviewSpSlides(report:SpPreview, mapToken=import.meta.env.VITE_M
     }
     if(number===46)return source(report.stockSeries,'a oferta histórica');
     if(number===50){const inputs=[report.stockSeries,report.launchSeries,report.salesSeries],failed=inputs.find(input=>input?.status==='blocked');if(failed)return source(failed,'as séries do IVV');if(inputs.some(input=>!input))return pending('O IVV aguarda as séries de oferta, lançamentos e vendas.');const result=spQuarterlyIvv(report),state=source(result,'as séries de oferta, lançamentos e vendas');return state.state==='available'&&result.rows.some(row=>row.value===null)?partial('Há trimestre sem base disponível para o IVV; não representa índice zero.'):state;}
-    const prices=spDisplayPrices(report);
     if(prices){
       if(number>=53&&number<=59){
         const points=prices.series[number]??[],valid=points.filter(row=>row.value!==null).length;
@@ -100,6 +100,9 @@ export function reviewSpSlides(report:SpPreview, mapToken=import.meta.env.VITE_M
   }
   return SP_ORIGINAL_SLIDES.map(slide=>{
     const finding={...check(slide.number)};
+    const notices=prices?.notices.filter(notice=>notice.slides.includes(slide.number))??[];
+    for(const notice of notices)finding.reason+=' '+notice.reason;
+    if((slide.number===63||slide.number===64)&&report.municipalPrices)finding.reason+=' Total, MCMV e MAP calculados por unidades em oferta na mesma fotografia granular.';
     if((SP_DETAIL_SLIDES as readonly number[]).includes(slide.number)&&finding.state==='available'&&report.granularDetails?.warnings?.length)finding.reason+=' Há ressalvas da fonte nos históricos; consulte os detalhes da conferência.';
     return {...slide,...finding};
   });

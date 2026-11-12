@@ -1,5 +1,9 @@
 # Decisões e pontos abertos — SP
 
+## 12/11/2026 — preços: fonte disponível por recorte e método identificado
+
+[Diagnóstico real e contrato](DIAGNOSTICO_PRECOS_2026-11-12.md). JSON do usuário comprova sete linhas anônimas na consulta geral e categorias 1/2/3/4 na Tipologia. Sem média municipal única, recuperar a série geral granular inteira e a linha geral conferida, identificando o método e preservando lacunas; barras por padrão continuam municipais e são identificadas separadamente. Não recompor total por médias dos padrões ou interpolar pontos. Grupo 4 significa quatro, somente 4+ explícito significa quatro ou mais. Quadros 63/64 usam o cálculo granular completo, mantendo mesmo universo para total/MCMV/MAP. Esta decisão substitui o apagamento dos cartões e a exclusividade da média municipal descritos em 11/11; não homologa a equivalência com o relatório manual.
+
 ## 11/11/2026 — fonte municipal dos preços
 
 [Contrato e limites](CORRECAO_FONTE_PRECOS_2026-11-11.md). Nova geração usa observações `medium-prices`/`medium-prices-meter` por competência/grupo, separadas do cálculo por estoque. Total geral exige observação explícita, sem média dos padrões; resposta sem agrupamento ainda não validada autenticada. Série municipal não depende de conciliação granular. Séries sem MCMV conservam método granular candidato; MCMV/MAP nos cards municipais fica indisponível até comprovar o cruzamento equivalente, preservando o granular na auditoria. Esta decisão substitui a exclusividade do cálculo granular descrita nas entradas antigas; não homologa pesos/metodologia da API nem seus valores reais. Escoamento preservado até retorno do analista.

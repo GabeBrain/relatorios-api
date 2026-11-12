@@ -1,5 +1,9 @@
 # Estado do handoff
 
+## 12/11/2026 — SP: diagnóstico recebido e seleção de preços corrigida
+
+JSON2T2026recebido e analisado; [contrato/hash/limites](../../features/relatorios-institucionais/sp/DIAGNOSTICO_PRECOS_2026-11-12.md). Fonte geral tem sete linhas anônimas, Tipologia entrega4exatos e adaptador apagava cartões MCMV/MAP. Correção local recupera série geral granular inteira com lacunas, linha geral calculada identificada e quadros granulares; aceita4com rótulo correto.55/57continuam com oito lacunas reais;56já disponível. Basea4ea3a25,main/origin0–0após fetch; script Fortaleza não rastreado preservado. 342testes/38arquivosSP,build/tipos/lint e50ensaiosEdgeoffline aprovados; teste de geração aguarda conclusão real por até4segundos. Sem nova API/geração real/push/Monday. Próximo envio autorizado e novo JSON; não homologar média geral editorial ou presumir preço numérico do grupo4antes da nova geração. Fortaleza permanece pausado.
+
 ## 12/11/2026 ? SP: JSON antes de corrigir os pre?os
 
 Usu?rio pausou Fortaleza trimestral (10/89) e priorizou slides SP53/59 indispon?veis e55/56/61?64com lacunas, para todos os per?odos. Solicitou primeiro disponibilizar JSON e pausar: bot?o no topo do resultado reutiliza snapshot existente; cobertura municipal inclui grupos e contagens por m?s para investigar geral/4+. Base3d3b1024,main/origin0?0ap?s fetch, apenas script preparat?rio Fortaleza n?o rastreado preservado.26testes, lint e quatro downloads Edge sint?ticos aprovados; sem API real/gera??o/publica??o/Monday. Pr?ximo: envio autorizado, usu?rio gera2T2026e envia JSON, ent?o diagn?stico/corre??o. Nenhuma f?rmula ou status alterado nesta entrega.
