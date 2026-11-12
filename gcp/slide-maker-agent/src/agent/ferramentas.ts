@@ -224,6 +224,9 @@ export class SessaoFase {
 
     const caminho = `${this.jobId}/v${e.versao}/${basename(absoluto)}`;
     await this.d.arm.gravar(BUCKETS.saida, caminho, dados, 'application/vnd.openxmlformats-officedocument.presentationml.presentation');
+    // Relatório ao analista (§9): bucket privado de saída, ao lado do deck da mesma versão, e na tabela
+    // slide_maker_relatorios. Fica fora de slide_maker_arquivos e de qualquer rota: só a equipe consulta.
+    await this.d.arm.gravar(BUCKETS.saida, caminhoRelatorio(this.jobId, e.versao), Buffer.from(this.relatorio, 'utf8'), 'text/markdown; charset=utf-8');
     await this.d.repo.inserirArquivo({ job_id: this.jobId, nome: basename(absoluto), mime: 'application/vnd.openxmlformats-officedocument.presentationml.presentation', bytes: dados.length, storage_path: `${BUCKETS.saida}/${caminho}`, origem: 'saida' });
     await this.d.repo.inserirVersao({ job_id: this.jobId, versao: e.versao, storage_path: caminho, deck_spec: await lerJson(this.d.workspace.caminho('trabalho/deck_spec.json')), mudancas: e.mudancas, qa: e.qa });
     const fontes = await lerJson(this.d.workspace.caminho(ARQ_FONTES));
@@ -240,6 +243,9 @@ async function lerJson(caminho: string): Promise<unknown> {
     return null;
   }
 }
+
+/** Caminho do relatório ao analista no bucket `slide-maker-saida` (consultado pela equipe no Supabase). */
+export const caminhoRelatorio = (jobId: string, versao: number) => `${jobId}/v${versao}/relatorio.md`;
 
 const aceite = (texto: string): ResultadoFerramenta => ({ ok: true, texto });
 const recusa = (texto: string): ResultadoFerramenta => ({ ok: false, texto });

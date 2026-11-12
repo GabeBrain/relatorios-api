@@ -86,6 +86,10 @@ test('fluxo completo do Slide Maker com o serviço simulado', async ({ page }) =
   await expect(composer).toBeDisabled();
   await expect(page.getByText('Seu deck está pronto — v2')).toBeVisible({ timeout: 30_000 });
   await expect(page.getByText('Ajuste simulado')).toBeVisible();
+  // Histórico no chat: a v1 continua na conversa, marcada como substituída e baixável
+  const cardV1 = page.getByRole('region', { name: 'Versão 1' });
+  await expect(cardV1).toContainText('Substituído pela v2');
+  await expect(cardV1.getByRole('button', { name: 'Baixar PPTX (v1)' })).toBeEnabled();
   await page.getByRole('button', { name: 'Versões anteriores' }).click();
   const dialogo = page.getByRole('dialog', { name: 'Versões do deck' });
   await expect(dialogo.getByRole('button', { name: 'Baixar versão 1' })).toBeVisible();

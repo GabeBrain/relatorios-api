@@ -1,5 +1,18 @@
 # Rebrain (Plataforma) — Documento Vivo
 
+## 12/11/2026 — Slide Maker: Fase 6 (histórico de versões e relatório ao analista) — Claude (sessão de Diego Cabrero)
+
+- **Mudança:**
+  - **Histórico no chat:** as entregas anteriores continuam na conversa, marcadas "Substituído pela vN", e ainda podem ser baixadas. "Versões anteriores" abre a lista de todas as versões, da mais recente à mais antiga, com o que mudou em cada uma.
+  - **Relatório ao analista:** passa a ser gravado também no Storage, em `slide-maker-saida/<jobId>/v<N>/relatorio.md`, além da tabela `slide_maker_relatorios`. Ele não aparece em nenhuma rota do colaborador nem na lista de arquivos.
+  - **Consulta pela equipe:** a consulta SQL está no README do serviço. Não há tela na v1, e nada mudou no banco.
+- **Validação:**
+  - Testes do serviço (71): o relatório de v1 e de v2 fica na tabela e no Storage, e não aparece no detalhe, nos arquivos nem no download.
+  - Testes de componente do histórico no chat e do diálogo de versões. Typecheck e ESLint limpos.
+  - E2E Playwright com o serviço simulado (2 passando), agora conferindo também a v1 marcada como substituída e baixável.
+- **Pendências:** Fase 7 (trabalhos dourados 2 e 3), que depende do deploy e da chave no Secret Manager (`DEPLOY_GCP.md` C1–C5).
+- **Monday:** —
+
 ## 12/11/2026 — Slide Maker: Fase 5 (frontend) — Claude (sessão de Diego Cabrero)
 
 - **Mudança:** nova ferramenta no menu, **Slide Maker** (`/slide-maker`), item próprio no grupo Rebrain logo depois do Atualizador VGV, com o ícone `Presentation`; também na busca Ctrl+K e na jornada "Gerar um relatório de mercado" da Home. Páginas lazy em `src/features/slide-maker/`: lista com identificação por e-mail @brain.srv.br (sem login GeoBrain), "Nova apresentação" (nome, contexto, upload validado), "Meus trabalhos" (tokens deste navegador) e "Todos os trabalhos" (só metadados); chat do trabalho com cards de perguntas (opções, "(Recomendado)", "Outro", múltipla escolha), narrativa (aprovar ou pedir ajuste), progresso com `BrainLoadingState`, etapa real e tempo decorrido, entrega com download, histórico de versões, ajuste pelo chat e "Tentar novamente". Atualização por Realtime Broadcast e consulta a cada 5 s durante as fases; ações registradas na `activity_log`. Arquivos compartilhados alterados: `App.tsx` (2 rotas), `AppLayout.tsx` (item e recolhimento do menu no celular), `AppLayout.test.tsx`, `CommandPalette.tsx` e `Home.tsx`. Risco aceito das rotas públicas registrado em `docs/architecture/SECURITY_NOTES.md` §8.

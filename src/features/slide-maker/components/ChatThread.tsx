@@ -105,7 +105,7 @@ export function ChatThread({ mensagens, acoes }: { mensagens: Mensagem[]; acoes:
             const atual = entrega.versao === acoes.versaoAtual;
             corpo = (
               <CardEntrega
-                entrega={entrega} atual={atual} baixando={acoes.baixando === entrega.versao}
+                entrega={entrega} versaoAtual={acoes.versaoAtual} baixando={acoes.baixando === entrega.versao}
                 onBaixar={() => acoes.onBaixar(entrega.versao)}
                 onVersoesAnteriores={atual && acoes.versaoAtual > 1 ? acoes.onVersoesAnteriores : undefined}
               />
