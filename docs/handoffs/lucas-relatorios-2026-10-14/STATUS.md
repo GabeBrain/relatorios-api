@@ -1,5 +1,9 @@
 # Estado do handoff
 
+## 12/11/2026 ? SP: JSON antes de corrigir os pre?os
+
+Usu?rio pausou Fortaleza trimestral (10/89) e priorizou slides SP53/59 indispon?veis e55/56/61?64com lacunas, para todos os per?odos. Solicitou primeiro disponibilizar JSON e pausar: bot?o no topo do resultado reutiliza snapshot existente; cobertura municipal inclui grupos e contagens por m?s para investigar geral/4+. Base3d3b1024,main/origin0?0ap?s fetch, apenas script preparat?rio Fortaleza n?o rastreado preservado.26testes, lint e quatro downloads Edge sint?ticos aprovados; sem API real/gera??o/publica??o/Monday. Pr?ximo: envio autorizado, usu?rio gera2T2026e envia JSON, ent?o diagn?stico/corre??o. Nenhuma f?rmula ou status alterado nesta entrega.
+
 ## 11/11/2026 — Fortaleza mensal: revisão e arquivos de conferência
 
 Lucas pediu revisar o mensal antes de avançar ao trimestral. [Entrega e retomada](../../features/relatorios-institucionais/fortaleza/MENSAL_EXPORTACAO_2026-11-11.md): faltava exportação, agora PDF/PPTX60posições com diagnóstico pareado, modo fiel ou textos/células editáveis, equipe da prévia e cancelamento. Corrigido subtítulo duplicado11/13/15. Testes/Edge offline, arquivos sintéticos reais, Office em leitura e PDF renderizado conferidos; não homologação dos números de mercado. Amostra/fontes/INCC/preços/IVV/capacidade/equipe continuam pendentes de geração real/analista. Basee23c6692, main/origin0–0eárvore limpa na abertura, fetch atualizado. Nova fatia local, sem publicação/coleta longa/Monday; demais domínios preservados. Trimestral10/89mantido, próximo11–20.

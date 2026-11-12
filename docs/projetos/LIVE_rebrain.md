@@ -392,6 +392,17 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 12/11/2026 ? SP: diagn?stico JSON vis?vel para investigar pre?os ? Codex
+
+- **Ambiente/funcionalidade:** SP institucional, resultado da gera??o e diagn?stico dos 85 slides.
+- **Pedido:** usu?rio pausou Fortaleza trimestral e pediu investigar 53/59 indispon?veis e 55/56/61?64 com lacunas, em todos os per?odos. Solicitou primeiro o bot?o JSON, depois pausa para gerar e enviar o arquivo.
+- **Mudan?a:** bot?o ?Baixar diagn?stico JSON? no topo do resultado ao encerrar a gera??o, reutilizando `spReviewSnapshot` e Button Brain. Exporta per?odo efetivo, situa??o/motivo por slide, pre?os municipais e baseline granular j? existentes. Fontes de pre?os passam a registrar grupos observados e contagem de medi??es v?lidas por m?s, sem payload bruto, autentica??o ou hist?ricos individuais. Checklist anterior preservado.
+- **Valida??o:** 26 testes focados; tipos/build e lint dirigido aprovados; download real no Edge headless com dados sint?ticos, 1440/390 e claro/escuro, 85 posi??es no JSON, zero erros/overflow. Rede externa bloqueada. Sem ensaio autenticado ou gera??o real.
+- **Etapas/Pend?ncias:** diagn?stico preparado; corre??o dos indicadores deliberadamente pausada at? usu?rio enviar JSON da gera??o atual, come?ando por 2T2026. Nenhuma regra de pre?o, status, m?dia ou fallback foi alterada. Fortaleza permanece pausado em 10/89; somente script preparat?rio n?o commitado, sem altera??o runtime.
+- **Monday:** ?
+- **Commits:** commit desta entrada; base `3d3b1024`. Sem push/publica??o ou escrita Monday.
+
+
 ### 11/11/2026 — Fortaleza mensal: PDF/PPTX de conferência e revisão — Lucas / Codex
 
 - **Mudança:** revisão mensal encontrou exportação ausente. Implementados PDF e PPTX fiel/editável com60páginas, diagnóstico da mesma geração, equipe da prévia, cancelamento/recuperação e guardas de acesso/competência/excesso de lançamentos. Mesmo componente nas prévias e nos arquivos; removido subtítulo duplicado11/13/15. [Contrato e retomada](../features/relatorios-institucionais/fortaleza/MENSAL_EXPORTACAO_2026-11-11.md).

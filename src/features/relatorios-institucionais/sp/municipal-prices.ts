@@ -12,7 +12,7 @@ export interface SpPriceSource {
 }
 export interface SpMunicipalPrices {
   method: 'geobrain-reported-prices-v1';
-  sources: { metric: SpPriceMetric; grouping: SpPriceGrouping; rows: number; issue?: string }[];
+  sources: { metric: SpPriceMetric; grouping: SpPriceGrouping; rows: number; issue?: string; coverage?: { month: string; groups: string[]; ticketValues: number; meterValues: number }[] }[];
   series: Record<number, SpPricePoint[]>;
   annualChanges: Record<number, number | null>;
   closing: { grouping: SpPriceGrouping; group: string; ticket: number | null; meter: number | null; issues: string[] }[];
@@ -64,7 +64,15 @@ export function buildSpMunicipalPrices(sources: SpPriceSource[], report: SpPrevi
     const ticket = read('medium-prices', grouping, group, report.throughMonth!), meter = read('medium-prices-meter', grouping, group, report.throughMonth!);
     return { grouping, group, ticket: ticket.value, meter: meter.value, issues: [ticket.issue, meter.issue].filter((issue): issue is string => !!issue) };
   }));
-  return { method: 'geobrain-reported-prices-v1', sources: sources.map(source => ({ metric: source.metric, grouping: source.grouping, rows: source.rows.length, issue: source.issue })), series, annualChanges, closing };
+  return { method: 'geobrain-reported-prices-v1', sources: sources.map(source => {
+    const months = [...new Set(source.rows.map(row => monthOf(row.period)).filter((month): month is string => !!month))].sort();
+    const coverage = months.map(month => {
+      const rows = source.rows.filter(row => monthOf(row.period) === month && normalize(row.building_type) === 'vertical');
+      const valid = (field: string) => rows.filter(row => (typeof row[field] === 'number' || typeof row[field] === 'string' && String(row[field]).trim()) && Number.isFinite(Number(row[field])) && Number(row[field]) > 0 && Number(row[field]) <= Number.MAX_SAFE_INTEGER / 100).length;
+      return { month, groups: [...new Set(rows.map(row => String(row.group ?? '').slice(0, 80)))].sort(), ticketValues: valid('average_price'), meterValues: valid('average_price_per_meter') };
+    });
+    return { metric: source.metric, grouping: source.grouping, rows: source.rows.length, issue: source.issue, coverage };
+  }), series, annualChanges, closing };
 }
 
 /** Preserve the granular calculation as an audit baseline, never a silent fallback. */
