@@ -1,3 +1,11 @@
+## 12/11/2026 — Edição na prévia de Fortaleza e SP
+
+**Autor/origem:** Codex, pedido de Lucas. Editor compartilhado usa os primitives existentes (Details, Select, Input, Textarea, Checkbox e Button): seleção no slide/lista, texto, cor, tamanho em pt, posição, negrito, ocultar, adicionar e restaurar. Estado por posição original durante a sessão; troca de geração/competência restaura a composição automática. Ajustes não são persistidos no servidor e não recalculam indicadores. PDF/PPTX recebem a mesma camada visual; auditoria de exportação inclui texto original e ajuste manual. Seleção não aparece no arquivo. Dados da API preservados. Não há chamada adicional à API.
+
+Fortaleza: textos estáticos das artes agora são SVG nativo Tahoma, extraídos no PowerPoint original aberto somente em leitura; títulos principais de pelo menos30pt. Retratos substituídos pelos arquivos embutidos de maior resolução disponível, sem ampliação artificial, e separados em imagens individuais no PPTX editável. SP mantém retratos individuais editáveis e controles de upload existentes; a camada compartilhada usa Tahoma e promove os títulos principais da prévia a30pt. O quadro institucional composto continua substituível inteiro; a qualidade máxima dos retratos que só existem nesse composto depende do original ou de upload.
+
+**Validação:** testes de estado/isolamento/restauração, integração dos dois relatórios e Edge com edição de texto existente, navegação, restauração e extração nativa para exportação. Não equivale a homologação de cálculo ou execução autenticada GeoBrain. Testes e capturas locais usam dados sintéticos onde não há histórico individual no JSON. Publicação ainda depende de autorização.
+
 ## 11/11/2026 — SP: tipografia editorial nativa e densidade dos retratos
 
 Mantidos rota lazy, SpSlideContent e exportador existentes. Textos editoriais antes rasterizados recebem camadasSVG Tahoma nas medidas da arte, com fundos locais medidos da referência; logos/QR/screenshots permanecem ilustrações. Sumário40px equivale a30pt noPPTX. Retratos separados preservam arquivos/crop originais e densidade efetiva até4×; sem novo primitive, fonte instalada, biblioteca ou token global. Tema da plataforma preservado; [contrato e verificação](../features/relatorios-institucionais/sp/CORRECOES_ANALISTA_2026-11-11.md).

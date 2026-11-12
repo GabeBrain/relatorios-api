@@ -1,5 +1,13 @@
 # Fortaleza — fatos, propostas e pendências
 
+## 12/11/2026 — Segundo JSON de agosto: grupos observados e disponibilidade
+
+**Autor/origem:** Codex, pedido de Lucas para disponibilizar todos os slides. O JSON `fortaleza-mensal-2026-08-diagnostico (1).json` tinha20disponíveis/25fontes pendentes/15editoriais. A cobertura preservada comprova40conjuntos municipais: não há obrigação de uma linha para cada padrão em cada mês; há obrigação de paginação estável, escopo, métricas válidas e todos os meses observados em cada conjunto não vazio. Comercial `Alto +` reconhecido. Oito respostas comerciais da RM são vazias com total0 confirmado depois da paginação: contribuição aditiva0, sem inventar linhas/padrões. Ausência de mês inteiro continua bloqueando fontes não vazias.
+
+Padrões socioeconômicos horizontais conhecidos são casas; loteamentos explícitos permanecem separados. Produtos desconhecidos no cadastro inicial não recebem classificação inventada: slide10 mostra intervalo mínimo–máximo e suspende comparação afetada. Contagens do slide2 agora são explicitamente **base cadastral consultada** (empresas identificadas), não amostra histórica da pesquisa, que continua sem fonte. Listas32capital/54RM redistribuídas pelas mesmas2/3páginas, sem renumerar ou omitir registros; capacidade24linhas por página.
+
+**Evidência:** fixture versionada contém somente agregados municipais do diagnóstico real. Replay confere40fontes e cobertura sem inserir linhas sintéticas. Ensaio60slides combina esses agregados reais com cadastro/históricos individuais sintéticos, pois o JSON não contém esses registros; não é geração autenticada nem homologação do relatório do usuário. Permanecem pendentes nova geração real após publicação, revisão de métodos/preços e comparação com o analista. Editor/visual em [contrato compartilhado](../PREVIA_EDITAVEL_2026-11-12.md).
+
 ## 11/11/2026 — exportação mensal antes de ampliar o trimestral
 
 A revisão solicitada por Lucas encontrou o mensal com60prévia, mas sem arquivos. [Contrato e limites](MENSAL_EXPORTACAO_2026-11-11.md): PDF e PPTX de conferência passam a usar exatamente a composição atual, sem nova consulta GeoBrain; diagnóstico da mesma geração anexado. Modo fiel em imagem é padrão; editável preserva textos/células, exigindo Montserrat e mantendo gráficos/fotos/artes em imagem. Excesso de lançamentos impede exportação, sem corte silencioso. Não tratar disponibilidade do arquivo como homologação dos indicadores. Trimestral10/89mantido; próximo11–20. Nenhuma transferência automática dos critérios de preços SP para Fortaleza.

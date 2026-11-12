@@ -424,6 +424,16 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 12/11/2026 — Relatórios Fortaleza: fontes observadas; Fortaleza e SP: prévia editável — Codex/Lucas
+
+- **Commit/validação:** `a6b537af`;266testes, build/tipos/lint;240casos mensais e324trimestrais no Edge, edição/navegação/restauração em ambos e PPTX/PDF reais60conferidos. Nove retratos em objetos editáveis. Novo download realSP85não executado; extração e integração testadas.
+
+- **Mudança:** validação das40fontes municipais pelo conjunto observado e meses completos; respostas comerciais realmente vazias confirmadas; classificação horizontal conhecida, intervalo para desconhecidos no cadastro; listas iniciais completas nas posições originais. Slide2 identifica base cadastral, não amostra histórica. Editor compartilhado de textos na prévia, auditoria dos ajustes manuais e exportação pareada; Tahoma/títulos principais30pt, artes Fortaleza com texto nativo e retratos de maior resolução disponível separados no PPTX.
+- **Evidência/limites:** [disponibilidade e método](../features/relatorios-institucionais/fortaleza/DIAGNOSTICO_MENSAL_2026-11-12.md), [editor e visual](../features/relatorios-institucionais/PREVIA_EDITAVEL_2026-11-12.md). Agregados reais do JSON de agosto; cadastro/históricos individuais sintéticos no ensaio. Sem nova geração autenticada, homologação ou escrita Monday. Alterações locais nesta entrega.
+- **Monday:** [Fortaleza](https://brain381753.monday.com/boards/18398428946/pulses/13149406420) — `13149406420`
+- **Etapas/Pendências:** implementação local e validações de prévia/exportação; publicar após autorização e gerar mensal real para confrontar disponibilidade/valores. Edição permanece na sessão, sem persistência no servidor; métodos de preços e mapas esquemáticos trimestrais seguem pendentes de homologação.
+
+
 ## 12/11/2026 — Fortaleza mensal: diagnóstico agosto versus outubro e bloqueios confirmados
 
 **Autor/origem:** Codex, a pedido de Lucas. Agosto recebido após a hipótese de outubro sem fechamento. Agosto tem15disponíveis/33pendentes/12editoriais; outubro14/34/12. Não é somente fechamento: cadastro falha na primeira resposta pelo limite de5páginas; séries municipais rejeitadas por padrões/meses/categorias persistem nos dois arquivos. Em agosto37está disponível e52–55bloqueiam por bairro ausente no empreendimento23980; em outubro37/52–55acusam fotografia2026-10ausente do85529. Evidências do usuário, não chamadas autenticadas feitas pelo agente.
@@ -1529,6 +1539,9 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 
 ## 2. Etapas
 
+- **12/11 — Fortaleza e SP:** edição na prévia implementada localmente, com Tahoma/títulos e exportação da mesma composição; mensal Fortaleza usa cobertura municipal observada para liberar fontes completas. Conferência real pós-publicação e homologação continuam abertas.
+
+
 - **Fortaleza mensal (12/11):** diagnóstico real de agosto confirma bloqueios além do fechamento. Correções locais de paginação, estados editoriais e bairro não informado; matriz municipal detalhada preparada para próximo JSON, sem declarar fontes todas resolvidas.
 
 
@@ -1653,6 +1666,9 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 ---
 
 ## 3. Pendências
+
+- **12/11 — Fortaleza/SP, entrega atual:** autorizar publicação desta correção, gerar mensal agosto novamente e conferir os números com o analista. Prévia manual permanece na sessão; fotos de consultoria SP disponíveis só no composto original podem exigir upload para maior resolução.
+
 
 - **Fortaleza mensal:** publicar correções somente após autorização; gerar agosto e conferir cobertura municipal agora preservada. Categorias/meses ausentes e fotografia de outubro ainda não reconciliados. Ver [diagnóstico](../features/relatorios-institucionais/fortaleza/DIAGNOSTICO_MENSAL_2026-11-12.md).
 
