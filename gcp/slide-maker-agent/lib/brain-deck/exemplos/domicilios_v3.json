@@ -1,0 +1,1086 @@
+{
+ "titulo": "O Brasil dos domicílios vazios",
+ "slides": [
+  {
+   "tipo": "capa",
+   "titulo": "O Brasil dos domicílios vazios",
+   "subtitulo": "O que os Censos 2010 e 2022 revelam sobre a vacância residencial e o que isso muda para o incorporador",
+   "palestrante": "Fábio Tadeu Araújo",
+   "detalhes": "CEO · Brain Inteligência Estratégica · novembro de 2026",
+   "notas": "Abertura (30s). Bom dia a todos. Nos próximos 15 minutos, mostramos o que o Censo revela sobre os domicílios vazios do Brasil e por que essa leitura precisa ser feita bairro a bairro."
+  },
+  {
+   "tipo": "conteudo",
+   "titulo": "11,4 milhões de domicílios vazios",
+   "apoio": "Um em cada oito domicílios está vago: quase dois para cada família em déficit",
+   "sub": "Domicílios particulares vagos (Censo 2022) e déficit habitacional (FJP, 2022)",
+   "fonte": "Fontes: IBGE, Censo 2010 e 2022; Fundação João Pinheiro, Déficit Habitacional no Brasil 2022 (divulgado em abr/2024) · Elaboração Brain",
+   "notas": "1min30. O Censo 2022 contou 11,4 milhões de domicílios vagos: 12,6% do estoque, contra 9,0% em 2010. No mesmo ano, a Fundação João Pinheiro estimou um déficit habitacional de cerca de 6,2 milhões de domicílios. São 1,8 domicílio vago para cada família em déficit. Tese da fala: o vazio cresceu em quase todo o país, mas é local, e é na zona de influência que ele vira risco ou oportunidade para o incorporador.",
+   "elementos": [
+    {
+     "tipo": "card",
+     "x": 0.6,
+     "y": 2.35,
+     "w": 3.8,
+     "h": 2.75,
+     "valor": "11,4 mi",
+     "rotulo": "domicílios vagos em 2022",
+     "sub": "6,1 mi em 2010 · +87%",
+     "destaque": true
+    },
+    {
+     "tipo": "card",
+     "x": 4.7,
+     "y": 2.35,
+     "w": 3.8,
+     "h": 2.75,
+     "valor": "12,6%",
+     "rotulo": "do estoque de domicílios está vago",
+     "sub": "9,0% em 2010 · +3,6 pp"
+    },
+    {
+     "tipo": "card",
+     "x": 8.8,
+     "y": 2.35,
+     "w": 3.9,
+     "h": 2.75,
+     "valor": "6,2 mi",
+     "rotulo": "domicílios em déficit habitacional",
+     "sub": "FJP, 2022 · atualizado"
+    },
+    {
+     "tipo": "texto",
+     "x": 0.6,
+     "y": 5.45,
+     "w": 12.1,
+     "h": 0.9,
+     "tamanho": 16,
+     "vertical": "middle",
+     "texto": [
+      {
+       "texto": "Tese: ",
+       "negrito": true,
+       "cor": "verde"
+      },
+      {
+       "texto": "o vazio cresceu em quase todo o país, mas é local. É na zona de influência que ele vira risco ou oportunidade."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "tipo": "divisor",
+   "secao": {
+    "titulo": "1 · O vazio cresceu mais que o ocupado",
+    "etiqueta": "01 · O VAZIO CRESCEU MAIS QUE O OCUPADO"
+   },
+   "numero": "01",
+   "titulo": "O vazio cresceu mais que o ocupado",
+   "subtitulo": "Ritmo, composição do novo estoque e comparação internacional",
+   "notas": "Transição (15s). Começamos pelo ritmo."
+  },
+  {
+   "tipo": "conteudo",
+   "titulo": "O estoque cresceu 5 vezes mais que a população",
+   "apoio": "Os domicílios vagos cresceram 87%, enquanto a população cresceu 6,5%",
+   "sub": "Variação 2010–2022 — Brasil (%)",
+   "fonte": "Fontes: IBGE, Censo 2010 e 2022 (população: 203,1 mi em 2022; moradores por domicílio) · Elaboração Brain",
+   "notas": "1min15. A população cresceu 6,5% em 12 anos. Os domicílios ocupados, 26%. O estoque total, 34%. E os vagos, 87%. Parte da explicação está na família menor: a média caiu de 3,31 para 2,79 moradores por domicílio. Mas o estoque correu na frente da demanda. Atualizado com dados de população do IBGE.",
+   "elementos": [
+    {
+     "tipo": "grafico",
+     "forma": "colunas",
+     "x": 0.6,
+     "y": 2.3,
+     "w": 7.8,
+     "h": 4.4,
+     "series": [
+      {
+       "nome": "Variação",
+       "rotulos": [
+        "População",
+        "Domicílios ocupados",
+        "Total de domicílios",
+        "Domicílios vagos"
+       ],
+       "valores": [
+        6.5,
+        26.2,
+        34.2,
+        87
+       ]
+      }
+     ],
+     "cores": [
+      "cinza",
+      "cinza",
+      "cinza",
+      "verde"
+     ],
+     "formato": "\"+\"0.0\"%\"",
+     "rotulo_tamanho": 16,
+     "rotulo_negrito": true,
+     "eixo_min": 0,
+     "eixo_max": 100,
+     "espaco_barras": 60,
+     "nome": "grafico ritmo"
+    },
+    {
+     "tipo": "leitura",
+     "x": 8.8,
+     "y": 2.5,
+     "w": 3.9,
+     "h": 3.9,
+     "numero": "3,31 → 2,79",
+     "texto": "moradores por domicílio entre 2010 e 2022. Famílias menores explicam parte da expansão; o restante ficou vago."
+    }
+   ]
+  },
+  {
+   "tipo": "conteudo",
+   "titulo": "23 de cada 100 novos domicílios estão vagos",
+   "apoio": "Dos 23,1 milhões de domicílios acrescentados desde 2010, 5,3 milhões estão vazios",
+   "sub": "Composição do acréscimo de domicílios particulares — Brasil, 2010–2022",
+   "fonte": "Fonte: IBGE, Censo Demográfico 2010 (SIDRA 1310) e 2022 (SIDRA 4711) · Elaboração Brain",
+   "notas": "1min. Dos 23,1 milhões de domicílios acrescentados, 65 de cada 100 foram ocupados, 23 estão vagos e 12 são de uso ocasional. Ponto de atenção para o setor: uma parte relevante da expansão do estoque não virou moradia ocupada.",
+   "elementos": [
+    {
+     "tipo": "grafico",
+     "forma": "barras",
+     "x": 0.6,
+     "y": 2.35,
+     "w": 12.1,
+     "h": 1.6,
+     "series": [
+      {
+       "nome": "Ocupados",
+       "rotulos": [
+        "Acréscimo"
+       ],
+       "valores": [
+        65.1
+       ]
+      },
+      {
+       "nome": "Vagos",
+       "rotulos": [
+        "Acréscimo"
+       ],
+       "valores": [
+        23
+       ]
+      },
+      {
+       "nome": "Uso ocasional",
+       "rotulos": [
+        "Acréscimo"
+       ],
+       "valores": [
+        11.9
+       ]
+      }
+     ],
+     "cores": [
+      "verde",
+      "amarelo",
+      "cinza"
+     ],
+     "empilhado": "percentual",
+     "ocultar_categorias": true,
+     "rotulo_posicao": "centro",
+     "formato": "0",
+     "rotulo_tamanho": 18,
+     "rotulo_negrito": true,
+     "rotulo_cor": "verde_escuro",
+     "espaco_barras": 10,
+     "nome": "grafico composicao"
+    },
+    {
+     "tipo": "numero",
+     "x": 0.6,
+     "y": 4.2,
+     "w": 3.8,
+     "valor": "15,0 mi",
+     "rotulo": "ocupados",
+     "sub": "65 de cada 100 novos domicílios",
+     "marcador": "verde",
+     "cor_valor": "verde"
+    },
+    {
+     "tipo": "numero",
+     "x": 4.699999999999999,
+     "y": 4.2,
+     "w": 3.8,
+     "valor": "5,3 mi",
+     "rotulo": "vagos",
+     "sub": "23 de cada 100 · de 6,1 mi para 11,4 mi",
+     "marcador": "amarelo",
+     "cor_valor": "texto"
+    },
+    {
+     "tipo": "numero",
+     "x": 8.799999999999999,
+     "y": 4.2,
+     "w": 3.8,
+     "valor": "2,7 mi",
+     "rotulo": "uso ocasional",
+     "sub": "12 de cada 100 · de 3,9 mi para 6,7 mi",
+     "marcador": "cinza",
+     "cor_valor": "texto"
+    }
+   ]
+  },
+  {
+   "tipo": "conteudo",
+   "titulo": "Já estamos perto do Japão",
+   "apoio": "A vacância brasileira (12,6%) se aproxima do recorde japonês de 13,8%",
+   "sub": "Taxa de domicílios vagos (%) — Brasil (Censo) e Japão (pesquisa nacional de habitação, out/2023)",
+   "fonte": "Fontes: IBGE, Censo 2010 e 2022; Ministério de Assuntos Internos e Comunicações do Japão via Nippon.com · Definições nacionais de domicílio vago diferem",
+   "notas": "1min. Comparação internacional. O Japão, país que envelhece e encolhe, chegou ao recorde de 9 milhões de casas vazias em 2023: 13,8% do estoque, com um termo próprio para isso, 'akiya'. O Brasil, com população ainda crescendo, já está em 12,6%. As definições não são idênticas, então a comparação é de ordem de grandeza. O ponto é: o nosso vazio não vem de população encolhendo, vem de estoque mal localizado ou inadequado.",
+   "elementos": [
+    {
+     "tipo": "grafico",
+     "forma": "colunas",
+     "x": 0.6,
+     "y": 2.3,
+     "w": 7.8,
+     "h": 4.4,
+     "series": [
+      {
+       "nome": "Vacância",
+       "rotulos": [
+        "Brasil 2010",
+        "Brasil 2022",
+        "Japão 2023"
+       ],
+       "valores": [
+        9,
+        12.6,
+        13.8
+       ]
+      }
+     ],
+     "cores": [
+      "cinza",
+      "verde",
+      "verde_escuro"
+     ],
+     "formato": "0.0\"%\"",
+     "rotulo_tamanho": 18,
+     "rotulo_negrito": true,
+     "eixo_min": 0,
+     "eixo_max": 16,
+     "espaco_barras": 70,
+     "nome": "grafico internacional"
+    },
+    {
+     "tipo": "leitura",
+     "x": 8.8,
+     "y": 2.5,
+     "w": 3.9,
+     "h": 3.9,
+     "numero": "9 milhões",
+     "texto": "de casas vazias no Japão, um país que encolhe. O Brasil chega a taxa parecida com a população ainda crescendo: o vazio aqui é de localização e de produto."
+    }
+   ]
+  },
+  {
+   "tipo": "divisor",
+   "secao": {
+    "titulo": "2 · A vacância tem geografia",
+    "etiqueta": "02 · A VACÂNCIA TEM GEOGRAFIA"
+   },
+   "numero": "02",
+   "titulo": "A vacância tem geografia",
+   "subtitulo": "Regiões e Unidades da Federação",
+   "notas": "Transição (15s). O fenômeno é nacional; a intensidade, não."
+  },
+  {
+   "tipo": "conteudo",
+   "titulo": "Nordeste lidera, Sul tem a menor taxa",
+   "apoio": "Todas as regiões subiram entre 2,7 e 4,1 pontos percentuais em 12 anos",
+   "sub": "Taxa de vacância por grande região — 2010 × 2022 (%)",
+   "fonte": "Fonte: IBGE, Censo Demográfico 2010 (SIDRA 1310) e 2022 (SIDRA 4711) · Elaboração Brain · Taxa de vacância = vagos ÷ domicílios particulares (2010) e particulares permanentes (2022)",
+   "notas": "1min. O Nordeste chega a 15,0%; o Sul fica em 10,5%. Em volume, o Sudeste concentra 4,6 milhões de vagos, 40% do total nacional. Taxa e volume contam histórias diferentes, e o incorporador precisa olhar os dois.",
+   "elementos": [
+    {
+     "tipo": "grafico",
+     "forma": "colunas",
+     "x": 0.6,
+     "y": 2.3,
+     "w": 7.9,
+     "h": 4.4,
+     "series": [
+      {
+       "nome": "2010",
+       "rotulos": [
+        "Sul",
+        "Sudeste",
+        "Centro-Oeste",
+        "Norte",
+        "Nordeste"
+       ],
+       "valores": [
+        7.8,
+        8.4,
+        9.1,
+        8.8,
+        10.9
+       ]
+      },
+      {
+       "nome": "2022",
+       "rotulos": [
+        "Sul",
+        "Sudeste",
+        "Centro-Oeste",
+        "Norte",
+        "Nordeste"
+       ],
+       "valores": [
+        10.5,
+        11.9,
+        12,
+        12.6,
+        15
+       ]
+      }
+     ],
+     "cores": [
+      "cinza",
+      "verde"
+     ],
+     "formato": "0.0\"%\"",
+     "legenda": true,
+     "eixo_min": 0,
+     "espaco_barras": 50,
+     "nome": "grafico regioes"
+    },
+    {
+     "tipo": "leitura",
+     "x": 8.9,
+     "y": 2.5,
+     "w": 3.8,
+     "h": 3.9,
+     "numero": "4,6 mi",
+     "texto": "de vagos estão no Sudeste: 40% do total nacional, com a segunda menor taxa do país."
+    }
+   ]
+  },
+  {
+   "tipo": "conteudo",
+   "titulo": "Santa Catarina é a exceção do país",
+   "apoio": "A menor vacância do Brasil (8,8%) e praticamente estável desde 2010",
+   "sub": "Taxa de vacância por UF — 2022 (%), em ordem crescente",
+   "fonte": "Fonte: IBGE, Censo Demográfico 2010 (SIDRA 1310) e 2022 (SIDRA 4711) · Elaboração Brain · Taxa de vacância = vagos ÷ domicílios particulares (2010) e particulares permanentes (2022)",
+   "notas": "1min15. Santa Catarina tem a menor taxa (8,8%) e quase não mudou desde 2010 (+0,6 pp). Roraima foi a única UF com queda. No outro extremo, Rondônia (16,7%) e Bahia (16,0%). Em volume, São Paulo soma 2,16 milhões de vagos, 19% do país. O Distrito Federal teve a segunda maior alta da taxa, +5,4 pp, atrás apenas de Rondônia.",
+   "elementos": [
+    {
+     "tipo": "grafico",
+     "forma": "colunas",
+     "x": 0.6,
+     "y": 2.2,
+     "w": 12.1,
+     "h": 3.5,
+     "series": [
+      {
+       "nome": "2022",
+       "rotulos": [
+        "SC",
+        "RR",
+        "PR",
+        "SP",
+        "MT",
+        "RS",
+        "AM",
+        "AC",
+        "GO",
+        "ES",
+        "PA",
+        "TO",
+        "MA",
+        "MS",
+        "MG",
+        "DF",
+        "RJ",
+        "AP",
+        "SE",
+        "AL",
+        "PI",
+        "PE",
+        "CE",
+        "RN",
+        "PB",
+        "BA",
+        "RO"
+       ],
+       "valores": [
+        8.8,
+        9.2,
+        10.8,
+        11,
+        11.2,
+        11.4,
+        11.6,
+        11.8,
+        12,
+        12.3,
+        12.3,
+        12.4,
+        12.4,
+        12.5,
+        12.6,
+        12.7,
+        13.1,
+        13.5,
+        13.5,
+        13.9,
+        14.6,
+        15.1,
+        15.4,
+        15.5,
+        15.8,
+        16,
+        16.7
+       ]
+      }
+     ],
+     "cores": [
+      "amarelo",
+      "verde",
+      "verde",
+      "verde",
+      "verde",
+      "verde",
+      "verde",
+      "verde",
+      "verde",
+      "verde",
+      "verde",
+      "verde",
+      "verde",
+      "verde",
+      "verde",
+      "verde",
+      "verde",
+      "verde",
+      "verde",
+      "verde",
+      "verde",
+      "verde",
+      "verde",
+      "verde",
+      "verde",
+      "verde_escuro",
+      "verde_escuro"
+     ],
+     "formato": "0.0",
+     "rotulo_tamanho": 9,
+     "categoria_tamanho": 10,
+     "eixo_min": 0,
+     "espaco_barras": 35,
+     "nome": "grafico UFs"
+    },
+    {
+     "tipo": "fato",
+     "x": 0.6,
+     "y": 5.85,
+     "w": 3.8,
+     "h": 0.85,
+     "destaque": "SC 8,8%",
+     "texto": "menor taxa e quase estável (+0,6 pp)"
+    },
+    {
+     "tipo": "fato",
+     "x": 4.699999999999999,
+     "y": 5.85,
+     "w": 3.8,
+     "h": 0.85,
+     "destaque": "RR −0,5 pp",
+     "texto": "única UF com queda da taxa"
+    },
+    {
+     "tipo": "fato",
+     "x": 8.799999999999999,
+     "y": 5.85,
+     "w": 3.8,
+     "h": 0.85,
+     "destaque": "SP 2,16 mi",
+     "texto": "de vagos: 19% do total do país"
+    }
+   ]
+  },
+  {
+   "tipo": "divisor",
+   "secao": {
+    "titulo": "3 · Capitais e grandes cidades",
+    "etiqueta": "03 · CAPITAIS E GRANDES CIDADES"
+   },
+   "numero": "03",
+   "titulo": "Nas grandes cidades, o vazio acelerou",
+   "subtitulo": "Capitais e municípios por porte",
+   "notas": "Transição (15s). Agora, onde o incorporador mais atua."
+  },
+  {
+   "tipo": "conteudo",
+   "titulo": "Capitais vão de 7% a 18%",
+   "apoio": "Boa Vista tem 7,1% de domicílios vagos; Porto Velho, 17,8%",
+   "sub": "Taxa de vacância das capitais — 2022 (%), da maior para a menor",
+   "fonte": "Fonte: IBGE, Censo Demográfico 2010 (SIDRA 1310) e 2022 (SIDRA 4711) · Elaboração Brain · Taxa de vacância = vagos ÷ domicílios particulares (2010) e particulares permanentes (2022)",
+   "notas": "1min15. Mais de 10 pontos de amplitude entre capitais. Boa Vista, Florianópolis e Vitória ficam abaixo de 10%; Curitiba e Belo Horizonte, logo acima. No topo, Porto Velho, Salvador, João Pessoa e Natal. Boa Vista e Florianópolis foram as únicas capitais que reduziram a taxa desde 2010.",
+   "elementos": [
+    {
+     "tipo": "grafico",
+     "forma": "barras",
+     "x": 0.6,
+     "y": 2.15,
+     "w": 8.3,
+     "h": 4.65,
+     "series": [
+      {
+       "nome": "2022",
+       "rotulos": [
+        "Boa Vista",
+        "Florianópolis",
+        "Vitória",
+        "Curitiba",
+        "Belo Horizonte",
+        "São Luís",
+        "São Paulo",
+        "Recife",
+        "Manaus",
+        "Maceió",
+        "Macapá",
+        "Cuiabá",
+        "Brasília",
+        "Goiânia",
+        "Aracaju",
+        "Rio de Janeiro",
+        "Rio Branco",
+        "Belém",
+        "Palmas",
+        "Campo Grande",
+        "Teresina",
+        "Fortaleza",
+        "Porto Alegre",
+        "Natal",
+        "João Pessoa",
+        "Salvador",
+        "Porto Velho"
+       ],
+       "valores": [
+        7.1,
+        9.8,
+        9.9,
+        10.5,
+        10.6,
+        11.2,
+        11.8,
+        12,
+        12.1,
+        12.4,
+        12.6,
+        12.7,
+        12.7,
+        13,
+        13.1,
+        13.3,
+        13.3,
+        13.4,
+        13.6,
+        13.7,
+        13.9,
+        14.1,
+        14.7,
+        15.5,
+        15.6,
+        16.4,
+        17.8
+       ]
+      }
+     ],
+     "cores": [
+      "amarelo",
+      "amarelo",
+      "verde",
+      "verde",
+      "verde",
+      "verde",
+      "verde",
+      "verde",
+      "verde",
+      "verde",
+      "verde",
+      "verde",
+      "verde",
+      "verde",
+      "verde",
+      "verde",
+      "verde",
+      "verde",
+      "verde",
+      "verde",
+      "verde",
+      "verde",
+      "verde",
+      "verde",
+      "verde",
+      "verde",
+      "verde"
+     ],
+     "formato": "0.0",
+     "rotulo_tamanho": 9,
+     "categoria_tamanho": 9,
+     "eixo_min": 0,
+     "eixo_max": 21,
+     "espaco_barras": 30,
+     "nome": "grafico capitais"
+    },
+    {
+     "tipo": "leitura",
+     "x": 9.2,
+     "y": 2.5,
+     "w": 3.5,
+     "h": 3.9,
+     "numero": "2 de 27",
+     "texto": "capitais reduziram a taxa: Boa Vista (9,7% → 7,1%) e Florianópolis (11,1% → 9,8%). As outras 25 subiram."
+    }
+   ]
+  },
+  {
+   "tipo": "conteudo",
+   "titulo": "Capitais dobraram o estoque vago",
+   "apoio": "De 1,27 para 2,61 milhões de vagos: +105%, acima do ritmo nacional (+87%)",
+   "sub": "Domicílios vagos nas 27 capitais — 2010 × 2022",
+   "fonte": "Fonte: IBGE, Censo Demográfico 2010 (SIDRA 1310) e 2022 (SIDRA 4711) · Elaboração Brain",
+   "notas": "1min. As capitais concentram hoje 23% dos vagos do país. Só São Paulo tem 589 mil domicílios vagos; o Rio, 388 mil. Fortaleza (+172%) e Salvador (+155%) estão entre as maiores altas. Para o incorporador, esse estoque disputa o mesmo comprador e o mesmo locatário do lançamento.",
+   "elementos": [
+    {
+     "tipo": "painel",
+     "x": 0.6,
+     "y": 2.35,
+     "w": 5.4,
+     "h": 4.3,
+     "valor": "2,61 mi",
+     "rotulo": "domicílios vagos nas capitais em 2022 (1,27 mi em 2010)",
+     "comparacoes": [
+      {
+       "valor": "+105%",
+       "rotulo": "capitais"
+      },
+      {
+       "valor": "+87%",
+       "rotulo": "Brasil"
+      }
+     ],
+     "nota": "23% dos vagos do país estão nas capitais"
+    },
+    {
+     "tipo": "texto",
+     "x": 6.4,
+     "y": 2.35,
+     "w": 6.3,
+     "h": 0.4,
+     "tamanho": 14,
+     "negrito": true,
+     "texto": "Maiores estoques vagos entre as capitais"
+    },
+    {
+     "tipo": "tabela",
+     "x": 6.4,
+     "y": 2.85,
+     "w": 6.3,
+     "larguras": [
+      2.1,
+      1.4,
+      1.4,
+      1.4
+     ],
+     "cabecalho": [
+      "Capital",
+      "Vagos 2010",
+      "Vagos 2022",
+      "Variação"
+     ],
+     "linhas": [
+      [
+       "São Paulo",
+       "293,6 mil",
+       "589,0 mil",
+       "+101%"
+      ],
+      [
+       "Rio de Janeiro",
+       "193,7 mil",
+       "388,3 mil",
+       "+101%"
+      ],
+      [
+       "Salvador",
+       "77,9 mil",
+       "199,0 mil",
+       "+155%"
+      ],
+      [
+       "Brasília",
+       "63,0 mil",
+       "148,9 mil",
+       "+136%"
+      ],
+      [
+       "Fortaleza",
+       "53,3 mil",
+       "145,3 mil",
+       "+172%"
+      ]
+     ],
+     "coluna_negrito": 3,
+     "nome": "tabela capitais"
+    }
+   ]
+  },
+  {
+   "tipo": "conteudo",
+   "titulo": "A grande cidade perdeu o estoque enxuto",
+   "apoio": "Nos 17 maiores municípios, a vacância subiu 4,9 pontos em 12 anos",
+   "sub": "Taxa de vacância por porte do município (nº de domicílios particulares permanentes em 2022) — %",
+   "fonte": "Fonte: IBGE, Censo Demográfico 2010 (SIDRA 1310) e 2022 (SIDRA 4711) · Elaboração Brain · Taxa de vacância = vagos ÷ domicílios particulares (2010) e particulares permanentes (2022)",
+   "notas": "1min. Em 2010 havia uma escada: quanto maior a cidade, menor a vacância. 11,4% nos municípios com até 5 mil domicílios contra 7,7% nos 17 maiores. Em 2022 a diferença caiu para 0,8 ponto. O salto foi maior justamente nas cidades com mais de 400 mil domicílios.",
+   "elementos": [
+    {
+     "tipo": "grafico",
+     "forma": "colunas",
+     "x": 0.6,
+     "y": 2.3,
+     "w": 8.2,
+     "h": 4.4,
+     "series": [
+      {
+       "nome": "2010",
+       "rotulos": [
+        "Até 5 mil",
+        "5 a 20 mil",
+        "20 a 100 mil",
+        "100 a 400 mil",
+        "Mais de 400 mil"
+       ],
+       "valores": [
+        11.4,
+        10.5,
+        8.7,
+        8.4,
+        7.7
+       ]
+      },
+      {
+       "nome": "2022",
+       "rotulos": [
+        "Até 5 mil",
+        "5 a 20 mil",
+        "20 a 100 mil",
+        "100 a 400 mil",
+        "Mais de 400 mil"
+       ],
+       "valores": [
+        13.4,
+        13,
+        12,
+        12.5,
+        12.6
+       ]
+      }
+     ],
+     "cores": [
+      "cinza",
+      "verde"
+     ],
+     "formato": "0.0\"%\"",
+     "legenda": true,
+     "eixo_min": 0,
+     "espaco_barras": 50,
+     "nome": "grafico porte"
+    },
+    {
+     "tipo": "leitura",
+     "x": 9.1,
+     "y": 2.5,
+     "w": 3.6,
+     "h": 3.9,
+     "numero": "3,7 → 0,8 pp",
+     "texto": "foi a redução da diferença entre os menores e os 17 maiores municípios. Escala urbana deixou de ser garantia de estoque enxuto."
+    }
+   ]
+  },
+  {
+   "tipo": "conteudo",
+   "titulo": "Mesmo estado, realidades opostas",
+   "apoio": "No Rio de Janeiro, São João de Meriti tem 4,3% de vagos; Macaé, 18,4%",
+   "sub": "As 5 menores e as 5 maiores taxas de vacância em 2022 — 134 municípios com mais de 100 mil domicílios (%)",
+   "fonte": "Fonte: IBGE, Censo Demográfico 2010 (SIDRA 1310) e 2022 (SIDRA 4711) · Elaboração Brain · Taxa de vacância = vagos ÷ domicílios particulares (2010) e particulares permanentes (2022)",
+   "notas": "1min. Entre as 134 maiores cidades, a taxa vai de 4,3% em São João de Meriti a 19,6% em Camaçari. E o contraste aparece dentro do mesmo estado. A média nacional não serve de régua para decidir onde e o que lançar.",
+   "elementos": [
+    {
+     "tipo": "texto",
+     "x": 0.6,
+     "y": 2.3,
+     "w": 5.9,
+     "h": 0.4,
+     "tamanho": 15,
+     "negrito": true,
+     "cor": "verde",
+     "texto": "Menor vacância"
+    },
+    {
+     "tipo": "texto",
+     "x": 6.8,
+     "y": 2.3,
+     "w": 5.9,
+     "h": 0.4,
+     "tamanho": 15,
+     "negrito": true,
+     "texto": "Maior vacância"
+    },
+    {
+     "tipo": "grafico",
+     "forma": "barras",
+     "x": 0.6,
+     "y": 2.75,
+     "w": 5.9,
+     "h": 3.95,
+     "series": [
+      {
+       "nome": "2022",
+       "rotulos": [
+        "São João de Meriti (RJ)",
+        "Chapecó (SC)",
+        "Guarujá (SP)",
+        "Boa Vista (RR)",
+        "Indaiatuba (SP)"
+       ],
+       "valores": [
+        4.3,
+        6.3,
+        7.1,
+        7.1,
+        7.6
+       ]
+      }
+     ],
+     "cores": [
+      "verde"
+     ],
+     "formato": "0.0\"%\"",
+     "rotulo_tamanho": 12,
+     "categoria_tamanho": 12,
+     "ordem_inversa": true,
+     "eixo_min": 0,
+     "eixo_max": 24,
+     "espaco_barras": 40,
+     "nome": "grafico menores"
+    },
+    {
+     "tipo": "grafico",
+     "forma": "barras",
+     "x": 6.8,
+     "y": 2.75,
+     "w": 5.9,
+     "h": 3.95,
+     "series": [
+      {
+       "nome": "2022",
+       "rotulos": [
+        "Camaçari (BA)",
+        "Macaé (RJ)",
+        "Mossoró (RN)",
+        "Porto Velho (RO)",
+        "Itaboraí (RJ)"
+       ],
+       "valores": [
+        19.6,
+        18.4,
+        18.4,
+        17.8,
+        17.7
+       ]
+      }
+     ],
+     "cores": [
+      "verde_escuro"
+     ],
+     "formato": "0.0\"%\"",
+     "rotulo_tamanho": 12,
+     "categoria_tamanho": 12,
+     "ordem_inversa": true,
+     "eixo_min": 0,
+     "eixo_max": 24,
+     "espaco_barras": 40,
+     "nome": "grafico maiores"
+    }
+   ]
+  },
+  {
+   "tipo": "divisor",
+   "secao": {
+    "titulo": "4 · O que fazer com o vazio",
+    "etiqueta": "04 · O QUE FAZER COM O VAZIO"
+   },
+   "numero": "04",
+   "titulo": "O que fazer com o vazio",
+   "subtitulo": "Déficit, reocupação e implicações para o incorporador",
+   "notas": "Transição (15s). Fechando: o que fazer com esse estoque."
+  },
+  {
+   "tipo": "conteudo",
+   "titulo": "Vazio e déficit convivem",
+   "apoio": "Metade do déficit é aluguel caro demais; o centro de SP mostra um caminho",
+   "sub": "Déficit habitacional 2022 (FJP) e resultados do Requalifica Centro + Subvenção Econômica (São Paulo, ago/2026)",
+   "fonte": "Fontes: FJP, Déficit Habitacional 2022 (abr/2024) via IRIB; Prefeitura de São Paulo (ago/2026) · Atualizado em nov/2026",
+   "notas": "1min30. Do déficit de 6,2 milhões, 52% é ônus excessivo com aluguel: 3,2 milhões de famílias que têm onde morar, mas pagam caro demais. Ou seja, o problema não é só falta de unidade, é unidade no lugar e no preço errados. Em São Paulo, o Requalifica Centro e a Subvenção Econômica já somam 50 edifícios em requalificação e 5.238 moradias, com 15 obras concluídas; a prefeitura subsidia até 25% da obra, num programa de R$ 1 bilhão.",
+   "elementos": [
+    {
+     "tipo": "card",
+     "x": 0.6,
+     "y": 2.35,
+     "w": 3.8,
+     "h": 2.6,
+     "valor": "52%",
+     "rotulo": "do déficit é ônus excessivo com aluguel",
+     "sub": "3,2 mi de famílias · FJP 2022",
+     "destaque": true
+    },
+    {
+     "tipo": "bloco",
+     "x": 4.7,
+     "y": 2.35,
+     "w": 8,
+     "h": 2.6,
+     "cor": "cinza_claro",
+     "nome": "fundo programa"
+    },
+    {
+     "tipo": "texto",
+     "x": 5,
+     "y": 2.5,
+     "w": 7.4,
+     "h": 0.45,
+     "tamanho": 15,
+     "negrito": true,
+     "cor": "verde",
+     "texto": "Requalifica Centro + Subvenção Econômica · São Paulo"
+    },
+    {
+     "tipo": "texto",
+     "x": 5,
+     "y": 3.05,
+     "w": 2.3,
+     "h": 0.9,
+     "tamanho": 40,
+     "negrito": true,
+     "destaque": true,
+     "cor": "verde",
+     "vertical": "bottom",
+     "texto": "50"
+    },
+    {
+     "tipo": "texto",
+     "x": 5,
+     "y": 4,
+     "w": 2.3,
+     "h": 0.7,
+     "tamanho": 13,
+     "texto": "edifícios em requalificação"
+    },
+    {
+     "tipo": "texto",
+     "x": 7.5,
+     "y": 3.05,
+     "w": 2.3,
+     "h": 0.9,
+     "tamanho": 40,
+     "negrito": true,
+     "destaque": true,
+     "cor": "verde",
+     "vertical": "bottom",
+     "texto": "5.238"
+    },
+    {
+     "tipo": "texto",
+     "x": 7.5,
+     "y": 4,
+     "w": 2.3,
+     "h": 0.7,
+     "tamanho": 13,
+     "texto": "moradias nos projetos"
+    },
+    {
+     "tipo": "texto",
+     "x": 10,
+     "y": 3.05,
+     "w": 2.3,
+     "h": 0.9,
+     "tamanho": 40,
+     "negrito": true,
+     "destaque": true,
+     "cor": "verde",
+     "vertical": "bottom",
+     "texto": "15"
+    },
+    {
+     "tipo": "texto",
+     "x": 10,
+     "y": 4,
+     "w": 2.3,
+     "h": 0.7,
+     "tamanho": 13,
+     "texto": "obras concluídas"
+    },
+    {
+     "tipo": "leitura",
+     "x": 0.6,
+     "y": 5.2,
+     "w": 12.1,
+     "h": 1.45,
+     "texto": "O déficit é tanto de preço e localização quanto de unidades. Reocupar estoque vago bem localizado, com subsídio a até 25% da obra, já virou programa de escala em São Paulo."
+    }
+   ]
+  },
+  {
+   "tipo": "conteudo",
+   "titulo": "Síntese Brain",
+   "apoio": "Três leituras para decisões de produto e localização",
+   "sub": "Implicações para o incorporador",
+   "fonte": "Fonte: IBGE, Censo Demográfico 2010 (SIDRA 1310) e 2022 (SIDRA 4711) · Elaboração Brain · FJP 2022 · Prefeitura de SP (ago/2026) · Leitura Brain",
+   "notas": "2min. Implicação 1: a média de 12,6% não dimensiona o risco de um projeto. A taxa vai de 4,3% a 19,6% entre as grandes cidades; a leitura tem que ser feita na zona de influência. Implicação 2: os 2,6 milhões de vagos nas capitais são concorrentes do lançamento e também matéria-prima. Configura oportunidade de retrofit e locação, desde que localização e produto sejam requalificáveis. Implicação 3: onde a vacância é baixa, como em Santa Catarina, Florianópolis, Vitória, Curitiba e Belo Horizonte, os números indicam menor folga de estoque; cruzamos com oferta, lançamentos e VSO locais antes de decidir.",
+   "elementos": [
+    {
+     "tipo": "lista_numerada",
+     "x": 0.6,
+     "y": 2.35,
+     "w": 12,
+     "h": 4.3,
+     "destaque": 1,
+     "itens": [
+      {
+       "titulo": "Leia o vazio na zona de influência",
+       "texto": "De 4,3% a 19,6% entre as grandes cidades. A média nacional (12,6%) não dimensiona o risco de um projeto."
+      },
+      {
+       "titulo": "Estoque vago é concorrente e matéria-prima",
+       "texto": "2,6 mi de vagos nas capitais disputam o mesmo comprador e locatário. Configura oportunidade de retrofit e renda, desde que o ativo seja requalificável."
+      },
+      {
+       "titulo": "Vacância baixa indica menor folga",
+       "texto": "SC (8,8%), Florianópolis, Vitória, Curitiba e BH ficam abaixo da média. Cruzar com oferta, lançamentos e VSO locais."
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "tipo": "final",
+   "responsavel": "fabio",
+   "notas": "30s. Obrigado. Os números indicam que o vazio brasileiro é local; estamos à disposição para ler a zona de influência de cada projeto. Os contatos estão na tela, e o QR code leva direto para nós."
+  }
+ ]
+}

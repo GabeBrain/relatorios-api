@@ -174,9 +174,10 @@ gcloud builds submit --config gcp/slide-maker-agent/cloudbuild.yaml --region="$R
 
 - O primeiro passo baixa `gs://$PROJETO-slide-maker-marca/marca/` para dentro do build; os ativos não
   ficam no repositório.
-- O build **falha** se faltar Neo Sans, Montserrat, um slide final ou o logo, e roda o teste de
-  fumaça: o LibreOffice renderiza um slide e o build confere que as duas fontes estão de fato
-  embutidas no PDF (não substituídas). A saída aparece no log do build ("Fumaça OK").
+- O build **falha** se faltar Neo Sans, Montserrat, um slide final ou o logo, e roda os testes das
+  ferramentas do agente (`lib/`) sem nada pulado: o deck de referência é gerado, passa no lint com
+  zero falhas 🔒 e o LibreOffice gera 18 PNGs com as duas fontes de fato embutidas no PDF. A saída
+  aparece no log do build (`Ran NN tests … OK`). Se falhar, envie ao Diego o trecho do log.
 - Se o build reclamar de permissão no bucket de origem do Cloud Build (`${PROJETO}_cloudbuild`),
   conceda `roles/storage.objectViewer` nele à conta `$BUILD`.
 

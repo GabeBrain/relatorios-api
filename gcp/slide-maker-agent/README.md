@@ -3,8 +3,9 @@
 Serviço do **Slide Maker** (Cloud Run, Node 22). Especificação: `docs/features/apresentacoes/INSTRUCOES_DESENVOLVIMENTO.md`.
 Preparação do GCP e publicação: `docs/features/apresentacoes/DEPLOY_GCP.md`.
 
-**Estado: Fase 2.** API completa, com o agente **simulado** (sem modelo e sem custo). O agente real, via
-Claude Agent SDK, entra na Fase 4.
+**Estado: Fase 3.** API completa, com o agente **simulado** (sem modelo e sem custo), e as ferramentas do
+agente em `lib/` (extração, brain-deck, render e lint; ver `lib/README.md`). O agente real, via Claude Agent
+SDK, entra na Fase 4.
 
 ## Como funciona
 
@@ -35,6 +36,7 @@ cd gcp/slide-maker-agent
 npm ci
 npm test          # 38 testes, com banco, Storage e fila em memória
 npm run typecheck
+npm run test:lib  # testes Python da lib/ (requer Python 3.12 + requirements.txt; ver lib/README.md)
 ```
 
 Se `src/features/slide-maker/lib/state-machine.ts` mudar, rode `npm run sync-shared`. Um teste falha
@@ -56,5 +58,6 @@ enquanto as duas cópias forem diferentes.
 ## Build e deploy
 
 Ver `DEPLOY_GCP.md`, Parte C. O build roda **da raiz do repositório** e baixa os ativos de marca do
-bucket privado; o Dockerfile falha se faltar Neo Sans, Montserrat ou um slide final, e executa o teste
-de fumaça `fumaca/fumaca.py` (LibreOffice renderiza um slide com as duas fontes embutidas no PDF).
+bucket privado; o Dockerfile falha se faltar Neo Sans, Montserrat ou um slide final, e roda os testes da
+`lib/` sem nada pulado: o deck de referência sai com zero falhas 🔒 e o LibreOffice gera 18 PNGs com as
+duas fontes embutidas.

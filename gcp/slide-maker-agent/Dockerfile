@@ -25,11 +25,12 @@ ENV DEBIAN_FRONTEND=noninteractive \
     NODE_ENV=production \
     WORK_ROOT=/work
 
-# LibreOffice (render), poppler (pdftoppm/pdffonts), fontconfig, corretor pt-BR, pandoc e o que o
-# sandbox do Agent SDK usa no Linux (bubblewrap + socat). curl serve ao diagnóstico de isolamento.
+# LibreOffice (render), poppler (pdftoppm/pdffonts), fontconfig, corretor pt-BR (programa hunspell +
+# dicionário; o lint usa na T8), pandoc e o que o sandbox do Agent SDK usa no Linux (bubblewrap + socat).
+# curl serve ao diagnóstico de isolamento.
 RUN apt-get update \
  && apt-get install -y --no-install-recommends \
-      libreoffice-impress poppler-utils fontconfig hunspell-pt-br pandoc \
+      libreoffice-impress poppler-utils fontconfig hunspell hunspell-pt-br pandoc \
       bubblewrap socat curl ca-certificates \
  && rm -rf /var/lib/apt/lists/*
 
@@ -67,9 +68,20 @@ COPY --from=compilacao /build/node_modules ./node_modules
 COPY --from=compilacao /build/dist ./dist
 COPY --from=compilacao /build/package.json ./package.json
 
-# Teste de fumaça (§10): LibreOffice renderiza um slide com as duas fontes, de fato embutidas no PDF.
-COPY gcp/slide-maker-agent/fumaca/fumaca.py /tmp/fumaca.py
-RUN python /tmp/fumaca.py && rm -rf /tmp/fumaca /tmp/fumaca.py /tmp/.config /tmp/.cache
+# Ferramentas do agente (§6.1): brain-deck, apply_theme, extract, render, lint. Logos recortadas no build.
+COPY gcp/slide-maker-agent/lib/ ./lib/
+RUN python lib/preparar_marca.py marca
+ENV BRAIN_MARCA=/app/marca
+
+# Teste de fumaça (§10) e testes da lib, sem nada pulado (SLIDE_MAKER_EXIGIR=1): a brain-deck reproduz o
+# build aprovado de referencia/, o deck tem zero falhas 🔒 no lint, o LibreOffice gera 18 PNGs com Neo Sans
+# e Montserrat embutidas, e cada regra 🔒 reprova a sua fixture. Falhou, o build falha.
+COPY docs/features/apresentacoes/referencia/ /tmp/referencia/
+RUN SLIDE_MAKER_EXIGIR=1 SLIDE_MAKER_MARCA=/app/marca SLIDE_MAKER_FONTES=/usr/local/share/fonts/brain \
+    SLIDE_MAKER_REFERENCIA=/tmp/referencia \
+    python -m unittest discover -s lib/testes -t lib/testes \
+ && rm -rf /tmp/referencia /tmp/slide-maker-* /tmp/lint-* /tmp/brain-deck* /tmp/extrair-* /tmp/render-* /tmp/.config /tmp/.cache \
+ && find lib -name __pycache__ -type d -prune -exec rm -rf {} +
 
 # Usuário sem privilégio; /work é o único diretório gravável do serviço além de /tmp.
 RUN useradd --uid 10001 --home-dir /tmp --no-create-home --shell /usr/sbin/nologin agente \

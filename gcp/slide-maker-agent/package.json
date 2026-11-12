@@ -10,7 +10,8 @@
     "start": "node dist/server.js",
     "typecheck": "tsc -p tsconfig.json",
     "test": "vitest run",
-    "sync-shared": "node scripts/sync-shared.mjs"
+    "sync-shared": "node scripts/sync-shared.mjs",
+    "test:lib": "python -m unittest discover -s lib/testes -t lib/testes"
   },
   "dependencies": {
     "@fastify/cors": "^11.4.1",
@@ -19,6 +20,8 @@
     "@supabase/supabase-js": "^2.119.0",
     "fastify": "^5.12.8",
     "google-auth-library": "^11.3.4",
+    "jszip": "3.10.2",
+    "pptxgenjs": "4.0.1",
     "zod": "^4.6.7"
   },
   "devDependencies": {
