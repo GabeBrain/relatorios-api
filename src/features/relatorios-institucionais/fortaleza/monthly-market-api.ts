@@ -3,6 +3,7 @@ import { requestWithRetry } from '@/features/panorama-secovi-fiergs/lib/request-
 import { fortalezaScope, fortalezaPeriod, type FortalezaSelection } from './model';
 import { monthlyMarketMonths, monthlyStockMonths, monthlyMarketSourceIssue, monthlySourceKey, type MonthlyMarketData, type MonthlyMarketSource, type MonthlyMetric, type MonthlySegment } from './monthly-market';
 import type { FortalezaEnvelope, FortalezaReadOptions } from './api';
+import { monthlySourceCoverage } from './municipal-coverage';
 
 /** Shared monthly harvest: two in-flight source streams; each stream paginates in order. */
 export async function fetchMonthlyMarket(selection: FortalezaSelection, authorizedCities: string[], options: FortalezaReadOptions, previous?: MonthlyMarketData): Promise<MonthlyMarketData> {
@@ -40,6 +41,7 @@ export async function fetchMonthlyMarket(selection: FortalezaSelection, authoriz
           if (page === last) throw new Error();
         }
         if (!source.complete) throw new Error();
+        source.coverage=monthlySourceCoverage(source,months);
         const issue = monthlyMarketSourceIssue(source,months);
         if (issue) { source.complete = false; source.issue = issue; source.rows = []; }
       } catch {

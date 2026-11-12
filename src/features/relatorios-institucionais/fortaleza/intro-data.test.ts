@@ -8,6 +8,16 @@ const cities = ['Fortaleza', 'Aquiraz', 'Caucaia', 'Eusébio', 'Maracanaú'];
 const raw = (city = 'Fortaleza', type = 'Vertical') => ({ building_id: `${city}-${type}`, name: 'Empreendimento sintético', city, state: 'CE', building_type: type, release_date: '2026-06-01', neighborhood: 'Centro', standard: type === 'Horizontal' ? 'Condomínio de Casas' : 'Standard', incorporators: [{ id: 1, name: 'Incorporadora sintética' }] });
 const response = (data: Record<string, unknown>[], total = data.length): HttpResponse<Record<string, unknown>> => ({ ok: true, status: 200, data: { data, meta: { current_page: 1, last_page: 1, total } }, text: null, contentType: 'application/json', latencyMs: 1, bytes: 1, error: null, requestHeaders: {}, requestQuery: {}, requestBody: null, url: '', method: 'GET' });
 describe('Fortaleza — fontes dos slides iniciais', () => {
+  it('percorre seis páginas para uma cidade com577verticais sem truncar o cadastro',async()=>{
+    const request=vi.fn(async(options:RequestOptions)=>{
+      const page=Number(options.query.page),type=String(options.query.type),total=type==='Vertical'?577:1,last=Math.ceil(total/100);
+      const records=Array.from({length:Math.min(100,total-(page-1)*100)},(_,index)=>({...raw('Fortaleza',type),building_id:`${type}-${(page-1)*100+index}`}));
+      const value=response(records,total);value.data.meta={current_page:page,last_page:last,total};return value;
+    });
+    const data=await fetchFortalezaIntro(monthlySelection,['Fortaleza'],{token:'synthetic',request});
+    expect(data.status).toBe('ready');expect(data.projects).toHaveLength(579);expect(data.requests).toBe(8);
+    expect(request.mock.calls.filter(([options])=>options.query.type==='Vertical').map(([options])=>options.query.page)).toEqual([1,2,3,4,5,6]);
+  });
   it('cancelamento do cadastro interrompe a sequência sem publicar parcial', async () => {
     const controller = new AbortController();
     const request = vi.fn(async () => { controller.abort(); return response([raw()]); });
@@ -46,7 +56,7 @@ describe('Fortaleza — fontes dos slides iniciais', () => {
       if (mode === 'segment') building.building_type = 'Hotel';
       if (mode === 'date') building.release_date = '';
       const value = response([building], mode === 'total' ? 2 : 1);
-      if (mode === 'limit') (value.data.meta as Record<string, unknown>).last_page = 6;
+      if (mode === 'limit') (value.data.meta as Record<string, unknown>).last_page = 41;
       return value;
     });
     const data = await fetchFortalezaIntro(monthlySelection, ['Fortaleza'], { token: 'synthetic', request });
