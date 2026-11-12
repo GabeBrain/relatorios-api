@@ -6,6 +6,7 @@ import {
   Building2,
   Database,
   FolderSearch,
+  Presentation,
   TrendingUp,
 } from 'lucide-react';
 import {
@@ -36,6 +37,7 @@ const PAGES: Destination[] = [
   { label: 'Rebrain — Assistente de Projetos', path: '/auditoria', icon: <ClipboardList className="h-4 w-4" />, keywords: 'assistente de projetos corretor vocacional slides auditoria' },
   { label: 'Rebrain — Empresas e Empregados', path: '/rebrain/empresas-empregados', icon: <Building2 className="h-4 w-4" />, keywords: 'rais empregados emprego formal empresas cnpj municipio cbo' },
   { label: 'Rebrain — Atualizador VGV', path: '/atualizador-vgv', icon: <TrendingUp className="h-4 w-4" />, keywords: 'vgv empreendimento excel incc ipca igp-di mapa' },
+  { label: 'Rebrain — Slide Maker', path: '/slide-maker', icon: <Presentation className="h-4 w-4" />, keywords: 'slide maker apresentacao apresentação deck pptx powerpoint palestra narrativa' },
   { label: 'Dashboard Geobrain', path: '/dash-geobrain', icon: <BarChart2 className="h-4 w-4" />, keywords: 'dash geobrain dashboard' },
   { label: 'Banco Quanti', path: '/quanti', icon: <Database className="h-4 w-4" />, keywords: 'area quanti quantitativo base dashboard' },
 ];

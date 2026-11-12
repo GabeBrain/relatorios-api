@@ -43,6 +43,8 @@ const FortalezaInstitutionalPage = lazy(() => import('./features/relatorios-inst
 const EmpresasEmpregadosPage = lazy(() => import('./features/empresas-empregados/pages/EmpresasEmpregadosPage.tsx'));
 const SindusconCuritibaPage = lazy(() => import('./features/sinduscon-curitiba/pages/SindusconCuritibaPage.tsx'));
 const EstimativasPage = lazy(() => import('./features/estimativas-vendas/EstimativasPage.tsx'));
+const SlideMakerPage = lazy(() => import('./features/slide-maker/pages/SlideMakerPage.tsx'));
+const SlideMakerChatPage = lazy(() => import('./features/slide-maker/pages/SlideMakerChatPage.tsx'));
 
 class ErrorBoundary extends Component<{ children: ReactNode }, { error: Error | null }> {
   state = { error: null };
@@ -123,6 +125,8 @@ const App = () => (
                 <Route path="/corretor/calibracao" element={<CorretorCalibrationPage />} />
                 <Route path="/corretor/:id/relatorio" element={<CorretorReportPage />} />
                 <Route path="/atualizador-vgv" element={<AtualizadorVgvPage />} />
+                <Route path="/slide-maker" element={<Suspense fallback={<div className="p-6"><BrainLoadingState variant="page" title="Carregando Slide Maker" /></div>}><SlideMakerPage /></Suspense>} />
+                <Route path="/slide-maker/:jobId" element={<Suspense fallback={<div className="p-6"><BrainLoadingState variant="page" title="Carregando a conversa do Slide Maker" /></div>}><SlideMakerChatPage /></Suspense>} />
                 {/* v1/v2 aposentadas → tudo cai no corretor v3 (histórico v1 = leitura lá dentro) */}
                 <Route path="/auditoria" element={<Navigate to="/corretor" replace />} />
                 <Route path="/auditoria/analise" element={<Navigate to="/corretor" replace />} />

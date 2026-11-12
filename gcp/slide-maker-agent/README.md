@@ -33,6 +33,30 @@ Cloud Tasks ──OIDC──► /internal/fase  (requisição aberta durante tod
 | `src/isolamento.ts` | Sandbox `bwrap` dos comandos do agente e diagnóstico de subida (`/healthz`) |
 | `src/shared/state-machine.ts` | Cópia da máquina de estados do frontend (`npm run sync-shared`) |
 
+## Relatório ao analista (sem tela na v1)
+
+A cada versão entregue, o agente registra um relatório interno: o que mudou em relação ao material
+original, as decisões tomadas, os dados atualizados com fonte, os números que ele mesmo calculou,
+as pendências marcadas `[PENDENTE]` e o resultado do QA. O relatório **não chega ao colaborador**:
+fica fora do detalhe do trabalho, da lista de arquivos e do download. Ele é gravado em dois lugares:
+
+- **Tabela** `slide_maker_relatorios`: uma linha por (`job_id`, `versao`), com o `markdown` e as `fontes` registradas.
+- **Storage**: `slide-maker-saida/<jobId>/v<N>/relatorio.md`, ao lado do `.pptx` da mesma versão. Não
+  sai na limpeza de 180 dias, que só alcança `slide-maker-entrada/` e `slide-maker-trabalho/`.
+
+Para consultar, use o SQL Editor do Supabase. O acesso é só por `service_role`: as tabelas e os
+buckets não têm policy para `anon` nem para `authenticated`.
+
+```sql
+select j.titulo, j.colaborador_email, j.responsavel, r.versao, r.created_at, r.markdown, r.fontes
+from slide_maker_relatorios r
+join slide_maker_jobs j on j.id = r.job_id
+order by r.created_at desc
+limit 20;
+```
+
+A tela interna entra junto com a frente de custos (INSTRUCOES §11).
+
 ## Desenvolvimento
 
 ```bash

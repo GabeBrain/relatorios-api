@@ -47,6 +47,7 @@ const JOURNEYS: Journey[] = [
       { title: 'Relatório AELO', description: 'Analise loteamentos abertos e fechados nas regiões atendidas.', to: '/rebrain/aelo', audiences: ['Analistas', 'Gestão'], study: 'Loteamentos' },
       { title: 'Relatório API Excel', description: 'Exporte dados GeoBrain por mês ou trimestre, com colunas e cálculos configuráveis.', to: '/rebrain/relatorio-api-excel', audiences: ['Analistas', 'Gestão'], study: 'API Excel' },
       { title: 'Empresas e Empregados', description: 'Explore vínculos formais da RAIS por município, setor e ocupação.', to: '/rebrain/empresas-empregados', audiences: ['Analistas', 'Pesquisa', 'Gestão'], study: 'Emprego formal' },
+      { title: 'Slide Maker', description: 'Envie estudos, planilhas ou decks e receba uma apresentação no padrão Brain, com a narrativa aprovada por você.', to: '/slide-maker', audiences: ['Analistas', 'Gestão'], study: 'Apresentações' },
     ],
   },
   {

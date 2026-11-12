@@ -103,6 +103,9 @@ describe('ferramentas brain (§5.1)', () => {
     expect(arm.objetos.has(`slide-maker-saida/${job.id}/v1/deck_v1.pptx`)).toBe(true);
     expect((await repo.listarVersoes(job.id))[0]).toMatchObject({ versao: 1, storage_path: `${job.id}/v1/deck_v1.pptx` });
     expect(repo.relatorios[0]).toMatchObject({ versao: 1, markdown: '# Relatório' });
+    // Relatório ao analista também no Storage, ao lado do deck, e nunca como arquivo do trabalho
+    expect(Buffer.from(arm.objetos.get(`slide-maker-saida/${job.id}/v1/relatorio.md`)!).toString('utf8')).toBe('# Relatório');
+    expect((await repo.listarArquivos(job.id)).map((a) => a.nome)).toEqual(['deck_v1.pptx']);
   });
 
   it('registrar_fonte acumula em trabalho/fontes.json (o lint e as próximas fases leem daí)', async () => {

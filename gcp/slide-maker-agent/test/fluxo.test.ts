@@ -70,6 +70,12 @@ describe('fluxo completo com agente simulado (§13): F1 → F2 → ajuste → F3
     expect(detalhe).not.toHaveProperty('relatorio');
     expect(JSON.stringify(detalhe)).not.toContain('Relatório simulado');
 
+    // Relatório ao analista por versão (§9, sem tela): tabela + Storage; fora do detalhe, dos arquivos e do download
+    expect(t.repo.relatorios.map((r) => [r.versao, r.markdown])).toEqual([[1, '# Relatório simulado v1'], [2, '# Relatório simulado v2']]);
+    for (const v of [1, 2]) expect(t.arm.objetos.has(`${BUCKETS.saida}/${jobId}/v${v}/relatorio.md`)).toBe(true);
+    expect(JSON.stringify(detalhe)).not.toContain('relatorio.md');
+    for (const v of [1, 2]) expect((await t.get(`/jobs/${jobId}/versoes/${v}/download`, token)).json().url).not.toContain('relatorio');
+
     // Nenhum workspace fica no disco depois das fases
     expect(existsSync(join(t.workRoot, jobId))).toBe(false);
     // E o workspace salvo no Storage não guarda a entrada (ela vem do bucket de entrada)

@@ -238,8 +238,9 @@ gcloud run services describe slide-maker-agent --region="$REGIAO" --format='valu
 
 ### C4. O que ainda não está nesta publicação
 
-- **Frontend (Fase 5):** `VITE_SLIDE_MAKER_AGENT_URL=$URL` entra no `.env` versionado (o Lovable lê de
-  lá), junto com o item "Slide Maker" no menu.
+- **Endereço do serviço no frontend:** o item "Slide Maker" e as páginas já estão no app (Fase 5), mas
+  mostram "ainda não está disponível neste ambiente" até que `VITE_SLIDE_MAKER_AGENT_URL=$URL` entre
+  no `.env` versionado (o Lovable lê de lá). Envie a `$URL` ao Diego depois de C2; o commit é dele.
 - **Alternativa registrada:** se o corte de 25 min não bastar para a produção (F3), a fase passa a
   rodar como **Cloud Run Job** (§8 item 5, §15.1 item 8).
 - **Limpeza de 180 dias** de `entrada/` e `trabalho/` (§15.1 item 2): job agendado, numa fase posterior.
