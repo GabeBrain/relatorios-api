@@ -1,5 +1,13 @@
 # Rebrain (Plataforma) — Documento Vivo
 
+## 12/11/2026 — Slide Maker: Fase 1 (fundação de dados) — Claude (sessão de Diego Cabrero)
+
+- **Mudança:** nova ferramenta Slide Maker (rota futura `/slide-maker`). Migration `20261112160000_slide_maker.sql` com 6 tabelas `slide_maker_*` (inclui `slide_maker_fases`: uma fase ativa por trabalho, rate limit e idempotência com o Cloud Tasks) e 3 buckets privados, **sem nenhuma policy** e com `revoke` para `anon`/`authenticated`. Tipos em `src/features/slide-maker/types.ts` e máquina de estados pura em `src/features/slide-maker/lib/state-machine.ts`. Nenhum arquivo compartilhado alterado; nada aparece no menu ainda.
+- **Decisões:** respostas do Diego registradas em `docs/features/apresentacoes/INSTRUCOES_DESENVOLVIMENTO.md` §15.1 (repo público → ativos de marca em bucket privado; `southamerica-east1`; lista "Todos os trabalhos" visível a todos, só com metadados; corte de fase em 25 min pelo limite de 30 min do Cloud Tasks, com Cloud Run Job como alternativa registrada; retenção de 180 dias). Roteiro de infraestrutura para o Gabriel em `docs/features/apresentacoes/DEPLOY_GCP.md`.
+- **Validação:** 78 testes da feature (todas as 1.430 combinações estado × evento × contexto da máquina de estados; leitura estática da migration cruzando os domínios do SQL com os tipos); typecheck e lint sem erros. Migration executada num Postgres 18.6 local (PGlite, fora do repo) com os grants padrão do Supabase simulados: 46/46 verificações de restrição e de acesso. **Não aplicada no Supabase real.**
+- **Pendências:** Gabriel aplica a migration (Parte A) e prepara o GCP (Parte B) conforme `DEPLOY_GCP.md`; Fase 2 (serviço `gcp/slide-maker-agent` com agente simulado) em seguida.
+- **Monday:** —
+
 ## 12/11/2026 — Validação do Fechamento: merge da main local divergente — Claude (sessão de Diego Cabrero)
 
 - **Mudança:** merge de `origin/main` (565 commits) na `main` local, que tinha divergido com 2 commits não publicados. O fix local `02b69c51` (15/10, filtros da sidebar na guia Divergências) foi substituído pelo fix equivalente e mais completo `75ef905a` (Edgar, 15/10, que também casa tipologia e período). Os três conflitos ficaram com a versão do remoto, e `aggregate.ts` voltou à versão do remoto. O guia `docs/INTEGRACAO_API_GEOBRAIN.md` (commit local `d567641b`) entra sem alteração.
