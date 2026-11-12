@@ -11,7 +11,7 @@ import { SpDetailSlide } from './SpDetailSlide';
 import { SpMarketStateSlide } from './SpMarketStateSlide';
 
 // Only exported aggregate price data is replayed. Synthetic ancillary sections
-// keep this test independent of raw projects and the live GeoBrain service.
+// keep this test independent of raw projects and the live Geobrain service.
 function replay() {
   const report=buildSpTemporalPreview(recordedInput(),'3T2026');
   const granular=buildSpGranularDetails(syntheticGranularBuildings(),report);

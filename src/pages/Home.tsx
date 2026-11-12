@@ -45,7 +45,7 @@ const JOURNEYS: Journey[] = [
       { title: 'Panorama de Mercado', description: 'Monte o panorama editorial Secovi/FIERGS por praça e período.', to: '/rebrain/panorama-secovi-fiergs', audiences: ['Analistas', 'Gestão'], study: 'Panorama executivo' },
       { title: 'SP Institucional', description: 'Gere o relatório de São Paulo capital por ano e trimestre, com etapas automáticas e PowerPoint editável.', to: '/rebrain/relatorios-institucionais/sp', audiences: ['Analistas', 'Gestão'], study: 'São Paulo capital' },
       { title: 'Relatório AELO', description: 'Analise loteamentos abertos e fechados nas regiões atendidas.', to: '/rebrain/aelo', audiences: ['Analistas', 'Gestão'], study: 'Loteamentos' },
-      { title: 'Relatório API Excel', description: 'Exporte dados GeoBrain por mês ou trimestre, com colunas e cálculos configuráveis.', to: '/rebrain/relatorio-api-excel', audiences: ['Analistas', 'Gestão'], study: 'API Excel' },
+      { title: 'Relatório API Excel', description: 'Exporte dados Geobrain por mês ou trimestre, com colunas e cálculos configuráveis.', to: '/rebrain/relatorio-api-excel', audiences: ['Analistas', 'Gestão'], study: 'API Excel' },
       { title: 'Empresas e Empregados', description: 'Explore vínculos formais da RAIS por município, setor e ocupação.', to: '/rebrain/empresas-empregados', audiences: ['Analistas', 'Pesquisa', 'Gestão'], study: 'Emprego formal' },
       { title: 'Slide Maker', description: 'Envie estudos, planilhas ou decks e receba uma apresentação no padrão Brain, com a narrativa aprovada por você.', to: '/slide-maker', audiences: ['Analistas', 'Gestão'], study: 'Apresentações' },
     ],
@@ -55,7 +55,7 @@ const JOURNEYS: Journey[] = [
     description: 'Explore oferta, desempenho, território e comportamento de público para apoiar decisões.',
     icon: BarChart3,
     tools: [
-      { title: 'Dashboard GeoBrain', description: 'Investigue empreendimentos, filtros urbanos e indicadores de mercado.', to: '/dash-geobrain', audiences: ['Analistas', 'Gestão'], study: 'Mercado imobiliário' },
+      { title: 'Dashboard Geobrain', description: 'Investigue empreendimentos, filtros urbanos e indicadores de mercado.', to: '/dash-geobrain', audiences: ['Analistas', 'Gestão'], study: 'Mercado imobiliário' },
       { title: 'Banco Quanti', description: 'Explore a Base Unificada, perfis e intenção de compra.', to: '/quanti', audiences: ['Pesquisa', 'Analistas', 'Gestão'], study: 'Pesquisa quantitativa' },
     ],
   },
@@ -72,7 +72,7 @@ const JOURNEYS: Journey[] = [
 ];
 
 const SUPPORT_TOOLS: Tool[] = [
-  { title: 'API Explorer', description: 'Consulte contratos e teste APIs GeoBrain e Sócio.', to: '/apis/explorer', audiences: ['Técnico'], study: 'Integrações' },
+  { title: 'API Explorer', description: 'Consulte contratos e teste APIs Geobrain e Sócio.', to: '/apis/explorer', audiences: ['Técnico'], study: 'Integrações' },
 ];
 
 function ToolCard({ tool }: { tool: Tool }) {

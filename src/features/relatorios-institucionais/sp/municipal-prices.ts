@@ -111,7 +111,7 @@ export function spDisplayPrices(report: SpPreview) {
     if (overall[field] === null && checked && !checked.partial && checked[field] !== null) {
       overall[field] = checked[field];
       overallMethods[field] = 'granular-stock-weighted';
-      notices.push({ slides:[field === 'ticket' ? 61 : 62], reason:'A linha geral é calculada pelas unidades em oferta; as barras por padrão são informadas pela GeoBrain. Métodos distintos para conferência, sem média das médias dos padrões.' });
+      notices.push({ slides:[field === 'ticket' ? 61 : 62], reason:'A linha geral é calculada pelas unidades em oferta; as barras por padrão são informadas pela Geobrain. Métodos distintos para conferência, sem média das médias dos padrões.' });
     }
   }
   return { series, annualChanges, seriesMethods, overallMethods, notices, overall,

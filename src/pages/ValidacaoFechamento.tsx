@@ -159,7 +159,7 @@ export default function ValidacaoFechamento() {
         {!hasToken && (
           <div className="flex items-start gap-2 rounded p-2 text-[10pt]" style={{ background: 'var(--vf-accent-soft)', border: '1px solid var(--vf-accent)' }}>
             <AlertCircle className="mt-0.5 h-3 w-3" />
-            <div>Faça login no bloco de autenticação para consultar a API GeoBrain.</div>
+            <div>Faça login no bloco de autenticação para consultar a API Geobrain.</div>
           </div>
         )}
         {status === 'loading' && (

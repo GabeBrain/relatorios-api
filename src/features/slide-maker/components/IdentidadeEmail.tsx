@@ -6,7 +6,7 @@ import { emailValido } from '../lib/armazenamento';
 
 /**
  * Identificação do colaborador (§9): só o e-mail @brain.srv.br, guardado neste navegador.
- * Não usa o login GeoBrain: o Slide Maker não depende da API GeoBrain.
+ * Não usa o login Geobrain: o Slide Maker não depende da API Geobrain.
  */
 export function IdentidadeEmail({ onSalvar }: { onSalvar: (email: string) => void }) {
   const id = useId();
