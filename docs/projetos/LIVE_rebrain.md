@@ -1,5 +1,16 @@
 # Rebrain (Plataforma) — Documento Vivo
 
+## 12/11/2026 — Slide Maker: banco aplicado no Lovable Cloud (DEPLOY_GCP Parte A) — Diego Cabrero, com Lovable
+
+- **Mudança:** a migration `supabase/migrations/20261112160000_slide_maker.sql` foi aplicada pelo Lovable no banco do Rebrain. Os buckets foram criados pela ferramenta de Storage do Lovable, porque ela não aceita `INSERT` em `storage.buckets` numa migration; nomes, privacidade e limites são os do arquivo. Nenhum arquivo do frontend nem de `supabase/functions/` foi alterado.
+- **Validação (consultas no SQL Editor, 12/11/2026 17h23):**
+  - as 6 tabelas `slide_maker_*` existem;
+  - os buckets `slide-maker-entrada`, `slide-maker-saida` e `slide-maker-trabalho` estão com `public = false`;
+  - **nenhuma** policy em `pg_policies` para as tabelas `slide_maker_*` nem para esses buckets.
+- **Achados do verificador de segurança do Lovable:** nenhum dos 5 é do Slide Maker. São dívidas já registradas em `docs/architecture/SECURITY_NOTES.md`: RLS do Corretor aberta a `anon` (§1), a edge function `analyze-slide` (§2), policies de Storage sem dono, atualização paga de dados de empresas e prévias de estudos. **Não usar "Fix all"**: ele pode criar policies ou mudar acessos de outras ferramentas sem revisão.
+- **Pendências:** Gabriel segue da Parte B do `docs/features/slide-maker/DEPLOY_GCP.md`. A chave `service_role` do banco do Lovable Cloud precisa ir para o Secret Manager (B3); confirmar como obtê-la. A `CLAUDE_API_KEY` dos Secrets do Lovable não chega ao Cloud Run.
+- **Monday:** —
+
 ## 12/11/2026 — Slide Maker: Fase 8 (documentação) — Claude (sessão de Diego Cabrero)
 
 - **Mudança:**
