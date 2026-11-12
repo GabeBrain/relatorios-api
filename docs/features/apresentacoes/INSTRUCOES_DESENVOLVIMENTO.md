@@ -402,3 +402,20 @@ Ao fim de cada fase: typecheck, lint e testes proporcionais; commit com `git add
 4. **Travas `maxBudgetUsd` por fase** (seção 11): os valores sugeridos servem para começar?
 5. **Responsáveis além de Fábio, Guilherme e Lucas Finoti:** sem slide final, o deck usa o slide institucional de contato (doc 02 §10). Ok?
 6. **Projeto GCP e região** do Cloud Run, e quem faz o deploy.
+
+### 15.1 Respostas do Diego (12/11/2026)
+
+Estas respostas prevalecem sobre o texto anterior deste documento quando houver conflito.
+
+| # | Tema | Decisão |
+|---|---|---|
+| 1 | Fontes e ativos de marca | O repositório é **público**: fontes Neo Sans, slides finais, logos e manual **não** são commitados. Ficam num **bucket privado do GCS**, baixado no build da imagem. Montserrat vem do Google Fonts (OFL) no build |
+| 2 | Retenção | **180 dias** para `slide-maker-entrada/` e `slide-maker-trabalho/`; versões e relatório ficam |
+| 3 | Identificação | E-mail informado + token por trabalho, sem login. **Mudança:** além de "Meus trabalhos" (tokens deste navegador), existe a lista **"Todos os trabalhos"**, visível a todos, no mesmo espírito da aba "Todos os estudos" do Assistente de Projetos, para evitar trabalho duplicado. A lista mostra só metadados (título, autor, responsável, situação, versão e datas). Abrir o chat, os arquivos ou o PPTX continua exigindo o token do trabalho |
+| 4 | `maxBudgetUsd` | Valores sugeridos na seção 11 |
+| 5 | Responsáveis | `fabio`, `guilherme`, `finoti` ou `outro`; `outro` termina com o slide institucional de contato (doc 02 §10) |
+| 6 | GCP | Região **`southamerica-east1`**. Projeto definido pelo Gabriel, que faz o deploy seguindo `DEPLOY_GCP.md` |
+| 7 | Isolamento dos comandos (seção 12) | `canUseTool` recusa caminhos fora de `/work/<jobId>`, `kb/`, `marca/` e `lib/`; `env` do agente montado explicitamente, só com a chave da Anthropic; autoteste de isolamento na subida do serviço, derrubando o health check se falhar; spike no Cloud Run gen2 na Fase 2. Se o `sandbox` do SDK não funcionar lá, aplicar o isolamento próprio da seção 12 |
+| 8 | Duração da fase (seção 8) | O Cloud Tasks espera no máximo **30 min** por tarefa HTTP (documentação do Cloud Tasks: "default timeout is 10 minutes, with a maximum of 30 minutes"), e não 60. **Decisão:** `dispatchDeadline` de 30 min e corte da fase pelo próprio serviço em **25 min**, com a mensagem de erro e o "Tentar novamente". **Alternativa registrada, se o corte se mostrar insuficiente** (ex.: decks muito longos na F3): executar a fase como **Cloud Run Job** (item 5 da seção 8), com o mesmo contrato `jobId + fase` e timeout de horas |
+| 9 | Registro de fases | Tabela adicional `slide_maker_fases` (sem custo): garante uma fase por trabalho no banco, conta o rate limit por e-mail e IP entre instâncias e dá idempotência com o Cloud Tasks |
+| 10 | Build da imagem | Contexto de build na **raiz do repositório** (a imagem copia `docs/.../base-conhecimento` para `kb/` e a máquina de estados de `src/features/slide-maker/lib/`), e não `--source gcp/slide-maker-agent` como no Sinduscon |
