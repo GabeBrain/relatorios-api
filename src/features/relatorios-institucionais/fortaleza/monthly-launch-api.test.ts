@@ -8,7 +8,7 @@ function transport(mode = 'success') {
   return vi.fn<FortalezaRequest>(async options => {
     const city = String(options.query.city), page = Number(options.query.page);
     const rows = monthlyLaunchFixture([city]).sources[0].rows;
-    if (mode === 'missing') rows.pop();
+    if (mode === 'missing') rows.splice(0,7);
     const total = rows.length, last = Math.ceil(total / 100);
     const next = page === last ? null : 'https://provider.invalid/next-without-filters';
     return { ok: mode !== 'error', status: mode === 'error' ? 403 : 200, data: { data: rows.slice((page - 1) * 100, page * 100), meta: { current_page: page, total: mode === 'unstable' && page === 2 ? total + 1 : total, last_page: mode === 'limit' ? 4 : last }, links: { next } }, text: null, contentType: 'application/json', latencyMs: 1, bytes: 1, error: null, requestHeaders: {}, requestQuery: {}, requestBody: null, url: '', method: 'GET' };

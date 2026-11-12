@@ -5,7 +5,8 @@ import type { IntroData } from './intro-data';
 import { introMonth } from './intro-view';
 import type { MonthlyMarketData } from './monthly-market';
 
-export const FORTALEZA_STANDARDS = ['Econômico', 'Compacto', 'Standard', 'Médio', 'Médio-Alto', 'Alto', 'Luxo'] as const;
+import { FORTALEZA_STANDARDS } from './classifications';
+export { FORTALEZA_STANDARDS } from './classifications';
 export interface LaunchBin { month: string; label: string; economic: number; other: number; total: number }
 export interface LaunchSeries {
   status: 'ready' | 'blocked'; issue: string | null;
@@ -25,7 +26,7 @@ export const blockedLaunchSeries = (issue: string): LaunchSeries => ({ status: '
 const blankBin = (month: string): LaunchBin => ({ month, label: `${introMonth(Number(month.slice(5)), true)}/${month.slice(2, 4)}`, economic: 0, other: 0, total: 0 });
 const standardKey = (value: unknown) => FORTALEZA_STANDARDS.find(standard => normalizeMarketText(standard) === normalizeMarketText(value));
 export function monthlyLaunchSourceIssue(source: MonthlyLaunchSource, selection: FortalezaSelection): string | null {
-  const months = monthlyLaunchMonths(selection), seen = new Set<string>();
+  const months = monthlyLaunchMonths(selection), seen = new Set<string>(),observed=new Set<string>();
   if (!source.complete) return `${source.city}: histórico mensal não concluído.`;
   for (const row of source.rows) {
     const month = marketMonth(row.period), standard = standardKey(row.group);
@@ -33,9 +34,9 @@ export function monthlyLaunchSourceIssue(source: MonthlyLaunchSource, selection:
     if (!month || !months.includes(month) || !standard || !Number.isSafeInteger(value) || value < 0 || normalizeMarketText(row.building_type) !== 'vertical' || row.city != null && normalizeMarketText(row.city) !== normalizeMarketText(source.city) || row.state != null && normalizeMarketText(row.state) !== 'ce') return `${source.city}: linha inválida ou fora do recorte do histórico de lançamentos.`;
     const key = `${month}/${standard}`;
     if (seen.has(key)) return `${source.city}: há mês/padrão duplicado.`;
-    seen.add(key);
+    seen.add(key);observed.add(month);
   }
-  return seen.size === months.length * FORTALEZA_STANDARDS.length ? null : `${source.city}: faltam meses ou padrões explícitos. Ausência não representa zero.`;
+  return observed.size === months.length ? null : `${source.city}: faltam competências inteiras no histórico de lançamentos. Ausência não representa zero.`;
 }
 function finish(history: LaunchBin[], selection: FortalezaSelection): LaunchSeries {
   const endMonth=selection.periodicity==='monthly'?selection.position:selection.position*3;
@@ -72,7 +73,7 @@ export function monthlyProjectLaunches(data: IntroData | null, selection: Fortal
   }
   return finish([...bins.values()], selection);
 }
-/** All seven standard rows must be explicit, including real zeros, in every city/month. */
+/** Sum the observed standard groups of each fully collected city/month; never synthesize group rows. */
 export function monthlyUnitLaunches(data: MonthlyLaunchData | null, selection: FortalezaSelection, cities: string[], region: 'capital' | 'rm'): LaunchSeries {
   const required = region === 'capital' ? ['Fortaleza'] : ['Aquiraz', 'Caucaia', 'Eusébio', 'Maracanaú'];
   if (required.some(city => !cities.some(value => normalizeMarketText(value) === normalizeMarketText(city)))) return blockedLaunchSeries('O recorte não inclui todos os municípios desta análise.');

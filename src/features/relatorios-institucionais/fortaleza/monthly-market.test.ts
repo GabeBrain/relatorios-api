@@ -63,7 +63,7 @@ describe('Fortaleza mensal — 12/14 e lote 16–25', () => {
   it.each(['city','month','duplicate','unknown','invalid','segment'])('cobertura inválida %s impede consolidado, sem descartar silenciosamente', mode => {
     const data = monthlyMarketFixture(), source = data.sources.find(source => source.city === 'Aquiraz' && source.segment === 'Horizontal' && source.metric === 'releases')!;
     if (mode === 'city') data.sources.splice(data.sources.indexOf(source),1);
-    if (mode === 'month') source.rows.pop();
+    if (mode === 'month') source.rows=source.rows.filter(row=>String(row.period).slice(0,7)!==data.months.at(-1));
     if (mode === 'duplicate') source.rows.push({ ...source.rows[0] });
     if (mode === 'unknown') source.rows[0].group = 'Produto desconhecido';
     if (mode === 'invalid') source.rows[0].releases_in_period = null;
@@ -71,10 +71,10 @@ describe('Fortaleza mensal — 12/14 e lote 16–25', () => {
     expect(buildMonthlySlide(12,data,selection,cities).status).toBe('blocked');
     expect(buildMonthlySlide(23,data,selection,cities).status).toBe('ready');
   });
-  it('não interpreta ausência de produto horizontal como zero e recusa rótulo novo', () => {
+  it('soma conjuntos classificados vazios sem criar linhas e recusa rótulo novo', () => {
     const data = monthlyMarketFixture();
     data.sources.filter(source => source.segment === 'Horizontal').forEach(source => { source.rows = source.rows.filter(row => row.group === 'Loteamento Aberto'); });
-    expect(buildMonthlySlide(14,data,selection,cities).status).toBe('blocked');
+    expect(buildMonthlySlide(14,data,selection,cities).status).toBe('ready');
     expect(buildMonthlySlide(19,data,selection,cities).status).toBe('ready');
     expect(monthlyProduct('Horizontal','Horizontal')).toBe('unknown');
     expect(monthlyProduct('Horizontal','Standard')).toBe('houses');

@@ -31,12 +31,12 @@ describe('Fortaleza — fontes dos slides iniciais', () => {
     expect(request.mock.calls.every(([options]) => options.includeAuth === false && options.query.uf === 'CE')).toBe(true);
     expect(introLaunchLists(data, selection).capital).toHaveLength(3);
     expect(introLaunchLists(data, selection).rm).toHaveLength(12);
-    expect(buildIntroView(selection, cities, data).sample).toEqual({ projects: null, capital: null, rm: null, companies: null });
+    expect(buildIntroView(selection, cities, data).sample).toEqual({ projects: 15, capital: 3, rm: 12, companies: 1 });
   });
   it('horizontal desconhecido bloqueia o gráfico em vez de virar casa por inferência', () => {
-    const project = buildIntroProject({ ...raw('Fortaleza', 'Horizontal'), standard: 'Econômico' });
+    const project = buildIntroProject({ ...raw('Fortaleza', 'Horizontal'), standard: 'Produto desconhecido' });
     expect(project.chartEligible).toBeNull();
-    expect(introBins({ status: 'ready', projects: [project], requests: 0, issues: [], startedAt: '', finishedAt: '' }, selection)).toBeNull();
+    expect(introBins({ status: 'ready', projects: [project], requests: 0, issues: [], startedAt: '', finishedAt: '' }, selection)!.history.at(-1)).toMatchObject({total:0,unknownCapital:1});
     expect(buildIntroProject({ ...raw('Aquiraz', 'Horizontal'), standard: 'Loteamento Fechado' }).chartEligible).toBe(false);
   });
   it('histórico não confunde empreendimentos, unidades ou meses/trimestres', () => {

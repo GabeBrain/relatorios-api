@@ -43,9 +43,9 @@ describe('Fortaleza — composição dos dez slides originais', () => {
     expect(screen.getByText(project.name)).toBeTruthy();
     expect(screen.getByText('Empresa sintética')).toBeTruthy();
     rerender(<FortalezaIntroSlide model="julho" page={2} view={view} />);
-    expect(view.sample.projects).toBeNull();
+    expect(view.sample.projects).toBe(1);expect(view.sampleMethod).toBe('registry');
     expect(container.textContent).not.toContain(project.name);
-    expect(container.textContent).toContain('—');
+    expect(container.textContent).toContain('Base consultada:');expect(container.textContent).toContain('não representa');
     rerender(<FortalezaIntroSlide model="julho" page={10} view={view} />);
     expect(screen.getAllByLabelText('Histórico de empreendimentos pendente')).toHaveLength(2);
   });

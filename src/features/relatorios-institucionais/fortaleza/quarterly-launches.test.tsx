@@ -40,7 +40,7 @@ describe('Fortaleza trimestral — ordem original 11–20',()=>{
     expect(money.rows.at(-1)!.total).toBe(75);expect(money.rows[2].total).toBe(35);
   });
   it('bloqueia mês faltante, duplicação, fonte incompleta, preço ausente e recorte insuficiente',()=>{
-    for(const mutate of [(data:ReturnType<typeof fixture>)=>data.sources[0].rows.pop(),(data:ReturnType<typeof fixture>)=>data.sources[0].rows.push(data.sources[0].rows[0]),(data:ReturnType<typeof fixture>)=>{data.sources[0].complete=false;}]){
+    for(const mutate of [(data:ReturnType<typeof fixture>)=>{data.sources[0].rows=data.sources[0].rows.filter(row=>String(row.period).slice(0,7)!==data.months.at(-1));},(data:ReturnType<typeof fixture>)=>data.sources[0].rows.push(data.sources[0].rows[0]),(data:ReturnType<typeof fixture>)=>{data.sources[0].complete=false;}]){
       const data=fixture();mutate(data);expect(buildQuarterlyLaunchSlide(12,data,intro,selection,cities).status).toBe('blocked');
     }
     const data=fixture();data.sources[0].rows.find(row=>row.period==='2026-06-01')!.vgv_release=null;

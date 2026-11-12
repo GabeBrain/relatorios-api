@@ -1,13 +1,13 @@
 import { FORTALEZA_CITIES, fortalezaPeriod, type FortalezaSelection } from './model';
 import { marketMonth, normalizeMarketText, type MarketRow } from './market';
-import { FORTALEZA_STANDARDS, monthlyLaunchMonths } from './monthly-launches';
+import { monthlyLaunchMonths } from './monthly-launches';
 import { introMonth } from './intro-view';
 import incc from './incc-di.json';
 import type { MonthlySourceCoverage } from './municipal-coverage';
 
 export type MonthlySegment = 'Vertical' | 'Horizontal' | 'Comercial';
 export type MonthlyMetric = 'releases' | 'sales' | 'stock';
-export interface MonthlyMarketSource { city: string; segment: MonthlySegment; metric: MonthlyMetric; complete: boolean; rows: MarketRow[]; issue: string | null; requests: number; startedAt: string; finishedAt: string; openingIncluded?:boolean; coverage?:MonthlySourceCoverage }
+export interface MonthlyMarketSource { city: string; segment: MonthlySegment; metric: MonthlyMetric; complete: boolean; rows: MarketRow[]; issue: string | null; requests: number; startedAt: string; finishedAt: string; openingIncluded?:boolean; coverage?:MonthlySourceCoverage; emptyResult?:boolean }
 export interface MonthlyMarketData { scopeKey: string; months: string[]; sources: MonthlyMarketSource[]; issues: string[] }
 export interface MonthlyBin { month: string; label: string; first: number; second: number; total: number }
 export interface MonthlySlideData {
@@ -25,25 +25,13 @@ export function monthlyStockMonths(months:string[]) {
   const [year,month] = months[0].split('-').map(Number);
   return [new Date(Date.UTC(year,month-2,1)).toISOString().slice(0,7),...months];
 }
-const socioeconomic = new Set(FORTALEZA_STANDARDS.map(normalizeMarketText));
-const houseLabels = new Set(['condominio de casas/sobrados', 'condominio de casas e sobrados', 'condominio de casas', 'casas em condominio', 'casas em condominio fechado']);
-const lotLabels = new Set(['loteamento aberto', 'loteamento fechado']);
-export type MonthlyProduct = 'vertical' | 'houses' | 'lots' | 'commercial' | 'excluded' | 'unknown';
-/** Own Fortaleza contract: the original tables distinguish socioeconomic houses from named lot products. No name heuristics. */
-export function monthlyProduct(segment: MonthlySegment, group: unknown): MonthlyProduct {
-  const key = normalizeMarketText(group);
-  if (segment === 'Vertical') return socioeconomic.has(key) ? 'vertical' : 'unknown';
-  if (segment === 'Comercial') return socioeconomic.has(key) || ['comercial', 'salas comerciais', 'lojas'].includes(key) ? 'commercial' : 'unknown';
-  if (lotLabels.has(key)) return 'lots';
-  if (houseLabels.has(key) || socioeconomic.has(key)) return 'houses';
-  if (['condominio de chacaras', 'loteamento comercial', 'terreno'].includes(key)) return 'excluded';
-  return 'unknown';
-}
+export { monthlyProduct,type MonthlyProduct } from './classifications';
+import { monthlyProduct } from './classifications';
 export function monthlyMarketSourceIssue(source: MonthlyMarketSource, months: string[]): string | null {
   if (source.metric === 'stock' && source.openingIncluded) months = monthlyStockMonths(months);
   if (!source.complete) return source.issue || 'Coleta não concluída.';
-  if (!source.rows.length) return 'A fonte não retornou observações. Ausência não representa zero.';
-  const seen = new Set<string>(), groups = new Set<string>(), observed = new Set<string>();
+  if (!source.rows.length) return source.segment==='Comercial'&&source.emptyResult?null:'A fonte não retornou observações. Ausência não representa zero.';
+  const seen = new Set<string>(), observed = new Set<string>();
   for (const row of source.rows) {
     const month = marketMonth(row.period), group = normalizeMarketText(row.group);
     if (!month || !months.includes(month) || !group || monthlyProduct(source.segment, group) === 'unknown' || normalizeMarketText(row.building_type) !== normalizeMarketText(source.segment)
@@ -52,10 +40,9 @@ export function monthlyMarketSourceIssue(source: MonthlyMarketSource, months: st
     if (value === null) return 'Quantidade ausente ou inválida.';
     const key = `${month}/${group}`;
     if (seen.has(key)) return 'Mês/padrão duplicado na fonte.';
-    seen.add(key); groups.add(group); observed.add(month);
+    seen.add(key); observed.add(month);
   }
-  if (source.segment === 'Vertical' && (groups.size !== FORTALEZA_STANDARDS.length || FORTALEZA_STANDARDS.some(group => !groups.has(normalizeMarketText(group))))) return 'Faltam padrões verticais explícitos.';
-  if (observed.size !== months.length || seen.size !== months.length * groups.size) return 'Faltam meses ou categorias explícitas. Ausência não representa zero.';
+  if (observed.size !== months.length) return 'Faltam competências inteiras na fonte. Ausência não representa zero.';
   return null;
 }
 export function readMonthlyNumber(raw: unknown, signed = false, integer = false): number | null {
@@ -91,7 +78,7 @@ export function buildMonthlySlide(page: number, data: MonthlyMarketData | null, 
     if (sources.length !== 1) return block(`${city}/${segment}/${metric}: fonte não concluída.`);
     const source = sources[0], issue = monthlyMarketSourceIssue(source, months);
     if (issue) return block(`${city}/${segment}/${metric}: ${issue}`);
-    if (segment === 'Horizontal' && !source.rows.some(row => monthlyProduct(segment,row.group) === (lots ? 'lots' : 'houses'))) return block(`${city}: a fonte horizontal não identifica explicitamente ${lots ? 'loteamentos' : 'casas e sobrados'}, inclusive zeros.`);
+    if(source.emptyResult)warnings.add(`${city}/${segment}: resposta municipal paginada com total zero; soma do conjunto vazio, sem registros sintetizados.`);
     sourceKeys.push(monthlySourceKey(source));
     for (const row of source.rows) {
       const product = monthlyProduct(segment, row.group);

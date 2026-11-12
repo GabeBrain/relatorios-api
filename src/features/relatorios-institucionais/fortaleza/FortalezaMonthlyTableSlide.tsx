@@ -1,3 +1,4 @@
+import { FortalezaArtwork } from './FortalezaArtwork';
 import type { FortalezaSelection } from './model';
 import { introMonth } from './intro-view';
 import { offerRatio,type OfferTable,type OfferRow } from './monthly-tables';
@@ -13,7 +14,7 @@ export default function FortalezaMonthlyTableSlide({page,selection,data}:{page:n
   const rows=[...visible,data.total],widths=columns.map((_,index)=>index===0?neighborhood?215:250:((1200-(neighborhood?215:250))/(columns.length-1))),height=neighborhood?29:65,header=neighborhood?48:83,top=neighborhood?147:195;
   let offset=40;const offsets=widths.map(width=>{const value=offset;offset+=width;return value;});
   return <svg className="fortaleza-intro-slide block aspect-video h-auto w-full" viewBox="0 0 1280 720" role="img" aria-label={`Fortaleza · slide ${page}`}>
-    <image href={artwork[`./assets/monthly/${page}.png`]} width={1280} height={720} aria-hidden="true"/>
+    <FortalezaArtwork href={artwork[`./assets/monthly/${page}.png`]} kind="monthly" page={page}/>
     <text x={43} y={neighborhood?133:170} fontSize={14} fill="#1B4059">{introMonth(selection.position)} de {selection.year}</text>
     {data.status!=='ready'?<text aria-label="Tabela mensal pendente" x={640} y={380} textAnchor="middle" fontSize={25} fill="#1B4059">Aguardando conferência da fonte</text>:<g aria-label="Tabela de oferta e vendas">
       {columns.map((column,index)=><g key={index}><rect x={offsets[index]} y={top} width={widths[index]} height={header} fill="#F1F1F1" stroke="white"/>{column.split('\n').map((line,lineIndex)=><text key={lineIndex} x={offsets[index]+widths[index]/2} y={top+header/2-((column.split('\n').length-1)*9)+lineIndex*20} textAnchor="middle" fontSize={neighborhood?14:17} fontWeight={700}>{line}</text>)}</g>)}

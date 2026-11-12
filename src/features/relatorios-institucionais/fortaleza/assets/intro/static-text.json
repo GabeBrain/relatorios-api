@@ -1,0 +1,439 @@
+﻿{
+    "julho-10":  [
+                     {
+                         "italic":  false,
+                         "text":  "Obs.: Essa análise considera empreendimentos verticais, comercias e horizontais (condomínios de ",
+                         "color":  "#1A3D57",
+                         "bold":  false,
+                         "y":  637.384033203125,
+                         "x":  657.61018880208337,
+                         "size":  12
+                     },
+                     {
+                         "italic":  false,
+                         "text":  "casas e sobrados).",
+                         "color":  "#1A3D57",
+                         "bold":  false,
+                         "y":  651.7840576171875,
+                         "x":  657.61018880208337,
+                         "size":  12
+                     }
+                 ],
+    "julho-3":  [
+
+                ],
+    "julho-2":  [
+                    {
+                        "italic":  false,
+                        "text":  "Critério de análises:",
+                        "color":  "#FFFFFF",
+                        "bold":  true,
+                        "y":  197.93994140625,
+                        "x":  701.18245442708337,
+                        "size":  24
+                    },
+                    {
+                        "italic":  false,
+                        "text":  "1. Lançamentos:",
+                        "color":  "#FFFFFF",
+                        "bold":  true,
+                        "y":  252.33994547526041,
+                        "x":  701.18245442708337,
+                        "size":  26.666666666666668
+                    },
+                    {
+                        "italic":  false,
+                        "text":  "Consideramos a tabela de lançamento x mês/ano do ",
+                        "color":  "#FFFFFF",
+                        "bold":  false,
+                        "y":  284.33994547526044,
+                        "x":  701.18245442708337,
+                        "size":  21.333333333333332
+                    },
+                    {
+                        "italic":  false,
+                        "text":  "início das vendas.",
+                        "color":  "#FFFFFF",
+                        "bold":  false,
+                        "y":  309.93994140625,
+                        "x":  701.18245442708337,
+                        "size":  21.333333333333332
+                    },
+                    {
+                        "italic":  false,
+                        "text":  "2. Cálculo de vendas e preços:",
+                        "color":  "#FFFFFF",
+                        "bold":  true,
+                        "y":  361.13993326822919,
+                        "x":  701.18245442708337,
+                        "size":  26.666666666666668
+                    },
+                    {
+                        "italic":  false,
+                        "text":  "Comparação das tabelas de vendas do mês atual x ",
+                        "color":  "#FFFFFF",
+                        "bold":  false,
+                        "y":  393.13993326822919,
+                        "x":  701.18245442708337,
+                        "size":  21.333333333333332
+                    },
+                    {
+                        "italic":  false,
+                        "text":  "mês anterior, para identificar variações nos preços, ",
+                        "color":  "#FFFFFF",
+                        "bold":  false,
+                        "y":  418.73994954427081,
+                        "x":  701.18245442708337,
+                        "size":  21.333333333333332
+                    },
+                    {
+                        "italic":  false,
+                        "text":  "estoque das unidades e distratos.",
+                        "color":  "#FFFFFF",
+                        "bold":  false,
+                        "y":  444.3399658203125,
+                        "x":  701.18245442708337,
+                        "size":  21.333333333333332
+                    },
+                    {
+                        "italic":  false,
+                        "text":  "3. Base de Cálculo dos preços:",
+                        "color":  "#FFFFFF",
+                        "bold":  true,
+                        "y":  495.53995768229169,
+                        "x":  701.18245442708337,
+                        "size":  26.666666666666668
+                    },
+                    {
+                        "italic":  false,
+                        "text":  "Preço de tabela do mês vigente de cada unidade.",
+                        "color":  "#FFFFFF",
+                        "bold":  false,
+                        "y":  527.53995768229163,
+                        "x":  701.18245442708337,
+                        "size":  21.333333333333332
+                    }
+                ],
+    "julho-6":  [
+
+                ],
+    "junho-6":  [
+
+                ],
+    "junho-2":  [
+                    {
+                        "italic":  false,
+                        "text":  "Critério de análises:",
+                        "color":  "#FFFFFF",
+                        "bold":  true,
+                        "y":  197.93994140625,
+                        "x":  701.18245442708337,
+                        "size":  24
+                    },
+                    {
+                        "italic":  false,
+                        "text":  "1. Lançamentos:",
+                        "color":  "#FFFFFF",
+                        "bold":  true,
+                        "y":  252.33994547526041,
+                        "x":  701.18245442708337,
+                        "size":  26.666666666666668
+                    },
+                    {
+                        "italic":  false,
+                        "text":  "Consideramos a tabela de lançamento x mês/ano do ",
+                        "color":  "#FFFFFF",
+                        "bold":  false,
+                        "y":  284.33994547526044,
+                        "x":  701.18245442708337,
+                        "size":  21.333333333333332
+                    },
+                    {
+                        "italic":  false,
+                        "text":  "início das vendas.",
+                        "color":  "#FFFFFF",
+                        "bold":  false,
+                        "y":  309.93994140625,
+                        "x":  701.18245442708337,
+                        "size":  21.333333333333332
+                    },
+                    {
+                        "italic":  false,
+                        "text":  "2. Cálculo de vendas e preços:",
+                        "color":  "#FFFFFF",
+                        "bold":  true,
+                        "y":  361.13993326822919,
+                        "x":  701.18245442708337,
+                        "size":  26.666666666666668
+                    },
+                    {
+                        "italic":  false,
+                        "text":  "Comparação das tabelas de vendas do mês atual x ",
+                        "color":  "#FFFFFF",
+                        "bold":  false,
+                        "y":  393.13993326822919,
+                        "x":  701.18245442708337,
+                        "size":  21.333333333333332
+                    },
+                    {
+                        "italic":  false,
+                        "text":  "mês anterior, para identificar variações nos preços, ",
+                        "color":  "#FFFFFF",
+                        "bold":  false,
+                        "y":  418.73994954427081,
+                        "x":  701.18245442708337,
+                        "size":  21.333333333333332
+                    },
+                    {
+                        "italic":  false,
+                        "text":  "estoque das unidades e distratos.",
+                        "color":  "#FFFFFF",
+                        "bold":  false,
+                        "y":  444.3399658203125,
+                        "x":  701.18245442708337,
+                        "size":  21.333333333333332
+                    },
+                    {
+                        "italic":  false,
+                        "text":  "3. Base de Cálculo dos preços:",
+                        "color":  "#FFFFFF",
+                        "bold":  true,
+                        "y":  495.53995768229169,
+                        "x":  701.18245442708337,
+                        "size":  26.666666666666668
+                    },
+                    {
+                        "italic":  false,
+                        "text":  "Preço de tabela do mês vigente de cada unidade.",
+                        "color":  "#FFFFFF",
+                        "bold":  false,
+                        "y":  527.53995768229163,
+                        "x":  701.18245442708337,
+                        "size":  21.333333333333332
+                    }
+                ],
+    "julho-9":  [
+                    {
+                        "italic":  false,
+                        "text":  "LANÇAMENTOS\u000b",
+                        "color":  "#FFFFFF",
+                        "bold":  true,
+                        "y":  105.29574584960938,
+                        "x":  541.75118001302087,
+                        "size":  80
+                    },
+                    {
+                        "italic":  false,
+                        "text":  "Vertical e Horizontal ",
+                        "color":  "#FFFFFF",
+                        "bold":  false,
+                        "y":  191.69573974609375,
+                        "x":  451.31778971354169,
+                        "size":  80
+                    }
+                ],
+    "junho-7":  [
+
+                ],
+    "junho-3":  [
+
+                ],
+    "junho-9":  [
+                    {
+                        "italic":  false,
+                        "text":  "LANÇAMENTOS\u000b",
+                        "color":  "#FFFFFF",
+                        "bold":  true,
+                        "y":  105.29574584960938,
+                        "x":  541.75118001302087,
+                        "size":  80
+                    },
+                    {
+                        "italic":  false,
+                        "text":  "Vertical e Horizontal ",
+                        "color":  "#FFFFFF",
+                        "bold":  false,
+                        "y":  191.69573974609375,
+                        "x":  451.31778971354169,
+                        "size":  80
+                    }
+                ],
+    "junho-10":  [
+                     {
+                         "italic":  false,
+                         "text":  "Obs.: Essa análise considera empreendimentos verticais, comercias e horizontais (condomínios de casas e sobrados).",
+                         "color":  "#1A3D57",
+                         "bold":  false,
+                         "y":  649.41239420572913,
+                         "x":  554.94938151041663,
+                         "size":  12
+                     }
+                 ],
+    "julho-5":  [
+
+                ],
+    "julho-4":  [
+
+                ],
+    "junho-4":  [
+
+                ],
+    "julho-1":  [
+                    {
+                        "italic":  false,
+                        "text":  "Reunião da comissão \u000b",
+                        "color":  "#FFFFFF",
+                        "bold":  true,
+                        "y":  230.75002034505209,
+                        "x":  80.755905151367188,
+                        "size":  53.333333333333336
+                    },
+                    {
+                        "italic":  false,
+                        "text":  "de pesquisas - CPES",
+                        "color":  "#FFFFFF",
+                        "bold":  true,
+                        "y":  294.75002034505206,
+                        "x":  80.755905151367188,
+                        "size":  53.333333333333336
+                    }
+                ],
+    "junho-8":  [
+                    {
+                        "italic":  false,
+                        "text":  "O que veremos:",
+                        "color":  "#FFFFFF",
+                        "bold":  true,
+                        "y":  197.5919189453125,
+                        "x":  132.79999796549478,
+                        "size":  48
+                    },
+                    {
+                        "italic":  false,
+                        "text":  "Lançamentos",
+                        "color":  "#FFFFFF",
+                        "bold":  false,
+                        "y":  217.8251953125,
+                        "x":  772.07999674479163,
+                        "size":  32
+                    },
+                    {
+                        "italic":  false,
+                        "text":  "Vendas",
+                        "color":  "#FFFFFF",
+                        "bold":  false,
+                        "y":  275.42519124348956,
+                        "x":  772.07999674479163,
+                        "size":  32
+                    },
+                    {
+                        "italic":  false,
+                        "text":  "Oferta Final",
+                        "color":  "#FFFFFF",
+                        "bold":  false,
+                        "y":  333.02518717447919,
+                        "x":  772.07999674479163,
+                        "size":  32
+                    },
+                    {
+                        "italic":  false,
+                        "text":  "Preços",
+                        "color":  "#FFFFFF",
+                        "bold":  false,
+                        "y":  390.62520345052081,
+                        "x":  772.07999674479163,
+                        "size":  32
+                    },
+                    {
+                        "italic":  false,
+                        "text":  "Análise Geral",
+                        "color":  "#FFFFFF",
+                        "bold":  false,
+                        "y":  448.22517903645831,
+                        "x":  772.07999674479163,
+                        "size":  32
+                    }
+                ],
+    "junho-5":  [
+
+                ],
+    "junho-1":  [
+                    {
+                        "italic":  false,
+                        "text":  "Reunião da comissão \u000b",
+                        "color":  "#FFFFFF",
+                        "bold":  true,
+                        "y":  230.75002034505209,
+                        "x":  80.755905151367188,
+                        "size":  53.333333333333336
+                    },
+                    {
+                        "italic":  false,
+                        "text":  "de pesquisas - CPES",
+                        "color":  "#FFFFFF",
+                        "bold":  true,
+                        "y":  294.75002034505206,
+                        "x":  80.755905151367188,
+                        "size":  53.333333333333336
+                    }
+                ],
+    "julho-7":  [
+
+                ],
+    "julho-8":  [
+                    {
+                        "italic":  false,
+                        "text":  "O que veremos:",
+                        "color":  "#FFFFFF",
+                        "bold":  true,
+                        "y":  197.5919189453125,
+                        "x":  132.79999796549478,
+                        "size":  48
+                    },
+                    {
+                        "italic":  false,
+                        "text":  "Lançamentos",
+                        "color":  "#FFFFFF",
+                        "bold":  false,
+                        "y":  217.8251953125,
+                        "x":  772.07999674479163,
+                        "size":  32
+                    },
+                    {
+                        "italic":  false,
+                        "text":  "Vendas",
+                        "color":  "#FFFFFF",
+                        "bold":  false,
+                        "y":  275.42519124348956,
+                        "x":  772.07999674479163,
+                        "size":  32
+                    },
+                    {
+                        "italic":  false,
+                        "text":  "Oferta Final",
+                        "color":  "#FFFFFF",
+                        "bold":  false,
+                        "y":  333.02518717447919,
+                        "x":  772.07999674479163,
+                        "size":  32
+                    },
+                    {
+                        "italic":  false,
+                        "text":  "Preços",
+                        "color":  "#FFFFFF",
+                        "bold":  false,
+                        "y":  390.62520345052081,
+                        "x":  772.07999674479163,
+                        "size":  32
+                    },
+                    {
+                        "italic":  false,
+                        "text":  "Análise Geral",
+                        "color":  "#FFFFFF",
+                        "bold":  false,
+                        "y":  448.22517903645831,
+                        "x":  772.07999674479163,
+                        "size":  32
+                    }
+                ]
+}

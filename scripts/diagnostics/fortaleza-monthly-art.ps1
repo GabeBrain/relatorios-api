@@ -1,5 +1,7 @@
-param([int]$FirstSlide = 46, [int]$LastSlide = 55)
+﻿param([int]$FirstSlide = 46, [int]$LastSlide = 55)
+. (Join-Path $PSScriptRoot 'fortaleza-static-text.ps1')
 $ErrorActionPreference = 'Stop'
+$staticText = @{}
 $fortMonthlyRoot = (Resolve-Path '.local-inputs/relatorios-lucas/fortaleza').Path
 $fortMonthlyAssets = Join-Path (Get-Location) 'src/features/relatorios-institucionais/fortaleza/assets/monthly'
 New-Item -ItemType Directory -Path $fortMonthlyAssets -Force | Out-Null
@@ -35,6 +37,7 @@ try {
           }
         }
       }
+      $staticText[[string]$number] = Get-FortalezaStaticText $slide
       $slide.Export((Join-Path $fortMonthlyAssets "$number.png"), 'PNG', 1280, 720)
       $fortMonthlyRecords += @{page=$number;charts=$charts;changes=$texts;scope=$scopeSlot}
     }
@@ -44,3 +47,12 @@ $fortMonthlyPrevious = Get-Content -LiteralPath (Join-Path $fortMonthlyAssets 'l
 $fortMonthlyRecords = @($fortMonthlyPrevious | Where-Object { $_.page -lt $FirstSlide -or $_.page -gt $LastSlide }) + $fortMonthlyRecords
 $fortMonthlyRecords | ConvertTo-Json -Depth 10 | Set-Content -LiteralPath (Join-Path $fortMonthlyAssets 'layout.json') -Encoding UTF8
 Write-Output 'Monthly artwork extracted without historical market values or dated methodology notes.'
+
+$previousTextPath = Join-Path $fortMonthlyAssets 'static-text.json'
+if (Test-Path -LiteralPath $previousTextPath) {
+  $previousText = Get-Content -LiteralPath $previousTextPath -Raw -Encoding UTF8 | ConvertFrom-Json
+  foreach ($property in $previousText.PSObject.Properties) {
+    if (-not $staticText.ContainsKey($property.Name)) { $staticText[$property.Name] = $property.Value }
+  }
+}
+$staticText | ConvertTo-Json -Depth 10 | Set-Content -LiteralPath (Join-Path $fortMonthlyAssets 'static-text.json') -Encoding UTF8
