@@ -91,3 +91,25 @@ Rastreabilidade mínima via `activity_log`:
 
 **Pendências de deploy:** aplicar a migration (`supabase db push` ou SQL editor) e
 `supabase functions deploy log-activity`.
+
+## 8. Slide Maker: rotas públicas com acesso por token (aceito — 12/nov/2026)
+
+O serviço `slide-maker-agent` (Cloud Run) não tem login nem usa a API GeoBrain. Cada trabalho tem um
+token aleatório de 32 bytes, mostrado uma única vez na criação e guardado no `localStorage` do
+navegador de quem criou; o banco guarda só o hash (`slide_maker_jobs.token_acesso_hash`). Todas as
+rotas `/jobs/:id/*` exigem o token; o e-mail @brain.srv.br só identifica o autor e **não** autoriza.
+"Todos os trabalhos" (`GET /jobs/equipe`) é público por decisão (evitar trabalho duplicado) e expõe
+só metadados: título, e-mail do autor, responsável, situação, versão e datas.
+
+**Risco aceito:** as rotas são públicas e cada fase chama um modelo pago. Mitigações: CORS restrito a
+`*.lovable.app` e localhost; rate limit por e-mail (3 trabalhos simultâneos, 10 fases/h) e por IP
+(40 fases/h), contados no banco; trava `maxBudgetUsd` por fase (F1 2, F2 6, F3 10, F4 5 US$); fases
+nunca reexecutadas automaticamente (Cloud Tasks com `maxAttempts: 1`). Token em `localStorage` tem o
+mesmo risco do item 5 (XSS); a CSP do item 4 reduziria.
+
+**Isolamento do agente:** comandos do agente rodam sob `bubblewrap` sem rede e sem as variáveis do
+serviço; as ferramentas de arquivo do SDK passam por uma guarda de caminhos que resolve links
+simbólicos; sem isolamento aprovado no diagnóstico de subida, nenhuma fase roda (`/healthz` 503).
+Arquivos de clientes ficam em buckets privados sem policy para `anon`; o download é por URL assinada
+de 10 min. Segredos (`ANTHROPIC_API_KEY`, `SUPABASE_SERVICE_ROLE_KEY`) ficam no Secret Manager do GCP.
+Detalhes: `docs/features/apresentacoes/INSTRUCOES_DESENVOLVIMENTO.md` §8, §12 e §15.1.

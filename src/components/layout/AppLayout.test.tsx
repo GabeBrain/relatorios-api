@@ -31,6 +31,14 @@ describe('marca do menu lateral', () => {
     expect(estimates.compareDocumentPosition(quanti) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     expect(screen.queryByText('Simulador de Vendas')).not.toBeInTheDocument();
   });
+  it('mostra o Slide Maker como item próprio do Rebrain, logo depois do Atualizador VGV', () => {
+    render(<MemoryRouter><AppLayout><p>Conteúdo</p></AppLayout></MemoryRouter>);
+    const vgv = screen.getByRole('link', { name: /Atualizador VGV/i });
+    const slideMaker = screen.getByRole('link', { name: /Slide Maker/i });
+    expect(slideMaker).toHaveAttribute('href', '/slide-maker');
+    expect(vgv.compareDocumentPosition(slideMaker) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(screen.getByRole('link', { name: /Assistente de Projetos/i }).compareDocumentPosition(slideMaker) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
   it('enquadra o símbolo do logo original ao recolher e restaura a marca ao expandir', () => {
     render(<MemoryRouter><AppLayout><p>Conteúdo</p></AppLayout></MemoryRouter>);
     expect(screen.getByAltText('Brain')).toBeInTheDocument();
