@@ -4,7 +4,7 @@ import { createSdkMcpServer, query, tool, type HookCallback, type Options, type 
 import { z } from 'zod';
 import type { Fase } from '../shared/state-machine.js';
 import type { ExecutorComandos } from '../isolamento.js';
-import { promptDaFase, promptFixo, REVISOR, systemPrompt, type Base } from '../prompt.js';
+import { promptDaFase, promptFixo, REVISOR, systemPrompt, VERSAO_PROMPT, type Base } from '../prompt.js';
 import type { Agente, ParametrosAgente, ResultadoAgente } from './agente.js';
 import { ESQUEMAS, type NomeFerramenta } from './ferramentas.js';
 import { avaliar } from './guarda.js';
@@ -167,7 +167,7 @@ export class AgenteClaude implements Agente {
       for await (const m of this.consultar(params) as AsyncIterable<SDKMessage>) {
         if (m.type !== 'result') continue;
         // Só identificadores e métricas no log; nunca conteúdo (§12). Custo fica fora da v1 (§11).
-        this.d.log?.(`agente job=${p.job.id} fase=${p.fase} resultado=${m.subtype} turnos=${m.num_turns} ms=${Date.now() - inicio}`);
+        this.d.log?.(`agente job=${p.job.id} fase=${p.fase} prompt=${VERSAO_PROMPT} resultado=${m.subtype} turnos=${m.num_turns} ms=${Date.now() - inicio}`);
         if (m.subtype === 'success') fim = m.is_error ? { tipo: 'erro', detalhe: 'erro_api' } : { tipo: 'fim' };
         else if (m.subtype === 'error_max_budget_usd') fim = { tipo: 'orcamento_excedido' };
         else fim = { tipo: 'erro', detalhe: m.subtype };

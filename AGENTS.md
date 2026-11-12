@@ -229,3 +229,11 @@ Sempre que alterar qualquer comportamento, regra, prompt, schema, migração, ex
 `docs/features/corretor-vocacionais/LIVE_regras_corretor_vocacionais.md`
 
 Use uma nova seção de versão no documento live quando regras forem adicionadas, removidas, renomeadas, reclassificadas entre determinísticas e IA/LLM, ou quando o fluxo de análise mudar.
+
+## Slide Maker
+
+Sempre que alterar o comportamento do agente do **Slide Maker** (prompt em `gcp/slide-maker-agent/src/prompt.ts`, ferramentas `brain`, `lib/lint_pptx.py` ou a base em `docs/features/slide-maker/base-conhecimento/`), suba `VERSAO_PROMPT` em `src/prompt.ts` e registre a nova versão em:
+
+`docs/features/slide-maker/LIVE_regras_slide_maker.md`
+
+Classifique cada regra como `DET` (o código garante) ou `IA/LLM` (depende do modelo seguir o prompt). O `npm run check:live-docs` cobra esse documento quando esses arquivos mudam.

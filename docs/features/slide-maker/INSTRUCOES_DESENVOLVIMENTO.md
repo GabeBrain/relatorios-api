@@ -1,9 +1,9 @@
 # Instruções de Desenvolvimento — Slide Maker (Rebrain)
 
 > **Documento de instrução para execução pelo Claude Code (Opus) neste repositório (`relatorios-api`).**
-> **Nome do produto no menu e na interface: Slide Maker.** Identificadores técnicos: rota `/slide-maker`, feature `src/features/slide-maker/`, serviço `gcp/slide-maker-agent/`, tabelas `slide_maker_*`, buckets `slide-maker-*`. A documentação continua em `docs/features/apresentacoes/` até a Fase 8, que a move com `git mv` para `docs/features/slide-maker/`.
+> **Nome do produto no menu e na interface: Slide Maker.** Identificadores técnicos: rota `/slide-maker`, feature `src/features/slide-maker/`, serviço `gcp/slide-maker-agent/`, tabelas `slide_maker_*`, buckets `slide-maker-*`. A documentação ficou em `docs/features/apresentacoes/` até a Fase 8 (12/11/2026), que a moveu com `git mv` para `docs/features/slide-maker/`.
 >
-> Elaborado em 12/11/2026 (revisado no mesmo dia) a partir dos testes de qualificação de apresentações feitos no Claude (Cowork) e da base de conhecimento v3, que está em `docs/features/apresentacoes/base-conhecimento/`.
+> Elaborado em 12/11/2026 (revisado no mesmo dia) a partir dos testes de qualificação de apresentações feitos no Claude (Cowork) e da base de conhecimento v3, que está em `docs/features/slide-maker/base-conhecimento/`.
 > Execute as fases **na ordem** (seção 14). Siga o **Protocolo de sessão** do `CLAUDE.md`/`AGENTS.md`: `main` direta, `git add` com caminhos explícitos, nunca `git push` por conta própria e doc vivo atualizado.
 
 ---
@@ -11,8 +11,8 @@
 ## 0. Como começar (prompt sugerido para abrir a sessão)
 
 ```
-Leia docs/features/apresentacoes/INSTRUCOES_DESENVOLVIMENTO.md e todos os arquivos de
-docs/features/apresentacoes/base-conhecimento/. Depois leia CLAUDE.md, docs/architecture/
+Leia docs/features/slide-maker/INSTRUCOES_DESENVOLVIMENTO.md e todos os arquivos de
+docs/features/slide-maker/base-conhecimento/. Depois leia CLAUDE.md, docs/architecture/
 FRONTEND_GUIDELINES.md, DESIGN_SYSTEM.md e SECURITY_NOTES.md. Antes de escrever código,
 me apresente: (1) o plano da Fase 1, (2) as dúvidas da seção 15 que bloqueiam a Fase 1.
 ```
@@ -187,7 +187,7 @@ registrar_relatorio e depois entregar_deck.
 
 ```
 gcp/slide-maker-agent/
-  kb/                    ← cópia de docs/features/apresentacoes/base-conhecimento/ (fonte única: o docs/),
+  kb/                    ← cópia de docs/features/slide-maker/base-conhecimento/ (fonte única: o docs/),
                            EXCETO 06-arquitetura-claude-code.md e comando-qualificar.md (desenho antigo,
                            substituído por este documento; não entram no prompt do agente)
   marca/
@@ -235,7 +235,7 @@ Monte em `gcp/slide-maker-agent/src/prompt.ts` a partir dos arquivos, sem copiar
 
 ### 6.4 Referência de implementação
 
-`docs/features/apresentacoes/referencia/build_domicilios_v3.js` é o build aprovado do teste "Domicílios vagos v3". Ele mostra o tema com a paleta do manual, os layouts com placeholders, a logo sem tagline no rodapé, os blocos modulares, o padrão título caixa alta + linha de apoio, o card "Leitura BRAIN", gráficos nativos e o slide final em imagem. **Extraia daí a `lib/brain-deck`**, transformando em funções parametrizadas por `deck_spec.json`. Não cole o arquivo como está. **Ele não roda isolado:** depende de `apply_theme` (a implementar em `lib/apply_theme.js`: grava as cores e o nome do tema em `ppt/theme/theme1.xml` depois do `writeFile`) e de uma pasta `marca/` com `logo_tag.png`, `logo_sem.png`, `logo_branco_tag.png`, `logo_branco_sem.png` e `final_fabio.png` (logos já recortadas; ver seção 6.1).
+`docs/features/slide-maker/referencia/build_domicilios_v3.js` é o build aprovado do teste "Domicílios vagos v3". Ele mostra o tema com a paleta do manual, os layouts com placeholders, a logo sem tagline no rodapé, os blocos modulares, o padrão título caixa alta + linha de apoio, o card "Leitura BRAIN", gráficos nativos e o slide final em imagem. **Extraia daí a `lib/brain-deck`**, transformando em funções parametrizadas por `deck_spec.json`. Não cole o arquivo como está. **Ele não roda isolado:** depende de `apply_theme` (a implementar em `lib/apply_theme.js`: grava as cores e o nome do tema em `ppt/theme/theme1.xml` depois do `writeFile`) e de uma pasta `marca/` com `logo_tag.png`, `logo_sem.png`, `logo_branco_tag.png`, `logo_branco_sem.png` e `final_fabio.png` (logos já recortadas; ver seção 6.1).
 
 ## 7. Contratos de dados (Supabase)
 
@@ -390,7 +390,7 @@ Para desenvolver depois (não implementar agora):
 5. **Frontend:** páginas, componentes e hooks da seção 9, com Realtime/polling. E2E com o serviço simulado.
 6. **Histórico de versões** no chat e gravação do relatório ao analista (sem tela).
 7. **Trabalhos dourados 2 e 3**, ajustes de prompt e registro dos resultados.
-8. **Documentação:** entrada em `docs/projetos/LIVE_rebrain.md`, `git mv docs/features/apresentacoes docs/features/slide-maker`, criação de `docs/features/slide-maker/LIVE_regras_slide_maker.md` (versões do prompt, regras determinísticas × regras do LLM, no mesmo modelo do Corretor) e instruções de deploy no README do serviço.
+8. **Documentação:** entrada em `docs/projetos/LIVE_rebrain.md`, `git mv docs/features/apresentacoes docs/features/slide-maker` (feito em 12/11/2026), criação de `docs/features/slide-maker/LIVE_regras_slide_maker.md` (versões do prompt, regras determinísticas × regras do LLM, no mesmo modelo do Corretor) e instruções de deploy no README do serviço.
 
 Ao fim de cada fase: typecheck, lint e testes proporcionais; commit com `git add <caminhos>`; relatório do que ficou local; **perguntar antes de qualquer push**.
 

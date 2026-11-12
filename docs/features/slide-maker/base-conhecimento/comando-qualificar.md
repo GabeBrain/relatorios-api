@@ -3,7 +3,7 @@ description: Qualifica uma apresentação de ponta a ponta (briefing → atualiz
 argument-hint: <pasta do job, ex. jobs/2026-11-adit-retrofit>
 ---
 
-> ⚠️ **SUBSTITUÍDO em 12/11/2026.** Este documento descreve o desenho antigo (projeto Claude Code com pastas `jobs/` e comando `/qualificar`). O sistema em desenvolvimento segue `docs/features/apresentacoes/INSTRUCOES_DESENVOLVIMENTO.md` no repositório `relatorios-api`. Mantido só como histórico; não usar como instrução.
+> ⚠️ **SUBSTITUÍDO em 12/11/2026.** Este documento descreve o desenho antigo (projeto Claude Code com pastas `jobs/` e comando `/qualificar`). O sistema em desenvolvimento segue `docs/features/slide-maker/INSTRUCOES_DESENVOLVIMENTO.md` no repositório `relatorios-api`. Mantido só como histórico; não usar como instrução.
 
 Qualifique a apresentação do job em `$ARGUMENTS` seguindo `docs/03-processo-de-qualificacao.md`.
 

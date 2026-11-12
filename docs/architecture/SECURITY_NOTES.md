@@ -112,4 +112,4 @@ serviço; as ferramentas de arquivo do SDK passam por uma guarda de caminhos que
 simbólicos; sem isolamento aprovado no diagnóstico de subida, nenhuma fase roda (`/healthz` 503).
 Arquivos de clientes ficam em buckets privados sem policy para `anon`; o download é por URL assinada
 de 10 min. Segredos (`ANTHROPIC_API_KEY`, `SUPABASE_SERVICE_ROLE_KEY`) ficam no Secret Manager do GCP.
-Detalhes: `docs/features/apresentacoes/INSTRUCOES_DESENVOLVIMENTO.md` §8, §12 e §15.1.
+Detalhes: `docs/features/slide-maker/INSTRUCOES_DESENVOLVIMENTO.md` §8, §12 e §15.1.

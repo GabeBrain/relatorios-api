@@ -12,10 +12,14 @@ const changedFiles = execFileSync('git', ['diff', '--name-only', `${base}...${he
   .split(/\r?\n/).filter(Boolean);
 const liveDocs = new Set(changedFiles.filter((file) => file.startsWith('docs/projetos/LIVE_')));
 const hasCorretorDoc = changedFiles.includes('docs/features/corretor-vocacionais/LIVE_regras_corretor_vocacionais.md');
+const hasSlideMakerDoc = changedFiles.includes('docs/features/slide-maker/LIVE_regras_slide_maker.md');
+// Comportamento do agente do Slide Maker: prompt, ferramentas brain, lint e base de conhecimento.
+const SLIDE_MAKER_REGRAS = /^(gcp\/slide-maker-agent\/(src\/prompt\.ts|src\/agent\/(claude|ferramentas|validador)\.ts|lib\/lint_pptx\.py)|docs\/features\/slide-maker\/base-conhecimento\/)/;
 const requirements = [
   ['Dashboard GeoBrain', /^src\/features\/dashboard-geobrain\//, 'docs/projetos/LIVE_dashboard-geobrain.md'],
   ['Área Quanti', /^src\/features\/area-quanti\//, 'docs/projetos/LIVE_area-quanti.md'],
   ['Atualizador VGV', /^src\/features\/atualizador-vgv\//, 'docs/projetos/LIVE_rebrain.md'],
+  ['Slide Maker', /^(src\/features\/slide-maker\/|gcp\/slide-maker-agent\/)/, 'docs/projetos/LIVE_rebrain.md'],
   ['Corretor Vocacionais', /^(src\/features\/corretor\/|supabase\/functions\/(analyze-slide|analyze-table-image|analyze-ata-image)\/)/, 'docs/projetos/LIVE_rebrain.md'],
 ];
 const failures = [];
@@ -30,6 +34,9 @@ if (changedFiles.some((file) => /^(src\/|supabase\/)/.test(file)) && liveDocs.si
 }
 if (changedFiles.some((file) => /^(src\/features\/corretor\/|supabase\/functions\/(analyze-slide|analyze-table-image|analyze-ata-image)\/)/.test(file)) && !hasCorretorDoc) {
   failures.push('Corretor Vocacionais: atualize docs/features/corretor-vocacionais/LIVE_regras_corretor_vocacionais.md.');
+}
+if (changedFiles.some((file) => SLIDE_MAKER_REGRAS.test(file)) && !hasSlideMakerDoc) {
+  failures.push('Slide Maker: atualize docs/features/slide-maker/LIVE_regras_slide_maker.md (e VERSAO_PROMPT, se o comportamento do agente mudou).');
 }
 // Higiene dos docs vivos: só avisa, nunca bloqueia (convenção em docs/projetos/README.md, seção Rotação).
 const LIVE_LIMIT = 120 * 1024;

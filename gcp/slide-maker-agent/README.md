@@ -1,7 +1,7 @@
 # slide-maker-agent
 
-Serviço do **Slide Maker** (Cloud Run, Node 22). Especificação: `docs/features/apresentacoes/INSTRUCOES_DESENVOLVIMENTO.md`.
-Preparação do GCP e publicação: `docs/features/apresentacoes/DEPLOY_GCP.md`.
+Serviço do **Slide Maker** (Cloud Run, Node 22). Especificação: `docs/features/slide-maker/INSTRUCOES_DESENVOLVIMENTO.md`.
+Preparação do GCP e publicação: `docs/features/slide-maker/DEPLOY_GCP.md`.
 
 **Estado: Fase 4.** API completa; agente real via Claude Agent SDK (`AGENTE=claude`) ou **simulado**
 (padrão, sem modelo e sem custo); ferramentas do agente em `lib/` (extração, brain-deck, render e lint; ver
@@ -87,7 +87,20 @@ enquanto as duas cópias forem diferentes.
 
 ## Build e deploy
 
-Ver `DEPLOY_GCP.md`, Parte C. O build roda **da raiz do repositório** e baixa os ativos de marca do
-bucket privado; o Dockerfile falha se faltar Neo Sans, Montserrat ou um slide final, e roda os testes da
-`lib/` sem nada pulado: o deck de referência sai com zero falhas 🔒 e o LibreOffice gera 18 PNGs com as
-duas fontes embutidas.
+Roteiro completo, com os comandos: `docs/features/slide-maker/DEPLOY_GCP.md`. Em resumo, nesta ordem:
+
+| Passo | O quê | Resultado esperado |
+|---|---|---|
+| A | Aplicar `supabase/migrations/20261112160000_slide_maker.sql` | 6 tabelas `slide_maker_*` e 3 buckets privados, sem nenhuma policy |
+| B | Bucket privado com os ativos de marca, contas de serviço, segredos (service_role do Supabase e chave da Anthropic no Secret Manager) e fila do Cloud Tasks | — |
+| C1–C2 | Build **da raiz do repositório** e deploy em `southamerica-east1`, com `AGENTE=simulado` | URL do serviço |
+| C3 | Verificações: `/healthz`, CORS, ensaio completo com o agente simulado | `200`; o bloco `isolamento` precisa vir aprovado para seguir ao C5 |
+| C4 | `VITE_SLIDE_MAKER_AGENT_URL=<URL>` no `.env` versionado (commit do Diego) | A página `/slide-maker` deixa de mostrar "ainda não está disponível" |
+| C5 | `AGENTE=claude` e trabalho dourado 1 | Deck sem falhas 🔒 |
+
+O build baixa os ativos de marca do bucket privado. O Dockerfile falha se faltar Neo Sans, Montserrat ou
+um slide final, e roda os testes da `lib/` sem nada pulado: o deck de referência sai com zero falhas 🔒 e
+o LibreOffice gera 18 PNGs com as duas fontes embutidas.
+
+Mudou o prompt, a base, as ferramentas ou o lint? Suba `VERSAO_PROMPT` em `src/prompt.ts` e registre em
+`docs/features/slide-maker/LIVE_regras_slide_maker.md`.

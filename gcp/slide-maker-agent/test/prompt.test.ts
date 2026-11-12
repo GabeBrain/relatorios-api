@@ -7,7 +7,7 @@ import type { JobRow } from '../src/repo/tipos.js';
 /** §6.2 e §13: system prompt montado dos arquivos da base (snapshot) e prompts de fase determinísticos. */
 
 const base = {
-  kbDir: fileURLToPath(new URL('../../../docs/features/apresentacoes/base-conhecimento/', import.meta.url)),
+  kbDir: fileURLToPath(new URL('../../../docs/features/slide-maker/base-conhecimento/', import.meta.url)),
   libDir: fileURLToPath(new URL('../lib/', import.meta.url)),
 };
 

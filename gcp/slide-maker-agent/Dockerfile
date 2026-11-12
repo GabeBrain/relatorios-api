@@ -55,7 +55,7 @@ RUN set -eu; d=/usr/local/share/fonts/brain/montserrat; mkdir -p "$d"; \
 
 WORKDIR /app
 # Base de conhecimento (fonte única: docs/). 06 e comando-qualificar são desenho antigo e não entram (§6.1).
-COPY docs/features/apresentacoes/base-conhecimento/ ./kb/
+COPY docs/features/slide-maker/base-conhecimento/ ./kb/
 RUN rm -f kb/06-arquitetura-claude-code.md kb/comando-qualificar.md
 # Ativos de marca, exceto as fontes, que já estão instaladas no sistema.
 COPY gcp/slide-maker-agent/.marca/ ./marca/
@@ -76,7 +76,7 @@ ENV BRAIN_MARCA=/app/marca
 # Teste de fumaça (§10) e testes da lib, sem nada pulado (SLIDE_MAKER_EXIGIR=1): a brain-deck reproduz o
 # build aprovado de referencia/, o deck tem zero falhas 🔒 no lint, o LibreOffice gera 18 PNGs com Neo Sans
 # e Montserrat embutidas, e cada regra 🔒 reprova a sua fixture. Falhou, o build falha.
-COPY docs/features/apresentacoes/referencia/ /tmp/referencia/
+COPY docs/features/slide-maker/referencia/ /tmp/referencia/
 RUN SLIDE_MAKER_EXIGIR=1 SLIDE_MAKER_MARCA=/app/marca SLIDE_MAKER_FONTES=/usr/local/share/fonts/brain \
     SLIDE_MAKER_REFERENCIA=/tmp/referencia \
     python -m unittest discover -s lib/testes -t lib/testes \

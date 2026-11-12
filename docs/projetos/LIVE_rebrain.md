@@ -1,5 +1,24 @@
 # Rebrain (Plataforma) — Documento Vivo
 
+## 12/11/2026 — Slide Maker: Fase 8 (documentação) — Claude (sessão de Diego Cabrero)
+
+- **Mudança:**
+  - A documentação mudou de pasta com `git mv`: de `docs/features/apresentacoes/` para `docs/features/slide-maker/`. Atualizei as referências no Dockerfile, nos testes, no README do serviço, no `SECURITY_NOTES.md` e na especificação. A migration ficou intocada, e as entradas antigas deste documento citam o caminho antigo.
+  - Novo `docs/features/slide-maker/LIVE_regras_slide_maker.md`, no modelo do Corretor: versão 1.0 do prompt, como o prompt é montado, regras DET (orquestrador, ferramentas `brain`, isolamento e lint), regras IA/LLM e calibrações pendentes (D2, T3).
+  - `VERSAO_PROMPT` em `src/prompt.ts`, que entra no log de cada fase (`prompt=1.0`).
+  - README do serviço com o resumo da publicação (A → C5).
+- **Arquivos compartilhados:**
+  - `scripts/check-live-docs.mjs`: mudanças em `src/features/slide-maker/` ou `gcp/slide-maker-agent/` passam a exigir este documento. Mudanças no prompt, nas ferramentas, no lint ou na base de conhecimento passam a exigir também o `LIVE_regras_slide_maker.md`.
+  - `AGENTS.md`: nova seção "Slide Maker", no mesmo formato da do Corretor.
+- **Validação:**
+  - 71 testes do serviço, inclusive a versão do prompt no log; o snapshot do prompt não mudou.
+  - 48 testes da `lib/` com a referência no caminho novo; 3 seguem pulados por falta do LibreOffice local.
+  - Typecheck e ESLint limpos.
+  - A checagem de documentação acusa a falta do documento de regras no commit da Fase 4, que mudou o prompt sem ele.
+  - Sem verificação: o `docker build` com os novos caminhos do `COPY`.
+- **Pendências:** Fase 7 (trabalhos dourados 2 e 3) depois do deploy (`DEPLOY_GCP.md` C1–C5); `VITE_SLIDE_MAKER_AGENT_URL` no `.env` depois do C2; limpeza de 180 dias.
+- **Monday:** —
+
 ## 12/11/2026 — Slide Maker: Fase 6 (histórico de versões e relatório ao analista) — Claude (sessão de Diego Cabrero)
 
 - **Mudança:**

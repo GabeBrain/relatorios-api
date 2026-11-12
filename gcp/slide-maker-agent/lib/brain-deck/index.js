@@ -1,5 +1,5 @@
 // brain-deck: constrói o .pptx Brain a partir de trabalho/deck_spec.json (INSTRUCOES §6.4).
-// Extraída do build aprovado docs/features/apresentacoes/referencia/build_domicilios_v3.js:
+// Extraída do build aprovado docs/features/slide-maker/referencia/build_domicilios_v3.js:
 // mesmos layouts (Capa, Divisor, Conteudo, SlideFinal), geometria, cores e componentes.
 import { existsSync, readFileSync } from 'node:fs';
 import { isAbsolute, join, relative, resolve } from 'node:path';
