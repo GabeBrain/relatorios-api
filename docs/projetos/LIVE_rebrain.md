@@ -424,6 +424,24 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+## 12/11/2026 — Fortaleza mensal: diagnóstico agosto versus outubro e bloqueios confirmados
+
+**Autor/origem:** Codex, a pedido de Lucas. Agosto recebido após a hipótese de outubro sem fechamento. Agosto tem15disponíveis/33pendentes/12editoriais; outubro14/34/12. Não é somente fechamento: cadastro falha na primeira resposta pelo limite de5páginas; séries municipais rejeitadas por padrões/meses/categorias persistem nos dois arquivos. Em agosto37está disponível e52–55bloqueiam por bairro ausente no empreendimento23980; em outubro37/52–55acusam fotografia2026-10ausente do85529. Evidências do usuário, não chamadas autenticadas feitas pelo agente.
+
+**Correções locais:** cadastro agora percorre até40páginas/4.000IDs por cidade/segmento, conservando totais estáveis, deduplicação, escopo e cancelamento. Regressão reproduz577verticais em6páginas sem truncamento; os577constam na coleta detalhada real. Capa1, sumário8 e divisória9deixam de receber erro de cálculo no JSON e seguem revisão editorial. Tabelas por bairro conservam registros sem bairro em “Bairro não informado”, com aviso e totais integrais; não inventam bairro nem alteram preço, quantidade ou fotografia. Produtos horizontais desconhecidos continuam bloqueados.
+
+**Séries ainda em investigação:** no diagnóstico antigo, a validação descartava as linhas municipais antes de exportar, impedindo identificar quais grupos/meses foram omitidos ou qual classificação comercial chegou. Nova cobertura é capturada após paginação estável, antes desse descarte: grupos/tipos observados, meses, padrões ausentes, células faltantes e quantidades/VGV agregados. Runtime ainda não publica fonte inválida; dados ausentes não viram zero. Não há token, cabeçalhos ou histórico individual nessa cobertura; não acrescenta chamadas GeoBrain. Necessária nova geração/JSON após publicação para corrigir a semântica específica da resposta real.
+
+**Ambiente/Etapas:** sessão começou em main limpa, origin único; fetch mostrou11commits atrás. FF até`4f2b0bf3` incorporou Slide Maker, guia GeoBrain e filtro de divergências; nenhuma mudança Fortaleza. Alterações desta rodada locais, distintas dos commits trimestrais publicados`4ec89c0a`/`431b64f4`. Prévia mensal60e trimestral89preservadas; não declarar todos os slides liberados nem homologados. Carregamento Brain, seleção autorizada e renderizadores de tabela existentes reutilizados.
+
+**Validação:** suíte Fortaleza251testes/23arquivos, tipos e lint aprovados; testes adicionais confirmam estados editoriais e cobertura preservada com fonte rejeitada. Build aprovado;12cenários Edge com bairro válido/ausente e fotografia ausente em1440/390claro/escuro aprovados, sem erros ou overflow. Captura de bairro não informado inspecionada.20testes focados repetidos após acrescentar asserções de estados e cobertura. Geração real do novo código e próximos números/estados ainda não observados.
+
+**Retomada:** completar verificações, commit isolado e perguntar pelo push. Após envio autorizado, gerar agosto novamente e ler `sources.municipal[].coverage`. Resolver categorias esparsas/comercial com evidência; não relaxar guardas globais para “zerar” o status. Histórico23980pode ter outros problemas além do bairro: a nova geração determina os bloqueios seguintes. Nenhuma escrita Monday, mudança SP, Slide Maker ou outros motores.
+
+**Monday:** [Estudo Fortaleza](https://brain381753.monday.com/boards/18398638577/pulses/13149406420) — `13149406420`, referência apenas.
+
+
+
 ## 12/11/2026 — autorização de publicação do trimestral
 
 Lucas autorizou expressamente o push após explicação de que89posições estão implementadas e a validação real permanece pendente. A revisão automática voltou a permitir fetch e regressões nesta retomada; não atribuir a isso comprovação de reposição de créditos. Tipos/lint e documentação aprovados; nova suíte completa247testes/22arquivos e build aprovados antes do envio. Usuário pediu aguardar JSON de agosto/setembro para o mensal; nenhuma correção mensal adicional foi incluída neste push. Mantidos os limites de localização esquemática, classificação da API, metodologia candidata e download real89pendente. Mensal outubro recebeu JSON com34fontes pendentes: investigação separada, sem atribuir esses defeitos ao novo trimestral ou homologar o mensal. Referência: commit local11–20`4ec89c0a`; restante21–89em commit isolado desta entrega. Sem escrita Monday.
@@ -1511,6 +1529,9 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 
 ## 2. Etapas
 
+- **Fortaleza mensal (12/11):** diagnóstico real de agosto confirma bloqueios além do fechamento. Correções locais de paginação, estados editoriais e bairro não informado; matriz municipal detalhada preparada para próximo JSON, sem declarar fontes todas resolvidas.
+
+
 - **Fortaleza trimestral (12/11):** 89 posições com implementação local; validação final/exportação real pendentes. 11–20 commitado localmente;21–89sem commit. Mensal60mantido. Ver [retomada](../features/relatorios-institucionais/fortaleza/TRIMESTRAL_2026-11-12.md).
 
 
@@ -1632,6 +1653,9 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 ---
 
 ## 3. Pendências
+
+- **Fortaleza mensal:** publicar correções somente após autorização; gerar agosto e conferir cobertura municipal agora preservada. Categorias/meses ausentes e fotografia de outubro ainda não reconciliados. Ver [diagnóstico](../features/relatorios-institucionais/fortaleza/DIAGNOSTICO_MENSAL_2026-11-12.md).
+
 
 - **Fortaleza trimestral:** repor créditos do workspace para a revisão automática voltar a autorizar ensaios elevados; repetir regressões após ajuste do IVV mensal, capturas aguardando imagens e downloads PPTX/PDF89. Depois commit isolado e autorização de push; homologação real separada.
 

@@ -3,10 +3,11 @@ import { marketMonth, normalizeMarketText, type MarketRow } from './market';
 import { FORTALEZA_STANDARDS, monthlyLaunchMonths } from './monthly-launches';
 import { introMonth } from './intro-view';
 import incc from './incc-di.json';
+import type { MonthlySourceCoverage } from './municipal-coverage';
 
 export type MonthlySegment = 'Vertical' | 'Horizontal' | 'Comercial';
 export type MonthlyMetric = 'releases' | 'sales' | 'stock';
-export interface MonthlyMarketSource { city: string; segment: MonthlySegment; metric: MonthlyMetric; complete: boolean; rows: MarketRow[]; issue: string | null; requests: number; startedAt: string; finishedAt: string; openingIncluded?:boolean }
+export interface MonthlyMarketSource { city: string; segment: MonthlySegment; metric: MonthlyMetric; complete: boolean; rows: MarketRow[]; issue: string | null; requests: number; startedAt: string; finishedAt: string; openingIncluded?:boolean; coverage?:MonthlySourceCoverage }
 export interface MonthlyMarketData { scopeKey: string; months: string[]; sources: MonthlyMarketSource[]; issues: string[] }
 export interface MonthlyBin { month: string; label: string; first: number; second: number; total: number }
 export interface MonthlySlideData {

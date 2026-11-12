@@ -31,13 +31,13 @@ export async function fetchFortalezaIntro(selection: FortalezaSelection, authori
   try {
     for (const city of scope.cities) for (const type of ['Vertical', 'Horizontal', 'Comercial']) {
       const distinct = new Map<string, Record<string, unknown>>(); let total: number | null = null, last: number | null = null, received = 0;
-      for (let page = 1; page <= 5; page++) {
+      for (let page = 1; page <= 40; page++) {
         check(); options.onProgress?.(`${city} · cadastro ${type.toLowerCase()} · página ${page}`);
         const response = await requestWithRetry(async () => { check(); output.requests++; return request({ url: 'https://geobrain.com.br/public-api/building', query: { city, uf: 'CE', type, page, per_page: 100 }, headers: { Authorization: `Bearer ${options.token}` }, includeAuth: false, signal: options.signal, timeoutMs: 20_000, cache: 'no-store' }); }, { attempts: 2, signal: options.signal, sleep: options.sleep });
         check();
         if (!response.ok || !response.data) throw new Error('O cadastro não respondeu ou não autorizou a consulta.');
         const payload = readBuildingPage(response.data, { city, uf: 'CE' }, page, 'fortaleza-building');
-        if (payload.total === null || payload.lastPage > 5 || payload.buildings.length > 100 || (last !== null && (last !== payload.lastPage || total !== payload.total))) throw new Error('O cadastro não confirmou cobertura estável dentro do limite curto de cinco páginas.');
+        if (payload.total === null || payload.total > 4000 || payload.lastPage > 40 || payload.buildings.length > 100 || (last !== null && (last !== payload.lastPage || total !== payload.total))) throw new Error('O cadastro não confirmou cobertura estável dentro do limite de 40 páginas e 4.000 empreendimentos por cidade/segmento.');
         total ??= payload.total; last ??= payload.lastPage;
         if (page < last && !payload.buildings.length) throw new Error('Há página intermediária vazia no cadastro.');
         for (const building of payload.buildings) {
