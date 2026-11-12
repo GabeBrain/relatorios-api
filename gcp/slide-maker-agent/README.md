@@ -74,8 +74,8 @@ enquanto as duas cópias forem diferentes.
 
 | Variável | Origem |
 |---|---|
-| `SUPABASE_URL` | `https://mxinpvcqzbfbzjodhgtz.supabase.co` |
-| `SUPABASE_SERVICE_ROLE_KEY` | Secret Manager `slide-maker-supabase-service-role-key` |
+| `SLIDE_MAKER_BRIDGE_URL` | URL publicada da função `slide-maker-bridge` no Lovable Cloud |
+| `SLIDE_MAKER_BRIDGE_SECRET` | Secret Manager `slide-maker-bridge-secret`; mesmo valor nos Secrets do Lovable |
 | `ANTHROPIC_API_KEY` | Secret Manager `slide-maker-anthropic-api-key` (com `AGENTE=claude`) |
 | `GCP_PROJECT`, `GCP_REGION` | projeto e `southamerica-east1` |
 | `TASKS_QUEUE` | `slide-maker-fases` |
@@ -91,3 +91,8 @@ Ver `DEPLOY_GCP.md`, Parte C. O build roda **da raiz do repositório** e baixa o
 bucket privado; o Dockerfile falha se faltar Neo Sans, Montserrat ou um slide final, e roda os testes da
 `lib/` sem nada pulado: o deck de referência sai com zero falhas 🔒 e o LibreOffice gera 18 PNGs com as
 duas fontes embutidas.
+
+
+## Backend Lovable Cloud
+
+O Cloud Run usa a ponte HMAC para banco, autorizações de Storage e Broadcast. A service role nunca sai do Lovable. Roteiro manual e recuperação: `docs/features/apresentacoes/DEPLOY_GCP.md`, seção final. O contrato compartilhado tem fonte em `supabase/functions/slide-maker-bridge/`; rode `node scripts/sync-bridge.mjs` nesta pasta após alterar handler/protocol. Teste/build conferem a cópia gerada.

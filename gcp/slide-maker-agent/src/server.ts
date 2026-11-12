@@ -1,5 +1,6 @@
 import { join } from 'node:path';
-import { createClient } from '@supabase/supabase-js';
+import { BridgeClient } from './bridge/client.js';
+import { repoBridge, StorageBridge, EventsBridge } from './bridge/adapters.js';
 import { LIMITES, lerConfig } from './config.js';
 import { criarApp } from './app.js';
 import { VerificadorOidcGoogle } from './auth/oidc.js';
@@ -9,20 +10,15 @@ import { AgenteSimulado } from './agent/simulado.js';
 import { validadorBasico } from './agent/ferramentas.js';
 import { validadorLint } from './agent/validador.js';
 import { DespachanteCloudTasks } from './dispatch/despachante.js';
-import { EventosBroadcast } from './eventos.js';
 import { diagnosticarIsolamento, executorBwrap, type Diagnostico } from './isolamento.js';
 import { Orquestrador } from './orquestrador.js';
-import { RepoSupabase } from './repo/supabase.js';
-import { ArmazenamentoSupabase } from './storage/armazenamento.js';
 
 const config = lerConfig();
 const log = (msg: string) => console.log(msg);
 
-const supabase = createClient(config.SUPABASE_URL, config.SUPABASE_SERVICE_ROLE_KEY, {
-  auth: { persistSession: false, autoRefreshToken: false },
-});
-const repo = new RepoSupabase(supabase);
-const arm = new ArmazenamentoSupabase(supabase);
+const bridge = new BridgeClient(config.SLIDE_MAKER_BRIDGE_URL, config.SLIDE_MAKER_BRIDGE_SECRET);
+const repo = repoBridge(bridge);
+const arm = new StorageBridge(bridge);
 
 let isolamento: Diagnostico | null = null;
 const app_ = (p: string) => join(config.APP_DIR, p);
@@ -40,7 +36,7 @@ const agente: Agente = real
 
 const orquestrador = new Orquestrador({
   repo, arm,
-  eventos: new EventosBroadcast(config.SUPABASE_URL, config.SUPABASE_SERVICE_ROLE_KEY, log),
+  eventos: new EventsBridge(bridge, log),
   despachante: new DespachanteCloudTasks({
     projeto: config.GCP_PROJECT, regiao: config.GCP_REGION, fila: config.TASKS_QUEUE,
     urlServico: config.SERVICE_URL, contaServico: config.TASKS_SERVICE_ACCOUNT,

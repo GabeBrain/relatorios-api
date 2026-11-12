@@ -68,13 +68,21 @@ export class Orquestrador {
     const t = transicionar(job.estado, evento, contexto(job));
     if (t.iniciaFase) await this.verificarLimites(job, origem);
 
-    const atualizado = await this.d.repo.atualizarJob(job.id, job.estado, {
+    const patch: Partial<JobRow> = {
       ...patchExtra,
       estado: t.estado,
       fase_em_curso: t.iniciaFase ?? (emExecucao(t.estado) ? job.fase_em_curso : null),
       erro_fase: null,
       erro: null,
-    });
+    };
+    if (t.iniciaFase && this.d.repo.reservarEvento) {
+      const reserva = await this.d.repo.reservarEvento({ job_id: job.id, estado_esperado: job.estado, patch, fase: t.iniciaFase, ip: origem.ip });
+      if (!reserva) throw new ConflitoDeEstado();
+      const final = await this.iniciarFase(reserva.job, t.iniciaFase, origem, reserva.fase);
+      await this.emitir(final);
+      return final;
+    }
+    const atualizado = await this.d.repo.atualizarJob(job.id, job.estado, patch);
     if (!atualizado) throw new ConflitoDeEstado();
 
     if (evento === 'cancelar') {
@@ -104,8 +112,17 @@ export class Orquestrador {
   }
 
   /** Registra a fase e a enfileira. Se a fila falhar, o trabalho vai para `erro` com "Tentar novamente". */
-  private async iniciarFase(job: JobRow, fase: Fase, origem: Origem): Promise<JobRow> {
-    const registro = await this.d.repo.criarFase({ job_id: job.id, fase, colaborador_email: job.colaborador_email, ip: origem.ip });
+  private async iniciarFase(job: JobRow, fase: Fase, origem: Origem, reservada?: FaseRow): Promise<JobRow> {
+    let registro: FaseRow;
+    try {
+      registro = reservada ?? await this.d.repo.criarFase({ job_id: job.id, fase, colaborador_email: job.colaborador_email, ip: origem.ip });
+    } catch (error) {
+      // A reserva atômica pode recusar uma corrida entre instâncias após o preflight.
+      // Nunca deixar o trabalho em processamento sem uma fase registrada.
+      const ativa = await this.d.repo.faseAtiva(job.id);
+      if (!ativa) await this.falhar(job, fase, 'Não foi possível reservar esta etapa. Tente novamente mais tarde.');
+      throw error;
+    }
     try {
       const tarefa = await this.d.despachante.enfileirar(registro.id);
       await this.d.repo.atualizarFase(registro.id, ['enfileirada'], { tarefa_nome: tarefa });

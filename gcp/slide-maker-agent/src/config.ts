@@ -3,8 +3,8 @@ import { z } from 'zod';
 /** Configuração lida do ambiente. Segredos chegam via Secret Manager (`--set-secrets`), nunca do repositório. */
 const Esquema = z.object({
   PORT: z.coerce.number().int().positive().default(8080),
-  SUPABASE_URL: z.url(),
-  SUPABASE_SERVICE_ROLE_KEY: z.string().min(20),
+  SLIDE_MAKER_BRIDGE_URL: z.url(),
+  SLIDE_MAKER_BRIDGE_SECRET: z.string().min(43),
   /** Só repassada ao agente (Fase 4); o agente simulado não a usa. */
   ANTHROPIC_API_KEY: z.string().optional(),
   GCP_PROJECT: z.string().min(1),

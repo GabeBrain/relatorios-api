@@ -2,15 +2,15 @@
 
 Roteiro para quem publica (Gabriel). Decisões de origem: `INSTRUCOES_DESENVOLVIMENTO.md` §15.1.
 
-> **Nenhum comando deste roteiro foi executado por quem o escreveu** (sessão sem `gcloud` nem acesso
-> ao projeto). A sintaxe segue a documentação oficial do `gcloud`; se algum comando divergir na sua
-> versão, a documentação do Google prevalece. Ao terminar cada parte, registre o resultado no
-> `docs/projetos/LIVE_rebrain.md`.
+> Atualizado para Lovable Cloud em 12/11/2026. Projeto e recursos Google de B1/B2/B4 foram preparados;
+> Anthropic versão1 enabled conforme captura de Gabriel. Ponte e migrations complementares têm validação
+> local; NÃO foram publicadas/aplicadas remotamente nesta entrega. Conferir o estado antes de executar.
+> Ao terminar cada parte, registrar evidência em `docs/projetos/LIVE_rebrain.md`.
 
 | | |
 |---|---|
 | Região | `southamerica-east1` (São Paulo) |
-| Projeto | a definir por quem publica; abaixo, `$PROJETO` |
+| Projeto | `brain-rebrain-slide-maker` (número `475189392075`) |
 | Supabase | projeto `mxinpvcqzbfbzjodhgtz` (o mesmo do Rebrain) |
 
 O roteiro tem três partes, em ordem: **A** (banco), **B** (preparação do GCP) e **C** (build, deploy e
@@ -20,8 +20,7 @@ verificações do serviço com o agente simulado da Fase 2).
 
 ## Parte A — Banco (Supabase)
 
-1. Aplicar a migration `supabase/migrations/20261112160000_slide_maker.sql` (`supabase db push` ou SQL
-   Editor). Ela cria 6 tabelas `slide_maker_*` e 3 buckets privados (`slide-maker-entrada`,
+1. Pelo Lovable Cloud, conferir o preflight e aplicar manualmente a migration `supabase/migrations/20261112160000_slide_maker.sql` (não executar db push contra o backend gerenciado). Ela cria 6 tabelas `slide_maker_*` e 3 buckets privados (`slide-maker-entrada`,
    `slide-maker-saida`, `slide-maker-trabalho`).
 2. Conferir depois de aplicar:
    - nenhuma policy nas tabelas `slide_maker_*` nem em `storage.objects` para esses buckets;
@@ -31,12 +30,26 @@ A migration foi executada localmente num Postgres 18.6 (PGlite 0.5.16) com os gr
 simulados: 46 verificações de restrição e de acesso (`anon`/`authenticated` sem leitura nem escrita,
 `service_role` com acesso). Não foi aplicada no projeto real.
 
+### A2. Ponte Lovable Cloud (obrigatória antes do Cloud Run)
+
+O Rebrain usa **Lovable Cloud**. A service role existe somente no backend gerenciado e NÃO é exportada.
+Execute o roteiro manual ao final deste documento. Após a migration original, aplicar somente
+`supabase/migrations/20261112200554_slide_maker_bridge.sql`, cadastrar a credencial de integração e publicar
+`slide-maker-bridge` com seus três arquivos TypeScript e `verify_jwt=false` somente nessa função.
+A autenticação HMAC é obrigatória no handler. Sem ela a função recusa a chamada antes do banco.
+
+A ponte fornece operações fechadas de dados e autorização de Storage; arquivos grandes são enviados
+diretamente por URL assinada. Cloud Run usa `SLIDE_MAKER_BRIDGE_URL` e `SLIDE_MAKER_BRIDGE_SECRET`.
+Resultados SQL são idempotentes por chamada, com nonce contra replay, controle CAS e limites atômicos.
+Broadcast é sinalização de melhor esforço; o frontend também consulta o estado periodicamente.
+
 ## Parte B — Preparação do Google Cloud
 
 ```bash
-PROJETO=<id-do-projeto>
+PROJETO=brain-rebrain-slide-maker
 REGIAO=southamerica-east1
-gcloud config set project "$PROJETO"
+# Prefira --project="$PROJETO" em cada comando; não altere a configuração do BigQuery.
+export CLOUDSDK_CORE_PROJECT="$PROJETO" # somente neste shell; remova ao terminar
 NUMERO=$(gcloud projects describe "$PROJETO" --format='value(projectNumber)')
 
 gcloud services enable run.googleapis.com cloudtasks.googleapis.com secretmanager.googleapis.com \
@@ -121,22 +134,32 @@ gcloud iam service-accounts add-iam-policy-binding "$TASKS" \
 
 ### B3. Segredos (Secret Manager)
 
-Nunca no `.env` versionado (SECURITY_NOTES §3). Cole o valor quando o comando pedir entrada e termine
-com Ctrl+D, para não deixar a chave no histórico do shell.
+O projeto e os recursos de B1/B2/B4 já foram preparados em 12/11. Conferir antes de recriar.
+`slide-maker-anthropic-api-key` já recebeu versão 1 enabled por Gabriel. Não acessar seu valor para conferir.
 
-```bash
-gcloud secrets create slide-maker-anthropic-api-key --replication-policy=automatic
-gcloud secrets versions add slide-maker-anthropic-api-key --data-file=-
-gcloud secrets create slide-maker-supabase-service-role-key --replication-policy=automatic
-gcloud secrets versions add slide-maker-supabase-service-role-key --data-file=-
+Para a ponte, Gabriel executa pessoalmente no PowerShell, na raiz do repositório:
 
-for S in slide-maker-anthropic-api-key slide-maker-supabase-service-role-key; do
-  gcloud secrets add-iam-policy-binding "$S" --member="serviceAccount:$RUNTIME" --role=roles/secretmanager.secretAccessor
-done
+```powershell
+python scripts/slide-maker/cadastrar-bridge.py
 ```
 
-Use uma chave da Anthropic **própria do Slide Maker**, para poder revogá-la e acompanhar o consumo
-separadamente.
+O script gera um valor aleatório, cadastra em `slide-maker-bridge-secret`, concede leitura à conta runtime
+e copia o valor para a área de transferência sem imprimir/gravar em arquivo. Cole no formulário seguro
+do Lovable (More → Settings → Secrets) com nome **`SLIDE_MAKER_BRIDGE_SECRET`**, salve e limpe o clipboard:
+
+```powershell
+Set-Clipboard -Value ""
+```
+
+Não cole no chat. O script recusa substituir uma versão ativa. Para rotação, coordenar os dois ambientes:
+pausar novas chamadas, cadastrar a mesma nova versão nos dois lados, atualizar a revisão e validar;
+manter o valor anterior recuperável no Secret Manager até confirmar o rollout. Não gerar outra chave
+para tentar recuperar uma já salva. Se precisar copiar novamente o mesmo valor com segurança, execute
+`python scripts/slide-maker/cadastrar-bridge.py --copiar-existente` em terminal pessoal interativo: ele lê
+a versão ativa apenas no processo local e a coloca no clipboard sem exibi-la ou criar nova versão.
+
+`slide-maker-supabase-service-role-key` foi criado vazio pelo roteiro antigo: não preencher nem referenciar
+no deploy. Remover esse recurso obsoleto somente depois de confirmar que nenhuma revisão o usa.
 
 ### B4. Fila do Cloud Tasks
 
@@ -153,15 +176,14 @@ gcloud tasks queues create slide-maker-fases --location="$REGIAO" \
 ### Retorno esperado da Parte B
 
 Envie ao Diego (ou registre no doc vivo): o `$PROJETO`, a saída de
-`gcloud storage ls -r gs://$PROJETO-slide-maker-marca/` e a confirmação de que os dois segredos têm
-uma versão ativa. **Não envie o valor dos segredos.**
+`gcloud storage ls -r gs://$PROJETO-slide-maker-marca/` e a confirmação de que os segredos Anthropic e ponte têm
+uma versão ativa (nunca a service role gerenciada). **Não envie o valor dos segredos.**
 
 ---
 
 ## Parte C — Publicação do serviço (Fase 2: agente simulado)
 
-Nesta fase o serviço roda com o **agente simulado**: percorre as etapas sem chamar o modelo e sem
-custo. Serve para provar a infraestrutura (fila, OIDC, Storage, Realtime) e para medir o isolamento
+Nesta fase o serviço roda com o **agente simulado**: percorre as etapas sem chamar o modelo; recursos Google podem gerar cobrança de infraestrutura. Serve para provar a infraestrutura (fila, OIDC, Storage, Realtime) e para medir o isolamento
 no Cloud Run antes da Fase 4.
 
 ### C1. Build da imagem (da raiz do repositório)
@@ -187,14 +209,16 @@ A URL do serviço é determinística (`https://<serviço>-<número do projeto>.<
 `SERVICE_URL` já entra no primeiro deploy. Confira depois de publicar.
 
 ```bash
+# Defina a URL efetivamente publicada e verificada no Lovable:
+PONTE_URL=<url-da-funcao-slide-maker-bridge>
 IMAGEM="$REGIAO-docker.pkg.dev/$PROJETO/slide-maker/slide-maker-agent:latest"
 URL="https://slide-maker-agent-$NUMERO.$REGIAO.run.app"
 
 gcloud run deploy slide-maker-agent --image="$IMAGEM" --region="$REGIAO" \
   --execution-environment=gen2 --service-account="$RUNTIME" --allow-unauthenticated \
   --min-instances=0 --max-instances=5 --concurrency=2 --cpu=2 --memory=4Gi --timeout=1800 \
-  --set-secrets=SUPABASE_SERVICE_ROLE_KEY=slide-maker-supabase-service-role-key:latest,ANTHROPIC_API_KEY=slide-maker-anthropic-api-key:latest \
-  --set-env-vars=SUPABASE_URL=https://mxinpvcqzbfbzjodhgtz.supabase.co,GCP_PROJECT=$PROJETO,GCP_REGION=$REGIAO,TASKS_QUEUE=slide-maker-fases,TASKS_SERVICE_ACCOUNT=$TASKS,SERVICE_URL=$URL
+  --set-secrets=SLIDE_MAKER_BRIDGE_SECRET=slide-maker-bridge-secret:latest,ANTHROPIC_API_KEY=slide-maker-anthropic-api-key:latest \
+  --set-env-vars=AGENTE=simulado,SLIDE_MAKER_BRIDGE_URL=$PONTE_URL,GCP_PROJECT=$PROJETO,GCP_REGION=$REGIAO,TASKS_QUEUE=slide-maker-fases,TASKS_SERVICE_ACCOUNT=$TASKS,SERVICE_URL=$URL
 
 gcloud run services describe slide-maker-agent --region="$REGIAO" --format='value(status.url)'   # deve bater com $URL
 ```
@@ -289,3 +313,47 @@ F3 = 10 e F4 = 5 US$).
    Diego pode conduzir essa parte junto. Ao chegar em `entregue`, baixe o deck com
    `GET /jobs/$JOB/versoes/1/download` e envie ao Diego o `.pptx`, o `jobId` e os logs da fase
    (`gcloud logging read 'resource.labels.service_name="slide-maker-agent" AND textPayload:"agente job="' --limit=20`).
+
+
+## Passos manuais de Gabriel — entrega da ponte Lovable Cloud
+
+1. **Preflight:** executar `docs/features/apresentacoes/VERIFICAR_LOVABLE_CLOUD_2026-11-12.sql`
+   no ambiente do Rebrain, projeto `mxinpvcqzbfbzjodhgtz`. Se não houver tabelas Slide Maker, aplicar
+   `supabase/migrations/20261112160000_slide_maker.sql`. Se as seis já existirem, conferir e pular essa
+   migration. Estado parcial exige diagnóstico; não fazer DROP nem reaplicar cegamente.
+2. **Complemento:** aplicar `supabase/migrations/20261112200554_slide_maker_bridge.sql` apenas se
+   ainda ausente. Cria duas tabelas privadas e duas RPCs invoker acessíveis somente a service_role.
+   Repetir o preflight: oito tabelas com RLS, três buckets privados, sem grants públicos nas tabelas
+   nem execução pública das RPCs. Conferir policies genéricas do Storage; preservar as das outras ferramentas.
+3. **Credencial:** seguir B3, usando o formulário seguro de Secrets. Anthropic vem do segredo Google já
+   cadastrado; a credencial da ponte é nova e gerada pelo script. Service role não é solicitada.
+4. **Função:** publicar os arquivos `index.ts`, `handler.ts` e `protocol.ts` de
+   `supabase/functions/slide-maker-bridge/`, com a configuração de `supabase/config.toml`.
+   O Lovable precisa receber os arquivos desta entrega; enquanto não houver push autorizado, anexar/fornecer
+   os arquivos locais no fluxo de desenvolvimento. Não publicar uma função gerada a partir só do nome.
+5. **Instrução para o Lovable:** “No backend existente do Rebrain, publique a função slide-maker-bridge
+   dos três arquivos fornecidos. Use SLIDE_MAKER_BRIDGE_SECRET pelo formulário de Secrets; mantenha
+   SUPABASE_SERVICE_ROLE_KEY somente no ambiente gerenciado. Configure verify_jwt=false exclusivamente
+   nessa função; o handler valida HMAC, versão, prazo e nonce. Aplique somente as migrations indicadas
+   após o preflight e devolva metadados de verificação e URL, sem conteúdo de credenciais ou trabalhos.”
+6. **Retorno:** fornecer URL efetiva e resultados sanitizados do preflight. Uma chamada sem assinatura deve
+   ser recusada. Depois, o teste autenticado do serviço deve conseguir criar/ler trabalho e transferir arquivo.
+   Código publicado e migração aplicada são estados diferentes; conferir ambos.
+7. **Google:** só após essa etapa e os 20 ativos de marca, executar C1–C3 com autorização de publicação.
+   A URL do Cloud Run, verificada em `services describe`, vai a `VITE_SLIDE_MAKER_AGENT_URL` no frontend.
+
+### Testes locais da entrega
+
+Na pasta `gcp/slide-maker-agent`: `npm ci`, `npm run typecheck`, `npm test`, `npm run build`.
+O teste bridge-flow usa PostgreSQL local/PGlite e transporte HTTP em memória; Storage, fila e Broadcast
+são simulados nesse teste. Isso não comprova permissões nem isolamento do Cloud Run real.
+Na raiz: `node scripts/diagnostics/slide-maker-bridge-sql.mjs` (após npm ci do serviço).
+Verificação da Edge: `deno check --no-config --no-lock --node-modules-dir=none supabase/functions/slide-maker-bridge/index.ts`.
+
+### Recuperação
+
+Se a ponte não responder, deixar o frontend indisponível e não ativar Claude. Não voltar ao deploy antigo
+que exige exportação de service role. Reverter para a revisão compatível anterior da ponte/serviço, se houver,
+preservando tabelas e arquivos. Nonces expiram após 10 minutos; resultados idempotentes privados são mantidos
+por 24 horas e limpos em lotes nas chamadas. A chave de idempotência é estável somente na repetição de transporte;
+repetições humanas de fases continuam ações explícitas, sem custo duplicado automático.

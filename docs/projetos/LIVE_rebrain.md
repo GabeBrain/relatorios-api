@@ -451,6 +451,15 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 12/11/2026 — Slide Maker: infraestrutura Google e ponte Lovable Cloud — Gabriel / Codex
+
+- **Problema/resultado:** o Rebrain usa Lovable Cloud, sem service role exportável. Cloud Run agora usa `slide-maker-bridge` para dados, autorização de Storage e Broadcast; credencial gerenciada permanece na Edge. Arquivos grandes são transferidos diretamente por URLs assinadas restritas. API pública por token do trabalho preservada.
+- **Implementação:** HMAC/versionamento/prazo/nonce, lista fechada de operações, erros sanitizados, idempotência transacional e reserva CAS+fase com limites serializados no banco. Migration complementar `20261112200554_slide_maker_bridge.sql`: duas tabelas privadas e duas RPCs invoker, sem execução pública. Recuperação da credencial via script pessoal com clipboard, sem chat, arquivo ou argumento de processo contendo segredo.
+- **Infraestrutura preparada antes desta fatia:** projeto `brain-rebrain-slide-maker`, número `475189392075`, São Paulo, mesma organização/cobrança profissional do BigQuery; bucket privado, contas runtime/tasks/build, repositório e fila (1 tentativa/4 concorrentes). Anthropic1enabled conforme capturaGabriel. Nenhum deploy. Bucket vazio na última conferência; 20 ativos com Diego. Segredo antigo de service role vazio e sem uso no novo deploy.
+- **Validação local:** 78 testes do serviço aprovados, 2 condicionais Linux/bwrap pulados; fluxo API→HMAC→handler→PostgreSQL/PGlite→F1–F4/v1/v2, incluindo resposta perdida após commit sem duplicação. 31 verificações SQL de permissões/CAS/idempotência/limites/rollback. 92 regressões da feature frontend, 3 testes do cadastro seguro, tipos Node/Deno, lint dirigido, builds do serviço/Rebrain aprovados. Storage/fila/Broadcast são simulados no teste integrado; concorrência multi-conexão e isolamento Cloud Run ainda precisam ensaio real. Nenhuma chamada paga.
+- **Entrega/manual:** [roteiro de deploy](../features/apresentacoes/DEPLOY_GCP.md), [plano e estado](../features/apresentacoes/PLANO_LOVABLE_CLOUD_2026-11-12.md), [SQL de conferência](../features/apresentacoes/VERIFICAR_LOVABLE_CLOUD_2026-11-12.sql). Gabriel aplica migrations e publica função manualmente no Lovable, cadastra `SLIDE_MAKER_BRIDGE_SECRET` com o valor gerado por `scripts/slide-maker/cadastrar-bridge.py`; Google usa `slide-maker-bridge-secret`. Depois validar simulado/isolamento e URLfrontend; agente real só com autorização de consumo. Estado **validado localmente**, sem migration remota, push ou publicação.
+- **Preservação:** main atualizada por fast-forward até06a179ee com autorização; nove arquivos locais salvos e reaplicados sem conflito, untracked preservados. Backup/stash mantidos. Alterações paralelas de FIERGS/estimativas/segurança ficam fora deste commit.
+
 ### 12/11/2026 — Relatórios: tabelas nativas e objetos editáveis nos PPTX — Codex/Lucas
 
 - **Commit:** `cd473deb` (12/11/2026), local; documentação de fechamento em commit separado.

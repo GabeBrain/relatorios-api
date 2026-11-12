@@ -1,5 +1,9 @@
 project_id = "mxinpvcqzbfbzjodhgtz"
 
+[functions.slide-maker-bridge]
+# Autenticação HMAC servidor-servidor verificada pelo handler, com nonce no banco.
+verify_jwt = false
+
 [functions.corretor-access]
 # Credenciais GeoBrain verificadas pela função; lista de contas habilitadas no servidor.
 verify_jwt = false

@@ -100,6 +100,7 @@ export async function criarApp(d: DependenciasApp): Promise<FastifyInstance> {
     if (erro instanceof ConflitoDeEstado || erro instanceof FaseAtivaExistente) return reply.status(409).send({ erro: erro.message });
     if (erro instanceof LimiteExcedido) return reply.status(429).send({ erro: erro.message });
     const e = erro as { code?: string; statusCode?: number };
+      if (e.code === 'rate_limit') return reply.status(429).send({ erro: 'Limite de etapas atingido. Aguarde e tente novamente.' });
     if (e.code === 'FST_REQ_FILE_TOO_LARGE') return reply.status(413).send({ erro: 'Cada arquivo pode ter no máximo 50 MB.' });
     if (e.code === 'FST_FILES_LIMIT') return reply.status(413).send({ erro: `Envie no máximo ${LIMITES.maxArquivos} arquivos.` });
     if (e.statusCode && e.statusCode < 500) return reply.status(e.statusCode).send({ erro: 'Requisição inválida.' });

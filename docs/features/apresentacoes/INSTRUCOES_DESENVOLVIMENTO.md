@@ -73,7 +73,7 @@ O conteúdo, a identidade visual e o processo **não são inventados aqui**: vê
 │  Imagem: Node 22 · Python 3.12 · LibreOffice · poppler · fontes Brain            │
 │          kb/ (base v3) · marca/ (logos, slides finais, fontes) · lib/ (scripts) │
 └───────────────┬───────────────────────────────────────────────┬────────────────┘
-                │ service role                                  │ HTTPS
+                │ ponte HMAC                                    │ HTTPS
                 ▼                                               ▼
       Supabase (Postgres, Storage, Realtime)              API Claude (Anthropic)
 ```
@@ -273,7 +273,7 @@ slide_maker_relatorios(job_id fk, versao int, markdown text, fontes jsonb, creat
 
 ### 7.3 RLS — não repetir a dívida do Corretor
 
-Diferente do Corretor (SECURITY_NOTES §1), **estas tabelas e buckets não têm policy para `anon`**. Arquivos de clientes não podem ser legíveis por quem descobrir a URL do Supabase. Todo acesso passa pelo serviço Cloud Run, com service role, validando o token de acesso do trabalho. Downloads usam **URL assinada de curta duração** (ex.: 10 min) emitida pelo serviço.
+Diferente do Corretor (SECURITY_NOTES §1), **estas tabelas e buckets não têm policy para `anon`**. Arquivos de clientes não podem ser legíveis por quem descobrir a URL do Supabase. O Cloud Run valida o token do trabalho e chama a ponte HMAC `slide-maker-bridge`; somente a Edge Function usa a service role interna do Lovable Cloud. Downloads usam **URL assinada de curta duração** (ex.: 10 min) emitida pelo serviço.
 
 Realtime: assine eventos por um canal de **Broadcast** do serviço (`slide-maker:<jobId>`) em vez de `postgres_changes` em tabela sem RLS para anon. Se o Broadcast exigir autorização no projeto, use polling leve (2–3 s) como alternativa e registre a decisão.
 
@@ -294,7 +294,7 @@ FastAPI não é obrigatório. Use **Node 22 + TypeScript** (o SDK é TS) com Fas
 | GET | `/jobs/:id/versoes/:n/download` | URL assinada do PPTX |
 | POST | `/jobs/listar` | `{ itens: [{ jobId, token }] }` vindos do navegador → resumo de cada trabalho válido |
 
-**Acesso (sem relação com a API GeoBrain):** o `POST /jobs` gera um token aleatório de 32 bytes e o devolve uma única vez; o banco guarda só o hash. Todas as rotas `/jobs/:id/*` exigem o header `x-job-token`. O navegador guarda `{ jobId, token }` no `localStorage` para montar "Meus trabalhos" (um navegador novo não vê os trabalhos antigos: limitação aceita na v1). O e-mail do colaborador só identifica o autor; ele **não** é usado para autorizar. Segredos (`ANTHROPIC_API_KEY`, `SUPABASE_SERVICE_ROLE_KEY`) ficam no **Secret Manager do GCP**, nunca no `.env` versionado (ver SECURITY_NOTES §3). O frontend recebe só `VITE_SLIDE_MAKER_AGENT_URL`. Como as rotas são públicas e cada fase chama um modelo pago, a proteção contra abuso é: CORS restrito, rate limit por e-mail e por IP (seção 12) e a trava `maxBudgetUsd` (seção 11). Registre esse risco aceito em `docs/architecture/SECURITY_NOTES.md`.
+**Acesso (sem relação com a API GeoBrain):** o `POST /jobs` gera um token aleatório de 32 bytes e o devolve uma única vez; o banco guarda só o hash. Todas as rotas `/jobs/:id/*` exigem o header `x-job-token`. O navegador guarda `{ jobId, token }` no `localStorage` para montar "Meus trabalhos" (um navegador novo não vê os trabalhos antigos: limitação aceita na v1). O e-mail do colaborador só identifica o autor; ele **não** é usado para autorizar. Segredos do serviço (`ANTHROPIC_API_KEY`, `SLIDE_MAKER_BRIDGE_SECRET`) ficam no **Secret Manager do GCP**; a credencial da ponte também é cadastrada nos Secrets do Lovable, e `SUPABASE_SERVICE_ROLE_KEY` permanece exclusivamente nas Edge Functions gerenciadas, nunca no `.env` versionado (ver SECURITY_NOTES §3). O frontend recebe só `VITE_SLIDE_MAKER_AGENT_URL`. Como as rotas são públicas e cada fase chama um modelo pago, a proteção contra abuso é: CORS restrito, rate limit por e-mail e por IP (seção 12) e a trava `maxBudgetUsd` (seção 11). Registre esse risco aceito em `docs/architecture/SECURITY_NOTES.md`.
 
 **Execução longa — nunca em background após responder.** No Cloud Run, trabalho executado depois que a resposta HTTP foi enviada pode ser interrompido quando a instância fica sem requisições ativas, mesmo com CPU sempre alocada. Uma fase de produção leva de 10 a 20 min, então:
 
@@ -359,7 +359,7 @@ Para desenvolver depois (não implementar agora):
 - Toda rota do trabalho exige o `x-job-token`; o banco guarda só o hash. O `jobId` é UUID aleatório, nunca sequencial.
 - Conteúdo enviado é **dado não confiável**: o system prompt manda ignorar instruções embutidas em PDFs, planilhas e slides. **Isso é orientação ao modelo, não barreira técnica.** As barreiras técnicas são:
   - **Isolamento dos comandos:** o `cwd` sozinho não impede o `Bash` de ler fora da pasta nem de acessar a internet, porque os comandos herdam a rede do processo que fala com a API da Anthropic. Configure a opção `sandbox` do Agent SDK para restringir sistema de arquivos e rede dos comandos (escrita só em `/work/<jobId>`, sem rede). **Confirme na documentação o que essa opção bloqueia na versão instalada e escreva um teste** que tente `curl` e leitura de `/etc` e `/app` via `Bash` e espere falha. Se a opção não cobrir os dois, execute os comandos do agente num processo isolado (usuário sem privilégio, namespace de rede sem saída, por exemplo via `bubblewrap`) e registre a decisão.
-  - **Segredos fora do alcance:** `ANTHROPIC_API_KEY` e `SUPABASE_SERVICE_ROLE_KEY` não podem estar no ambiente herdado pelos comandos do agente (use `env` explícito no `query()` e limpe o ambiente do sandbox).
+  - **Segredos fora do alcance:** `ANTHROPIC_API_KEY` e `SLIDE_MAKER_BRIDGE_SECRET` não podem estar no ambiente herdado pelos comandos do agente (use `env` explícito no `query()` e limpe o ambiente do sandbox).
   - **Rede só pelas ferramentas de pesquisa:** WebSearch/WebFetch, e apenas na F2/F4.
 - Retenção: proponha 180 dias para `entrada/` e `trabalho/` (job de limpeza), mantendo versões e relatório. **Confirme com o Diego** (seção 15).
 - Rate limit **por e-mail informado** (3 trabalhos simultâneos e 10 fases por hora) e, como segunda barreira, **por IP com limite folgado** (ex.: 40 fases por hora), já que a equipe pode sair para a internet com o mesmo IP do escritório. Também um teto global de fases simultâneas por instância.

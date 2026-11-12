@@ -93,6 +93,8 @@ type Patch<T> = Partial<Omit<T, 'id' | 'created_at'>>;
  * status) atual for o esperado, e devolvem `null` quando outra requisição chegou antes.
  */
 export interface Repo {
+  /** Backend persistente: CAS do trabalho + reserva da fase/limites numa única transação. */
+  reservarEvento?(dados: { job_id: string; estado_esperado: Estado; patch: Partial<JobRow>; fase: Fase; ip: string | null }): Promise<{ job: JobRow; fase: FaseRow } | null>;
   criarJob(dados: { colaborador_email: string; titulo: string; contexto: string | null; token_acesso_hash: string }): Promise<JobRow>;
   obterJob(id: string): Promise<JobRow | null>;
   obterJobs(ids: string[]): Promise<JobRow[]>;

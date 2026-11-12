@@ -39,11 +39,11 @@ describe('ambiente dos comandos do agente (§12)', () => {
 describe('configuração', () => {
   it('erro de configuração cita os nomes das variáveis, nunca os valores', () => {
     try {
-      lerConfig({ SUPABASE_URL: 'nao-e-url', SUPABASE_SERVICE_ROLE_KEY: 'segredo-curto' });
+      lerConfig({ SLIDE_MAKER_BRIDGE_URL: 'nao-e-url', SLIDE_MAKER_BRIDGE_SECRET: 'segredo-curto' });
       expect.unreachable();
     } catch (e) {
       const msg = (e as Error).message;
-      expect(msg).toContain('SUPABASE_URL');
+      expect(msg).toContain('SLIDE_MAKER_BRIDGE_URL');
       expect(msg).not.toContain('segredo-curto');
     }
   });
