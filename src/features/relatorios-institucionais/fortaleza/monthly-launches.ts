@@ -17,9 +17,9 @@ export interface MonthlyLaunchSource {
 }
 export interface MonthlyLaunchData { scopeKey?: string; sources: MonthlyLaunchSource[]; issues: string[]; market?: MonthlyMarketData; prices?: PriceCollection }
 export function monthlyLaunchMonths(selection: FortalezaSelection) {
-  if (selection.periodicity !== 'monthly') throw new Error('O histórico mensal exige uma referência mensal.');
   fortalezaPeriod(selection);
-  return Array.from({ length: 25 }, (_, index) => new Date(Date.UTC(selection.year, selection.position - 25 + index, 1)).toISOString().slice(0, 7));
+  const length=selection.periodicity==='monthly'?25:27,endMonth=selection.periodicity==='monthly'?selection.position:selection.position*3;
+  return Array.from({ length }, (_, index) => new Date(Date.UTC(selection.year, endMonth - length + index, 1)).toISOString().slice(0, 7));
 }
 export const blockedLaunchSeries = (issue: string): LaunchSeries => ({ status: 'blocked', issue, history: [], accumulated: [], changes: { total: null, economic: null, other: null } });
 const blankBin = (month: string): LaunchBin => ({ month, label: `${introMonth(Number(month.slice(5)), true)}/${month.slice(2, 4)}`, economic: 0, other: 0, total: 0 });
@@ -38,10 +38,11 @@ export function monthlyLaunchSourceIssue(source: MonthlyLaunchSource, selection:
   return seen.size === months.length * FORTALEZA_STANDARDS.length ? null : `${source.city}: faltam meses ou padrões explícitos. Ausência não representa zero.`;
 }
 function finish(history: LaunchBin[], selection: FortalezaSelection): LaunchSeries {
+  const endMonth=selection.periodicity==='monthly'?selection.position:selection.position*3;
   const accumulated = [selection.year - 1, selection.year].map(year => {
-    const bins = history.filter(bin => bin.month >= `${year}-01` && bin.month <= `${year}-${String(selection.position).padStart(2, '0')}`);
+    const bins = history.filter(bin => bin.month >= `${year}-01` && bin.month <= `${year}-${String(endMonth).padStart(2, '0')}`);
     const economic = bins.reduce((sum, bin) => sum + bin.economic, 0), other = bins.reduce((sum, bin) => sum + bin.other, 0);
-    return { month: `${year}-${String(selection.position).padStart(2, '0')}`, label: `Jan-${introMonth(selection.position, true)}/${year}`, economic, other, total: economic + other };
+    return { month: `${year}-${String(endMonth).padStart(2, '0')}`, label: `Jan-${introMonth(endMonth, true)}/${year}`, economic, other, total: economic + other };
   });
   if ([...history, ...accumulated].some(bin => ![bin.economic, bin.other, bin.total].every(Number.isSafeInteger))) return blockedLaunchSeries('A soma excedeu o limite numérico seguro.');
   const difference = (now: number, before: number) => before === 0 ? null : (now - before) / before * 100;

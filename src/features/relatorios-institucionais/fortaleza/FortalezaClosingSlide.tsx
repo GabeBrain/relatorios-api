@@ -1,12 +1,13 @@
 import { closingLines,type FortalezaEditorial } from './monthly-closing';
 import type { FortalezaSelection } from './model';
 import { introMonth } from './intro-view';
+const quarterlyArtwork=import.meta.glob('./assets/quarterly/*.png',{eager:true,import:'default',query:'?url'}) as Record<string,string>;
 const artwork=import.meta.glob('./assets/monthly/*.png',{eager:true,import:'default',query:'?url'}) as Record<string,string>;
-export default function FortalezaClosingSlide({page,selection,editorial}:{page:number;selection:FortalezaSelection;editorial:FortalezaEditorial}){
+export default function FortalezaClosingSlide({page,selection,editorial,originalPage}:{page:number;selection:FortalezaSelection;editorial:FortalezaEditorial;originalPage?:number}){
   const people=page===57?editorial.brain:page===58?editorial.sinduscon:[];
-  return <svg className="fortaleza-intro-slide block aspect-video h-auto w-full" viewBox="0 0 1280 720" role="img" aria-label={`Fortaleza · slide ${page}`}>
-    <image href={page===59&&editorial.board?editorial.board:artwork[`./assets/monthly/${page}.png`]} width={1280} height={720} preserveAspectRatio="xMidYMid meet" aria-hidden="true"/>
-    {[56,60].includes(page)&&<text x={1200} y={page===60?690:580} textAnchor="end" fontSize={18} fill="white">{introMonth(selection.position)} de {selection.year}</text>}
+  return <svg className="fortaleza-intro-slide block aspect-video h-auto w-full" viewBox="0 0 1280 720" role="img" aria-label={`Fortaleza · slide ${originalPage??page}`}>
+    <image href={page===59&&editorial.board?editorial.board:originalPage?quarterlyArtwork[`./assets/quarterly/${originalPage}.png`]:artwork[`./assets/monthly/${page}.png`]} width={1280} height={720} preserveAspectRatio="xMidYMid meet" aria-hidden="true"/>
+    {[56,60].includes(page)&&<text x={1200} y={page===60?690:580} textAnchor="end" fontSize={18} fill="white">{selection.periodicity==='quarterly'?`${selection.position}º trimestre`:introMonth(selection.position)} de {selection.year}</text>}
     {people.map((person,index)=>{
       if(!person.visible)return null;const x=60+(index%3)*260,top=page===57?(index<3?28:365):170;
       const names=closingLines(person.name,23,2),roles=closingLines(person.role,25),longest=Math.max(...names.map(line=>line.length),1),roleMax=Math.max(...roles.map(line=>line.length),1);

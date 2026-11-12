@@ -50,7 +50,7 @@ describe('Fortaleza mensal56–60 e diagnóstico',()=>{
     const state=await generation();state.monthlyLaunches!.prices={scopeKey:'private-token',months:[],issues:[],sources:[{city:'Fortaleza',segment:'Vertical',complete:true,records:[{Authorization:'Bearer private-token',photo:'data:image/png;base64,private',typologies_history:[{secret:'individual'}]}],frames:{},issue:null,requests:1,startedAt:'',finishedAt:''}]};
     const value=JSON.stringify(buildFortalezaDiagnostic(selection,state));for(const forbidden of ['private-token','Authorization','data:image','typologies_history','individual'])expect(value).not.toContain(forbidden);
   });
-  it('trimestral tem89posições e não apresenta a continuação como implementada',async()=>{
-    const state=await generation(),quarter={...selection,periodicity:'quarterly' as const,position:2};state.blueprint=await prepareFortalezaBlueprint(quarter,cities,{yieldControl:async()=>{}});state.monthlyLaunches=null;const snapshot=buildFortalezaDiagnostic(quarter,state);expect(snapshot.slides).toHaveLength(89);expect(snapshot.summary['not-implemented']).toBe(79);
+  it('trimestral tem89posições e preserva pendência de fonte quando não há dados',async()=>{
+    const state=await generation(),quarter={...selection,periodicity:'quarterly' as const,position:2};state.blueprint=await prepareFortalezaBlueprint(quarter,cities,{yieldControl:async()=>{}});state.monthlyLaunches=null;const snapshot=buildFortalezaDiagnostic(quarter,state);expect(snapshot.slides).toHaveLength(89);expect(snapshot.summary['not-implemented']).toBe(0);
   });
 });

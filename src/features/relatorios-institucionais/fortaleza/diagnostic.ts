@@ -7,6 +7,10 @@ import { buildMonthlySlide } from './monthly-market';
 import { buildPriceSlide } from './monthly-prices';
 import { buildMonthlyIvv } from './monthly-ivv';
 import { buildOfferTable } from './monthly-tables';
+import { quarterlyTableForPage } from './quarterly-details';
+import { createFortalezaEditorial } from './monthly-closing';
+import { buildQuarterlyPrice,buildQuarterlyIvv,QUARTERLY_PRICE_PAGES } from './quarterly-analysis';
+import { buildQuarterlyLaunchSlide,buildQuarterlyMunicipalTable,buildQuarterlyStockTable } from './quarterly-launches';
 export type DiagnosticStatus='available'|'source-pending'|'editorial-review'|'not-implemented';
 export interface DiagnosticSlide { number:number; title:string; scope:string[]; status:DiagnosticStatus; issue:string|null; warnings:string[]; values:unknown }
 /** Whitelist only: no auth state, raw projects, images or request headers enter this snapshot. */
@@ -18,12 +22,24 @@ export function buildFortalezaDiagnostic(selection:FortalezaSelection,state:Diag
   const capacity=(start:number,end:number)=>INTRO_LAYOUTS[monthly?'julho':'junho'].slice(start-1,end).reduce((sum,layout)=>sum+(layout.shapes.find(shape=>shape.slot==='table')?.rows??1)-1,0);
   const tableCache=new Map<number,ReturnType<typeof buildOfferTable>>();
   const slides:DiagnosticSlide[]=reference.slides.map(definition=>{
-    const page=definition.number,base:DiagnosticSlide={number:page,title:definition.title,scope:monthly?scopeFor(page):cities,status:'editorial-review',issue:'Conteúdo editorial da referência; revisar para a edição atual.',warnings:[],values:null};
+    const page=definition.number,base:DiagnosticSlide={number:page,title:definition.title,scope:monthly?scopeFor(page):[11,13,18,25,26,30,38,41,42,43,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69].includes(page)?cities.filter(city=>!rm.includes(city)):[14,15,27,28,39,44,45,46,47,48,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84].includes(page)?rm:cities,status:'editorial-review',issue:'Conteúdo editorial da referência; revisar para a edição atual.',warnings:[],values:null};
     const calculated=(value:{status:string;issue:string|null;warnings?:string[]})=>({...base,status:value.status==='ready'?'available' as const:'source-pending' as const,issue:value.issue,warnings:value.warnings??[],values:value});
     if(page===2)return {...base,status:'source-pending',issue:'Amostra histórica e empresas pesquisadas não possuem fonte própria confirmada.',values:view.sample};
     if(page>=3&&page<=7){const rows=page<=4?view.capital:view.rm,limit=page<=4?capacity(3,4):capacity(5,7),overflow=Math.max(0,(rows?.length??0)-limit);return {...base,status:rows&&!overflow?'available':'source-pending',issue:!rows?'Cadastro de lançamentos não concluído.':overflow?`${overflow} lançamentos exigem continuação antes da exportação.`:null,values:{projects:rows?.length??null,capacity:limit,overflow}};}
     if(page===10)return {...base,status:view.history?'available':'source-pending',issue:view.history?null:'Série de empreendimentos indisponível.',values:{history:view.history,accumulated:view.accumulated,changes:view.changes}};
-    if(!monthly)return page<=10?base:{...base,status:'not-implemented',issue:'A continuação trimestral ainda não foi implementada.'};
+    if(!monthly){
+      if(page>=41){
+        if([41,44,65,70,80,85,86,87,88,89].includes(page))return base;
+        if(QUARTERLY_PRICE_PAGES[page])return calculated(buildQuarterlyPrice(page,sources?.prices??null,selection,cities));
+        if(page===54||page===72)return calculated(buildQuarterlyIvv(sources?.market??null,selection,cities,page===72));
+        const detail=quarterlyTableForPage(page,{selection,cities,data:state.intro,monthlyLaunches:sources,editorial:createFortalezaEditorial()});
+        const {points,...aggregates}=detail;return {...calculated(detail),values:{...aggregates,...(points?{locatedProjects:points.length}: {})}};
+      }
+      if(page===40)return calculated(buildQuarterlyStockTable(sources?.market??null,selection,cities));
+      if([16,19,31,32].includes(page))return calculated(buildQuarterlyMunicipalTable(page,sources?.market??null,selection,cities));
+      if(page>=11&&page<=39&&![20,23,33,36].includes(page))return calculated(buildQuarterlyLaunchSlide(page,sources?.market??null,state.intro,selection,cities));
+      return page<=40?base:{...base,status:'not-implemented',issue:'A continuação trimestral ainda não foi implementada.'};
+    }
     if(page===11)return calculated(monthlyProjectLaunches(state.intro,selection,cities));
     if(page===13||page===15)return calculated(monthlyUnitLaunches(sources,selection,cities,page===13?'capital':'rm'));
     if([18,21,29,32,36,39,44,56,57,58,59,60].includes(page))return base;

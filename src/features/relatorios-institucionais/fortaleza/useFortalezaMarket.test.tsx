@@ -6,10 +6,14 @@ import { useFortalezaMarket } from './useFortalezaMarket';
 import { marketFixture, monthlySelection } from './__tests__/market-fixture';
 import { fetchFortalezaIntro } from './intro-data';
 import { fetchMonthlyLaunches } from './monthly-launch-api';
+import { fetchMonthlyPrices } from './monthly-prices-api';
+import { fetchMonthlyMarket } from './monthly-market-api';
 
 vi.mock('./api', () => ({ collectFortalezaMarket: vi.fn() }));
 vi.mock('./intro-data', () => ({ fetchFortalezaIntro: vi.fn() }));
 vi.mock('./monthly-launch-api', () => ({ fetchMonthlyLaunches: vi.fn() }));
+vi.mock('./monthly-prices-api', () => ({ fetchMonthlyPrices: vi.fn() }));
+vi.mock('./monthly-market-api', () => ({ fetchMonthlyMarket: vi.fn() }));
 const collect = vi.mocked(collectFortalezaMarket);
 type Payload = Awaited<ReturnType<typeof collectFortalezaMarket>>;
 function payload(failed = false): Payload {
@@ -25,11 +29,11 @@ function deferred() {
   const promise = new Promise<Payload>(done => { resolve = done; });
   return { promise, resolve };
 }
-beforeEach(() => { collect.mockReset(); vi.mocked(fetchMonthlyLaunches).mockReset(); vi.mocked(fetchMonthlyLaunches).mockResolvedValue({ sources: [], issues: [] }); vi.mocked(fetchFortalezaIntro).mockResolvedValue({ status: 'ready', projects: [], issues: [], requests: 0, startedAt: '', finishedAt: '' }); });
+beforeEach(() => { vi.mocked(fetchMonthlyPrices).mockReset();vi.mocked(fetchMonthlyPrices).mockResolvedValue({scopeKey:"quarterly",months:[],sources:[],issues:[]}); vi.mocked(fetchMonthlyMarket).mockReset(); vi.mocked(fetchMonthlyMarket).mockResolvedValue({scopeKey:"quarterly",months:[],sources:[],issues:[]}); collect.mockReset(); vi.mocked(fetchMonthlyLaunches).mockReset(); vi.mocked(fetchMonthlyLaunches).mockResolvedValue({ sources: [], issues: [] }); vi.mocked(fetchFortalezaIntro).mockResolvedValue({ status: 'ready', projects: [], issues: [], requests: 0, startedAt: '', finishedAt: '' }); });
 afterEach(cleanup);
 
 describe('Fortaleza — sessão e ciclo da consulta', () => {
-  it('consulta o histórico mensal na mesma ação e não o transfere para o trimestral', async () => {
+  it('coleta a janela de cada periodicidade sem transferir o cache mensal para o trimestral', async () => {
     collect.mockResolvedValue(payload());
     const { result, rerender } = renderHook(({ periodicity }: { periodicity: 'monthly' | 'quarterly' }) => useFortalezaMarket({ ...monthlySelection, periodicity, position: periodicity === 'monthly' ? 6 : 2 }, ['Fortaleza'], 'token-a', true), { initialProps: { periodicity: 'monthly' } });
     await act(async () => { await result.current.consult(); });
@@ -39,7 +43,10 @@ describe('Fortaleza — sessão e ciclo da consulta', () => {
     expect(result.current.state).toBeNull();
     await act(async () => { await result.current.consult(); });
     expect(fetchMonthlyLaunches).toHaveBeenCalledTimes(1);
-    expect(result.current.state.monthlyLaunches).toBeNull();
+    expect(fetchMonthlyMarket).toHaveBeenCalledTimes(1);
+    expect(vi.mocked(fetchMonthlyMarket).mock.calls[0][0].periodicity).toBe('quarterly');
+    expect(vi.mocked(fetchMonthlyMarket).mock.calls[0][3]).toBeUndefined();
+    expect(result.current.state.monthlyLaunches?.market?.scopeKey).toBe('quarterly');
   });
   it('uma falha do histórico preserva o núcleo e oferece recuperação', async () => {
     collect.mockResolvedValue(payload());

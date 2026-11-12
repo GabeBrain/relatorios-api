@@ -4,6 +4,8 @@ import type { FortalezaMarketReport } from './market';
 import { prepareFortalezaBlueprint, type FortalezaBlueprint, type FortalezaSelection } from './model';
 import { fetchFortalezaIntro, type IntroData } from './intro-data';
 import { fetchMonthlyLaunches } from './monthly-launch-api';
+import { fetchMonthlyMarket } from './monthly-market-api';
+import { fetchMonthlyPrices } from './monthly-prices-api';
 import type { MonthlyLaunchData } from './monthly-launches';
 
 export const FORTALEZA_GENERATION_STEPS = [
@@ -66,10 +68,14 @@ export function useFortalezaMarket(selection: FortalezaSelection, authorizedCiti
       const intro: IntroData = preservedIntro?.status === 'ready' ? preservedIntro : result.collection.failedCities.length ? { status: 'blocked', projects: [], issues: ['Conclua as fontes municipais antes de consultar o cadastro dos slides iniciais.'], requests: 0, startedAt: new Date().toISOString(), finishedAt: new Date().toISOString() } : await fetchFortalezaIntro(selection, authorizedCities, { token, signal: controller.signal, onProgress: message => { if (!controller.signal.aborted) setState(current => current?.key === key ? { ...current, message } : current); } });
       if (controller.signal.aborted) return;
       introCache.current = intro;
-      const monthlyLaunches = selection.periodicity === 'monthly' && report.metrics ? await fetchMonthlyLaunches(selection, authorizedCities, {
+      const monthlyLaunches = report.metrics ? selection.periodicity === 'monthly' ? await fetchMonthlyLaunches(selection, authorizedCities, {
         token, signal: controller.signal, includeMonthlyReport: true,
         onProgress: message => { if (!controller.signal.aborted) setState(current => current?.key === key ? { ...current, message } : current); },
-      }, preservedMonthly) : null;
+      }, preservedMonthly) : await (async()=>{
+        const collected=await fetchMonthlyMarket(selection,authorizedCities,{token,signal:controller.signal,onProgress:message=>{if(!controller.signal.aborted)setState(current=>current?.key===key?{...current,message}:current);}},preservedMonthly?.market);
+        const prices=await fetchMonthlyPrices(selection,authorizedCities,{token,signal:controller.signal,onProgress:message=>{if(!controller.signal.aborted)setState(current=>current?.key===key?{...current,message}:current);}},preservedMonthly?.prices);
+        return {scopeKey:collected.scopeKey,market:collected,prices,issues:[...collected.issues,...prices.issues],sources:collected.sources.filter(source=>source.segment==='Vertical'&&source.metric==='releases').map(source=>({...source}))};
+      })() : null;
       if (controller.signal.aborted) return;
       monthlyCache.current = monthlyLaunches;
       activate('reconciliation');
@@ -82,7 +88,7 @@ export function useFortalezaMarket(selection: FortalezaSelection, authorizedCiti
       }
       if (controller.signal.aborted) return;
       const finishedSteps: FortalezaGenerationState['steps'] = FORTALEZA_GENERATION_STEPS.map(step => ({ ...step, status: step.id === 'validation' ? 'done' : step.id === 'sources' ? report.metrics && intro.status === 'ready' && !monthlyLaunches?.issues.length ? 'done' : 'attention' : step.id === 'reconciliation' ? report.metrics && !report.issues.length ? 'done' : 'attention' : blueprint ? 'done' : 'waiting' }));
-      setState({ key, phase: 'done', startedAt, finishedAt:new Date().toISOString(), message: report.metrics ? report.issues.length || intro.status !== 'ready' || monthlyLaunches?.issues.length ? 'Prévia organizada; confira os balanços e as fontes pendentes.' : monthlyLaunches?.market ? 'Prévia mensal organizada até o slide 60.' : 'Prévia vertical e slides iniciais organizados.' : 'Há fontes ou cobertura a conferir antes de organizar a prévia.', report, hasFailedCities: result.collection.failedCities.length > 0 || Boolean(monthlyLaunches?.issues.length), blueprint, intro, monthlyLaunches, steps: finishedSteps });
+      setState({ key, phase: 'done', startedAt, finishedAt:new Date().toISOString(), message: report.metrics ? report.issues.length || intro.status !== 'ready' || monthlyLaunches?.issues.length ? 'Prévia organizada; confira os balanços e as fontes pendentes.' : monthlyLaunches?.market ? selection.periodicity==='monthly'?'Prévia mensal organizada até o slide 60.':'Prévia trimestral organizada até o slide 89.' : 'Prévia vertical e slides iniciais organizados.' : 'Há fontes ou cobertura a conferir antes de organizar a prévia.', report, hasFailedCities: result.collection.failedCities.length > 0 || Boolean(monthlyLaunches?.issues.length), blueprint, intro, monthlyLaunches, steps: finishedSteps });
     } catch {
       if (!controller.signal.aborted) setState(current => ({ key, phase: 'error', startedAt, message: 'Não foi possível concluir a consulta. Confira sua autenticação e tente novamente.', report: null, hasFailedCities: false, blueprint: null, intro: null, monthlyLaunches: null, steps: (current?.steps ?? steps).map(step => ({ ...step, status: step.status === 'running' ? 'failed' : step.status })) }));
     } finally { if (operation.current === controller) operation.current = null; }
