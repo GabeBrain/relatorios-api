@@ -80,7 +80,7 @@ export function buildMonthlySlide(page: number, data: MonthlyMarketData | null, 
   const required = rmOnly ? FORTALEZA_CITIES.filter(city => city !== 'Fortaleza') : pattern || page === 24 || page === 34 ? ['Fortaleza'] : [...FORTALEZA_CITIES];
   const missing = required.filter(city => !cities.some(value => normalizeMarketText(value) === normalizeMarketText(city)));
   if (missing.length) return block(`Faltam municípios no recorte deste slide: ${missing.join(', ')}. ${required.length === 1 ? 'Selecione Fortaleza ou o conjunto Fortaleza e RM.' : 'Para o relatório completo, escolha “Fortaleza e RM · 5 municípios” e gere novamente.'}`);
-  const months = monthlyMarketMonths(selection), visibleMonths = months.slice(-25), bins = new Map(months.map(month => [month, blank(month)]));
+  const months = monthlyMarketMonths(selection), visibleMonths = months.slice(selection.periodicity==='monthly'?-25:-27), bins = new Map(months.map(month => [month, blank(month)]));
   const metrics: MonthlyMetric[] = rollingPage ? ['releases','sales'] : stockPage ? ['stock'] : [22,23,25,27,28,30,31].includes(page) ? ['sales'] : ['releases'];
   const segments: MonthlySegment[] = pattern || rollingPage || page === 34 || page === 35 ? ['Vertical'] : lots ? ['Horizontal'] : page === 14 || page === 33 ? ['Vertical','Horizontal'] : ['Vertical','Horizontal','Comercial'];
   const baseMonth = fortalezaPeriod(selection).end.slice(0,7), warnings = new Set<string>(), sourceKeys: string[] = [];
@@ -110,10 +110,11 @@ export function buildMonthlySlide(page: number, data: MonthlyMarketData | null, 
   }
   if ([...bins.values()].some(bin => ![bin.first,bin.second,bin.total].every(value => Number.isFinite(value) && Math.abs(value) < Number.MAX_SAFE_INTEGER / 100))) return block('O agregado excede a precisão numérica segura.');
   const history = visibleMonths.map(month => bins.get(month)!);
+  const endMonth=selection.periodicity==='monthly'?selection.position:selection.position*3;
   const accumulated = stockPage ? [] : [selection.year - 1, selection.year].map(year => {
-    const values = [...bins.values()].filter(bin => bin.month >= `${year}-01` && bin.month <= `${year}-${String(selection.position).padStart(2,'0')}`);
+    const values = [...bins.values()].filter(bin => bin.month >= `${year}-01` && bin.month <= `${year}-${String(endMonth).padStart(2,'0')}`);
     const first = values.reduce((sum, bin) => sum + bin.first,0), second = values.reduce((sum, bin) => sum + bin.second,0);
-    return { month: `${year}-${String(selection.position).padStart(2,'0')}`, label: `Jan-${introMonth(selection.position,true)}/${year}`, first, second, total: first + second };
+    return { month: `${year}-${String(endMonth).padStart(2,'0')}`, label: `Jan-${introMonth(endMonth,true)}/${year}`, first, second, total: first + second };
   });
   if (accumulated.some(bin => ![bin.first,bin.second,bin.total].every(value => Number.isFinite(value) && Math.abs(value) < Number.MAX_SAFE_INTEGER / 100))) return block('O acumulado excede a precisão numérica segura.');
   const result: MonthlySlideData = { status: 'ready', issue: null, warnings: [...warnings], history, accumulated, changes: { total: difference(history.at(-1)!.total, history.at(-13)!.total), first: stockPage ? null : difference(accumulated[1].first,accumulated[0].first), second: stockPage ? null : difference(accumulated[1].second,accumulated[0].second) }, labels, unit: money ? 'milhões' : 'unidades', ...(money ? { baseMonth } : {}), sourceKeys };

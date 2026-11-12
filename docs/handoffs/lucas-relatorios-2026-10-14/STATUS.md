@@ -1,5 +1,12 @@
 # Estado do handoff
 
+## 12/11/2026 — Fortaleza trimestral: slides 11–20
+
+Retomada autorizada por Lucas, base `bca69e66`, main/origin 0–0 após fetch. Office abriu original trimestral em leitura (hash do catálogo conferido); arte 11–20 sem tabelas/gráficos/percentuais anteriores. Nove trimestres completos a partir de 27 meses; lançamentos em unidades, cadastro distinto e VGV corrigido mês a mês pelo INCC-DI. Tabelas 16/19 preservam mês de fechamento do original e somam vertical/horizontal/comercial; original exibia total repetindo somente horizontal. Prévia e JSON agora reconhecem 20/89 posições, sem exportação trimestral prematura. Carregamento Brain, escopo autorizado, retry e cancelamento reutilizados. Mensal 60/60 e SP preservados.
+
+Validação: 235 testes Fortaleza/21 arquivos, build/tipos e lint dirigidos aprovados; 48 cenários Edge com rede externa bloqueada (1440/390, claro/escuro, dez slides e fontes incompletas/vazias); comparação visual com os dez originais revisada, títulos das tabelas restaurados após inspeção. Dados sintéticos; sem geração autenticada ou homologação. Próximo: 21–40, depois preços, mapas, tabelas e fechamento. Sem publicação ou escrita Monday.
+
+
 ## 12/11/2026 — SP: preços históricos observados sem barras vazias
 
 Novo diagnóstico do usuário (SHA-256 `504aa4d5fd114879fb8ff4af4719655b0ea94af64e2086a9da20f006f4ae27fd`) confirma médias por estoque positivo nos 13 períodos de cada slide 53/55/57. A guarda de estoque negativo em uma tipologia bloqueava as amostras históricas, inclusive o recorte de dois dormitórios sem negativo próprio. Agora permite exibir a média observada com cobertura parcial; negativos não ponderam preços e permanecem na auditoria. Não reconcilia estoque/população, não altera o fechamento nem calcula variações envolvendo parciais. Validação: 351 testes SP em 39 arquivos, tipos e lint dirigidos aprovados. Teste novo confere 13 pontos em 53/55/57 e preserva bloqueio de fechamento inválido. Sem nova observação em navegador autenticado; verificação headless do cálculo, com dados sintéticos. Métodos com esgotadas continuam indisponíveis por preços ausentes (99 tipologias no geral, 25 em um dormitório e 24 em dois no fechamento); não comprovam equivalência ao analista. Sem novas consultas API ou mudança de coleta. Fortaleza preservado.

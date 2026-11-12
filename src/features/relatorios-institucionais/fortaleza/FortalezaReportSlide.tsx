@@ -14,6 +14,7 @@ import FortalezaMonthlyTableSlide from './FortalezaMonthlyTableSlide';
 import FortalezaMonthlyAnalysisSlide from './FortalezaMonthlyAnalysisSlide';
 import FortalezaMonthlyMarketSlide from './FortalezaMonthlyMarketSlide';
 import FortalezaMonthlyLaunchSlide from './FortalezaMonthlyLaunchSlide';
+import FortalezaQuarterlyLaunchSlide from './FortalezaQuarterlyLaunchSlide';
 
 export interface FortalezaSlideProps {
   selection:FortalezaSelection; cities:string[]; data:IntroData|null;
@@ -22,7 +23,7 @@ export interface FortalezaSlideProps {
 /** Preview and exports share exactly the same slide, including edited people. */
 export default function FortalezaReportSlide({page,...props}:FortalezaSlideProps&{page:number}) {
   const {selection,cities,data,monthlyLaunches,editorial}=props;
-  if(selection.periodicity!=='monthly')return <FortalezaIntroSlide model="junho" page={page} view={buildIntroView(selection,cities.length?cities:[...FORTALEZA_CITIES],data)}/>;
+  if(selection.periodicity!=='monthly')return page>=11?<FortalezaQuarterlyLaunchSlide page={page} {...props}/>:<FortalezaIntroSlide model="junho" page={page} view={buildIntroView(selection,cities.length?cities:[...FORTALEZA_CITIES],data)}/>;
   if(page>=56)return <FortalezaClosingSlide page={page} selection={selection} editorial={editorial}/>;
   if(page>=47)return <FortalezaMonthlyTableSlide page={page} selection={selection} data={buildOfferTable(Math.min(page,52),monthlyLaunches?.market??null,monthlyLaunches?.prices??null,selection,cities)}/>;
   if(page>=36){

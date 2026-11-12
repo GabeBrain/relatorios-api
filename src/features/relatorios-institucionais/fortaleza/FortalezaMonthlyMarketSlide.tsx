@@ -7,21 +7,21 @@ const artwork = import.meta.glob('./assets/monthly/*.png', { eager:true, import:
 const colors = ['#1B4059','#42CCA2'];
 const number = (value: number, money = false) => value.toLocaleString('pt-BR',{ maximumFractionDigits:money ? 1 : 0 });
 const percentage = (value: number | null) => value === null ? '—' : `${value > 0 ? '+' : value < 0 ? '−' : ''}${Math.abs(value).toLocaleString('pt-BR',{ maximumFractionDigits:1 })}%`;
-function Plot({ bins, x, width, large = false, money, palette = colors, bottom = 533 }: { bins: MonthlyBin[]; x:number; width:number; large?:boolean; money:boolean; palette?:string[]; bottom?:number }) {
+export function Plot({ bins, x, width, large = false, money, palette = colors, bottom = 533, quarterly = false }: { bins: MonthlyBin[]; x:number; width:number; large?:boolean; money:boolean; palette?:string[]; bottom?:number; quarterly?:boolean }) {
   const min = Math.min(0,...bins.map(bin => Math.min(0,bin.first) + Math.min(0,bin.second)));
   const max = Math.max(1,...bins.map(bin => Math.max(0,bin.first) + Math.max(0,bin.second)));
   const y = (value:number) => bottom - (value - min) / (max - min) * 275;
   const zero = y(0), step = width / bins.length, barWidth = step * .76;
-  return <g aria-label={large ? 'Acumulado no ano' : 'Histórico mensal'}><line x1={x} x2={x + width} y1={zero} y2={zero} stroke="#AAB8C2" />
+  return <g aria-label={large ? 'Acumulado no ano' : quarterly ? 'Histórico trimestral' : 'Histórico mensal'}><line x1={x} x2={x + width} y1={zero} y2={zero} stroke="#AAB8C2" />
     {bins.map((bin,index) => {
       const cx = x + step * (index + .5); let positive = 0, negative = 0;
       return <g key={bin.month}>{[bin.first,bin.second].map((value, group) => {
         const from = value >= 0 ? positive : negative;
         if (value >= 0) positive += value; else negative += value;
         const top = Math.min(y(from),y(from + value)), height = Math.abs(y(from) - y(from + value));
-        const label = number(value,money), labelSize = large ? 23 : Math.min(12,(step - 4) / (label.length * .65));
+        const label = number(value,money), labelSize = large ? 23 : quarterly ? 22 : Math.min(12,(step - 4) / (label.length * .65));
         return <g key={group}><rect x={cx - barWidth / 2} y={top} width={barWidth} height={height} fill={palette[group]} />{height > (large ? 35 : 18) && <text x={cx} y={top + height / 2 + (large ? 8 : 4)} textAnchor="middle" fontSize={labelSize} fill={group ? 'black' : 'white'} fontWeight={700}>{label}</text>}</g>;
-      })}<circle cx={cx} cy={y(bin.total)} r={large ? 6 : 4.5} fill="#AA4EBF" /><text x={cx} y={y(bin.total) - 14} textAnchor="middle" fontSize={large ? 27 : Math.min(13,(step - 3) / (number(bin.total,money).length * .65))} fill="black" fontWeight={700}>{number(bin.total,money)}</text><text x={cx} y={bottom + 27} textAnchor={large ? 'middle' : 'end'} transform={large ? undefined : `rotate(-50 ${cx} ${bottom + 27})`} fontSize={large ? 17 : 14} fill="black">{bin.label}</text></g>;
+      })}<circle cx={cx} cy={y(bin.total)} r={large ? 6 : 4.5} fill="#AA4EBF" /><text x={cx} y={y(bin.total) - 14} textAnchor="middle" fontSize={large ? 27 : quarterly ? 25 : Math.min(13,(step - 3) / (number(bin.total,money).length * .65))} fill="black" fontWeight={700}>{number(bin.total,money)}</text><text x={cx} y={bottom + 27} textAnchor={large || quarterly ? 'middle' : 'end'} transform={large || quarterly ? undefined : `rotate(-50 ${cx} ${bottom + 27})`} fontSize={large || quarterly ? 17 : 14} fill="black">{bin.label}</text></g>;
     })}
   </g>;
 }

@@ -104,7 +104,7 @@ describe('Fortaleza mensal 36–45',()=>{
     const {rerender}=render(<FortalezaIntroSlides selection={selection} cities={cities} data={null}/>);
     fireEvent.click(screen.getByRole('button',{name:'45'}));
     rerender(<FortalezaIntroSlides selection={{...selection,periodicity:'quarterly',position:2}} cities={cities} data={null}/>);
-    expect(screen.getByRole('button',{name:'10'}).getAttribute('aria-pressed')).toBe('true');
+    expect(screen.getByRole('button',{name:'20'}).getAttribute('aria-pressed')).toBe('true');
     expect(screen.queryByRole('button',{name:'45'})).toBeNull();
   });
 });
