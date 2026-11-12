@@ -97,7 +97,13 @@ export function SpReportPages({ report, onSelectSlide }: { report: SpPreview; on
 }
 
 function OriginalTextSlide({ number, title, report, onNavigate }: { number: number; title: string; report: SpPreview;onNavigate?:(page:number)=>void }) {
-  if(number===2)return <svg role="img" aria-label="Sobre este relatório" viewBox="0 0 1280 720" className="absolute inset-0 h-full w-full"><title>São Paulo capital · Empreendimentos residenciais verticais</title><text x="132" y="542" fontSize="20" fontWeight="bold" fill="#3d582e">{report.quarter[0]}º TRIMESTRE {report.quarter.slice(2)}</text></svg>;
+  if(number===2)return <svg role="img" aria-label="Sobre este relatório" viewBox="0 0 1280 720" className="absolute inset-0 h-full w-full"><title>São Paulo capital · Empreendimentos residenciais verticais</title>
+    <rect x={85} y={72} width={550} height={52} rx={26} fill="#ffcf00"/><text x={110} y={110} fontSize={40} fontWeight="bold" fill="#5b7537">SOBRE ESTE RELATÓRIO</text>
+    <rect x={85} y={150} width={520} height={164} rx={33} fill="white"/><text x={132} y={195} fontSize={24} fontWeight="bold" fill="#5b7537">Tipo de estudo:</text><text x={132} y={238} fontSize={22} fontWeight="bold" fill="#3d582e">MERCADO IMOBILIÁRIO</text>
+    <rect x={85} y={344} width={520} height={102} rx={33} fill="white"/><text x={132} y={382} fontSize={24} fontWeight="bold" fill="#5b7537">Local do estudo:</text><text x={132} y={414} fontSize={22} fontWeight="bold" fill="#3d582e">SÃO PAULO/SP</text>
+    <rect x={85} y={477} width={520} height={103} rx={33} fill="white"/><text x={132} y={516} fontSize={24} fontWeight="bold" fill="#5b7537">Período de realização:</text><text x={132} y={549} fontSize={22} fontWeight="bold" fill="#3d582e">{report.quarter[0]}º TRIMESTRE {report.quarter.slice(2)}</text>
+  </svg>;
+
   const divider = title.startsWith('Divisória:');
   const text = number === 2 ? [`São Paulo capital · Empreendimentos residenciais verticais`, report.quarter, spPeriodLabel(report)] : number === 6 ? SP_ORIGINAL_SLIDES.filter(item => item.title.startsWith('Divisória:')).map(item => `${item.number}. ${item.title.replace('Divisória: ', '')}`) : number >= 26 && number <= 30 ? ['Metodologia do INCC em definição', 'Aguardando série do índice, mês-base e critério de atualização.', 'Valores nominais não são exibidos como corrigidos.'] : divider ? [] : ['Conteúdo pendente', 'Esta posição segue o modelo original.', 'Os dados ou a revisão editorial ainda não foram concluídos.'];
   const words = (number === 6 ? 'SUMÁRIO' : title.replace('Divisória: ', '')).split(' '), lines = [''];

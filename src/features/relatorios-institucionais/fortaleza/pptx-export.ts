@@ -1,3 +1,4 @@
+import {addNativePptxSlide,patchNativePptx,type NativePatch} from '../shared/native-pptx';
 import type PptxGenJS from 'pptxgenjs';
 import { embedReportPptxAudit } from '../shared/pptx-audit';
 
@@ -55,41 +56,29 @@ export async function buildFortalezaMonthlyExport(slides:HTMLElement[],options:{
   const {signal}=options;check(signal);
   const count=options.periodicity==='quarterly'?89:60,kind=options.periodicity==='quarterly'?'Trimestral':'Mensal';
   if(slides.length!==count||slides.some((slide,i)=>Number(slide.dataset.fortalezaExportSlide)!==i+1))throw new Error(`A exportação exige as ${count} páginas na ordem original.`);
-  const [{default:Pptx},{toPng,toJpeg,getFontEmbedCSS}]=await Promise.all([import('pptxgenjs'),import('html-to-image')]);
+  const [{default:Pptx},{toJpeg,getFontEmbedCSS}]=await Promise.all([import('pptxgenjs'),import('html-to-image')]);
   const pptx=new Pptx();pptx.layout='LAYOUT_WIDE';pptx.author='Brain Inteligência Estratégica';pptx.title=`Fortaleza e RM · ${kind} · ${options.period}`;
-  pptx.subject=`Versão para conferência, sem homologação. ${options.mode==='editable'?'Textos e células dinâmicos editáveis; retratos individuais editáveis; gráficos, rótulos inclinados e artes em imagem. Requer Tahoma instalada.':'Lâminas em imagem para preservar a aparência da prévia.'}`;
+  pptx.subject='Conferência: tabelas, textos e formas vetoriais editáveis; imagens substituíveis individualmente. Requer Tahoma.';
   const pdf=options.format==='pdf'?await(await import('pdf-lib')).PDFDocument.create():null;
   if(pdf){pdf.setTitle(pptx.title);pdf.setAuthor(pptx.author);pdf.setSubject('Versão para conferência, sem homologação; diagnóstico anexado.');}
+  const patches:NativePatch[]=[];
   const fontEmbedCSS=await getFontEmbedCSS(slides[0]);check(signal);
   for(const [i,original] of slides.entries()){
     await waitArtwork(original,signal);check(signal);
+    if(!pdf){
+      const slide=await addNativePptxSlide(pptx,original,signal,patches);
+      slide.addNotes(`Fortaleza / SINDUSCON-CE · ${options.period}; posição ${i+1}/${count}. Objetos nativos editáveis; sem homologação automática.`);
+      options.onProgress(i+1,count);continue;
+    }
     const clone=original.cloneNode(true) as HTMLElement;original.parentElement!.append(clone);
     try{
-      const photos:{data:string;x:number;y:number;w:number;h:number;name:string}[]=[];
-      if(!pdf&&options.mode==='editable'){
-        const frame=clone.getBoundingClientRect();
-        for(const photo of clone.querySelectorAll<SVGSVGElement>('[data-fortaleza-editable-photo]')){
-          const box=photo.getBoundingClientRect(),portrait=new Image();portrait.src=photo.querySelector('image')?.getAttribute('href')??'';await portrait.decode();check(signal);
-          const ratio=Math.max(1,Math.min(8,portrait.naturalWidth/box.width,portrait.naturalHeight/box.height));
-          photos.push({data:await toPng(photo as unknown as HTMLElement,{pixelRatio:ratio,width:box.width,height:box.height,cacheBust:false,fontEmbedCSS}),x:(box.left-frame.left)*W/frame.width,y:(box.top-frame.top)*H/frame.height,w:box.width*W/frame.width,h:box.height*H/frame.height,name:photo.dataset.fortalezaEditablePhoto??''});
-          photo.remove();
-        }
-      }
-      const native=!pdf&&options.mode==='editable'?fortalezaNativeTexts(clone):{texts:[],parents:new Set<Element>()};
-      for(const parent of native.parents){(parent as HTMLElement).style.setProperty('fill','transparent','important');(parent as HTMLElement).style.setProperty('color','transparent','important');(parent as HTMLElement).style.setProperty('-webkit-text-fill-color','transparent','important');}
-      const image=await(pdf?toJpeg(clone,{fontEmbedCSS,pixelRatio:2,width:1280,height:720,cacheBust:false,backgroundColor:'#ffffff',quality:.97}):toPng(clone,{fontEmbedCSS,pixelRatio:2,width:1280,height:720,cacheBust:false}));check(signal);
-      if(pdf){const page=pdf.addPage([W*72,H*72]),jpg=await pdf.embedJpg(image);check(signal);page.drawImage(jpg,{x:0,y:0,width:W*72,height:H*72});}
-      else{
-        const slide=pptx.addSlide();slide.addImage({data:image,x:0,y:0,w:W,h:H,objectName:`Lâmina ${kind} ${i+1}`});
-        for(const {name,...photo} of photos)slide.addImage({...photo,objectName:`Foto editável: ${name}`});
-        for(const text of native.texts){const {size,text:value,...box}=text;slide.addText(value,{...box,fontSize:size,fontFace:'Tahoma',margin:0,breakLine:false,valign:'middle',fit:'shrink',wrap:false,objectName:`Texto editável: ${text.text.slice(0,50)}`} as PptxGenJS.TextPropsOptions);}
-        slide.addNotes(`Fortaleza / SINDUSCON-CE · ${options.period}; posição ${i+1}/${count}. Versão para conferência; fontes pendentes preservadas. ${pptx.subject}`);
-      }
+      const image=await toJpeg(clone,{fontEmbedCSS,pixelRatio:2,width:1280,height:720,cacheBust:false,backgroundColor:'#ffffff',quality:.97});check(signal);
+      const page=pdf.addPage([W*72,H*72]),jpg=await pdf.embedJpg(image);check(signal);page.drawImage(jpg,{x:0,y:0,width:W*72,height:H*72});
       options.onProgress(i+1,count);
     }finally{clone.remove();}
   }
   if(pdf){check(signal);const auditBytes=new TextEncoder().encode(JSON.stringify(options.audit));let binary='';for(let i=0;i<auditBytes.length;i+=8192)binary+=String.fromCharCode(...auditBytes.subarray(i,i+8192));await pdf.attach(btoa(binary),'fortaleza-diagnostico.json',{mimeType:'application/json',description:'Diagnóstico da mesma exportação; sem credenciais ou históricos brutos.'});const bytes=await pdf.save();check(signal);return new Blob([bytes as BlobPart],{type:'application/pdf'});}
   check(signal);const blob=await pptx.write({outputType:'blob',compression:true}) as Blob;check(signal);
-  const bytes=embedReportPptxAudit(new Uint8Array(await blob.arrayBuffer()),options.audit,{part:FORTALEZA_PPTX_AUDIT_PART,namespace:'urn:brain:fortaleza-institutional:audit:v1',relationshipId:'rIdFortalezaAudit'});check(signal);
+  const bytes=embedReportPptxAudit(patchNativePptx(new Uint8Array(await blob.arrayBuffer()),patches),options.audit,{part:FORTALEZA_PPTX_AUDIT_PART,namespace:'urn:brain:fortaleza-institutional:audit:v1',relationshipId:'rIdFortalezaAudit'});check(signal);
   return new Blob([bytes as BlobPart],{type:'application/vnd.openxmlformats-officedocument.presentationml.presentation'});
 }

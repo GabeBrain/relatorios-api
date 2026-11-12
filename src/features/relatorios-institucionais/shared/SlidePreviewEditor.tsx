@@ -27,8 +27,12 @@ export function EditableSlideSurface({page,edits={},enabled=false,onElements,onS
       const before=getComputedStyle(node),r=node.getBoundingClientRect(),fontPx=parseFloat(before.fontSize),top=(r.top-frame.top)*720/frame.height;
       const value=node.textContent??'';
       if(node instanceof SVGTextElement&&top<125&&fontPx>=24&&(Number(before.fontWeight)>=600||before.fontWeight==='bold')&&value.replace(/[\d\W_]/g,'').length>=6)node.style.fontSize=`${Math.max(40,fontPx)}px`;
-      const style=getComputedStyle(node),box=node.getBoundingClientRect();if(!value.trim()||!box.width||!box.height||style.display==='none')continue;
-      const anchor=style.textAnchor==='middle'?'middle':style.textAnchor==='end'?'end':'start',x=(box.left-frame.left+(anchor==='middle'?box.width/2:anchor==='end'?box.width:0))*1280/frame.width;
+      const style=getComputedStyle(node),cell=node.closest('[data-native-cell]');let box=node.getBoundingClientRect();
+      if(cell){const range=document.createRange();range.selectNodeContents(node);if(typeof range.getBoundingClientRect==='function')box=range.getBoundingClientRect();}
+      if(!value.trim()||!box.width||!box.height||style.display==='none')continue;
+      const align=cell?getComputedStyle(node.parentElement!).textAlign:style.textAnchor;
+      const anchor=align==='middle'||align==='center'?'middle':align==='end'||align==='right'?'end':'start',x=(box.left-frame.left+(anchor==='middle'?box.width/2:anchor==='end'?box.width:0))*1280/frame.width;
+      node.setAttribute('data-slide-text-id',`text-${index}`);
       discovered.push({id:`text-${index}`,text:value,x,y:(box.top-frame.top)*720/frame.height,fontPt:parseFloat(style.fontSize)*.75,color:colorHex(node instanceof SVGTextElement?style.fill:style.color),bold:Number(style.fontWeight)>=600||style.fontWeight==='bold',anchor});
       if(edits[`text-${index}`])node.style.visibility='hidden';
     }
@@ -38,9 +42,9 @@ export function EditableSlideSurface({page,edits={},enabled=false,onElements,onS
   },[children,edits,onElements,page]);
   return <div ref={root} className="relative h-full w-full" style={{aspectRatio:'16 / 9',fontFamily:'Tahoma, Arial, sans-serif'}} data-editable-slide={page}>{children}
     <svg data-manual-slide-layer="true" viewBox="0 0 1280 720" className="pointer-events-none absolute inset-0 h-full w-full" aria-label="Ajustes manuais do slide">
-      {Object.values(edits).filter(edit=>!edit.hidden).map(edit=><text key={edit.id} x={edit.x} y={edit.y} dominantBaseline="text-before-edge" textAnchor={edit.anchor} fontFamily="Tahoma" fontSize={edit.fontPt*4/3} fontWeight={edit.bold?700:400} fill={edit.color}>{edit.text.split('\n').map((line,index)=><tspan key={index} x={edit.x} dy={index?edit.fontPt*4/3*1.2:0}>{line||' '}</tspan>)}</text>)}
+      {Object.values(edits).filter(edit=>!edit.hidden).map(edit=><text key={edit.id} data-slide-edit-source={edit.id} data-slide-edit-hidden={edit.hidden?'true':undefined} x={edit.x} y={edit.y} dominantBaseline="text-before-edge" textAnchor={edit.anchor} fontFamily="Tahoma" fontSize={edit.fontPt*4/3} fontWeight={edit.bold?700:400} fill={edit.color}>{edit.text.split('\n').map((line,index)=><tspan key={index} x={edit.x} dy={index?edit.fontPt*4/3*1.2:0}>{line||' '}</tspan>)}</text>)}
     </svg>
-    {enabled&&<svg data-manual-slide-layer="true" viewBox="0 0 1280 720" className="absolute inset-0 h-full w-full" aria-label="Selecionar texto para editar">{[...elements,...Object.values(edits).filter(edit=>edit.added)].map(element=>{const value=edits[element.id]??element,width=Math.min(1120,Math.max(60,value.text.length*value.fontPt*.75)),x=value.x-(value.anchor==='middle'?width/2:value.anchor==='end'?width:0);return <rect key={value.id} x={x} y={value.y} width={width} height={Math.max(24,value.fontPt*1.8)} fill="transparent" stroke="currentColor" strokeOpacity={.2} style={{cursor:'text'}} onClick={()=>onSelect?.(value.id)}><title>{value.text}</title></rect>;})}</svg>}
+    {enabled&&<svg data-manual-slide-layer="true" viewBox="0 0 1280 720" className="absolute inset-0 h-full w-full" aria-label="Selecionar texto para editar">{[...elements,...Object.values(edits).filter(edit=>edit.added)].map(element=>{const value=edits[element.id]??element,width=Math.min(1120,Math.max(60,value.text.length*value.fontPt*.75)),x=value.x-(value.anchor==='middle'?width/2:value.anchor==='end'?width:0);return <rect key={value.id} data-slide-select={value.id} role="button" tabIndex={0} aria-label={`Editar: ${value.text}`} x={x} y={value.y} width={width} height={Math.max(24,value.fontPt*1.8)} fill="transparent" stroke="currentColor" strokeOpacity={.2} style={{cursor:'text'}} onClick={()=>onSelect?.(value.id)} onKeyDown={event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();onSelect?.(value.id);}}}><title>{value.text}</title></rect>;})}</svg>}
   </div>;
 }
 export function SlidePreviewEditor({page,state}:{page:number;state:SlidePreviewEditing}){
