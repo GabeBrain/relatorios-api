@@ -1,5 +1,22 @@
 # Rebrain (Plataforma) — Documento Vivo
 
+## 13/11/2026 — Slide Maker: decimal pt-BR no render (prompt 1.1) — Diego Cabrero, com Claude
+
+- **Causa:** os rótulos de gráfico são números com código de formato; o separador vem do idioma de quem renderiza. O PowerPoint da equipe (pt-BR) mostra vírgula, mas o LibreOffice da imagem, em `C.UTF-8`, mostrava `3.31`, tanto nas miniaturas do QA quanto na revisão visual do próprio agente em F3/F4.
+- **Correção (DET):** `lib/render.py` grava `ooSetupSystemLocale = pt-BR` no perfil temporário do LibreOffice. `VERSAO_PROMPT` 1.1 registrado em `LIVE_regras_slide_maker.md`.
+- **Validação:** referência renderizada na imagem publicada antes/depois: slide 9 com `8.8` → só `8,8`. Teste obrigatório no build (`9,2` presente, `9.2` ausente) e perfil com pt-BR; build com 49 testes da `lib/`; 89 testes do serviço. Revisão `slide-maker-agent-00008-fkb` (`sha256:c8b29fcf…`), agente real e isolamento aprovado.
+- **Não muda:** o PPTX entregue. Office configurado em inglês segue o idioma de quem abre.
+- **Pendências:** Diego remove os diagnósticos `6b6b2f64…` e `d7296bae…` (SQL com contagem 2); calibrar T8 ("déficit"); decidir o ajuste F4 do dourado.
+- **Monday:** —
+
+## 13/11/2026 — Slide Maker: QA do deck dourado 1 (v1) — Diego Cabrero, com Claude
+
+- **Verificação:** o PPTX baixado por Diego passou pela imagem publicada (`sha256:54a8557c…`): render dos 17 slides sem erro e lint com **0 falhas 🔒 e 11 alertas**; miniaturas conferidas por hash e inspecionadas. Identidade correta: logo, paleta, Neo Sans/Montserrat, slide final oficial do Fábio e fontes nos rodapés. Cópia temporária em `diagnosticos/` do bucket de marca removida após o QA.
+- **Achados:** (1) rótulos de gráfico com ponto decimal (`3.31`, `+87.0%`) enquanto o texto usa vírgula: vem da brain-deck, o deck de referência tem o mesmo padrão e o lint não cobre; (2) T3, densidade de 66 a 101 palavras em 6 slides (referência ~40); (3) T8 marca "déficit" como erro, falso positivo do dicionário; (4) slide 16 com metade inferior vazia; (5) capa sem nome, cidade e data do evento, como o próprio agente avisou.
+- **Não verificado:** exatidão dos números e fontes (cabe a Diego e ao ponto focal); custo do trabalho (console da Anthropic).
+- **Pendências:** decidir o ajuste F4 (dados do evento) dentro de US$ 23; corrigir o decimal pt-BR nos gráficos da brain-deck e calibrar T8 ("déficit") — mudança de ferramenta exige subir `VERSAO_PROMPT` e registrar em `LIVE_regras_slide_maker.md`; remover os diagnósticos `6b6b2f64…` e `d7296bae…`.
+- **Monday:** —
+
 ## 13/11/2026 — Slide Maker: dourado 1 entregue (v1) e envio de 190 MB comprovado — Diego Cabrero, com Claude
 
 - **Dourado 1 (`0c232f3e…`), agente real:** F1 em 82 s, F2 em 3,5 min, F3 em 9,7 min (18h42–18h53 UTC). Deck v1 com 17 slides (~14 min), tese em 4 blocos, dados atualizados até 2026 e slide final do Fábio. O próprio agente sinalizou que faltam nome, cidade e data do evento (capa e slide da cidade). Custo a conferir no console da Anthropic (o log não registra custo, §11).

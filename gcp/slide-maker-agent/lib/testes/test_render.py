@@ -39,6 +39,20 @@ class Fumaca(unittest.TestCase):
             self.assertTrue(any(n.startswith("neosanspro") for n in nomes), f"Neo Sans Pro ausente do PDF: {r['fontes_pdf']}")
             self.assertTrue(any(n.startswith("montserrat") for n in nomes), f"Montserrat ausente do PDF: {r['fontes_pdf']}")
 
+        # Rótulos numéricos dos gráficos em pt-BR, como no PowerPoint da equipe: o slide 9 da referência tem
+        # o gráfico de vacância por UF (8,8 / 9,2 / 10,8…), que em C.UTF-8 saía como 8.8 / 9.2.
+        from pypdf import PdfReader
+        texto = PdfReader(r["pdf"]).pages[8].extract_text()
+        self.assertIn("9,2", texto)
+        self.assertNotIn("9.2", texto)
+
+    def test_perfil_fixa_pt_br(self):
+        perfil = Path(tempfile.mkdtemp(prefix="perfil-"))
+        render.preparar_perfil(perfil)
+        xcu = (perfil / "user" / "registrymodifications.xcu").read_text(encoding="utf-8")
+        self.assertIn('oor:name="ooSetupSystemLocale"', xcu)
+        self.assertIn("<value>pt-BR</value>", xcu)
+
 
 if __name__ == "__main__":
     unittest.main()
