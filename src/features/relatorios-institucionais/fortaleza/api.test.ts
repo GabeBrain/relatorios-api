@@ -85,6 +85,22 @@ describe('Fortaleza — leitura curta autenticada', () => {
     expect(request.mock.calls.filter(([options]) => options.query.city === 'Fortaleza')).toHaveLength(4);
     expect(request.mock.calls.filter(([options]) => options.query.city === 'Aquiraz')).toHaveLength(8);
   });
+  it.each(['monthly','quarterly'] as const)('retry %s consulta novamente fonte recebida mas reprovada na validação',async periodicity=>{
+    const selection={...monthlySelection,periodicity,position:periodicity==='monthly'?6:2,territory:'capital-rm' as const},fallback=fixtureRequest(selection);
+    let invalid=true;
+    const request=vi.fn(async options=>{
+      const result=await fallback(options);
+      if(invalid&&options.query.city==='Aquiraz'&&options.url.endsWith('/sales'))result.data.data[0].liquid_sales=null;
+      return result;
+    });
+    const first=await collectFortalezaMarket(selection,[...FORTALEZA_CITIES],{token,request});
+    expect(first.result.collection.failedCities).toHaveLength(0);expect(first.report.metrics).toBeNull();
+    invalid=false;
+    const second=await collectFortalezaMarket(selection,[...FORTALEZA_CITIES],{token,request},first.result);
+    expect(second.report.status).toBe('complete');
+    expect(request.mock.calls.filter(([options])=>options.query.city==='Aquiraz')).toHaveLength(8);
+    expect(request.mock.calls.filter(([options])=>options.query.city==='Fortaleza')).toHaveLength(4);
+  });
   it('cancelamento interrompe antes das próximas fontes e não retorna resultado parcial', async () => {
     const controller = new AbortController();
     const request = vi.fn(async options => { controller.abort(); return fixtureRequest()(options); });

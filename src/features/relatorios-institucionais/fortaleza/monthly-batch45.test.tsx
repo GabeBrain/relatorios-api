@@ -19,6 +19,14 @@ function fixture():PriceCollection {
   }));return {scopeKey:'fixture',months,sources,issues:[]};
 }
 describe('Fortaleza mensal 36–45',()=>{
+  it.each(['monthly','quarterly'] as const)('IVV negativo fica abaixo da referência zero no %s',periodicity=>{
+    const selected={...selection,periodicity,position:periodicity==='monthly'?7:2},market=monthlyMarketFixture(selected);
+    market.sources.filter(source=>source.city==='Fortaleza'&&source.segment==='Vertical'&&source.metric==='sales').forEach(source=>source.rows.forEach(row=>row.liquid_sales=-1));
+    const {container}=render(<FortalezaMonthlyAnalysisSlide page={45} selection={selected} data={buildMonthlyIvv(market,selected,cities)}/>);
+    const zero=Number(screen.getByLabelText('Referência de IVV zero').getAttribute('y1'));
+    expect(zero).toBeLessThan(535);expect(zero).toBeGreaterThan(270);
+    expect([...container.querySelectorAll('circle')].every(circle=>Number(circle.getAttribute('cy'))>zero)).toBe(true);
+  });
   it('37 apresenta13 meses e38 separa casas de lotes fechados',()=>{
     const data=fixture(),first=buildPriceSlide(37,data,selection,cities),second=buildPriceSlide(38,data,selection,cities);
     expect(first.status).toBe('ready');expect(first.series[0].points).toHaveLength(13);expect(first.changes).toEqual([{month:0,year:0}]);

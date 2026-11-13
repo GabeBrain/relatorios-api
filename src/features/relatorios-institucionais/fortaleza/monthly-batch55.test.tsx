@@ -16,6 +16,14 @@ function fixture():PriceCollection {
   }));return {scopeKey:'fixture55',months,sources,issues:[]};
 }
 describe('Fortaleza mensal46–55',()=>{
+  it.each([47,48,49,50,51,52,53,54,55])('tabela %i reserva cabeçalho e competência antes dos dados',page=>{
+    const data=buildOfferTable(Math.min(page,52),monthlyMarketFixture(),fixture(),selection,cities);
+    const {container}=render(<FortalezaMonthlyTableSlide page={page} selection={selection} data={data}/>);
+    expect(container.querySelector('[data-monthly-table-heading]')).toBeTruthy();
+    const first=container.querySelector('g[aria-label="Tabela de oferta e vendas"] rect')!;
+    expect(Number(first.getAttribute('y'))).toBeGreaterThanOrEqual(192);
+    expect(screen.getByText('julho de 2026')).toBeTruthy();
+  });
   it('preserva grafia autorizada sem perder identidade por caixa ou acento',()=>{
     const names=cities.map(city=>city.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase()),data=monthlyMarketFixture();
     data.sources.forEach(source=>source.city=source.city.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase());

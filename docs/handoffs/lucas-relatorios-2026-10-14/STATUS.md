@@ -1,5 +1,9 @@
 # Estado do handoff
 
+## 13/11/2026 — Push autorizado e segunda revisão dos dois relatórios
+
+Lucas autorizou integrar/enviar a revisão e aprofundar mensal/trimestral. `44febf82` enviado após merge `b203bee9` com os dois commits remotos, preservando os logs. Base desta rodada: `b203bee9`, origin único, fetch final 0 atrás/0 à frente antes do novo commit. 287 testes, tipos, lint e build aprovados; 604 cenários visuais e quatro cenários de recuperação na página real com API interceptada; downloads locais PPTX/PDF 60/89 conferidos. [Correções e evidências](../../features/relatorios-institucionais/fortaleza/REVISAO_TRIMESTRAL_2026-11-13.md). Sem sessão autenticada Geobrain confirmada ou coleta real; homologação e confirmação do deploy pendentes. Sem escrita Monday. Autorização de push desta sessão permanece aplicável à revisão solicitada.
+
 ## 13/11/2026 ? Revisão trimestral Fortaleza/SINDUSCON
 
 Lucas/Codex; main limpa na abertura, origin único, fetch concluído, 0 atrás/0 à frente sobre `a3d2f4f3`. Node/npm/Vitest/Edge disponíveis. Subprocessos de teste exigiram execução elevada por `spawn EPERM` no isolamento; execução permitida. 270 testes Fortaleza aprovados. Sem sessão autenticada Geobrain confirmada, sem chamada real nesta rodada, sem push ou escrita Monday. Escopo, correções, fontes públicas e limites em [revisão trimestral](../../features/relatorios-institucionais/fortaleza/REVISAO_TRIMESTRAL_2026-11-13.md). Publicação e homologação pendentes.

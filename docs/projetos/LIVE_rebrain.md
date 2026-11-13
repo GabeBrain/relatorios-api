@@ -546,6 +546,16 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-11-13 — Fortaleza mensal/trimestral: recuperação, IVV e conferência dos arquivos — Lucas/Codex
+
+- **Ambiente/funcionalidade:** Rebrain, relatórios Fortaleza/SINDUSCON mensal60 e trimestral89.
+- **O quê/por quê:** recuperação descarta cache do núcleo reprovado, preserva cidades válidas e oferece nova tentativa para cadastro inicial indisponível. Cabeçalhos mensais corrigidos pelo padrão trimestral compartilhado, IVV negativo abaixo da linha zero e guardas do total geral/negativo reforçadas.
+- **Validação:** 287 testes/24 arquivos, tipos, lint e build aprovados; 604 cenários visuais Edge e quatro cenários de recuperação com carregamento Brain lento, erro/sucesso, desktop/celular e claro/escuro. Downloads PPTX/PDF60/89 conferidos; textos nativos/Tahoma/listas e auditoria preservados. API interceptada; dados sintéticos ou replay municipal identificado, sem nova geração autenticada/homologação.
+- **Arquivos/evidências:** módulos Fortaleza, scripts de diagnóstico; [revisão e limites](../features/relatorios-institucionais/fortaleza/REVISAO_TRIMESTRAL_2026-11-13.md).
+- **Commits:** primeira revisão `44febf82` enviada pelo merge `b203bee9`; rodada adicional identificada por `fix(fortaleza): improve monthly and quarterly recovery and layout`.
+- **Monday:** [Estudo Fortaleza](https://brain381753.monday.com/boards/18398638577/pulses/13149406420) — `13149406420`.
+- **Impacto em Etapas/Pendências:** implementação e verificações locais concluídas, envio autorizado por Lucas nesta sessão. Fonte da amostra histórica, metodologias, equipe, geração autenticada e deploy confirmado continuam pendentes; nenhuma escrita Monday.
+
 ### 2026-11-13 — Fortaleza/SINDUSCON trimestral: cobertura de fontes e revisão geral — Lucas/Codex
 
 - **Ambiente/funcionalidade:** Rebrain, relatório trimestral Fortaleza/SINDUSCON, 89 posições.
@@ -1707,6 +1717,8 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 
 ## 2. Etapas
 
+- **13/11 — Fortaleza mensal/trimestral:** revisão adicional validada com 287 testes, 604 cenários visuais, recuperação simulada e downloads reais locais; envio autorizado. Aceite com dados reais permanece pendente.
+
 - **13/11 ? Fortaleza trimestral:** revisão local de cobertura por tipologia, rastreabilidade e cabeçalhos concluída; [evidência](../features/relatorios-institucionais/fortaleza/REVISAO_TRIMESTRAL_2026-11-13.md). Homologação real pendente.
 
 - **12/11 — Grafia:** Geobrain padronizado nos textos visíveis; entrega editorial local.
@@ -1842,6 +1854,8 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 ---
 
 ## 3. Pendências
+
+- **13/11 — Fortaleza mensal/trimestral:** após publicação autorizada, gerar relatório/JSON reais pareados, conferir cobertura e homologar métodos/equipe/amostra histórica. Downloads60/89 e recuperação não são mais pendências de implementação; confirmação de deploy e validação autenticada seguem abertas.
 
 - **13/11 ? Fortaleza trimestral:** autorizar envio desta revisão, gerar diagnóstico real pareado e homologar fontes/metodologia/equipe. Lacunas históricas não são preenchidas com zero ou cadastro atual.
 

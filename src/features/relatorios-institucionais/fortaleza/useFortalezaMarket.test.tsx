@@ -129,6 +129,23 @@ describe('Fortaleza — sessão e ciclo da consulta', () => {
     expect(result.current.state.steps.find(step => step.id === 'structure').status).toBe('waiting');
     expect(result.current.state.blueprint).toBeNull();
   });
+  it('oferece recuperação quando a paginação concluiu mas o núcleo foi reprovado',async()=>{
+    const data=payload();data.report.cities[0].status='incomplete';data.report.metrics=null;
+    collect.mockResolvedValue(data);
+    const {result}=renderHook(()=>useFortalezaMarket(monthlySelection,['Fortaleza'],'token-a',true));
+    await act(async()=>{await result.current.consult();});
+    expect(result.current.state.hasFailedCities).toBe(true);
+  });
+  it('oferece recuperação do cadastro inicial sem repetir fontes concluídas',async()=>{
+    collect.mockResolvedValue(payload());
+    vi.mocked(fetchFortalezaIntro).mockResolvedValueOnce({status:'blocked',projects:[],issues:['Cadastro indisponível.'],requests:1,startedAt:'',finishedAt:''});
+    const {result}=renderHook(()=>useFortalezaMarket(monthlySelection,['Fortaleza'],'token-a',true));
+    await act(async()=>{await result.current.consult();});
+    expect(result.current.state.hasFailedCities).toBe(true);
+    await act(async()=>{await result.current.consult(true);});
+    expect(result.current.state.intro.status).toBe('ready');expect(result.current.state.hasFailedCities).toBe(false);
+    expect(collect.mock.calls[1][3]).toBeDefined();
+  });
   it('progresso segue a etapa real e balanço pendente não recebe conclusão sem ressalva', async () => {
     const request = deferred();
     collect.mockImplementation((_selection, _cities, options) => { options.onStage('sources'); options.onProgress('Fortaleza · vendas líquidas · página 1'); return request.promise; });

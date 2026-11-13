@@ -4,7 +4,7 @@
 
 ## Onde trabalhar
 
-**Fortaleza trimestral — revisão geral, 13/11:** [correções, fontes e limites](fortaleza/REVISAO_TRIMESTRAL_2026-11-13.md). Fotografia incompleta por tipologia bloqueia preços; diagnóstico rastreia cobertura mensal e INCC. Cabeçalhos sem sobreposição/data fixa. 270 testes e 364 cenários Edge aprovados; geração autenticada e homologação continuam pendentes.
+**Fortaleza mensal/trimestral — revisão geral, 13/11:** [correções, fontes e limites](fortaleza/REVISAO_TRIMESTRAL_2026-11-13.md). Histórico parcial por tipologia bloqueia preços; fontes reprovadas são consultadas novamente. Cabeçalhos mensais/trimestrais e referência zero do IVV corrigidos. 287 testes, 604 cenários visuais, quatro cenários de recuperação e downloads PPTX/PDF 60/89 conferidos. Primeira revisão enviada por autorização de Lucas; geração autenticada e homologação continuam pendentes.
 
 **SP — revisão do analista,11/11:** [correções, comparação dos artefatos e retomada](sp/CORRECOES_ANALISTA_2026-11-11.md). Tahoma nativo, sumário30pt, trimestre no subtítulo, Top10 percentual e fotos/exportação revisados localmente. Escoamento adiado por Lucas; preços/histórico dependem de conciliação de método e base, sem travar os demais ajustes. Sem publicação deste lote.
 

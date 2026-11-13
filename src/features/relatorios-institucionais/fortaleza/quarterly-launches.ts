@@ -61,7 +61,7 @@ export function buildQuarterlyMunicipalTable(page:number,data:MonthlyMarketData|
   }
   const row=(label:string,values:number[])=>({label,values,total:values.reduce((sum,value)=>sum+value,0)});
   const rows=[row('Econômico',cells[0]),row('Demais Padrões',cells[1]),row('Subtotal Res. Vertical',cells[0].map((value,i)=>value+cells[1][i])),row('Horizontal',cells[2]),row('Comercial',cells[3]),row('Total',cells[0].map((_,i)=>cells.reduce((sum,values)=>sum+values[i],0)))];
-  if(rows.some(row=>!Number.isFinite(row.total)||row.total>Number.MAX_SAFE_INTEGER/100))return block('O total excede a precisão numérica segura.');
+  if(rows.some(row=>[...row.values,row.total].some(value=>!Number.isFinite(value)||Math.abs(value)>Number.MAX_SAFE_INTEGER/100)))return block('O total excede a precisão numérica segura.');
   return {status:'ready',issue:null,warnings,sourceKeys,unit:money?'milhões':'unidades',month,rows};
 }
 
@@ -90,6 +90,7 @@ export function buildQuarterlyStockTable(data:MonthlyMarketData|null,selection:F
   const total=Array<number>(5).fill(0);
   for(const [label,values] of rows)if(!label.startsWith('Subtotal'))values.forEach((value,index)=>total[index]+=value);
   rows.set('Total',total);
-  if(rows.size>24||total.some(value=>!Number.isSafeInteger(value)))return fail('Quantidade de linhas ou total excede o limite desta lâmina.');
-  return {...output,status:'ready',issue:null,rows:[...rows].map(([label,values])=>({label,values,total:values.reduce((sum,value)=>sum+value,0)}))};
+  const calculated=[...rows].map(([label,values])=>({label,values,total:values.reduce((sum,value)=>sum+value,0)}));
+  if(rows.size>24||calculated.some(row=>[...row.values,row.total].some(value=>!Number.isSafeInteger(value))))return fail('Quantidade de linhas ou total excede o limite desta lâmina.');
+  return {...output,status:'ready',issue:null,rows:calculated};
 }

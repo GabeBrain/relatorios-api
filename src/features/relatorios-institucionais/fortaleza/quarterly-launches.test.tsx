@@ -98,4 +98,12 @@ describe('Fortaleza trimestral — ordem original 11–20',()=>{
     data.sources=data.sources.filter(source=>!(source.segment==='Comercial'&&source.metric==='stock'));
     expect(buildQuarterlyStockTable(data,selection,cities).status).toBe('blocked');
   });
+  it('rejeita total geral de estoque inseguro mesmo quando cada município cabe no limite',()=>{
+    const data=fixture();data.sources.filter(source=>source.metric==='stock').forEach(source=>source.rows.forEach(row=>row.stock=110_000_000_000_000));
+    expect(buildQuarterlyStockTable(data,selection,cities).status).toBe('blocked');
+  });
+  it('aplica limite numérico simétrico aos totais de vendas negativas',()=>{
+    const data=fixture();data.sources.filter(source=>source.metric==='sales').forEach(source=>source.rows.forEach(row=>row.liquid_sales=-100_000_000_000_000));
+    expect(buildQuarterlyMunicipalTable(31,data,selection,cities).status).toBe('blocked');
+  });
 });
