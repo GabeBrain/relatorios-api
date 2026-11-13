@@ -10,8 +10,45 @@ import { buildFortalezaDiagnostic } from './diagnostic';
 import { prepareFortalezaBlueprint } from './model';
 import { createFortalezaEditorial } from './monthly-closing';
 import FortalezaReportSlide from './FortalezaReportSlide';
+import { FortalezaGenerationPanel } from './FortalezaGenerationPanel';
 const selection={...monthlyMarketSelection,periodicity:'quarterly' as const,position:2},cities=[...FORTALEZA_CITIES];
 describe('Fortaleza trimestral — preços, fechamento e tabelas 41–89',()=>{
+  it('bloqueia preço quando uma tipologia desaparece, mesmo havendo outra observação no mesmo mês',()=>{
+    const prices=quarterlyPriceFixture(selection),source=prices.sources[0],record=source.records[0],history=record.typologies_history as Record<string,unknown>[];
+    record.typologies_history=[...history,...history.slice(0,-1).map(row=>({...row,typology_id:999,price_private_area:9000}))];
+    source.frames=normalizePriceFrames(source,prices.months);
+    expect(source.frames[prices.months.at(-1)!].productIssues.vertical?.join(' ')).toContain('incompleta por tipologia');
+    expect(buildQuarterlyPrice(42,prices,selection,cities).status).toBe('blocked');
+  });
+  it('não exige uma tipologia antes de sua primeira observação e aceita estoque zero explícito',()=>{
+    const prices=quarterlyPriceFixture(selection),source=prices.sources[0],record=source.records[0],history=record.typologies_history as Record<string,unknown>[];
+    record.typologies_history=[...history,...history.slice(-3).map(row=>({...row,typology_id:999,typology_stock:0}))];
+    source.frames=normalizePriceFrames(source,prices.months);
+    expect(buildQuarterlyPrice(42,prices,selection,cities).status).toBe('ready');
+  });
+  it('não substitui preço por m² explícito inválido pelo quociente de preço e área',()=>{
+    const prices=quarterlyPriceFixture(selection),source=prices.sources.find(source=>source.city==='Fortaleza'&&source.segment==='Horizontal')!;
+    (source.records[0].typologies_history as Record<string,unknown>[]).at(-1)!.price_private_area=0;
+    source.frames=normalizePriceFrames(source,prices.months);
+    const table=buildQuarterlyDetailTable(68,prices,selection,cities);
+    expect(table.rows.find(row=>row.label==='Casas em Condomínio')!.values[2]).toBeNull();
+    expect(table.warnings.join(' ')).toContain('ausentes');
+  });
+  it('diagnóstico identifica escopos, fotografias incompletas e fonte do INCC sem históricos individuais',async()=>{
+    const prices=quarterlyPriceFixture(selection),source=prices.sources[0];
+    (source.records[0].typologies_history as Record<string,unknown>[]).at(-1)!.price_private_area=null;
+    (source.records[0].typologies_history as Record<string,unknown>[]).at(-1)!.price=null;
+    source.frames=normalizePriceFrames(source,prices.months);
+    const blueprint=await prepareFortalezaBlueprint(selection,cities,{yieldControl:async()=>{}});
+    const generation={phase:'done' as const,startedAt:0,key:'test',message:'',steps:[],hasFailedCities:false,blueprint,report:null,intro:null,monthlyLaunches:{sources:[],issues:[],prices,market:monthlyMarketFixture(selection)}};
+    const diagnostic=buildFortalezaDiagnostic(selection,generation);
+    expect(diagnostic.slides[2].scope).toEqual(['Fortaleza']);expect(diagnostic.slides[4].scope).toEqual(cities.slice(1));
+    expect(diagnostic.sources.detailed[0].frames.at(-1)!.missingPrices).toBe(1);
+    expect(diagnostic.sources.monetaryIndex.series).toBe('INCC-DI');
+    expect(JSON.stringify(diagnostic)).not.toContain('typologies_history');
+    const panel=renderToStaticMarkup(<FortalezaGenerationPanel state={generation}/>);
+    expect(panel).toContain('trimestral até o slide 89');expect(panel).not.toContain('mensal até o slide 60');
+  });
   it('preços são nove fotografias, comparadas ao trimestre anterior e mesmo trimestre do ano anterior',()=>{
     const data=buildQuarterlyPrice(42,quarterlyPriceFixture(selection),selection,cities);
     expect(data.status).toBe('ready');expect(data.series[0].points).toHaveLength(9);expect(data.series[0].points.at(-1)!.value).toBe(3260);
@@ -62,5 +99,9 @@ describe('Fortaleza trimestral — preços, fechamento e tabelas 41–89',()=>{
       const svg=renderToStaticMarkup(<FortalezaReportSlide page={page} selection={selection} cities={cities} data={null} monthlyLaunches={monthlyLaunches} editorial={createFortalezaEditorial()}/>);
       expect(svg).toContain(`Fortaleza · slide ${page}`);expect(svg).not.toContain('Aguardando conferência');expect(svg).not.toContain('NaN');
     }
+  });
+  it.each([59,62,67,68,73,75,82,83])('cabeçalho %i preserva título e recorte sem nota histórica fixa de junho',page=>{
+    const svg=renderToStaticMarkup(<FortalezaReportSlide page={page} selection={{...selection,position:3}} cities={cities} data={null} monthlyLaunches={null} editorial={createFortalezaEditorial()}/>);
+    expect(svg).toContain('data-quarterly-detail-heading');expect(svg).toContain('3º trimestre de 2026');expect(svg).not.toContain('*Até junho');
   });
 });

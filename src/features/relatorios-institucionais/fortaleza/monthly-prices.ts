@@ -46,13 +46,16 @@ export function normalizePriceFrames(source:PriceSource,months:string[]):Record<
       if (raw && typeof raw === 'object') { const value = raw as Record<string,unknown>; metadata.set(String(value.id ?? value.typology_id ?? ''),typeof value.type_of_typology === 'string' ? value.type_of_typology : null); }
     }
     const seen = new Map<string,string>(), observed = new Set<string>();
+    const firstObserved = new Map<string,string>();
     for (const raw of building.typologies_history) {
       if (!raw || typeof raw !== 'object' || Array.isArray(raw)) { months.forEach(month => productIssue(month,product,`Empreendimento ${id}: linha histórica inválida.`)); continue; }
       const row = raw as Record<string,unknown>, month = marketMonth(row.period);
       if (!month) { months.forEach(month => productIssue(month,product,`Empreendimento ${id}: competência inválida.`)); continue; }
-      if (!frames[month] || month < release) continue;
-      observed.add(month);
       const typology = String(row.typology_id ?? '').trim(), identity = `${month}/${typology}`, signature = historyFingerprint(row);
+      if (month < release || month > months.at(-1)!) continue;
+      if (typology && (!firstObserved.has(typology) || month < firstObserved.get(typology)!)) firstObserved.set(typology,month);
+      if (!frames[month]) continue;
+      observed.add(month);
       if (!typology) { productIssue(month,product,`Empreendimento ${id}: tipologia sem ID.`); continue; }
       if (seen.has(identity)) { if (seen.get(identity) !== signature) productIssue(month,product,`Empreendimento ${id}: tipologia/mês conflitante.`); continue; }
       seen.set(identity,signature);
@@ -64,6 +67,9 @@ export function normalizePriceFrames(source:PriceSource,months:string[]):Record<
       frames[month].rows.push({ project:id,typology,product,units,meter:meter !== null && meter > 0 ? meter : null,category });
     }
     for (const month of months) if (month >= release && !observed.has(month)) productIssue(month,product,`Empreendimento ${id}: fotografia ${month} ausente. Não usamos o cadastro atual como substituto.`);
+    for (const month of months) for (const [typology,first] of firstObserved) {
+      if (month >= first && !seen.has(`${month}/${typology}`)) productIssue(month,product,`Empreendimento ${id}: fotografia ${month} incompleta por tipologia. Ausência não representa estoque zero.`);
+    }
   }
   return frames;
 }

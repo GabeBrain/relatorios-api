@@ -529,6 +529,16 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-11-13 — Fortaleza/SINDUSCON trimestral: cobertura de fontes e revisão geral — Lucas/Codex
+
+- **Ambiente/funcionalidade:** Rebrain, relatório trimestral Fortaleza/SINDUSCON, 89 posições.
+- **O quê/por quê:** bloqueio de fotografia parcial por tipologia, preço explícito inválido sem substituição silenciosa, fontes/avisos nas tabelas e cobertura histórica detalhada no JSON. Corrigidos escopos do diagnóstico e painel trimestral; cabeçalhos recompostos para evitar sobreposição e notas fixas de junho.
+- **Arquivos/evidências:** [revisão e limites](../features/relatorios-institucionais/fortaleza/REVISAO_TRIMESTRAL_2026-11-13.md); módulos Fortaleza e diagnóstico visual. 270 testes/24 arquivos aprovados. Sem consulta autenticada ou homologação real.
+- **Commits:** entrega isolada sobre `a3d2f4f3`, identificada por `fix(fortaleza): audit quarterly sources and historical coverage`.
+- **Monday:** [Estudo Fortaleza](https://brain381753.monday.com/boards/18398638577/pulses/13149406420) — `13149406420`.
+- **Impacto em Etapas/Pendências:** correções locais para revisão; publicação aguarda autorização. Fonte da amostra histórica, metodologias candidatas, equipe e ensaio real continuam abertos. Sem escrita Monday.
+
+
 ### 12/11/2026 — Slide Maker: integração final da ponte com Fase8 e base Lovable — Gabriel / Codex
 
 - **Integração autorizada:** preservadas a ponte local `e1a69879` e as entregas remotas até `fc3dda87`, inclusive a renomeação de documentação, branding e registros do Lovable. Conflitos resolvidos mantendo `docs/features/slide-maker/` como fonte. Todas as linhas não vazias do LIVE remoto foram conferidas como preservadas; mudanças locais paralelas continuam em backup/stash para reaplicação após o merge.
@@ -1680,6 +1690,8 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 
 ## 2. Etapas
 
+- **13/11 ? Fortaleza trimestral:** revisão local de cobertura por tipologia, rastreabilidade e cabeçalhos concluída; [evidência](../features/relatorios-institucionais/fortaleza/REVISAO_TRIMESTRAL_2026-11-13.md). Homologação real pendente.
+
 - **12/11 — Grafia:** Geobrain padronizado nos textos visíveis; entrega editorial local.
 
 
@@ -1813,6 +1825,8 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 ---
 
 ## 3. Pendências
+
+- **13/11 ? Fortaleza trimestral:** autorizar envio desta revisão, gerar diagnóstico real pareado e homologar fontes/metodologia/equipe. Lacunas históricas não são preenchidas com zero ou cadastro atual.
 
 - **12/11 — Grafia:** publicar o ajuste editorial Geobrain após autorização; mensagens server-side dependem do deploy das funções correspondentes.
 

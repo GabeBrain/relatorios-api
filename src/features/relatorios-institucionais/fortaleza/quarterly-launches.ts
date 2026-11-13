@@ -2,11 +2,11 @@ import type { FortalezaSelection } from './model';
 import { FORTALEZA_CITIES,fortalezaPeriod } from './model';
 import type { IntroData } from './intro-data';
 import { monthlyProjectLaunches,monthlyUnitLaunches } from './monthly-launches';
-import { buildMonthlySlide,blockedMonthlySlide,monthlyMarketMonths,monthlyMarketSourceIssue,monthlyProduct,readMonthlyNumber,type MonthlyBin,type MonthlyMarketData,type MonthlySlideData } from './monthly-market';
+import { buildMonthlySlide,blockedMonthlySlide,monthlyMarketMonths,monthlyMarketSourceIssue,monthlySourceKey,monthlyProduct,readMonthlyNumber,type MonthlyBin,type MonthlyMarketData,type MonthlySlideData } from './monthly-market';
 import { normalizeMarketText,marketMonth } from './market';
 
 const mappedPages:Record<number,number>={12:12,14:14,17:16,18:17,21:19,22:20,24:22,25:23,26:24,27:25,28:26,29:27,30:28,34:30,35:31,37:33,38:34,39:35};
-export interface QuarterlyMunicipalTable {status:'ready'|'blocked';issue:string|null;warnings:string[];unit:'unidades'|'milhões';month:string;rows:{label:string;values:number[];total:number}[]}
+export interface QuarterlyMunicipalTable {status:'ready'|'blocked';issue:string|null;warnings:string[];sourceKeys:string[];unit:'unidades'|'milhões';month:string;rows:{label:string;values:number[];total:number}[]}
 export function quarterlyBins(rows:MonthlyBin[]):MonthlyBin[]{
   const result:MonthlyBin[]=[];
   for(let index=0;index<rows.length;index+=3){
@@ -23,6 +23,7 @@ export function buildQuarterlyLaunchSlide(page:number,data:MonthlyMarketData|nul
   if([11,13,15].includes(page)){
     const projects=page===11?monthlyProjectLaunches(intro,selection,cities):monthlyUnitLaunches(data?{sources:data.sources.filter(item=>item.segment==='Vertical'&&item.metric==='releases').map(item=>({...item})),issues:data.issues}:null,selection,cities,page===13?'capital':'rm');
     source={...blockedMonthlySlide(projects.issue??''),status:projects.status,issue:projects.issue,labels:['Padrão Econômico','Demais Padrões'],history:projects.history.map(row=>({...row,first:row.economic,second:row.other})),accumulated:projects.accumulated.map(row=>({...row,first:row.economic,second:row.other}))};
+    source.sourceKeys=page===11?['Fortaleza/Vertical/cadastro-lançamentos']:(data?.sources.filter(item=>item.segment==='Vertical'&&item.metric==='releases'&&(page===13?normalizeMarketText(item.city)==='fortaleza':normalizeMarketText(item.city)!=='fortaleza')).map(monthlySourceKey)??[]);
   }else{
     const mapped=mappedPages[page];if(!mapped)return blockedMonthlySlide('Lâmina trimestral sem contrato de cálculo.');
     // 13/15 are vertical units by standard, not VGV or sales.
@@ -38,14 +39,17 @@ export function buildQuarterlyLaunchSlide(page:number,data:MonthlyMarketData|nul
 /** These two original tables are explicitly closing-month snapshots of launches. */
 export function buildQuarterlyMunicipalTable(page:number,data:MonthlyMarketData|null,selection:FortalezaSelection,cities:string[]):QuarterlyMunicipalTable{
   const month=fortalezaPeriod(selection).end.slice(0,7),money=page===19||page===32,sales=page===31||page===32;
-  const block=(issue:string):QuarterlyMunicipalTable=>({status:'blocked',issue,warnings:[],unit:money?'milhões':'unidades',month,rows:[]});
+  const sourceKeys:string[]=[],warnings:string[]=[];
+  const block=(issue:string):QuarterlyMunicipalTable=>({status:'blocked',issue,warnings,sourceKeys,unit:money?'milhões':'unidades',month,rows:[]});
   if(selection.periodicity!=='quarterly'||![16,19,31,32].includes(page))return block('Tabela sem contrato trimestral.');
   if(FORTALEZA_CITIES.some(city=>!cities.some(value=>normalizeMarketText(value)===normalizeMarketText(city))))return block('A tabela exige os cinco municípios autorizados.');
   const cells=Array.from({length:4},()=>Array<number>(5).fill(0));
   for(const [index,city] of FORTALEZA_CITIES.entries())for(const segment of ['Vertical','Horizontal','Comercial'] as const){
     const sources=data?.sources.filter(source=>normalizeMarketText(source.city)===normalizeMarketText(city)&&source.segment===segment&&source.metric===(sales?'sales':'releases'))??[];
-    if(sources.length!==1)return block(`${city}/${segment}: fonte de lançamentos não concluída.`);
+    if(sources.length!==1)return block(`${city}/${segment}: fonte de ${sales?'vendas':'lançamentos'} não concluída.`);
+    sourceKeys.push(monthlySourceKey(sources[0]));
     const issue=monthlyMarketSourceIssue(sources[0],monthlyMarketMonths(selection));if(issue)return block(`${city}/${segment}: ${issue}`);
+    if(sources[0].emptyResult)warnings.push(`${city}/${segment}: resposta paginada com total zero; nenhum registro sintetizado.`);
 
     for(const row of sources[0].rows){
       if(marketMonth(row.period)!==month)continue;
@@ -58,12 +62,12 @@ export function buildQuarterlyMunicipalTable(page:number,data:MonthlyMarketData|
   const row=(label:string,values:number[])=>({label,values,total:values.reduce((sum,value)=>sum+value,0)});
   const rows=[row('Econômico',cells[0]),row('Demais Padrões',cells[1]),row('Subtotal Res. Vertical',cells[0].map((value,i)=>value+cells[1][i])),row('Horizontal',cells[2]),row('Comercial',cells[3]),row('Total',cells[0].map((_,i)=>cells.reduce((sum,values)=>sum+values[i],0)))];
   if(rows.some(row=>!Number.isFinite(row.total)||row.total>Number.MAX_SAFE_INTEGER/100))return block('O total excede a precisão numérica segura.');
-  return {status:'ready',issue:null,warnings:[],unit:money?'milhões':'unidades',month,rows};
+  return {status:'ready',issue:null,warnings,sourceKeys,unit:money?'milhões':'unidades',month,rows};
 }
 
 /** Provider standards stay named as delivered; no invented equivalence to editorial price bands. */
 export function buildQuarterlyStockTable(data:MonthlyMarketData|null,selection:FortalezaSelection,cities:string[]):QuarterlyMunicipalTable{
-  const month=fortalezaPeriod(selection).end.slice(0,7),output:QuarterlyMunicipalTable={status:'blocked',issue:null,warnings:['Padrões conforme classificação da API; faixas editoriais de valor não são inferidas.'],unit:'unidades',month,rows:[]};
+  const month=fortalezaPeriod(selection).end.slice(0,7),output:QuarterlyMunicipalTable={status:'blocked',issue:null,warnings:['Padrões conforme classificação da API; faixas editoriais de valor não são inferidas.'],sourceKeys:[],unit:'unidades',month,rows:[]};
   const fail=(issue:string)=>({...output,issue});
   if(FORTALEZA_CITIES.some(city=>!cities.some(value=>normalizeMarketText(value)===normalizeMarketText(city))))return fail('A tabela exige os cinco municípios autorizados.');
   const rows=new Map<string,number[]>();
@@ -72,7 +76,9 @@ export function buildQuarterlyStockTable(data:MonthlyMarketData|null,selection:F
     for(const [index,city] of FORTALEZA_CITIES.entries()){
       const sources=data?.sources.filter(source=>normalizeMarketText(source.city)===normalizeMarketText(city)&&source.segment===segment&&source.metric==='stock')??[];
       if(sources.length!==1)return fail(`${city}/${segment}: fonte de estoque não concluída.`);
+      output.sourceKeys.push(monthlySourceKey(sources[0]));
       const issue=monthlyMarketSourceIssue(sources[0],monthlyMarketMonths(selection));if(issue)return fail(`${city}/${segment}: ${issue}`);
+      if(sources[0].emptyResult)output.warnings.push(`${city}/${segment}: resposta paginada com total zero; nenhum registro sintetizado.`);
       for(const raw of sources[0].rows){
         if(marketMonth(raw.period)!==month||monthlyProduct(segment,raw.group)==='excluded')continue;
         const label=segment==='Comercial'?'Comercial':`${segment} · ${String(raw.group)}`,values=rows.get(label)??Array<number>(5).fill(0),value=readMonthlyNumber(raw.stock,false,true);

@@ -39,6 +39,18 @@ describe('Fortaleza trimestral — ordem original 11–20',()=>{
     expect(units.month).toBe('2026-06');expect(units.rows.at(-1)!.values).toEqual([22,22,22,22,22]);expect(units.rows.at(-1)!.total).toBe(110);
     expect(money.rows.at(-1)!.total).toBe(75);expect(money.rows[2].total).toBe(35);
   });
+  it('rastreia as fontes usadas nas unidades e nas tabelas, inclusive comercial com total zero confirmado',()=>{
+    const data=fixture();
+    expect(buildQuarterlyLaunchSlide(11,data,intro,selection,cities).sourceKeys).toEqual(['Fortaleza/Vertical/cadastro-lançamentos']);
+    expect(buildQuarterlyLaunchSlide(13,data,intro,selection,cities).sourceKeys).toEqual(['Fortaleza/Vertical/releases']);
+    expect(buildQuarterlyLaunchSlide(15,data,intro,selection,cities).sourceKeys).toHaveLength(4);
+    for(const source of data.sources.filter(source=>source.segment==='Comercial')){source.rows=[];source.emptyResult=true;}
+    const municipal=buildQuarterlyMunicipalTable(16,data,selection,cities),stock=buildQuarterlyStockTable(data,selection,cities);
+    expect(municipal.status).toBe('ready');expect(municipal.sourceKeys).toHaveLength(15);expect(municipal.warnings).toHaveLength(5);
+    expect(stock.status).toBe('ready');expect(stock.sourceKeys).toHaveLength(15);expect(stock.warnings.join(' ')).toContain('total zero');
+    data.sources=data.sources.filter(source=>source.city!=='Fortaleza'||source.segment!=='Vertical'||source.metric!=='sales');
+    expect(buildQuarterlyMunicipalTable(31,data,selection,cities).issue).toContain('vendas');
+  });
   it('bloqueia mês faltante, duplicação, fonte incompleta, preço ausente e recorte insuficiente',()=>{
     for(const mutate of [(data:ReturnType<typeof fixture>)=>{data.sources[0].rows=data.sources[0].rows.filter(row=>String(row.period).slice(0,7)!==data.months.at(-1));},(data:ReturnType<typeof fixture>)=>data.sources[0].rows.push(data.sources[0].rows[0]),(data:ReturnType<typeof fixture>)=>{data.sources[0].complete=false;}]){
       const data=fixture();mutate(data);expect(buildQuarterlyLaunchSlide(12,data,intro,selection,cities).status).toBe('blocked');

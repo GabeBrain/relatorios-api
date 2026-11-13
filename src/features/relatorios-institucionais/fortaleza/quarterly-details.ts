@@ -36,7 +36,7 @@ function observations(prices:PriceCollection|null,selection:FortalezaSelection,r
       if([...current.values()].reduce((sum,row)=>sum+quantity(row.typology_stock),0)===0)continue;
       for(const row of current.values()){
         const qty=quantity(row.qty),stock=quantity(row.typology_stock);if(stock>qty)throw new Error('Estoque maior que a capacidade histórica.');
-        const area=number(row.private_area),ticket=number(row.price),explicit=number(row.price_private_area),meter=explicit&&explicit>0?explicit:area&&ticket?ticket/area:null;
+        const area=number(row.private_area),ticket=number(row.price),explicit=row.price_private_area,meter=explicit===null||explicit===undefined||explicit===''?area&&ticket?ticket/area:null:number(explicit);
         const [year,month]=release.split('-').map(Number),[endYear,endMonth]=closing.split('-').map(Number);
         result.push({id,city,label:product==='houses'?'Casas em Condomínio':product==='closed-lots'?'Loteamento Fechado':product==='open-lots'?'Loteamento Aberto':'Vertical',standard:String(building.standard??''),year,age:(endYear-year)*12+endMonth-month,bedroom:readMonthlyNumber(row.number_bedroom,false,true),qty,stock,area:area&&area>0?area:null,ticket:ticket&&ticket>0?ticket:null,meter:meter&&meter>0?meter:null,latitude:numberSigned(building.latitude??building.lat),longitude:numberSigned(building.longitude??building.lng??building.lon)});
       }
