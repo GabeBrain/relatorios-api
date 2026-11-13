@@ -1546,6 +1546,42 @@ export type Database = {
           },
         ]
       }
+      slide_maker_bridge_calls: {
+        Row: {
+          created_at: string
+          id: string
+          request_hash: string
+          result: Json | null
+        }
+        Insert: {
+          created_at?: string
+          id: string
+          request_hash: string
+          result?: Json | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          request_hash?: string
+          result?: Json | null
+        }
+        Relationships: []
+      }
+      slide_maker_bridge_nonces: {
+        Row: {
+          created_at: string
+          nonce: string
+        }
+        Insert: {
+          created_at?: string
+          nonce: string
+        }
+        Update: {
+          created_at?: string
+          nonce?: string
+        }
+        Relationships: []
+      }
       slide_maker_fases: {
         Row: {
           colaborador_email: string
@@ -2171,6 +2207,17 @@ export type Database = {
         }
         Returns: string
       }
+      slide_maker_bridge_dispatch: {
+        Args: {
+          p_args: Json
+          p_hash: string
+          p_key: string
+          p_nonce: string
+          p_operation: string
+        }
+        Returns: Json
+      }
+      slide_maker_bridge_nonce: { Args: { p_nonce: string }; Returns: boolean }
     }
     Enums: {
       [_ in never]: never
