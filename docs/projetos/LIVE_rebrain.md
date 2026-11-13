@@ -1,5 +1,16 @@
 # Rebrain (Plataforma) — Documento Vivo
 
+## 13/11/2026 — Slide Maker: ativos oficiais, build final, QA visual e publicação do serviço — Diego Cabrero, com Claude
+
+- **Estado:** serviço final `slide-maker-agent` publicado (público, revisão `slide-maker-agent-00002-cx5`) com **agente simulado**; distinto do `slide-maker-diagnostico`, que segue privado e intocado. Interface conectada via `VITE_SLIDE_MAKER_AGENT_URL` no `.env` (vale no Lovable após push).
+- **Feito:** 20 ativos oficiais enviados a `marca/` no bucket privado, MD5 idênticos aos originais. gcloud instalado e autenticado na máquina de Diego com `inovacao.grupo.brain@gmail.com`. Build C1 com 48 testes da `lib/` aprovados, nenhum pulado. C2 com bridge secret, sem chave Anthropic montada. C3: `/health` com isolamento `aprovado:true`, `/internal/fase` sem OIDC → 403, F1–F4 em 19 etapas (`testar-infra.py`), CORS aceita `*.lovable.app` e recusa outras origens.
+- **Correções (DET, sem mudança de prompt):** `test_brain_deck.py` avaliava `SERVICO.parents[1]` mesmo com `SLIDE_MAKER_REFERENCIA` definida e quebrava na imagem (`/app`); `lib/render.sh` chegava sem bit de execução quando o build é enviado do Windows, e o prompt manda o agente chamá-lo direto (o build agora aplica `chmod` e falha sem ele); novo `.gcloudignore` exclui `.marca/` local, que o gcloud enviaria por não ler `.gitignore` aninhado.
+- **Validação visual:** a imagem final gerou o deck de referência com a marca oficial, 18 PNGs conferidos um a um (miniaturas com hash), lint com 0 falhas 🔒 e 8 alertas. E2E `tests/slide-maker.spec.ts` no Edge, Vite local contra o serviço publicado: 2/2.
+- **Não verificado:** interface publicada pelo Lovable (depende do push); se a atualização veio por Realtime Broadcast ou pela consulta de 5 s.
+- **Evidência:** [JSON sanitizado](../features/slide-maker/evidencias/2026-11-13_publicacao_final.json); [roteiro](../features/slide-maker/DEPLOY_GCP.md).
+- **Pendências:** C5 com limite aprovado por Diego de **um** trabalho dourado (≤ US$ 23), confirmado com ele antes de executar; limpar/ocultar trabalhos de teste e diagnóstico que aparecem em "Todos os trabalhos" antes do aceite; push (decisão de Diego); aceite de Diego com o ponto focal e as partes envolvidas (sem aprovação obrigatória de Gabriel); remover o segredo obsoleto `slide-maker-supabase-service-role-key`, que nenhuma revisão usa.
+- **Monday:** —
+
 ## 13/11/2026 — Slide Maker: infraestrutura testada no Google com imagem sintética — Gabriel / Codex
 
 - **Estado:** diagnóstico privado publicado e fluxo simulado verificado no Cloud Run; não é publicação do serviço final.

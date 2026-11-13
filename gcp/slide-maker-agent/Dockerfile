@@ -70,7 +70,9 @@ COPY --from=compilacao /build/package.json ./package.json
 
 # Ferramentas do agente (§6.1): brain-deck, apply_theme, extract, render, lint. Logos recortadas no build.
 COPY gcp/slide-maker-agent/lib/ ./lib/
-RUN python lib/preparar_marca.py marca
+# Envio feito do Windows perde o bit de execução; o prompt chama /app/lib/render.sh diretamente.
+RUN chmod 0755 lib/render.sh && test -x lib/render.sh \
+ && python lib/preparar_marca.py marca
 ENV BRAIN_MARCA=/app/marca
 
 # Teste de fumaça (§10) e testes da lib, sem nada pulado (SLIDE_MAKER_EXIGIR=1): a brain-deck reproduz o

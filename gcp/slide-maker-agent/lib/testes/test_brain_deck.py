@@ -19,7 +19,9 @@ from pptx.util import Emu
 import lint_pptx as L
 
 # No repositório: docs/…/referencia. No build da imagem: copiada para fora de /app (SLIDE_MAKER_REFERENCIA).
-REFERENCIA = Path(os.environ.get("SLIDE_MAKER_REFERENCIA", SERVICO.parents[1] / "docs" / "features" / "slide-maker" / "referencia"))
+# O padrão só é calculado sem a variável: na imagem, SERVICO=/app não tem parents[1].
+_REFERENCIA_ENV = os.environ.get("SLIDE_MAKER_REFERENCIA")
+REFERENCIA = Path(_REFERENCIA_ENV) if _REFERENCIA_ENV else SERVICO.parents[1] / "docs" / "features" / "slide-maker" / "referencia"
 
 
 def conteudo(caminho: Path) -> list:

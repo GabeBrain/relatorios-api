@@ -2,6 +2,13 @@
 
 Roteiro para quem publica (Gabriel). Decisões de origem: `INSTRUCOES_DESENVOLVIMENTO.md` §15.1.
 
+> **Atualização 13/11/2026, tarde (Diego):** 20 ativos oficiais no bucket (MD5 conferido), C1 aprovado
+> (48 testes da `lib/`, nenhum pulado), QA visual dos 18 slides com a imagem final, C2/C3 concluídos:
+> `slide-maker-agent` público, revisão `slide-maker-agent-00002-cx5`, agente simulado, isolamento aprovado,
+> F1–F4 em 19 etapas e E2E da interface contra o serviço. `VITE_SLIDE_MAKER_AGENT_URL` no `.env`.
+> [Evidência](evidencias/2026-11-13_publicacao_final.json). Próximo: C5, com limite aprovado por Diego de
+> **um** trabalho dourado (≤ US$ 23). O texto abaixo desta caixa descreve o estado anterior.
+>
 > Estado verificado em 13/11/2026: migrations, buckets privados, ponte HMAC e segredos concluídos.
 > O fluxo simulado F1–F4 passou com Cloud Run privado, Cloud Tasks/OIDC, banco e Storage reais.
 > O diagnóstico usa uma imagem sintética, sem ativos oficiais e sem chave Anthropic: não é o serviço final.
@@ -213,6 +220,12 @@ gcloud --project="$PROJETO" builds submit --config gcp/slide-maker-agent/cloudbu
   aparece no log do build (`Ran NN tests … OK`). Se falhar, envie ao Diego o trecho do log.
 - Se o build reclamar de permissão no bucket de origem do Cloud Build (`${PROJETO}_cloudbuild`),
   conceda `roles/storage.objectViewer` nele à conta `$BUILD`.
+- O `.gcloudignore` da raiz exclui `gcp/slide-maker-agent/.marca/`: o gcloud não lê `.gitignore` aninhado, e uma
+  `.marca/` local de testes misturaria arquivos antigos aos do bucket. Conferir com `gcloud meta list-files-for-upload .`.
+- Enviado do Windows, o código perde o bit de execução; o Dockerfile aplica `chmod 0755 lib/render.sh` e falha
+  se o script não ficar executável (o prompt manda o agente chamar `/app/lib/render.sh`).
+- Os testes do build apagam os PNGs. Para conferir os slides, rode a imagem final num build sem fonte que gere o
+  deck de referência, renderize e publique as miniaturas com hash (feito em 13/11; ver evidência).
 
 ### C2. Deploy no Cloud Run
 

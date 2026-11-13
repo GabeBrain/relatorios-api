@@ -1,0 +1,53 @@
+{
+  "date": "2026-11-13",
+  "project": "brain-rebrain-slide-maker",
+  "account": "inovacao.grupo.brain@gmail.com",
+  "operator": "Diego Cabrero (sessão Claude Code na máquina de Diego)",
+  "source_base": "e4c4c52b",
+  "brand_assets": {
+    "bucket": "gs://brain-rebrain-slide-maker-slide-maker-marca/marca/",
+    "objects": 20,
+    "composition": "1 manual + 4 logos + 3 slides finais + 12 Neo Sans",
+    "md5_identical_to_originals": true,
+    "diagnostic_object_untouched": "diagnosticos/2026-11-13/diagnostico.png"
+  },
+  "builds": {
+    "ea3a2d37-ee33-4b89-854b-89aa544a5148": "FAILURE: test_brain_deck não importava (SERVICO.parents[1] em /app); 39/40 OK",
+    "5dc3e99a-ddd6-47db-8f19-d8c12e1f1002": "SUCCESS: 48 testes lib OK, nenhum pulado; sha256:898b98aa…",
+    "30be9950-0369-41f5-9e09-45d3b12426d5": "SUCCESS: 48 testes lib OK, nenhum pulado; render.sh executável; sha256:7861094c8d86cb0a1c2c2d226f95cdf5422706d4ebb33786c5bd239339897076"
+  },
+  "visual_qa": {
+    "image": "sha256:7861094c8d86cb0a1c2c2d226f95cdf5422706d4ebb33786c5bd239339897076",
+    "builds": ["4cb9413a-c6f4-42ea-83b6-79359d3d16b9", "4c484e11-e62c-4c08-a972-d5d6bac5a7eb", "e4dfdcc6-5fdb-40c6-9b95-d3ee58d3ff89"],
+    "deck": "lib/brain-deck/exemplos/domicilios_v3.json com a marca oficial",
+    "slides_rendered": 18,
+    "slides_inspected": 18,
+    "lint": { "falhas_bloqueantes": 0, "alertas": 8 },
+    "observed": "Neo Sans nos títulos, Montserrat no corpo, logos oficiais, paleta Brain, slide final oficial do Fábio",
+    "first_attempt_defect": "lib/render.sh sem bit de execução na imagem 898b98aa (upload a partir do Windows); corrigido no Dockerfile"
+  },
+  "service": {
+    "name": "slide-maker-agent",
+    "url": "https://slide-maker-agent-475189392075.southamerica-east1.run.app",
+    "revision": "slide-maker-agent-00002-cx5",
+    "public": true,
+    "agent": "simulado",
+    "anthropic_secret_mounted": false,
+    "bridge_secret_mounted": true,
+    "health": { "ok": true, "agente": "simulado", "isolamento": { "bwrap": "ok", "semRede": true, "semSegredosNoAmbiente": true, "semLeituraDoApp": true, "semEscritaFora": true, "workspaceGravavel": true, "aprovado": true } },
+    "internal_without_oidc": 403,
+    "smoke_f1_f4": { "ok": true, "steps": 19, "jobs": ["24cb46e1-6780-4b19-bdfe-87ccd9ad3231", "c4f47f5e-1aed-43fd-8a64-221861e00fe6"] },
+    "cors": { "https://rebrain.lovable.app": "204 permitido", "https://evil.example.com": "recusado" }
+  },
+  "frontend": {
+    "env": "VITE_SLIDE_MAKER_AGENT_URL no .env versionado",
+    "e2e": "tests/slide-maker.spec.ts no Edge, Vite local apontando ao serviço publicado: 2/2 aprovados",
+    "not_distinguished": "atualização por Realtime Broadcast vs. consulta periódica de 5 s"
+  },
+  "paid_model_calls": 0,
+  "limits": [
+    "Agente real (C5) não ativado nesta etapa",
+    "Interface publicada pelo Lovable depende do push; E2E usou o frontend local",
+    "Trabalhos de teste/diagnóstico aparecem em 'Todos os trabalhos' do banco de produção"
+  ]
+}
