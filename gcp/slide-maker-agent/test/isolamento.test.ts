@@ -20,7 +20,7 @@ describe('configuração do sandbox', () => {
   const args = argsSandbox('/work/job-1');
 
   it('sem rede, sem ambiente herdado, PID/usuário próprios', () => {
-    for (const f of ['--unshare-net', '--unshare-pid', '--unshare-user', '--clearenv', '--die-with-parent']) expect(args).toContain(f);
+    for (const f of ['--unshare-net', '--unshare-pid', '--unshare-user', '--clearenv', '--die-with-parent', '--as-pid-1']) expect(args).toContain(f);
     expect(args).not.toContain('--share-net');
     expect(args.indexOf('--clearenv')).toBeLessThan(args.indexOf('--setenv'));
     expect(valoresDe(args, '--setenv').sort()).toEqual(Object.keys(AMBIENTE_SANDBOX).sort());

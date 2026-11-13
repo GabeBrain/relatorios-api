@@ -1,5 +1,16 @@
 # Rebrain (Plataforma) — Documento Vivo
 
+## 13/11/2026 — Slide Maker: infraestrutura testada no Google com imagem sintética — Gabriel / Codex
+
+- **Estado:** diagnóstico privado publicado e fluxo simulado verificado no Cloud Run; não é publicação do serviço final.
+- **Validação:** build real, upload/leitura byte a byte da imagem sintética no bucket privado, Artifact Registry, Cloud Run gen2, fila real com OIDC, ponte Lovable/banco/Storage, F1–F4, versões v1/v2 e downloads privados. `/internal/fase` sem OIDC e trabalho sem token recusados. `/health` final com todas as verificações de isolamento aprovadas. Sem chave Anthropic montada ou chamadas pagas ao modelo.
+- **Correções comprovadas:** leitura do bucket de fontes concedida somente à conta de build; máquina padrão após cota recusar E2_HIGHCPU_8; `/health` porque Cloud Run intercepta `/healthz`; `--as-pid-1` impede ambiente original no processo auxiliar bwrap em `/proc/1/environ`. Diagnóstico com sentinela confirmou reprovação antes e aprovação depois, sem retirar verificações.
+- **Permissões:** conta profissional `inovacao.grupo.brain@gmail.com` Owner e `actAs` nas três contas confirmados. Build/deploy reais feitos com ela; login na máquina de Diego ainda precisa ser conferido lá.
+- **Evidências e procedimento:** [JSON sanitizado](../features/slide-maker/evidencias/2026-11-13_infra.json), [roteiro atualizado](../features/slide-maker/DEPLOY_GCP.md), `scripts/slide-maker/testar-infra.py`. Revisão privada `slide-maker-diagnostico-00002-fbc`; 80 testes locais aprovados e 2 testes Linux pulados no Windows, complementados pelo ensaio remoto.
+- **Pendências:** 20 ativos oficiais; build final com fontes/renderização/lint obrigatórios; publicação final e interface/CORS; agente real/trabalhos dourados após autorização de custo. Não repetir migrations/segredos e nunca exportar service_role. Diagnóstico e PNG ficam fora dos nomes/destinos produtivos.
+- **Monday:** —
+
+
 ## 12/11/2026 — Slide Maker: banco aplicado no Lovable Cloud (DEPLOY_GCP Parte A) — Diego Cabrero, com Lovable
 
 - **Mudança:** a migration `supabase/migrations/20261112160000_slide_maker.sql` foi aplicada pelo Lovable no banco do Rebrain. Os buckets foram criados pela ferramenta de Storage do Lovable, porque ela não aceita `INSERT` em `storage.buckets` numa migration; nomes, privacidade e limites são os do arquivo. Nenhum arquivo do frontend nem de `supabase/functions/` foi alterado.

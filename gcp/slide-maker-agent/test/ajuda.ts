@@ -1,7 +1,7 @@
 import { mkdtempSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { criarApp } from '../src/app.js';
+import { criarApp, type DependenciasApp } from '../src/app.js';
 import type { VerificadorOidc } from '../src/auth/oidc.js';
 import { AgenteSimulado, roteiroPadrao, type Roteiro } from '../src/agent/simulado.js';
 import { validadorBasico } from '../src/agent/ferramentas.js';
@@ -22,6 +22,7 @@ export class OidcFalso implements VerificadorOidc {
 export interface OpcoesMontagem {
   roteiro?: Roteiro;
   faseTimeoutMs?: number;
+  saude?: DependenciasApp['saude'];
 }
 
 export async function montar(o: OpcoesMontagem = {}) {
@@ -40,7 +41,7 @@ export async function montar(o: OpcoesMontagem = {}) {
     verificacaoCancelamentoMs: 20,
     chaveAnthropic: 'sk-ant-teste',
   });
-  const app = await criarApp({ repo, arm, orquestrador, oidc: new OidcFalso() });
+  const app = await criarApp({ repo, arm, orquestrador, oidc: new OidcFalso(), saude: o.saude });
 
   const api = {
     app, repo, arm, eventos, despachante, workRoot,

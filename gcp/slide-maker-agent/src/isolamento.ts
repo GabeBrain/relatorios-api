@@ -44,7 +44,9 @@ export const AMBIENTE_SANDBOX: Readonly<Record<string, string>> = {
 export function argsSandbox(workspace: string, pastas: PastasServico = PASTAS_PADRAO): string[] {
   const args = [
     '--unshare-net', '--unshare-pid', '--unshare-user', '--unshare-ipc', '--unshare-uts',
-    '--die-with-parent', '--new-session',
+    // The bwrap PID 1 reaper retains its original environment in /proc/1/environ.
+    // Make the command PID 1 so --clearenv also protects that procfs view.
+    '--die-with-parent', '--new-session', '--as-pid-1',
     '--ro-bind', '/usr', '/usr', '--ro-bind', '/etc', '/etc',
     '--symlink', 'usr/bin', '/bin', '--symlink', 'usr/sbin', '/sbin',
     '--symlink', 'usr/lib', '/lib', '--symlink', 'usr/lib64', '/lib64',

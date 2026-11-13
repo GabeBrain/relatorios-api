@@ -2,9 +2,11 @@
 
 Roteiro para quem publica (Gabriel). Decisões de origem: `INSTRUCOES_DESENVOLVIMENTO.md` §15.1.
 
-> Atualizado para Lovable Cloud em 12/11/2026. Projeto e recursos Google de B1/B2/B4 foram preparados;
-> Anthropic versão1 enabled conforme captura de Gabriel. Ponte e migrations complementares têm validação
-> local; NÃO foram publicadas/aplicadas remotamente nesta entrega. Conferir o estado antes de executar.
+> Estado verificado em 13/11/2026: migrations, buckets privados, ponte HMAC e segredos concluídos.
+> O fluxo simulado F1–F4 passou com Cloud Run privado, Cloud Tasks/OIDC, banco e Storage reais.
+> O diagnóstico usa uma imagem sintética, sem ativos oficiais e sem chave Anthropic: não é o serviço final.
+> Evidências e correções de infraestrutura: [ensaio de 13/11](evidencias/2026-11-13_infra.json).
+> Não repetir A/B indiscriminadamente. Faltam os 20 ativos oficiais e o build/QA da imagem final.
 > Ao terminar cada parte, registrar evidência em `docs/projetos/LIVE_rebrain.md`.
 
 | | |
@@ -31,14 +33,14 @@ verificações do serviço com o agente simulado da Fase 2).
    - nenhuma policy nas tabelas `slide_maker_*` nem em `storage.objects` para esses buckets;
    - os 3 buckets aparecem como **privados** no painel de Storage.
 
-A base tem relato de aplicação e conferência remota por Diego/Lovable. Esta sessão não consultou
-diretamente o banco gerenciado. A validação local da ponte usa PostgreSQL/PGlite, sem substituir o
-preflight manual ou a conferência de policies genéricas de Storage no ambiente real.
+A base e o complemento foram conferidos manualmente por Gabriel no Lovable em 13/11.
+Os adaptadores foram exercitados remotamente pela ponte, inclusive com a fila real.
+O acesso administrativo direto ao banco continua restrito ao Lovable.
 
 ### A2. Ponte Lovable Cloud (obrigatória antes do Cloud Run)
 
 O Rebrain usa **Lovable Cloud**. A service role existe somente no backend gerenciado e NÃO é exportada.
-Execute o roteiro manual ao final deste documento. Após a migration original, aplicar somente
+O roteiro manual ao final deste documento já foi concluído em 13/11. Em outro ambiente, após conferir a base, aplicar somente
 `supabase/migrations/20261112200554_slide_maker_bridge.sql`, cadastrar a credencial de integração e publicar
 `slide-maker-bridge` com seus três arquivos TypeScript e `verify_jwt=false` somente nessa função.
 A autenticação HMAC é obrigatória no handler. Sem ela a função recusa a chamada antes do banco.
@@ -192,6 +194,11 @@ no Cloud Run antes da Fase 4.
 
 ### C1. Build da imagem (da raiz do repositório)
 
+Use a máquina padrão do Cloud Build: `E2_HIGHCPU_8` foi recusada pela cota deste projeto em São Paulo.
+A conta de build já recebeu `roles/storage.objectViewer` no bucket `brain-rebrain-slide-maker_cloudbuild`,
+após uma tentativa real confirmar a ausência dessa permissão. O build de diagnóstico passou com a máquina padrão.
+No Windows, use `gcloud.cmd` para evitar bloqueio do script PowerShell; os exemplos abaixo são Bash.
+
 ```bash
 gcloud --project="$PROJETO" builds submit --config gcp/slide-maker-agent/cloudbuild.yaml --region="$REGIAO" \
   --service-account="projects/$PROJETO/serviceAccounts/$BUILD" \
@@ -238,14 +245,18 @@ gcloud --project="$PROJETO" run services describe slide-maker-agent --region="$R
 1. **Saúde e isolamento (spike da §15.1 item 7):**
 
    ```bash
-   curl -s "$URL/healthz"
+   curl -s "$URL/health"
    ```
 
    Esperado: `"ok":true` e um bloco `isolamento`. **Envie esse JSON ao Diego.** Ele mostra se o
    `bubblewrap` funciona no Cloud Run gen2 (`"bwrap":"ok"` e `"aprovado":true`) ou não
    (`"bwrap":"falhou"`, com o motivo em `detalhe`). É a evidência que decide o isolamento da Fase 4.
    Com o agente simulado (padrão), o resultado é só informativo; com `AGENTE=claude` (Parte C5),
-   isolamento reprovado deixa o `/healthz` em 503 e nenhuma fase roda.
+   isolamento reprovado deixa o `/health` em 503 e nenhuma fase roda.
+
+   Não usar `/healthz` no Cloud Run: o frontend Google interceptou esse caminho com 404 no ensaio.
+   `/healthz` permanece apenas como alias local de compatibilidade.
+   [Limitação documentada pelo Google](https://docs.cloud.google.com/run/docs/known-issues#reserved_url_paths).
 
 2. **Ensaio do fluxo com o agente simulado** (troque o e-mail e use qualquer PDF):
 
@@ -279,21 +290,14 @@ Só depois de C3 com `"aprovado": true` no bloco `isolamento`. Cada trabalho com
 **tem custo** (estimativa da base, doc 07: US$ 5–9 por deck; a trava por fase é F1 = 2, F2 = 6,
 F3 = 10 e F4 = 5 US$).
 
-1. **Chave da API no Secret Manager.** A chave que está nos Secrets do Lovable (`CLAUDE_API_KEY`) fica
-   nas funções do Supabase e o Cloud Run não a enxerga. Grave a mesma chave (ou uma chave própria
-   do Slide Maker, criada no Console da Anthropic) como nova versão do segredo:
-
-   ```bash
-   read -rs CHAVE   # cole a chave e tecle Enter; ela não aparece na tela nem fica no histórico
-   printf '%s' "$CHAVE" | gcloud --project="$PROJETO" secrets versions add slide-maker-anthropic-api-key --data-file=-
-   unset CHAVE
-   ```
+1. **Chave já cadastrada:** `slide-maker-anthropic-api-key`, versão 1 ativa, exclusiva do Slide Maker.
+   Conferir somente metadados. Não criar outra versão, copiar a chave do Lovable ou imprimir valores.
 
 2. **Ligar o agente real:**
 
    ```bash
    gcloud --project="$PROJETO" run services update slide-maker-agent --region="$REGIAO" --update-env-vars=AGENTE=claude
-   curl -s -o /dev/null -w '%{http_code}\n' "$URL/healthz"; curl -s "$URL/healthz" | jq
+   curl -s -o /dev/null -w '%{http_code}\n' "$URL/health"; curl -s "$URL/health" | jq
    ```
 
    Esperado: `200`, `"agente":"claude"` e `"isolamento": {…, "aprovado": true}`. Se vier `503`, o
@@ -321,6 +325,9 @@ F3 = 10 e F4 = 5 US$).
 
 ## Passos manuais de Gabriel — entrega da ponte Lovable Cloud
 
+**Concluídos em 13/11/2026.** Os passos abaixo são referência de recuperação/outro ambiente.
+O operador seguinte deve prosseguir por C1–C3 após enviar os ativos; não repetir migrations ou segredos.
+
 1. **Preflight:** executar `docs/features/slide-maker/VERIFICAR_LOVABLE_CLOUD_2026-11-12.sql`
    no ambiente do Rebrain, projeto `mxinpvcqzbfbzjodhgtz`. As seis tabelas e os três buckets já foram
    relatados como conferidos por Diego/Lovable. Se existirem, pular a base e seguir para o complemento.
@@ -345,7 +352,7 @@ F3 = 10 e F4 = 5 US$).
 6. **Retorno:** fornecer URL efetiva e resultados sanitizados do preflight. Uma chamada sem assinatura deve
    ser recusada. Depois, o teste autenticado do serviço deve conseguir criar/ler trabalho e transferir arquivo.
    Código publicado e migração aplicada são estados diferentes; conferir ambos.
-7. **Google:** só após essa etapa e os 20 ativos de marca, executar C1–C3 com autorização de publicação.
+7. **Google:** esta etapa Lovable já foi concluída. Após os 20 ativos, executar C1–C3 com autorização de publicação.
    A URL do Cloud Run, verificada em `services describe`, vai a `VITE_SLIDE_MAKER_AGENT_URL` no frontend.
 
 ### Testes locais da entrega
@@ -363,3 +370,37 @@ que exige exportação de service role. Reverter para a revisão compatível ant
 preservando tabelas e arquivos. Nonces expiram após 10 minutos; resultados idempotentes privados são mantidos
 por 24 horas e limpos em lotes nas chamadas. A chave de idempotência é estável somente na repetição de transporte;
 repetições humanas de fases continuam ações explícitas, sem custo duplicado automático.
+
+### Continuidade por Diego e seu agente
+
+A conta `inovacao.grupo.brain@gmail.com` foi verificada como `roles/owner`, com `iam.serviceAccounts.actAs`
+efetivo nas três contas de serviço. Upload, build e deploy foram executados com essa identidade.
+Isso prova as permissões da conta; o login e a instalação do gcloud na máquina de Diego precisam ser
+conferidos lá com `gcloud auth list`, sem compartilhar senha ou credencial em chat.
+
+O serviço `slide-maker-diagnostico` é **privado**, sem chave Anthropic e com escala mínima zero.
+Invocadores explícitos: a conta profissional acima e `slide-maker-tasks`. Use o proxy autenticado:
+
+```bash
+gcloud --project="$PROJETO" run services proxy slide-maker-diagnostico --region="$REGIAO" --port=8089
+# Em outro terminal:
+curl -s http://127.0.0.1:8089/health
+```
+
+Ensaio reproduzível na raiz do repositório (Python e gcloud instalados):
+
+```bash
+python scripts/slide-maker/testar-infra.py --url=https://slide-maker-diagnostico-475189392075.southamerica-east1.run.app --iam-account=inovacao.grupo.brain@gmail.com
+```
+
+O script exige agente simulado e isolamento aprovado antes de criar um trabalho sintético; executa
+F1–F4, verifica histórico v2, downloads e recusas de acesso. Guarda somente evidência sanitizada em
+`.local-inputs/2026-11-13_slide-maker/infra.json`; tokens ficam em memória. Cada execução consome quatro
+fases do limite horário, sem usar o modelo. O arquivo PPTX do simulado é uma fixture, não um deck renderizado.
+
+Não configurar o frontend com esse diagnóstico. A imagem não contém a marca oficial nem executou o QA
+visual. O caminho produtivo continua sendo: ativos oficiais → C1 com testes obrigatórios → C2/C3 → frontend
+→ C5 após autorização de custo. O ensaio privado não valida o acesso público/CORS do frontend final.
+O arquivo sintético está em `diagnosticos/2026-11-13/diagnostico.png`, fora de `marca/`, sem contaminar os 20 ativos.
+Não há impedimento para Diego executar a sequência inteira com sua sessão autenticada; Gabriel só precisa
+intervir quando uma autorização exclusiva ou um acesso não disponível naquele ambiente for comprovado.

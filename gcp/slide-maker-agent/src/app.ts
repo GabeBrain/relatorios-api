@@ -124,7 +124,8 @@ export async function criarApp(d: DependenciasApp): Promise<FastifyInstance> {
   const responder = (reply: FastifyReply, job: JobRow, status = 202) => reply.status(status).send({ trabalho: publico(job) });
 
   // Com o agente real, isolamento reprovado = serviço não saudável (503): nenhuma fase roda (§15.1 item 7).
-  app.get('/healthz', async (_req, reply) => {
+  // Cloud Run reserves some paths ending in z. Keep the local alias for compatibility.
+  for (const url of ['/health', '/healthz']) app.get(url, async (_req, reply) => {
     const s = d.saude ? await d.saude() : {};
     const ok = s.ok !== false;
     return reply.status(ok ? 200 : 503).send({ ...s, ok });

@@ -30,7 +30,7 @@ Cloud Tasks ──OIDC──► /internal/fase  (requisição aberta durante tod
 | `src/prompt.ts` | System prompt (base de conhecimento + `lib/README.md`) e prompt de cada fase |
 | `src/agent/simulado.ts` | Agente simulado usado nos testes e nos ensaios |
 | `src/agent/agente.ts` | Interface do agente e ambiente do processo do CLI (só a chave da Anthropic) |
-| `src/isolamento.ts` | Sandbox `bwrap` dos comandos do agente e diagnóstico de subida (`/healthz`) |
+| `src/isolamento.ts` | Sandbox `bwrap` dos comandos do agente e diagnóstico de subida (`/health`) |
 | `src/shared/state-machine.ts` | Cópia da máquina de estados do frontend (`npm run sync-shared`) |
 
 ## Relatório ao analista (sem tela na v1)
@@ -94,7 +94,7 @@ Roteiro completo, com os comandos: `docs/features/slide-maker/DEPLOY_GCP.md`. Em
 | A | Conferir base já aplicada por Diego/Lovable; aplicar somente o complemento da ponte | 8 tabelas privadas, 3 buckets privados e 2 RPCs restritas |
 | B | Bucket privado com os ativos de marca, contas de serviço, segredos (credencial da ponte e chave Anthropic no Secret Manager) e fila do Cloud Tasks | — |
 | C1–C2 | Build **da raiz do repositório** e deploy em `southamerica-east1`, com `AGENTE=simulado` | URL do serviço |
-| C3 | Verificações: `/healthz`, CORS, ensaio completo com o agente simulado | `200`; o bloco `isolamento` precisa vir aprovado para seguir ao C5 |
+| C3 | Verificações: `/health`, CORS, ensaio completo com o agente simulado | `200`; o bloco `isolamento` precisa vir aprovado para seguir ao C5 |
 | C4 | `VITE_SLIDE_MAKER_AGENT_URL=<URL>` no `.env` versionado (commit do Diego) | A página `/slide-maker` deixa de mostrar "ainda não está disponível" |
 | C5 | `AGENTE=claude` e trabalho dourado 1 | Deck sem falhas 🔒 |
 

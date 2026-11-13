@@ -33,6 +33,6 @@ options:
   # _IMAGEM usa ${PROJECT_ID}: exige substituições dinâmicas.
   dynamicSubstitutions: true
   logging: CLOUD_LOGGING_ONLY
-  machineType: E2_HIGHCPU_8
+  # Default machine: E2_HIGHCPU_8 has no available quota in this project/region.
 
 timeout: 3600s

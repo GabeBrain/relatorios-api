@@ -9,6 +9,11 @@ conhecimento que o agente lê: [`base-conhecimento/`](base-conhecimento/). Servi
 
 ## Como atualizar
 
+Verificação operacional de 13/11/2026 (DET, sem alteração de prompt): `/health` evita o caminho reservado
+do Cloud Run. `--as-pid-1` impede que o processo auxiliar do bubblewrap retenha o ambiente original em
+`/proc/1/environ`. Diagnóstico com sentinela no Cloud Run confirmou reprovação antes e aprovação depois,
+mantendo as cinco verificações de isolamento. [Evidência](evidencias/2026-11-13_infra.json).
+
 1. Atualize este arquivo sempre que mudar o prompt (`gcp/slide-maker-agent/src/prompt.ts`), a base de
    conhecimento, as ferramentas `brain` (`src/agent/ferramentas.ts`), o lint (`lib/lint_pptx.py`), os limites
    (`src/config.ts`) ou o fluxo de fases.
@@ -86,7 +91,7 @@ modelo e regras de conteúdo permanecem na versão 1.0; esta adaptação muda o 
 | Bash embutido desligado e desviado para `mcp__brain__executar`, que roda sob `bwrap` sem rede, com `--clearenv`, só o workspace gravável e `lib/`, `kb/`, `marca/`, `node_modules/` somente leitura | `isolamento.ts` |
 | Read/Write/Edit/Glob/Grep: hook `PreToolUse` recusa caminhos fora do trabalho e das pastas de apoio (resolvendo links) e qualquer escrita em `entrada/` | `guarda.ts` |
 | Processo do agente recebe só a chave da Anthropic no ambiente | `agente.ts` (`ambienteDoAgente`) |
-| Com `AGENTE=claude`, isolamento reprovado no diagnóstico de subida → `/healthz` 503 e nenhuma fase roda | `app.ts`, `isolamento.ts` |
+| Com `AGENTE=claude`, isolamento reprovado no diagnóstico de subida → `/health` 503 e nenhuma fase roda | `app.ts`, `isolamento.ts` |
 
 ### Regras DET — lint do deck (`lib/lint_pptx.py`, doc 05 §1)
 
