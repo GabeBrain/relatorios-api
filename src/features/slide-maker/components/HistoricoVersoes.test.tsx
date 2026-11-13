@@ -31,6 +31,13 @@ describe('histórico de versões no chat (§9)', () => {
     expect(baixar).toHaveBeenCalledTimes(2);
   });
 
+  it('entrega que chega antes de a fase fechar (versao_atual ainda anterior) já aparece como vigente', () => {
+    render(<CardEntrega entrega={{ versao: 1, mudancas: [], qa: QA }} versaoAtual={0} onBaixar={vi.fn()} />);
+    const card = screen.getByRole('region', { name: 'Versão 1' });
+    expect(card).toHaveTextContent('Seu deck está pronto — v1');
+    expect(card).not.toHaveTextContent('Substituído');
+  });
+
   it('o diálogo lista da mais recente para a mais antiga, marca a atual e baixa cada uma', () => {
     const baixar = vi.fn();
     render(<HistoricoVersoes aberto onFechar={vi.fn()} versoes={[v(1), v(3, ['Novo gráfico']), v(2)]} baixando={null} onBaixar={baixar} />);

@@ -1,5 +1,14 @@
 # Rebrain (Plataforma) — Documento Vivo
 
+## 13/11/2026 — Slide Maker: dourado 1 entregue (v1) e envio de 190 MB comprovado — Diego Cabrero, com Claude
+
+- **Dourado 1 (`0c232f3e…`), agente real:** F1 em 82 s, F2 em 3,5 min, F3 em 9,7 min (18h42–18h53 UTC). Deck v1 com 17 slides (~14 min), tese em 4 blocos, dados atualizados até 2026 e slide final do Fábio. O próprio agente sinalizou que faltam nome, cidade e data do evento (capa e slide da cidade). Custo a conferir no console da Anthropic (o log não registra custo, §11).
+- **Correção de interface:** o card da entrega chega ao chat antes de a fase fechar; nesse intervalo mostrava "Substituído pela v0". Entrega com versão ≥ `versao_atual` passa a ser tratada como vigente (teste novo em `HistoricoVersoes.test.tsx`; 93 testes da feature).
+- **Envio grande:** com `slide-maker-entrada` em 200 MB (SQL de Diego), PUT direto de 60 MB (39 s) e 190 MB (96 s) aceitos; a conclusão leu e recusou o tipo trocado de propósito, apagando o objeto, sem iniciar fase.
+- **Chave:** versão 1 do segredo destruída no Secret Manager; a revogação da chave antiga no console da Anthropic fica com Diego.
+- **Pendências:** revisão do deck v1 por Diego/ponto focal e decisão sobre um ajuste F4 (nome, cidade e data do evento) dentro do limite de US$ 23; remover os trabalhos de diagnóstico `6b6b2f64…` e `d7296bae…`; aceite.
+- **Monday:** —
+
 ## 13/11/2026 — Slide Maker: causa do erro do C5 (segredo Anthropic corrompido) e correção — Diego Cabrero, com Claude
 
 - **Causa:** a versão 1 de `slide-maker-anthropic-api-key` tinha 644 caracteres, com 8 `DEL` (U+007F), rastro de chave colada num terminal e "corrigida" com Backspace. O Node recusa o valor como cabeçalho, e a CLI do agente recebia `API Error: 400 status code (no body)`. Diagnóstico por um job pontual do Cloud Run (removido), que só imprimiu o formato, sem o valor.

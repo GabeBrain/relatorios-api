@@ -14,7 +14,8 @@ interface Props {
 
 /** "Seu deck está pronto — vN" (§9), até 3 linhas do que mudou e o botão Baixar PPTX. */
 export function CardEntrega({ entrega, versaoAtual, baixando, onBaixar, onVersoesAnteriores }: Props) {
-  const atual = entrega.versao === versaoAtual;
+  // A entrega chega ao chat antes de a fase fechar e atualizar versao_atual: nesse intervalo ela já é a vigente.
+  const atual = entrega.versao >= versaoAtual;
   return (
     <section
       className={cn('space-y-3 rounded-xl border p-5 shadow-sm', atual ? 'border-success/30 bg-success/[0.05]' : 'border-border bg-card')}

@@ -102,7 +102,7 @@ export function ChatThread({ mensagens, acoes }: { mensagens: Mensagem[]; acoes:
             break;
           case 'entrega': {
             const entrega = c.entrega as Entrega;
-            const atual = entrega.versao === acoes.versaoAtual;
+            const atual = entrega.versao >= acoes.versaoAtual;
             corpo = (
               <CardEntrega
                 entrega={entrega} versaoAtual={acoes.versaoAtual} baixando={acoes.baixando === entrega.versao}
