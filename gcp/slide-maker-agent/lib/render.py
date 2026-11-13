@@ -46,6 +46,23 @@ def fontes_do_pdf(pdf: Path) -> list[str]:
     return sorted(n for n in nomes if n)
 
 
+# Rótulos de gráfico são números com código de formato ("0.00"): o separador vem do idioma de quem
+# renderiza. O PowerPoint da equipe (pt-BR) mostra "3,31"; o LibreOffice da imagem, em C.UTF-8, mostrava
+# "3.31" nas miniaturas que o agente e o QA conferem. O perfil temporário fixa pt-BR como idioma de números.
+REGISTRO_PT_BR = """<?xml version="1.0" encoding="UTF-8"?>
+<oor:items xmlns:oor="http://openoffice.org/2001/registry" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<item oor:path="/org.openoffice.Setup/L10N"><prop oor:name="ooSetupSystemLocale" oor:op="fuse"><value>pt-BR</value></prop></item>
+</oor:items>
+"""
+
+
+def preparar_perfil(perfil: Path) -> None:
+    """Perfil novo do LibreOffice com pt-BR como idioma de formatação (decimal com vírgula)."""
+    usuario = perfil / "user"
+    usuario.mkdir(parents=True, exist_ok=True)
+    (usuario / "registrymodifications.xcu").write_text(REGISTRO_PT_BR, encoding="utf-8")
+
+
 def renderizar(pptx: Path, destino: Path, dpi: int = 60) -> dict:
     if not pptx.is_file():
         raise FileNotFoundError(f"arquivo não encontrado: {pptx}")
@@ -53,6 +70,7 @@ def renderizar(pptx: Path, destino: Path, dpi: int = 60) -> dict:
     for antigo in destino.glob("slide-*.png"):
         antigo.unlink()
     with tempfile.TemporaryDirectory(prefix="render-") as tmp:
+        preparar_perfil(Path(tmp, "perfil"))
         perfil = Path(tmp, "perfil").resolve().as_uri()
         cmd = [achar_soffice(), f"-env:UserInstallation={perfil}", "--headless", "--norestore",
                "--convert-to", "pdf", "--outdir", tmp, str(pptx)]

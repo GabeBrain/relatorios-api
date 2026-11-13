@@ -1,5 +1,14 @@
 # Rebrain (Plataforma) — Documento Vivo
 
+## 13/11/2026 — Slide Maker: decimal pt-BR no render (prompt 1.1) — Diego Cabrero, com Claude
+
+- **Causa:** os rótulos de gráfico são números com código de formato; o separador vem do idioma de quem renderiza. O PowerPoint da equipe (pt-BR) mostra vírgula, mas o LibreOffice da imagem, em `C.UTF-8`, mostrava `3.31`, tanto nas miniaturas do QA quanto na revisão visual do próprio agente em F3/F4.
+- **Correção (DET):** `lib/render.py` grava `ooSetupSystemLocale = pt-BR` no perfil temporário do LibreOffice. `VERSAO_PROMPT` 1.1 registrado em `LIVE_regras_slide_maker.md`.
+- **Validação:** referência renderizada na imagem publicada antes/depois: slide 9 com `8.8` → só `8,8`. Teste obrigatório no build (`9,2` presente, `9.2` ausente) e perfil com pt-BR; build com 49 testes da `lib/`; 89 testes do serviço. Revisão `slide-maker-agent-00008-fkb` (`sha256:c8b29fcf…`), agente real e isolamento aprovado.
+- **Não muda:** o PPTX entregue. Office configurado em inglês segue o idioma de quem abre.
+- **Pendências:** Diego remove os diagnósticos `6b6b2f64…` e `d7296bae…` (SQL com contagem 2); calibrar T8 ("déficit"); decidir o ajuste F4 do dourado.
+- **Monday:** —
+
 ## 13/11/2026 — Slide Maker: QA do deck dourado 1 (v1) — Diego Cabrero, com Claude
 
 - **Verificação:** o PPTX baixado por Diego passou pela imagem publicada (`sha256:54a8557c…`): render dos 17 slides sem erro e lint com **0 falhas 🔒 e 11 alertas**; miniaturas conferidas por hash e inspecionadas. Identidade correta: logo, paleta, Neo Sans/Montserrat, slide final oficial do Fábio e fontes nos rodapés. Cópia temporária em `diagnosticos/` do bucket de marca removida após o QA.

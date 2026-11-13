@@ -51,6 +51,20 @@ modelo e regras de conteúdo permanecem na versão 1.0; esta adaptação muda o 
   API→ponte→PostgreSQL/PGlite→F1–F4/v1/v2. Provedores Storage/fila/Broadcast são simulados neste ensaio;
   não comprova permissões remotas nem isolamento Linux. Roteiro e arquivos em [DEPLOY_GCP.md](DEPLOY_GCP.md).
 
+## Versão 1.1 — 13/11/2026 — render dos gráficos em pt-BR
+
+`VERSAO_PROMPT = '1.1'`. Prompt, modelo, ferramentas MCP e lint inalterados; muda a ferramenta `lib/render.py`.
+
+- **DET:** o perfil temporário do LibreOffice fixa `ooSetupSystemLocale = pt-BR`. Rótulos de gráfico são números
+  com código de formato (`0.00`, `"+"0.0"%"`) e o separador decimal vem do idioma de quem renderiza: com o
+  contêiner em `C.UTF-8`, as miniaturas de QA (e a revisão visual do agente em F3/F4) mostravam `3.31` onde o
+  PowerPoint da equipe, em pt-BR, mostra `3,31`. Agora render, agente e colaborador veem a mesma vírgula.
+- **Evidência:** referência renderizada na imagem publicada antes/depois: slide 9 com `8.8` → só `8,8`.
+  Teste obrigatório no build: `test_render.py` exige `9,2` e recusa `9.2` no slide 9; perfil com pt-BR.
+- **Não muda:** o PPTX entregue (os códigos de formato já eram numéricos). Em Office configurado em inglês, o
+  separador continua seguindo o idioma de quem abre.
+- **Pendente (calibração):** T8 marca "déficit" como erro de ortografia (dicionário do hunspell).
+
 ## Versão 1.0 — 12/11/2026 — primeira versão (Fases 1–6)
 
 `VERSAO_PROMPT = '1.0'`. Modelo `claude-opus-5-5`, esforço `medium`, Claude Agent SDK 0.3.322.
