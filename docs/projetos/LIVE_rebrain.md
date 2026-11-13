@@ -1,5 +1,13 @@
 # Rebrain (Plataforma) — Documento Vivo
 
+## 13/11/2026 — Slide Maker: causa do erro do C5 (segredo Anthropic corrompido) e correção — Diego Cabrero, com Claude
+
+- **Causa:** a versão 1 de `slide-maker-anthropic-api-key` tinha 644 caracteres, com 8 `DEL` (U+007F), rastro de chave colada num terminal e "corrigida" com Backspace. O Node recusa o valor como cabeçalho, e a CLI do agente recebia `API Error: 400 status code (no body)`. Diagnóstico por um job pontual do Cloud Run (removido), que só imprimiu o formato, sem o valor.
+- **Correção:** Diego criou a versão 2 pelo console. Formato válido (108 caracteres) e chamada mínima ao `claude-opus-5-5` com 200 "ok". Serviço apontado para `:2`; versão 1 desativada (preservada). Nova regra DET: com `AGENTE=claude`, chave fora de `^sk-ant-[A-Za-z0-9_-]+$` impede a revisão de subir, sem expor o valor (teste em `unidades.test.ts`).
+- **Resultado:** o dourado 1 (`0c232f3e…`) concluiu a F1 com o agente real em 82 s e aguarda as respostas de Diego. Revisão `slide-maker-agent-00007-669` (imagem `sha256:54a8557c…`, 48 testes da `lib/`; 89 testes do serviço).
+- **Pendências:** revogar a chave antiga no console da Anthropic; subir `slide-maker-entrada` para 200 MB (o limite global do Storage já é 3 GB, mas o do bucket prevalece: 60 MB ainda recusado às 18h30); concluir F2–F4 do dourado dentro de US$ 23; remover o trabalho de diagnóstico `6b6b2f64…`.
+- **Monday:** —
+
 ## 13/11/2026 — Slide Maker: arquivos de até 200 MB por envio direto e diagnóstico do C5 — Diego Cabrero, com Claude
 
 - **Mudança:** upload passa a ir do navegador direto ao Storage por URL assinada (`POST /jobs/:id/envios` → PUT → `POST /jobs/:id/envios/concluir`), com progresso real no `BrainLoadingState`. Limites: 200 MB por arquivo, 500 MB por trabalho (decisão de Diego). Motivo: o Cloud Run recusa corpo acima de 32 MiB, então até os 50 MB anunciados falhariam. A conclusão confere tamanho e assinatura binária lendo só o início do objeto (Range) e remove o que não foi confirmado, porque o workspace baixa todo o prefixo. Ponte do Lovable sem mudança. A rota multipart continua para compatibilidade.

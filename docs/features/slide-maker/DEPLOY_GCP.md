@@ -306,7 +306,9 @@ Só depois de C3 com `"aprovado": true` no bloco `isolamento`. Cada trabalho com
 **tem custo** (estimativa da base, doc 07: US$ 5–9 por deck; a trava por fase é F1 = 2, F2 = 6,
 F3 = 10 e F4 = 5 US$).
 
-1. **Chave já cadastrada:** `slide-maker-anthropic-api-key`, versão 1 ativa, exclusiva do Slide Maker.
+1. **Chave cadastrada:** `slide-maker-anthropic-api-key`, **versão 2** (13/11/2026; a versão 1 estava corrompida por
+   Backspace no terminal e foi desativada). Grave novas versões pelo console (campo de valor), nunca digitando no
+   terminal; com `AGENTE=claude` o serviço recusa subir se a chave sair do formato `sk-ant-…`.
    Conferir somente metadados. Não criar outra versão, copiar a chave do Lovable ou imprimir valores.
 
 2. **Ligar o agente real:**

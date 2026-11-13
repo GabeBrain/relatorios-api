@@ -47,6 +47,17 @@ describe('configuração', () => {
       expect(msg).not.toContain('segredo-curto');
     }
   });
+
+  it('com AGENTE=claude, chave com caractere de controle impede a subida sem expor o valor', () => {
+    const base = {
+      SLIDE_MAKER_BRIDGE_URL: 'https://x.supabase.co/functions/v1/slide-maker-bridge', SLIDE_MAKER_BRIDGE_SECRET: 'a'.repeat(43),
+      GCP_PROJECT: 'p', TASKS_SERVICE_ACCOUNT: 'tasks@p.iam.gserviceaccount.com', SERVICE_URL: 'https://s.run.app', AGENTE: 'claude',
+    };
+    expect(() => lerConfig({ ...base, ANTHROPIC_API_KEY: 'sk-ant-api03-abc\u007fdef' })).toThrow(/ANTHROPIC_API_KEY/);
+    expect(() => lerConfig({ ...base, ANTHROPIC_API_KEY: 'sk-ant-api03-abc\n' })).toThrow(/ANTHROPIC_API_KEY/);
+    try { lerConfig({ ...base, ANTHROPIC_API_KEY: 'sk-ant-api03-SEGREDO\u007f' }); } catch (e) { expect((e as Error).message).not.toContain('SEGREDO'); }
+    expect(lerConfig({ ...base, ANTHROPIC_API_KEY: 'sk-ant-api03-Abc_def-123' }).AGENTE).toBe('claude');
+  });
 });
 
 describe('nomes de arquivo', () => {

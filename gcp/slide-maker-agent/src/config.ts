@@ -27,6 +27,11 @@ const Esquema = z.object({
   if (c.AGENTE === 'claude' && !c.ANTHROPIC_API_KEY) {
     ctx.addIssue({ code: 'custom', path: ['ANTHROPIC_API_KEY'], message: 'obrigatória com AGENTE=claude' });
   }
+  // 13/11/2026: uma versão gravada com Backspace (U+007F) virou "API Error: 400 (no body)" no meio da F1.
+  // Chave fora do formato impede a subida da revisão, sem expor o valor.
+  if (c.AGENTE === 'claude' && c.ANTHROPIC_API_KEY && !/^sk-ant-[A-Za-z0-9_-]+$/.test(c.ANTHROPIC_API_KEY)) {
+    ctx.addIssue({ code: 'custom', path: ['ANTHROPIC_API_KEY'], message: 'fora do formato sk-ant-… (espaço, quebra de linha ou caractere de controle no segredo?)' });
+  }
 });
 
 export type Config = z.infer<typeof Esquema>;
