@@ -80,7 +80,7 @@ modelo e regras de conteúdo permanecem na versão 1.0; esta adaptação muda o 
 | Cancelar com deck já entregue volta à última versão (`entregue`) | `state-machine.ts` |
 | Trava de custo por fase (`maxBudgetUsd`): F1 2, F2 6, F3 10, F4 5 US$ | `ORCAMENTO_USD` |
 | Corte da fase em 25 min (`FASE_TIMEOUT_MS`); Cloud Tasks com prazo de 30 min | `config.ts` |
-| Upload: `.pptx`, `.xlsx`, `.docx`, `.pdf`, `.png`, `.jpg`/`.jpeg` com assinatura binária conferida; até 10 arquivos de 50 MB | `uploads.ts`, `LIMITES` |
+| Upload: `.pptx`, `.xlsx`, `.docx`, `.pdf`, `.png`, `.jpg`/`.jpeg` com assinatura binária conferida; até 10 arquivos de 200 MB e 500 MB por trabalho, enviados direto ao Storage (13/11/2026) | `uploads.ts`, `LIMITES` |
 | Limites de uso: 10 fases/h por e-mail, 40 por IP, 3 trabalhos simultâneos por e-mail | `LIMITES` |
 | Download só por URL assinada de 10 min, gerada no clique, com o token do trabalho | `app.ts` |
 

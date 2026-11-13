@@ -1,5 +1,5 @@
 import type { Repo } from '../repo/tipos.js';
-import type { Armazenamento, Bucket } from '../storage/armazenamento.js';
+import { inspecionarPorUrl, type Armazenamento, type Bucket } from '../storage/armazenamento.js';
 import type { EventoTrabalho, Eventos } from '../eventos.js';
 import { BridgeClient } from './client.js';
 
@@ -35,6 +35,16 @@ export class StorageBridge implements Armazenamento {
     for (let i = 0; i < paths.length; i += 500) await this.client.call('removerObjetos', [bucket, paths.slice(i, i + 500)]);
   }
   urlAssinada(bucket: Bucket, path: string, seconds: number): Promise<string> { return this.client.call('download', [bucket, path, seconds]); }
+  async urlEnvio(bucket: Bucket, path: string) {
+    return (await this.client.call<{ signedUrl: string }>('upload', [bucket, path])).signedUrl;
+  }
+  async inspecionar(bucket: Bucket, path: string, n: number) {
+    try {
+      return await inspecionarPorUrl((url, init) => this.client.transfer(url, init), await this.urlAssinada(bucket, path, 60), n);
+    } catch {
+      return null;
+    }
+  }
 }
 export class EventsBridge implements Eventos {
   constructor(private readonly client: BridgeClient, private readonly log: (message: string) => void) {}

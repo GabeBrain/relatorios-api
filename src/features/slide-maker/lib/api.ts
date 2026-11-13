@@ -60,14 +60,50 @@ async function chamar<T>(caminho: string, o: Opcoes = {}): Promise<T> {
   return dados as T;
 }
 
+export interface ProgressoEnvio { enviados: number; total: number; arquivo: string }
+
+/** PUT na URL assinada, com progresso real (XMLHttpRequest: fetch não informa o upload). */
+function gravarNaUrl(url: string, arquivo: File, contentType: string, aoProgredir: (bytes: number) => void): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open('PUT', url);
+    xhr.setRequestHeader('content-type', contentType);
+    xhr.setRequestHeader('x-upsert', 'true');
+    xhr.upload.onprogress = (e) => aoProgredir(e.loaded);
+    xhr.onload = () => {
+      if (xhr.status >= 200 && xhr.status < 300) { aoProgredir(arquivo.size); resolve(); return; }
+      // O Storage responde 400 com {"statusCode":"413","error":"Payload too large","code":"EntityTooLarge"}.
+      const grandeDemais = xhr.status === 413 || /EntityTooLarge|"413"/.test(xhr.responseText ?? '');
+      reject(new ErroSlideMaker(xhr.status, grandeDemais
+        ? `"${arquivo.name}" passa do limite aceito pelo armazenamento (200 MB por arquivo).`
+        : `Não foi possível enviar "${arquivo.name}". Tente novamente.`));
+    };
+    xhr.onerror = () => reject(new ErroSlideMaker(0, MENSAGEM_REDE));
+    xhr.send(arquivo);
+  });
+}
+
 export const api = {
   criar: (dados: { colaborador_email: string; titulo: string; contexto?: string }) =>
     chamar<TrabalhoCriado>('/jobs', { corpo: dados }),
 
-  enviarArquivos: (jobId: string, token: string, arquivos: File[]) => {
-    const f = new FormData();
-    for (const a of arquivos) f.append('arquivos', a, a.name);
-    return chamar<{ trabalho: Trabalho }>(`/jobs/${jobId}/arquivos`, { token, formulario: f, timeoutMs: 5 * 60_000 });
+  /**
+   * Envio direto ao Storage (até 200 MB por arquivo): o serviço valida e devolve URLs assinadas, o
+   * navegador grava cada arquivo nelas e o serviço confere o que chegou antes de iniciar a análise.
+   * O Cloud Run não aceita corpo acima de 32 MiB, então o arquivo não passa por ele.
+   */
+  enviarArquivos: async (jobId: string, token: string, arquivos: File[], aoProgredir?: (p: ProgressoEnvio) => void) => {
+    const { envios } = await chamar<{ envios: { nome: string; contentType: string; url: string }[] }>(
+      `/jobs/${jobId}/envios`, { token, corpo: { arquivos: arquivos.map((a) => ({ nome: a.name, bytes: a.size })) } });
+    const total = arquivos.reduce((s, a) => s + a.size, 0);
+    const enviados = arquivos.map(() => 0);
+    for (const [i, e] of envios.entries()) {
+      await gravarNaUrl(e.url, arquivos[i]!, e.contentType, (b) => {
+        enviados[i] = b;
+        aoProgredir?.({ enviados: enviados.reduce((s, v) => s + v, 0), total, arquivo: arquivos[i]!.name });
+      });
+    }
+    return chamar<{ trabalho: Trabalho }>(`/jobs/${jobId}/envios/concluir`, { token, corpo: { nomes: envios.map((e) => e.nome) }, timeoutMs: 5 * 60_000 });
   },
 
   detalhe: (jobId: string, token: string) => chamar<DetalheTrabalho>(`/jobs/${jobId}`, { token }),

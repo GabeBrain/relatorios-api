@@ -36,6 +36,9 @@ verificações do serviço com o agente simulado da Fase 2).
    tabelas. O bloco `INSERT INTO storage.buckets` não é aceito nesse ambiente: os buckets
    `slide-maker-entrada`, `slide-maker-saida` e `slide-maker-trabalho` são criados pela ferramenta de
    Storage do Lovable, privados, com limites de 50 MB, 200 MB e sem limite específico, respectivamente.
+   **Desde 13/11/2026 a entrada precisa de 200 MB** (envio direto do navegador, 500 MB por trabalho): subir o limite
+   do bucket `slide-maker-entrada` e, se menor, o limite global de upload do Storage do projeto. Conferir com
+   `select id, public, file_size_limit from storage.buckets where id like 'slide-maker-%';` (entrada = 209715200, privado).
 2. Conferir depois de aplicar:
    - nenhuma policy nas tabelas `slide_maker_*` nem em `storage.objects` para esses buckets;
    - os 3 buckets aparecem como **privados** no painel de Storage.

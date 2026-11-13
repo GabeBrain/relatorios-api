@@ -34,6 +34,9 @@ class ArmazenamentoLocal extends ArmazenamentoMemoria {
     if (!this.objetos.has(`${b}/${c}`)) throw new Error('objeto inexistente');
     return `${base}/dev/arquivo?chave=${encodeURIComponent(`${b}/${c}`)}`;
   }
+  override async urlEnvio(b: Bucket, c: string) {
+    return `${base}/dev/envio?chave=${encodeURIComponent(`${b}/${c}`)}`;
+  }
 }
 
 const repo = new RepoMemoria();
@@ -67,6 +70,13 @@ app.get('/dev/arquivo', async (req, reply) => {
     .header('content-type', 'application/vnd.openxmlformats-officedocument.presentationml.presentation')
     .header('content-disposition', `attachment; filename="${chave.split('/').at(-1)}"`)
     .send(Buffer.from(dados));
+});
+// Envio direto (o papel da URL assinada do Storage): PUT com o corpo bruto do arquivo.
+app.addContentTypeParser('*', { parseAs: 'buffer', bodyLimit: 250 * 1024 * 1024 }, (_req, corpo, feito) => feito(null, corpo));
+app.put('/dev/envio', async (req, reply) => {
+  const chave = String((req.query as { chave?: string }).chave ?? '');
+  arm.objetos.set(chave, new Uint8Array(req.body as Buffer));
+  return reply.status(200).send({ Key: chave });
 });
 await app.listen({ host: '127.0.0.1', port: porta });
 console.log(`slide-maker dev-local em ${base}`);

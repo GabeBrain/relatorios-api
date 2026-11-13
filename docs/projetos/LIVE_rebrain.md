@@ -1,5 +1,14 @@
 # Rebrain (Plataforma) — Documento Vivo
 
+## 13/11/2026 — Slide Maker: arquivos de até 200 MB por envio direto e diagnóstico do C5 — Diego Cabrero, com Claude
+
+- **Mudança:** upload passa a ir do navegador direto ao Storage por URL assinada (`POST /jobs/:id/envios` → PUT → `POST /jobs/:id/envios/concluir`), com progresso real no `BrainLoadingState`. Limites: 200 MB por arquivo, 500 MB por trabalho (decisão de Diego). Motivo: o Cloud Run recusa corpo acima de 32 MiB, então até os 50 MB anunciados falhariam. A conclusão confere tamanho e assinatura binária lendo só o início do objeto (Range) e remove o que não foi confirmado, porque o workspace baixa todo o prefixo. Ponte do Lovable sem mudança. A rota multipart continua para compatibilidade.
+- **C5:** agente real ligado com o limite de **um** trabalho dourado (≤ US$ 23) aprovado por Diego. O dourado 1 (`0c232f3e…`) falhou na F1: a API da Anthropic recusou a primeira chamada (1 turno, 3 s, `erro_api`), com custo desprezível. O serviço agora registra o status e a mensagem da API (sem custo nem conteúdo, preservando §11/§12).
+- **Validação:** 88 testes do serviço (6 novos de envio e 1 de erro de API), 92 da interface, typecheck/ESLint, E2E local 2/2 pelo envio direto e build com 48 testes da `lib/`. No serviço publicado, sem iniciar F1: PUT do navegador a partir de `geobrain-relatorios.lovable.app` = 200; 201 MB recusado pelo serviço; conclusão leu o objeto via ponte e recusou tipo trocado. [Evidência](../features/slide-maker/evidencias/2026-11-13_envio_direto_e_c5.json).
+- **Não verificado:** envio real acima de 50 MB, que o Storage recusou (`EntityTooLarge`) até o limite subir no Lovable.
+- **Pendências:** Diego sobe o limite de `slide-maker-entrada` (e o global do Storage, se menor) para 200 MB; motivo exato da recusa da API e nova tentativa do dourado 1; trabalhos de teste incluídos no SQL de limpeza.
+- **Monday:** —
+
 ## 13/11/2026 — Slide Maker: ativos oficiais, build final, QA visual e publicação do serviço — Diego Cabrero, com Claude
 
 - **Estado:** serviço final `slide-maker-agent` publicado (público, revisão `slide-maker-agent-00002-cx5`) com **agente simulado**; distinto do `slide-maker-diagnostico`, que segue privado e intocado. Interface conectada via `VITE_SLIDE_MAKER_AGENT_URL` no `.env` (vale no Lovable após push).

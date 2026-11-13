@@ -77,7 +77,10 @@ describe('validação de arquivos antes do envio', () => {
     expect(validarArquivos([arquivo('a.pdf', 10), arquivo('b.XLSX', 10)])).toEqual([]);
     expect(validarArquivos([arquivo('a.exe', 10)])[0]!.motivo).toBe('Tipo de arquivo não aceito.');
     expect(validarArquivos([arquivo('a.pdf', 0)])[0]!.motivo).toBe('Arquivo vazio.');
-    expect(validarArquivos([{ name: 'g.pdf', size: 51 * 1024 * 1024 } as File])[0]!.motivo).toBe('Maior que 50 MB.');
+    expect(validarArquivos([{ name: 'm.pdf', size: 199 * 1024 * 1024 } as File])).toEqual([]);
+    expect(validarArquivos([{ name: 'g.pdf', size: 201 * 1024 * 1024 } as File])[0]!.motivo).toBe('Maior que 200 MB.');
+    const tres = [1, 2, 3].map((i) => ({ name: `${i}.pdf`, size: 190 * 1024 * 1024 }) as File);
+    expect(validarArquivos(tres).map((p) => p.motivo)).toEqual(['Os arquivos somam mais de 500 MB, o limite por apresentação.']);
     expect(validarArquivos(Array.from({ length: 11 }, (_, i) => arquivo(`${i}.pdf`, 1)))[0]!.motivo).toBe('Envie no máximo 10 arquivos.');
   });
 });

@@ -4,7 +4,7 @@
  */
 import { emExecucao, type Estado } from './state-machine';
 import {
-  EXTENSOES_ENTRADA, MAX_ARQUIVOS, MAX_BYTES_ARQUIVO,
+  EXTENSOES_ENTRADA, MAX_ARQUIVOS, MAX_BYTES_ARQUIVO, MAX_BYTES_TRABALHO,
   type DetalheTrabalho, type EtapaProgresso, type Mensagem,
 } from '../types';
 
@@ -83,8 +83,11 @@ export function validarArquivos(arquivos: File[]): ProblemaArquivo[] {
   for (const a of arquivos) {
     const ext = a.name.slice(a.name.lastIndexOf('.')).toLowerCase();
     if (!(EXTENSOES_ENTRADA as readonly string[]).includes(ext)) problemas.push({ nome: a.name, motivo: 'Tipo de arquivo não aceito.' });
-    else if (a.size > MAX_BYTES_ARQUIVO) problemas.push({ nome: a.name, motivo: 'Maior que 50 MB.' });
+    else if (a.size > MAX_BYTES_ARQUIVO) problemas.push({ nome: a.name, motivo: 'Maior que 200 MB.' });
     else if (a.size === 0) problemas.push({ nome: a.name, motivo: 'Arquivo vazio.' });
+  }
+  if (arquivos.reduce((s, a) => s + a.size, 0) > MAX_BYTES_TRABALHO) {
+    problemas.push({ nome: '', motivo: 'Os arquivos somam mais de 500 MB, o limite por apresentação.' });
   }
   return problemas;
 }

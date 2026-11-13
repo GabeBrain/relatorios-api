@@ -22,7 +22,9 @@ export const DOMINIO_EMAIL = '@brain.srv.br';
 /** Extensões aceitas no upload (§1, §8). */
 export const EXTENSOES_ENTRADA = ['.pptx', '.xlsx', '.pdf', '.docx', '.png', '.jpg', '.jpeg'] as const;
 export const MAX_ARQUIVOS = 10;
-export const MAX_BYTES_ARQUIVO = 50 * 1024 * 1024;
+export const MAX_BYTES_ARQUIVO = 200 * 1024 * 1024;
+/** Soma dos arquivos de um trabalho (o serviço confere de novo). */
+export const MAX_BYTES_TRABALHO = 500 * 1024 * 1024;
 
 /** Trabalho visto pelo autor (rotas com `x-job-token`). */
 export interface Trabalho {

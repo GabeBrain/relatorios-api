@@ -6,7 +6,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { logActivity } from '@/lib/activity-log';
-import { api } from '../lib/api';
+import { api, type ProgressoEnvio } from '../lib/api';
 import { identidade, trabalhosLocais } from '../lib/armazenamento';
 import { emExecucao } from '../lib/state-machine';
 import type { DetalheTrabalho, Trabalho } from '../types';
@@ -77,12 +77,12 @@ export function useJobEvents(jobId: string, ativo: boolean) {
 export function useCriarTrabalho() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (d: { email: string; titulo: string; contexto: string; arquivos: File[] }) => {
+    mutationFn: async (d: { email: string; titulo: string; contexto: string; arquivos: File[]; aoProgredir?: (p: ProgressoEnvio) => void }) => {
       const { jobId, token } = await api.criar({ colaborador_email: d.email, titulo: d.titulo, ...(d.contexto.trim() && { contexto: d.contexto.trim() }) });
       trabalhosLocais.adicionar({ jobId, token, titulo: d.titulo, criadoEm: new Date().toISOString() });
       logActivity('Slide Maker: nova apresentação', d.titulo);
       // Se o upload falhar, o trabalho já existe (rascunho) e o chat oferece reenviar os arquivos.
-      await api.enviarArquivos(jobId, token, d.arquivos).catch((e) => { throw Object.assign(e, { jobId }); });
+      await api.enviarArquivos(jobId, token, d.arquivos, d.aoProgredir).catch((e) => { throw Object.assign(e, { jobId }); });
       logActivity('Slide Maker: arquivos enviados', `${d.titulo} (${d.arquivos.length})`);
       return jobId;
     },
@@ -109,7 +109,8 @@ function useAcao<A>(alvo: Alvo, nome: string, fn: (token: string, a: A) => Promi
 export function useAcoesTrabalho(jobId: string, token: string | null, titulo: string) {
   const alvo = { jobId, token, titulo };
   return {
-    enviarArquivos: useAcao<File[]>(alvo, 'arquivos enviados', (tk, arquivos) => api.enviarArquivos(jobId, tk, arquivos)),
+    enviarArquivos: useAcao<{ arquivos: File[]; aoProgredir?: (p: ProgressoEnvio) => void }>(alvo, 'arquivos enviados',
+      (tk, e) => api.enviarArquivos(jobId, tk, e.arquivos, e.aoProgredir)),
     responder: useAcao<Record<string, string | string[]>>(alvo, 'respostas enviadas', (tk, r) => api.responder(jobId, tk, r)),
     aprovarNarrativa: useAcao<void>(alvo, 'narrativa aprovada', (tk) => api.narrativa(jobId, tk, { acao: 'aprovar' })),
     ajustarNarrativa: useAcao<string>(alvo, 'ajuste de narrativa', (tk, texto) => api.narrativa(jobId, tk, { acao: 'ajustar', texto })),

@@ -1,12 +1,13 @@
 import { useId, useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { BrainLoadingState } from '@/components/feedback/BrainLoadingState';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useCriarTrabalho } from '../hooks/useSlideMaker';
 import { validarArquivos } from '../lib/chat';
+import type { ProgressoEnvio as Progresso } from '../lib/api';
+import { ProgressoEnvio } from './ProgressoEnvio';
 import { UploadDropzone } from './UploadDropzone';
 
 /** "Nova apresentação": nome, contexto opcional e arquivos; ao concluir, abre o chat do trabalho. */
@@ -18,13 +19,15 @@ export function NovaApresentacao({ email, onCancelar }: { email: string; onCance
   const [contexto, setContexto] = useState('');
   const [arquivos, setArquivos] = useState<File[]>([]);
   const [inicio, setInicio] = useState<number | null>(null);
+  const [progresso, setProgresso] = useState<Progresso | null>(null);
   const valido = titulo.trim().length >= 3 && arquivos.length > 0 && validarArquivos(arquivos).length === 0;
 
   const enviar = (e: FormEvent) => {
     e.preventDefault();
     if (!valido || criar.isPending) return;
     setInicio(Date.now());
-    criar.mutate({ email, titulo: titulo.trim(), contexto, arquivos }, {
+    setProgresso(null);
+    criar.mutate({ email, titulo: titulo.trim(), contexto, arquivos, aoProgredir: setProgresso }, {
       onSuccess: (jobId) => navigate(`/slide-maker/${jobId}`),
       onError: (erro) => {
         // Trabalho criado mas upload falhou: o chat oferece reenviar.
@@ -50,7 +53,7 @@ export function NovaApresentacao({ email, onCancelar }: { email: string; onCance
         <span className="text-sm font-medium">Arquivos</span>
         <UploadDropzone arquivos={arquivos} onChange={setArquivos} desabilitado={criar.isPending} />
       </div>
-      {criar.isPending && <BrainLoadingState title="Enviando os arquivos" description="Criando o trabalho e enviando o material ao Slide Maker." startedAt={inicio} />}
+      {criar.isPending && <ProgressoEnvio progresso={progresso} inicio={inicio} />}
       {criar.isError && !(criar.error as { jobId?: string }).jobId && (
         <p role="alert" className="text-sm text-destructive">{criar.error.message}</p>
       )}

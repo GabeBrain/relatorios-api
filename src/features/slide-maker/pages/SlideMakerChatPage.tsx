@@ -8,8 +8,10 @@ import { ChatThread } from '../components/ChatThread';
 import { ComposerAjuste } from '../components/ComposerAjuste';
 import { HistoricoVersoes } from '../components/HistoricoVersoes';
 import { EstadoBadge } from '../components/ListaTrabalhos';
+import { ProgressoEnvio } from '../components/ProgressoEnvio';
 import { UploadDropzone } from '../components/UploadDropzone';
 import { useAcoesTrabalho, useBaixarVersao, useJob, useJobEvents } from '../hooks/useSlideMaker';
+import type { ProgressoEnvio as Progresso } from '../lib/api';
 import { trabalhosLocais } from '../lib/armazenamento';
 import { mensagensVisiveis, situacao, validarArquivos } from '../lib/chat';
 import { RESPONSAVEL_ROTULO } from '../types';
@@ -36,6 +38,8 @@ export default function SlideMakerChatPage() {
   const baixar = useBaixarVersao(jobId, token, titulo);
   const [historico, setHistorico] = useState(false);
   const [arquivos, setArquivos] = useState<File[]>([]);
+  const [progressoEnvio, setProgressoEnvio] = useState<Progresso | null>(null);
+  const [inicioEnvio, setInicioEnvio] = useState<number | null>(null);
   const fim = useRef<HTMLDivElement>(null);
   useJobEvents(jobId, !!token);
 
@@ -112,10 +116,15 @@ export default function SlideMakerChatPage() {
               <section className="space-y-3 rounded-xl border border-border bg-card p-5 shadow-sm" aria-label="Enviar arquivos">
                 <p className="text-sm">Envie o material da apresentação para começar.</p>
                 <UploadDropzone arquivos={arquivos} onChange={setArquivos} desabilitado={acoes.enviarArquivos.isPending} />
+                {acoes.enviarArquivos.isPending && <ProgressoEnvio progresso={progressoEnvio} inicio={inicioEnvio} />}
                 {acoes.enviarArquivos.isError && <p role="alert" className="text-sm text-destructive">{acoes.enviarArquivos.error.message}</p>}
                 <Button
                   disabled={!arquivos.length || validarArquivos(arquivos).length > 0 || acoes.enviarArquivos.isPending}
-                  onClick={() => acoes.enviarArquivos.mutate(arquivos, { onSuccess: () => setArquivos([]) })}
+                  onClick={() => {
+                    setInicioEnvio(Date.now());
+                    setProgressoEnvio(null);
+                    acoes.enviarArquivos.mutate({ arquivos, aoProgredir: setProgressoEnvio }, { onSuccess: () => setArquivos([]) });
+                  }}
                 >
                   {acoes.enviarArquivos.isPending ? 'Enviando…' : 'Enviar arquivos'}
                 </Button>

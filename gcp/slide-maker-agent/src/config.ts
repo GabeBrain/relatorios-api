@@ -44,7 +44,12 @@ export function lerConfig(env: NodeJS.ProcessEnv = process.env): Config {
 /** Limites da §8 e da §12. */
 export const LIMITES = {
   maxArquivos: 10,
-  maxBytesArquivo: 50 * 1024 * 1024,
+  // 200 MB por arquivo e 500 MB por trabalho (Diego, 13/11/2026). Acima de 32 MiB o Cloud Run recusa o corpo:
+  // arquivos grandes vão direto ao Storage por URL assinada (POST /jobs/:id/envios).
+  maxBytesArquivo: 200 * 1024 * 1024,
+  maxBytesTrabalho: 500 * 1024 * 1024,
+  /** Validade da URL de envio direto: um arquivo de 200 MB em conexão lenta. */
+  urlEnvioSegundos: 2 * 60 * 60,
   fasesPorHoraPorEmail: 10,
   fasesPorHoraPorIp: 40,
   trabalhosSimultaneosPorEmail: 3,

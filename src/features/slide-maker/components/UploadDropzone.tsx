@@ -44,7 +44,7 @@ export function UploadDropzone({ arquivos, onChange, desabilitado }: Props) {
         <FileUp className="h-7 w-7 text-primary" aria-hidden="true" />
         <p className="text-sm font-medium">Arraste os arquivos para cá</p>
         <p className="text-xs text-muted-foreground">
-          {EXTENSOES_ENTRADA.join(', ')} · até {MAX_ARQUIVOS} arquivos de 50 MB
+          {EXTENSOES_ENTRADA.join(', ')} · até {MAX_ARQUIVOS} arquivos de 200 MB, 500 MB no total
         </p>
         <Button type="button" variant="outline" size="sm" disabled={desabilitado} onClick={() => input.current?.click()} aria-describedby={`${id}-tipos`}>
           Escolher arquivos

@@ -1,6 +1,9 @@
 import { createHmac, createHash, randomUUID } from 'node:crypto';
 import { FaseAtivaExistente } from '../repo/tipos.js';
 
+/** Arquivos de até 200 MB entre Storage e Cloud Run (/jobs/:id/envios). */
+const TRANSFERENCIA_MS = 10 * 60_000;
+
 export class BridgeError extends Error {
   constructor(readonly code: string) { super(`Ponte Lovable: ${code}`); }
 }
@@ -37,7 +40,7 @@ export class BridgeClient {
   async transfer(url: string, init?: RequestInit) {
     const target = new URL(url), bridge = new URL(this.url);
     if (target.protocol !== 'https:' || target.origin !== bridge.origin || !target.pathname.startsWith('/storage/v1/')) throw new BridgeError('url_arquivo_invalida');
-    const response = await this.transport(url, { ...init, redirect: 'error', signal: AbortSignal.timeout(120000) });
+    const response = await this.transport(url, { ...init, redirect: 'error', signal: AbortSignal.timeout(TRANSFERENCIA_MS) });
     if (!response.ok) throw new BridgeError('transferencia_arquivo');
     return response;
   }

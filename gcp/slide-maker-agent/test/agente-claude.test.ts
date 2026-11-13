@@ -207,6 +207,13 @@ describe('resultado do agente', () => {
     // Mas traz a versão do prompt, para ligar o resultado às regras vigentes (LIVE_regras_slide_maker.md)
     expect(t.log.join()).toContain(`prompt=${VERSAO_PROMPT} `);
   });
+
+  it('erro de API registra status e a mensagem da API, sem custo', async () => {
+    const t = montar({ mensagens: [resultado('success', { is_error: true, api_error_status: 400, total_cost_usd: 0.01, result: 'Credit balance is too low' })] });
+    expect(await t.agente.executar(t.p)).toEqual({ tipo: 'erro', detalhe: 'erro_api' });
+    expect(t.log.join()).toContain('erro_api status=400 motivo="Credit balance is too low"');
+    expect(t.log.join()).not.toMatch(/0\.01|cost/);
+  });
 });
 
 describe('pode_pesquisar', () => {

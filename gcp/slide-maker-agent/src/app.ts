@@ -11,7 +11,7 @@ import type { VerificadorOidc } from './auth/oidc.js';
 import { ConflitoDeEstado, LimiteExcedido, type Orquestrador } from './orquestrador.js';
 import { FaseAtivaExistente, type JobRow, type Repo } from './repo/tipos.js';
 import { BUCKETS, type Armazenamento } from './storage/armazenamento.js';
-import { UploadInvalido, desduplicar, validarArquivo } from './uploads.js';
+import { BYTES_ASSINATURA, UploadInvalido, desduplicar, nomeSeguro, validarArquivo, validarConteudo, validarDeclarado, validarTotal } from './uploads.js';
 
 export interface DependenciasApp {
   repo: Repo;
@@ -37,6 +37,13 @@ const CorpoNarrativa = z.discriminatedUnion('acao', [
   z.strictObject({ acao: z.literal('aprovar') }),
   z.strictObject({ acao: z.literal('ajustar'), texto: z.string().trim().min(1).max(4000) }),
 ]);
+const CorpoEnvios = z.strictObject({
+  arquivos: z.array(z.strictObject({ nome: z.string().min(1).max(255), bytes: z.number().int().positive() })).min(1, 'Nenhum arquivo enviado.'),
+});
+const CorpoConcluirEnvios = z.strictObject({
+  nomes: z.array(z.string().min(1).max(255)).min(1, 'Nenhum arquivo enviado.'),
+  contexto: z.string().max(2000).optional(),
+});
 const CorpoMensagem = z.strictObject({ texto: z.string().trim().min(1).max(4000) });
 const CorpoListar = z.strictObject({
   itens: z.array(z.strictObject({ jobId: z.uuid(), token: z.string().min(1).max(128) })).max(LIMITES.itensListar),
@@ -86,8 +93,8 @@ export async function criarApp(d: DependenciasApp): Promise<FastifyInstance> {
 
   await app.register(cors, {
     origin: (origem, cb) => cb(null, !origem || ORIGENS_PERMITIDAS.test(origem)),
-    methods: ['GET', 'POST'],
-    allowedHeaders: ['content-type', 'x-job-token'],
+    methods: ['GET', 'POST', 'PUT'],
+    allowedHeaders: ['content-type', 'x-job-token', 'x-upsert'],
   });
   await app.register(multipart, {
     limits: { fileSize: LIMITES.maxBytesArquivo, files: LIMITES.maxArquivos, fields: 5, fieldSize: 2000 },
@@ -163,9 +170,33 @@ export async function criarApp(d: DependenciasApp): Promise<FastifyInstance> {
     };
   });
 
-  app.post('/jobs/:id/arquivos', async (req, reply) => {
+  /** Registra os arquivos já gravados em entrada/, informa no chat e inicia a F1. */
+  async function registrarArquivos(req: FastifyRequest, reply: FastifyReply, job: JobRow,
+    arquivos: { nome: string; mime: string; bytes: number }[], contextoBruto: unknown) {
+    const contextoExtra = valorTexto(contextoBruto).trim().slice(0, 500);
+    const registrados = [];
+    for (const a of arquivos) {
+      registrados.push(await d.repo.inserirArquivo({
+        job_id: job.id, nome: a.nome, mime: a.mime, bytes: a.bytes, storage_path: `${BUCKETS.entrada}/${job.id}/${a.nome}`, origem: 'entrada',
+      }));
+    }
+    await d.repo.inserirMensagem({
+      job_id: job.id, autor: 'usuario', tipo: 'arquivos',
+      conteudo: { arquivos: registrados.map((r) => ({ id: r.id, nome: r.nome, mime: r.mime, bytes: r.bytes })), ...(contextoExtra ? { contexto: contextoExtra } : {}) },
+    });
+    const patch = contextoExtra ? { contexto: [job.contexto, contextoExtra].filter(Boolean).join(' · ').slice(0, 500) } : {};
+    return responder(reply, await d.orquestrador.eventoDoUsuario(job, 'arquivos_enviados', origem(req), patch));
+  }
+
+  async function rascunho(req: FastifyRequest): Promise<JobRow> {
     const job = await autorizado(req);
     if (job.estado !== 'rascunho') throw new ErroHttp(409, 'Os arquivos já foram enviados para este trabalho.');
+    return job;
+  }
+
+  // Multipart pelo próprio serviço: só cabe abaixo de 32 MiB (limite de corpo do Cloud Run). A interface usa /envios.
+  app.post('/jobs/:id/arquivos', async (req, reply) => {
+    const job = await rascunho(req);
     if (!req.isMultipart()) throw new ErroHttp(400, 'Envie os arquivos como multipart/form-data.');
 
     try {
@@ -173,26 +204,56 @@ export async function criarApp(d: DependenciasApp): Promise<FastifyInstance> {
       if (!salvos.length) throw new ErroHttp(400, 'Nenhum arquivo enviado.');
       const lidos = await Promise.all(salvos.map(async (s) => ({ original: s.filename, dados: await readFile(s.filepath) })));
       const validados = lidos.map((l) => ({ ...validarArquivo(l.original, l.dados), dados: l.dados }));
+      validarTotal(validados.map((v) => v.dados.length));
       const nomes = desduplicar(validados.map((v) => v.nome));
-      const contextoExtra = valorTexto((values as Record<string, unknown>).contexto).trim().slice(0, 500);
-
-      const registrados = [];
-      for (const [i, v] of validados.entries()) {
-        const caminho = `${job.id}/${nomes[i]}`;
-        await d.arm.gravar(BUCKETS.entrada, caminho, v.dados, v.mime);
-        registrados.push(await d.repo.inserirArquivo({
-          job_id: job.id, nome: nomes[i]!, mime: v.mime, bytes: v.dados.length, storage_path: `${BUCKETS.entrada}/${caminho}`, origem: 'entrada',
-        }));
-      }
-      await d.repo.inserirMensagem({
-        job_id: job.id, autor: 'usuario', tipo: 'arquivos',
-        conteudo: { arquivos: registrados.map((r) => ({ id: r.id, nome: r.nome, mime: r.mime, bytes: r.bytes })), ...(contextoExtra ? { contexto: contextoExtra } : {}) },
-      });
-      const patch = contextoExtra ? { contexto: [job.contexto, contextoExtra].filter(Boolean).join(' · ').slice(0, 500) } : {};
-      return responder(reply, await d.orquestrador.eventoDoUsuario(job, 'arquivos_enviados', origem(req), patch));
+      for (const [i, v] of validados.entries()) await d.arm.gravar(BUCKETS.entrada, `${job.id}/${nomes[i]}`, v.dados, v.mime);
+      return await registrarArquivos(req, reply, job,
+        validados.map((v, i) => ({ nome: nomes[i]!, mime: v.mime, bytes: v.dados.length })), (values as Record<string, unknown>).contexto);
     } finally {
-      await req.cleanRequestFiles();
+      await req.cleanRequestFiles().catch(() => {});
     }
+  });
+
+  // Envio direto ao Storage (até 200 MB por arquivo): 1) URLs assinadas; 2) o navegador grava; 3) concluir.
+  app.post('/jobs/:id/envios', async (req) => {
+    const job = await rascunho(req);
+    const { arquivos } = validar(CorpoEnvios, req.body);
+    if (arquivos.length > LIMITES.maxArquivos) throw new UploadInvalido(`Envie no máximo ${LIMITES.maxArquivos} arquivos.`);
+    const declarados = arquivos.map((a) => validarDeclarado(a.nome, a.bytes));
+    validarTotal(arquivos.map((a) => a.bytes));
+    const nomes = desduplicar(declarados.map((v) => v.nome));
+    const envios = [];
+    for (const [i, nome] of nomes.entries()) {
+      envios.push({ original: arquivos[i]!.nome, nome, contentType: declarados[i]!.mime, url: await d.arm.urlEnvio(BUCKETS.entrada, `${job.id}/${nome}`) });
+    }
+    return { envios, validadeSegundos: LIMITES.urlEnvioSegundos };
+  });
+
+  app.post('/jobs/:id/envios/concluir', async (req, reply) => {
+    const job = await rascunho(req);
+    const corpo = validar(CorpoConcluirEnvios, req.body);
+    const nomes = [...new Set(corpo.nomes)];
+    if (nomes.length > LIMITES.maxArquivos) throw new UploadInvalido(`Envie no máximo ${LIMITES.maxArquivos} arquivos.`);
+    // Só nomes que a própria rota de envios poderia ter gerado: nada de caminho ou caractere fora do padrão.
+    if (nomes.some((n) => nomeSeguro(n) !== n)) throw new ErroHttp(400, 'Nome de arquivo inválido.');
+
+    const arquivos = [];
+    for (const nome of nomes) {
+      const insp = await d.arm.inspecionar(BUCKETS.entrada, `${job.id}/${nome}`, BYTES_ASSINATURA);
+      if (!insp) throw new UploadInvalido(`"${nome}" não chegou ao armazenamento. Envie de novo.`);
+      try {
+        arquivos.push({ ...validarConteudo(nome, insp.bytes, insp.inicio), bytes: insp.bytes });
+      } catch (e) {
+        await d.arm.remover(BUCKETS.entrada, [`${job.id}/${nome}`]).catch(() => {});
+        throw e;
+      }
+    }
+    validarTotal(arquivos.map((a) => a.bytes));
+    // O workspace baixa tudo sob o prefixo do trabalho: envio abandonado ou repetido não pode entrar na F1.
+    const confirmados = new Set(nomes.map((n) => `${job.id}/${n}`));
+    const sobras = (await d.arm.listar(BUCKETS.entrada, job.id)).filter((c) => !confirmados.has(c));
+    if (sobras.length) await d.arm.remover(BUCKETS.entrada, sobras);
+    return registrarArquivos(req, reply, job, arquivos, corpo.contexto);
   });
 
   app.post('/jobs/:id/respostas', async (req, reply) => {

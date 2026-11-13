@@ -284,7 +284,9 @@ FastAPI não é obrigatório. Use **Node 22 + TypeScript** (o SDK é TS) com Fas
 | Método | Rota | Função |
 |---|---|---|
 | POST | `/jobs` | Cria o trabalho (`colaborador_email`, `contexto?`); retorna `{ jobId, token }` (o token só é mostrado aqui) |
-| POST | `/jobs/:id/arquivos` | Upload multipart (máx. 10 arquivos, 50 MB cada, extensões permitidas); inicia F1 |
+| POST | `/jobs/:id/arquivos` | Upload multipart pelo serviço (até 32 MiB, limite do Cloud Run); inicia F1. Mantido por compatibilidade |
+| POST | `/jobs/:id/envios` | Envio direto (13/11/2026): valida nome, tipo, até 200 MB por arquivo e 500 MB no total; devolve URLs assinadas de gravação no Storage |
+| POST | `/jobs/:id/envios/concluir` | Confere tamanho e assinatura binária do que chegou (só os primeiros bytes), remove o não confirmado e inicia F1 |
 | POST | `/jobs/:id/respostas` | Respostas do card (`{ respostas: Record<pergunta, string \| string[]> }`); inicia F2 |
 | POST | `/jobs/:id/narrativa` | `{ acao: "aprovar" }` → F3 · `{ acao: "ajustar", texto }` → F2 de novo |
 | POST | `/jobs/:id/mensagens` | Texto livre; com o trabalho em `entregue`, inicia F4 |

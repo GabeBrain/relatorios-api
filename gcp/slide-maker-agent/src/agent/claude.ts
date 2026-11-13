@@ -168,6 +168,11 @@ export class AgenteClaude implements Agente {
         if (m.type !== 'result') continue;
         // Só identificadores e métricas no log; nunca conteúdo (§12). Custo fica fora da v1 (§11).
         this.d.log?.(`agente job=${p.job.id} fase=${p.fase} prompt=${VERSAO_PROMPT} resultado=${m.subtype} turnos=${m.num_turns} ms=${Date.now() - inicio}`);
+        // Erro de API: o texto em `result` é a mensagem da API (chave, saldo, modelo, limite), não conteúdo do trabalho.
+        if (m.subtype === 'success' && m.is_error) {
+          const motivo = String(m.result ?? '').replace(/\s+/g, ' ').slice(0, 200);
+          this.d.log?.(`agente job=${p.job.id} fase=${p.fase} erro_api status=${m.api_error_status ?? '?'} motivo=${JSON.stringify(motivo)}`);
+        }
         if (m.subtype === 'success') fim = m.is_error ? { tipo: 'erro', detalhe: 'erro_api' } : { tipo: 'fim' };
         else if (m.subtype === 'error_max_budget_usd') fim = { tipo: 'orcamento_excedido' };
         else fim = { tipo: 'erro', detalhe: m.subtype };

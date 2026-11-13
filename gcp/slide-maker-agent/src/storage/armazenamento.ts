@@ -15,6 +15,21 @@ export interface Armazenamento {
   listar(bucket: Bucket, prefixo: string): Promise<string[]>;
   remover(bucket: Bucket, caminhos: string[]): Promise<void>;
   urlAssinada(bucket: Bucket, caminho: string, segundos: number): Promise<string>;
+  /** URL assinada para o navegador gravar o objeto direto no Storage (PUT, com upsert). */
+  urlEnvio(bucket: Bucket, caminho: string): Promise<string>;
+  /** Tamanho e primeiros `n` bytes, sem baixar o objeto inteiro; null se não existir. */
+  inspecionar(bucket: Bucket, caminho: string, n: number): Promise<InspecaoObjeto | null>;
+}
+
+export interface InspecaoObjeto { bytes: number; inicio: Uint8Array }
+
+/** Lê só o início de um objeto por URL assinada de download (Range); o total vem de Content-Range. */
+export async function inspecionarPorUrl(baixar: (url: string, init: RequestInit) => Promise<Response>, url: string, n: number): Promise<InspecaoObjeto> {
+  const r = await baixar(url, { headers: { range: `bytes=0-${n - 1}` } });
+  const intervalo = r.headers.get('content-range')?.match(/\/(\d+)$/);
+  const corpo = new Uint8Array(await r.arrayBuffer());
+  const bytes = intervalo ? Number(intervalo[1]) : Number(r.headers.get('content-length') ?? corpo.length);
+  return { bytes, inicio: corpo.subarray(0, n) };
 }
 
 export class ArmazenamentoMemoria implements Armazenamento {
@@ -39,6 +54,13 @@ export class ArmazenamentoMemoria implements Armazenamento {
   async urlAssinada(b: Bucket, c: string, segundos: number) {
     if (!this.objetos.has(this.chave(b, c))) throw new Error('objeto inexistente');
     return `memoria://${b}/${c}?expira=${segundos}`;
+  }
+  async urlEnvio(b: Bucket, c: string) {
+    return `memoria-envio://${b}/${c}`;
+  }
+  async inspecionar(b: Bucket, c: string, n: number) {
+    const v = this.objetos.get(this.chave(b, c));
+    return v ? { bytes: v.length, inicio: v.slice(0, n) } : null;
   }
 }
 
@@ -87,5 +109,19 @@ export class ArmazenamentoSupabase implements Armazenamento {
     const { data, error } = await this.db.storage.from(b).createSignedUrl(c, segundos, { download: true });
     if (error || !data) throw new Error(`Storage: URL assinada de ${b} falhou`);
     return data.signedUrl;
+  }
+
+  async urlEnvio(b: Bucket, c: string) {
+    const { data, error } = await this.db.storage.from(b).createSignedUploadUrl(c, { upsert: true });
+    if (error || !data) throw new Error(`Storage: URL de envio de ${b} falhou`);
+    return data.signedUrl;
+  }
+
+  async inspecionar(b: Bucket, c: string, n: number) {
+    try {
+      return await inspecionarPorUrl(fetch, await this.urlAssinada(b, c, 60), n);
+    } catch {
+      return null;
+    }
   }
 }

@@ -43,17 +43,42 @@ export function extensao(nome: string): string {
   return m ? m[0] : '';
 }
 
-/** Valida um arquivo enviado. Lança `UploadInvalido` com mensagem para o usuário. */
-export function validarArquivo(nomeOriginal: string, dados: Uint8Array): { nome: string; mime: string } {
+const MB = (b: number) => `${Math.round(b / (1024 * 1024))} MB`;
+
+/** Bytes iniciais suficientes para conferir qualquer assinatura de TIPOS. */
+export const BYTES_ASSINATURA = 16;
+
+/** Nome, tipo e tamanho, antes de receber o conteúdo (envio direto ao Storage). */
+export function validarDeclarado(nomeOriginal: string, bytes: number): { nome: string; mime: string } {
   const ext = extensao(nomeOriginal);
   const tipo = TIPOS[ext];
   if (!tipo) throw new UploadInvalido(`"${nomeSeguro(nomeOriginal)}": formato não aceito. Envie ${EXTENSOES_ACEITAS.join(', ')}.`);
-  if (dados.length === 0) throw new UploadInvalido(`"${nomeSeguro(nomeOriginal)}" está vazio.`);
-  if (dados.length > LIMITES.maxBytesArquivo) throw new UploadInvalido(`"${nomeSeguro(nomeOriginal)}" passa de 50 MB.`);
-  if (!tipo.assinatura.every((b, i) => dados[i] === b)) {
+  if (!Number.isFinite(bytes) || bytes <= 0) throw new UploadInvalido(`"${nomeSeguro(nomeOriginal)}" está vazio.`);
+  if (bytes > LIMITES.maxBytesArquivo) throw new UploadInvalido(`"${nomeSeguro(nomeOriginal)}" passa de ${MB(LIMITES.maxBytesArquivo)}.`);
+  return { nome: nomeSeguro(nomeOriginal), mime: tipo.mime };
+}
+
+/** Valida tamanho e assinatura binária (`inicio` = primeiros bytes). Lança `UploadInvalido`. */
+export function validarConteudo(nomeOriginal: string, bytes: number, inicio: Uint8Array): { nome: string; mime: string } {
+  const v = validarDeclarado(nomeOriginal, bytes);
+  const ext = extensao(nomeOriginal);
+  if (!TIPOS[ext]!.assinatura.every((b, i) => inicio[i] === b)) {
     throw new UploadInvalido(`"${nomeSeguro(nomeOriginal)}" não parece ser um arquivo ${ext} válido.`);
   }
-  return { nome: nomeSeguro(nomeOriginal), mime: tipo.mime };
+  return v;
+}
+
+/** Valida um arquivo recebido inteiro. Lança `UploadInvalido` com mensagem para o usuário. */
+export function validarArquivo(nomeOriginal: string, dados: Uint8Array): { nome: string; mime: string } {
+  return validarConteudo(nomeOriginal, dados.length, dados.subarray(0, BYTES_ASSINATURA));
+}
+
+/** Soma do trabalho dentro do limite. Lança `UploadInvalido`. */
+export function validarTotal(bytes: number[]): void {
+  const total = bytes.reduce((a, b) => a + b, 0);
+  if (total > LIMITES.maxBytesTrabalho) {
+    throw new UploadInvalido(`Os arquivos somam ${MB(total)}; o limite por apresentação é ${MB(LIMITES.maxBytesTrabalho)}.`);
+  }
 }
 
 /** Garante nomes únicos dentro de um envio ("a.pdf", "a (2).pdf"). */
