@@ -68,6 +68,14 @@ class Referencia(Base):
         self.assertEqual(r["falhas_bloqueantes"], 0, r["itens"])
         self.assertNotIn("E1", {n["id"] for n in r["nao_verificado"]})
 
+    def test_T8_deficit_e_superavit_nao_sao_erro_de_ortografia(self):
+        # A referência fala de "déficit habitacional"; o dicionário pt_BR do Debian não traz a palavra.
+        r = self.lint()
+        if "T8" in {n["id"] for n in r["nao_verificado"]}:
+            self.skipTest("hunspell pt_BR indisponível")
+        t8 = " ".join(i["mensagem"] for i in r["itens"] if i["id"] == "T8")
+        self.assertNotRegex(t8.lower(), r"d[eé]ficit|super[aá]vit")
+
     def test_o_que_nao_foi_verificado_e_declarado(self):
         r = self.lint(briefing=None, fontes_json=None)
         pulados = {n["id"] for n in r["nao_verificado"]}

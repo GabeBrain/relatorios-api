@@ -1,5 +1,13 @@
 # Rebrain (Plataforma) — Documento Vivo
 
+## 13/11/2026 — Slide Maker: T8 aceita "déficit" e "superávit" (prompt 1.2) — Diego Cabrero, com Claude
+
+- **Causa:** o dicionário `hunspell-pt-br` do Debian não traz "déficit", grafia do VOLP; no dourado 1 era o único alerta T8, falso positivo.
+- **Correção (DET):** glossário do `lib/lint_pptx.py` com `déficit(s)` e `superávit(s)`. T8 continua ALERTA. `VERSAO_PROMPT` 1.2 em `LIVE_regras_slide_maker.md`.
+- **Validação:** build `c602ae0a` com 50 testes da `lib/`, nenhum pulado (hunspell real na imagem), incluindo o novo teste sobre a referência; 89 testes do serviço. Revisão `slide-maker-agent-00009-m4x` (`sha256:9b925818…`), agente real e isolamento aprovado.
+- **Pendências:** Diego remove os diagnósticos `6b6b2f64…` e `d7296bae…` no SQL editor do Lovable; decidir o ajuste F4 do dourado; aceite com o ponto focal.
+- **Monday:** —
+
 ## 13/11/2026 — Slide Maker: decimal pt-BR no render (prompt 1.1) — Diego Cabrero, com Claude
 
 - **Causa:** os rótulos de gráfico são números com código de formato; o separador vem do idioma de quem renderiza. O PowerPoint da equipe (pt-BR) mostra vírgula, mas o LibreOffice da imagem, em `C.UTF-8`, mostrava `3.31`, tanto nas miniaturas do QA quanto na revisão visual do próprio agente em F3/F4.

@@ -93,7 +93,9 @@ ANGLICISMOS = [r"\bperformance\b", r"\bcase study\b", r"\btarget\b", r"\bdeadlin
                r"\bmindset\b", r"\bbusiness\b", r"\bstakeholders?\b", r"\bplayers?\b"]
 GLOSSARIO = {"vgv", "vso", "mcmv", "sbpe", "fgts", "sfh", "cri", "fidc", "fii", "landbank", "permuta", "loteamento",
              "multifamily", "long", "short", "stay", "studios", "retrofit", "zeph", "brain", "incorporador",
-             "incorporadores", "requalificavel", "requalificaveis", "vacancia", "akiya", "sidra"}
+             "incorporadores", "requalificavel", "requalificaveis", "vacancia", "akiya", "sidra",
+             # Grafia do VOLP que o hunspell-pt-br do Debian não traz (falso positivo no trabalho dourado de 13/11/2026).
+             "deficit", "deficits", "superavit", "superavits"}
 
 MESES = {"jan": 1, "fev": 2, "mar": 3, "abr": 4, "mai": 5, "jun": 6, "jul": 7, "ago": 8, "set": 9, "out": 10, "nov": 11, "dez": 12}
 MESES_EXTENSO = {"janeiro": 1, "fevereiro": 2, "marco": 3, "abril": 4, "maio": 5, "junho": 6, "julho": 7,

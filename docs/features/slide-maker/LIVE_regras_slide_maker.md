@@ -51,6 +51,16 @@ modelo e regras de conteúdo permanecem na versão 1.0; esta adaptação muda o 
   API→ponte→PostgreSQL/PGlite→F1–F4/v1/v2. Provedores Storage/fila/Broadcast são simulados neste ensaio;
   não comprova permissões remotas nem isolamento Linux. Roteiro e arquivos em [DEPLOY_GCP.md](DEPLOY_GCP.md).
 
+## Versão 1.2 — 13/11/2026 — T8 aceita "déficit" e "superávit"
+
+`VERSAO_PROMPT = '1.2'`. Prompt, modelo e ferramentas inalterados; muda o glossário do `lib/lint_pptx.py`.
+
+- **DET:** T8 (ortografia, ALERTA) ignora `déficit(s)` e `superávit(s)`, grafias do VOLP que o dicionário
+  `hunspell-pt-br` do Debian não traz. No trabalho dourado 1 era o único alerta T8, falso positivo.
+- **Evidência:** teste no build (`test_T8_deficit_e_superavit_nao_sao_erro_de_ortografia`), com hunspell real,
+  sobre a referência, que fala de "déficit habitacional".
+- **Não muda:** o nível da T8 (continua ALERTA) e o resto do glossário.
+
 ## Versão 1.1 — 13/11/2026 — render dos gráficos em pt-BR
 
 `VERSAO_PROMPT = '1.1'`. Prompt, modelo, ferramentas MCP e lint inalterados; muda a ferramenta `lib/render.py`.

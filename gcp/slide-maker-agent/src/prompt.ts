@@ -16,7 +16,7 @@ import type { JobRow } from './repo/tipos.js';
  * conhecimento, ferramentas, lint) e registre em docs/features/slide-maker/LIVE_regras_slide_maker.md.
  * Vai no log de cada fase para ligar um resultado à versão que o produziu.
  */
-export const VERSAO_PROMPT = '1.1';
+export const VERSAO_PROMPT = '1.2';
 
 /** Mesmo valor de `SYSTEM_PROMPT_DYNAMIC_BOUNDARY` do Agent SDK (sdk.d.ts); conferido em teste. */
 export const LIMITE_DINAMICO = '__SYSTEM_PROMPT_DYNAMIC_BOUNDARY__';
