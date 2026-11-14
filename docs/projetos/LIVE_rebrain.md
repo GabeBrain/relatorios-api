@@ -1,5 +1,13 @@
 # Rebrain (Plataforma) — Documento Vivo
 
+## 13/11/2026 — Assistente de Projetos: Sugestão de análise falhava em estudos com vários lotes — Diego Cabrero, com Claude
+
+- **Causa (confirmada por SQL de leitura):** no Sabel (403 slides), o Luna devolveu memos de lote com 9,5 e 10,5 KB, contra o teto fixo de 8 KB herdado do perfil mini. As duas tentativas falharam pagando um lote cada e não chegaram à compilação. A tela mostrava só "Não foi possível concluir esta etapa".
+- **Correção:** perfil `luna-high-2026-11-13`, com o prompt de lote pedindo até 5.000 caracteres e o teto calculado pela janela da compilação (24 KB até 3 lotes, 9,2 KB com 10). A falha passa a mostrar o motivo salvo, sem dado financeiro. Perfis antigos ficaram intactos. Regras na Versão 0.76 de `LIVE_regras_corretor_vocacionais.md`.
+- **Validação:** 397 testes do Corretor e TypeScript/lint aprovados; sem IA real e sem Deno local.
+- **Pendências:** publicar `corretor-execution` e `analyze-consulting-suggestion` e o frontend no Lovable; reteste real do Sabel com uma tentativa só. Sem migration.
+- **Monday:** —
+
 ## 13/11/2026 — Slide Maker: T8 aceita "déficit" e "superávit" (prompt 1.2) — Diego Cabrero, com Claude
 
 - **Causa:** o dicionário `hunspell-pt-br` do Debian não traz "déficit", grafia do VOLP; no dourado 1 era o único alerta T8, falso positivo.

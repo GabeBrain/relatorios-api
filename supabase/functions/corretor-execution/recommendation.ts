@@ -1,4 +1,4 @@
-import { partitionSlides, validateRecommendationSlides, quoteRecommendation, prepareRequest, recommendationCost, recommendationProfile, executionRecommendationProfile, MAX_MEMO_BYTES, utf8 } from '../_shared/recommendation.ts';
+import { partitionSlides, validateRecommendationSlides, quoteRecommendation, prepareRequest, recommendationCost, recommendationProfile, executionRecommendationProfile, memoLimitBytes, utf8 } from '../_shared/recommendation.ts';
 const fn = 'analyze-consulting-suggestion';
 // Adaptador limitado ao cliente administrativo criado pelo controlador.
 // deno-lint-ignore no-explicit-any
@@ -50,7 +50,7 @@ export async function recommendationStep(db:DB,run:DB,owner:string,url:string,ke
     const previous=rows.find((r:DB)=>r.batch_hash===identity);
     if(!previous){payload=candidate;break;}
     if(batches.length>1){
-      if(typeof previous.response?.batch!=='string'||!previous.response.batch.trim()||utf8(previous.response.batch)>MAX_MEMO_BYTES){
+      if(typeof previous.response?.batch!=='string'||!previous.response.batch.trim()||utf8(previous.response.batch)>memoLimitBytes(batches.length,profile)){
         await db.from('corretor_recommendations').update({state:'failed',error_message:'Um lote não retornou um memo completo dentro do limite. O uso confirmado foi registrado.'}).eq('execution_id',run.id);
         await db.from('corretor_executions').update({state:'failed'}).eq('id',run.id);
         return json({error:'Um lote precisa de conferência; os memos confirmados foram preservados.'},409);

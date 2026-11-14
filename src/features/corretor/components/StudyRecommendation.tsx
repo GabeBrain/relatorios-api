@@ -13,7 +13,7 @@ import type { Ir } from '../lib/audit/ir';
 import type { StudyV3 } from '../lib/v3/db';
 import type { VersionRecord } from '../lib/projects';
 import { recommendationSource } from '../lib/v3/consulting-suggestion';
-import { listRecommendations, runRecommendation, quoteRecommendation, PROMPT_VERSION, RECOMMENDATION_STATES, type RecommendationRecord } from '../lib/recommendations';
+import { listRecommendations, runRecommendation, quoteRecommendation, RECOMMENDATION_STATES, type RecommendationRecord } from '../lib/recommendations';
 import { studyHref } from '../lib/study-navigation';
 
 export interface RecommendationStudy { study:StudyV3; version:VersionRecord }
@@ -52,7 +52,8 @@ export default function StudyRecommendation({study,version,preparedIr,ensureStud
    if(target.version.sha1!==ir.sha1)throw new Error('Confira a versão da apresentação antes de gerar.');
    const current=await refresh(target)??[];
    const unknown=current.find(r=>Number(r.reserved_usd)>0);if(unknown)throw new Error('Há uma chamada com retorno pendente. Confira a execução antes de autorizar outra.');
-   const saved=current.find(r=>r.content&&r.prompt_version===PROMPT_VERSION);
+   // Sugestão salva de qualquer perfil continua válida: só "Preparar outras sugestões" gera de novo.
+   const saved=current.find(r=>r.content);
    if(saved&&!wantNew){setSelected(saved);return;}
    const resume=current.find(r=>['prepared','running','interrupted'].includes(r.state)&&!r.content);
    setSelected(resume??null);
@@ -67,7 +68,7 @@ export default function StudyRecommendation({study,version,preparedIr,ensureStud
   <h2><Sparkles size={20} aria-hidden="true"/> Sugestão de análise</h2>
   <LoadingSurface busy={historyLoading||refreshing} initial={historyLoading&&!records.length} label="Atualizando sugestões…">
   {records.length>0&&<div className="cr-history" aria-label="Histórico de recomendações">{records.map(r=><Button key={r.id} variant="outline" aria-pressed={selected?.id===r.id} disabled={running} onClick={()=>setSelected(r)}>{RECOMMENDATION_STATES[r.state]} · {new Date(r.created_at).toLocaleString('pt-BR')}</Button>)}</div>}
-  {selected&&<div className="cr-state"><strong>{RECOMMENDATION_STATES[selected.state]} · versão {selected.version_n}</strong>{Number(selected.reserved_usd)>0&&<p role="status">Uma etapa ainda aguarda confirmação. Atualize o histórico antes de tentar novamente.</p>}{selected.error_message&&<p role="alert">Não foi possível concluir esta etapa. Atualize o histórico ou procure a equipe de suporte.</p>}</div>}
+  {selected&&<div className="cr-state"><strong>{RECOMMENDATION_STATES[selected.state]} · versão {selected.version_n}</strong>{Number(selected.reserved_usd)>0&&<p role="status">Uma etapa ainda aguarda confirmação. Atualize o histórico antes de tentar novamente.</p>}{selected.error_message&&<p role="alert">{processingMessage(selected.error_message,'Não foi possível concluir esta etapa. Atualize o histórico ou procure a equipe de suporte.')}</p>}</div>}
   {selected?.content&&<><div className="cp-actions"><Button variant="outline" onClick={()=>void navigator.clipboard.writeText(plainRecommendation(selected.content!)).then(()=>setCopied(true)).catch(()=>setError('Não foi possível copiar. Você pode baixar o texto.'))}>{copied?<Check size={16}/>:<Copy size={16}/>}Copiar tudo</Button><Button variant="outline" onClick={download}><Download size={16}/>Baixar texto</Button><Button variant="outline" disabled={running||unknown} onClick={()=>setWantNew(true)}>Preparar outras sugestões</Button></div>{selected.state==='partial'&&<p role="status">Resultado parcial: uma etapa não foi concluída por inteiro. Confira a cobertura antes de utilizar.</p>}<RecommendationResult key={selected.id} text={selected.content}/></>}
   {showForm&&<>
    {loading?<CorretorLoadingState title="Preparando conteúdo da apresentação…" />:!ir?<><p>Selecione o PowerPoint desta versão para preparar a recomendação.</p><Button variant="outline" onClick={()=>fileInput.current?.click()}><FileUp size={18}/>Selecionar PowerPoint da versão</Button></>:quote?.error?<p role="alert">{quote.error}</p>:quote?.value&&<>
