@@ -5,6 +5,8 @@ Plano de implantação original: [IMPLANTACAO_CLAUDE.md](IMPLANTACAO_CLAUDE.md).
 
 ## Etapa atual
 
+**16/11 — lote visual1–20 com Codex:** [entrega e limites](SLIDES_01_20_2026-11-16.md). Prévia navegável mensal/trimestral na arte original, fontes independentes de cadastro/histórico e gráficos de lançamentos; grade recolhida para inventário. CAGED9–14segue pendente de fonte, sem números antigos.51testes,160verificações de slides e8cenários de página com API interceptada; tipos/lint/build aprovados. Próximo: integrar CAGED e conciliar metodologia/fontes, depois21–40. Exportação e geração autenticada real pendentes. Registros abaixo preservam as etapas anteriores.
+
 **Etapa 1 concluída (inventário e contrato inicial)** — periodicidade, recorte e composição comprovados nos
 originais ([MAPA_SLIDES.md](MAPA_SLIDES.md), [EVIDENCIAS.md](EVIDENCIAS.md)).
 **Etapa 2 (estrutura e rota) concluída em 16/11** — domínio `src/features/relatorios-institucionais/maceio/`

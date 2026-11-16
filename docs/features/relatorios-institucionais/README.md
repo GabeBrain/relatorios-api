@@ -4,6 +4,8 @@
 
 ## Onde trabalhar
 
+**Maceió — primeiros20slides,16/11:** [prévia visual, fontes e limites](maceio/SLIDES_01_20_2026-11-16.md). Mensal/trimestral com navegação e arte original; cadastro e histórico de lançamentos independentes do balanço curto. CAGED9–14pendente,21em diante/exportação ainda em implantação.51testes,160casos visuais e8cenários de página com API interceptada; sem geração autenticada ou homologação.
+
 **Maceió — inventário comprovado e estrutura, 16/11:** [plano](maceio/PLAN.md), [mapa de slides](maceio/MAPA_SLIDES.md), [matriz](maceio/MATRIZ_INDICADORES.csv), [decisões](maceio/DECISOES.md) e [evidências](maceio/EVIDENCIAS.md). Periodicidade comprovada por extração OOXML: maio = mensal (82), junho = trimestral 2T2026 (87); recorte 7/6 municípios por edição (Coqueiro Seco só na mensal). Estrutura implantada em `src/features/relatorios-institucionais/maceio/` com rota oculta `/rebrain/relatorios-institucionais/maceio` (sem menu, decisão de Lucas). Fontes, prévia de conteúdo, exportação e homologação pendentes. Handoff original: [IMPLANTACAO_CLAUDE.md](maceio/IMPLANTACAO_CLAUDE.md).
 
 **Fortaleza — arquivos reais e referências, 16/11:** [comparação mensal/trimestral e correção dos títulos](fortaleza/COMPARACAO_REFERENCIAS_2026-11-16.md). Mensal agosto comparado a julho no período comum; lançamentos de julho e VGV na mesma base conferem. Preços, estoque, casas e padrões divergem e seguem para o analista. Títulos dos mapas e IVV corrigidos no gerador; valores dos anexos preservados.

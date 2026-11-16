@@ -1,5 +1,9 @@
 # Estado do handoff
 
+## 16/11/2026 — Maceió: primeiro lote visual com Codex
+
+Lucas pediu substituir a grade pelo padrão Fortaleza e iniciar1–20na mesma sequência/arte dos originais. Base `f519b5dc`, origin único0/0 após fetch, main com apenas `ARTE.md` anterior não versionado (preservado). [Entrega](../../features/relatorios-institucionais/maceio/SLIDES_01_20_2026-11-16.md): prévia1–20mensal/trimestral, assets derivados/textos nativos, fontes independentes de cadastro e histórico de unidades, gráficos16–20com guardas. CAGED9–14sem integração, sem números antigos; estatísticas demográficas antigas removidas.51testes/tipos/lint/build aprovados;160casos de lâminas+8cenários de página Edge com API interceptada e resposta lenta. Sem geração autenticada, exportação Maceió ou homologação; rota segue oculta. Fontes/métodos pendentes com analista e próximo bloco21–40. Nenhuma escrita Monday. Registros antigos “sem push” do Claude não descrevem mais o Git atual: `f519b5dc` já estava no origin na abertura desta rodada.
+
 ## 16/11/2026 — Maceió: núcleo vertical (bloco 3) com Claude
 
 Mesma sessão das Etapas 1–2. Coleta municipal vertical (releases/sales/stock) com balanço, retry por cidade e painéis, ligada à rota oculta. 42 testes do módulo com request injetado; tipos/lint/build limpos; regressão relatórios+FIERGS 1181/1186 com 3 timeouts pré-existentes (FIERGS falha na base, pasta sem diff). Sem geração autenticada real; fixture não é coleta. Commits locais sem push.

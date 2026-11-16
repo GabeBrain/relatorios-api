@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { collectMaceioMarket, type MaceioCollection } from './api';
 import type { MaceioMarketReport } from './market';
 import { prepareMaceioBlueprint, type MaceioBlueprint, type MaceioSelection } from './model';
+import { collectMaceioIntro, type MaceioIntroData } from './intro-data';
 
 export const MACEIO_GENERATION_STEPS = [
   { id: 'validation', title: 'Validar o recorte' },
@@ -19,6 +20,7 @@ export interface MaceioGenerationState {
   report: MaceioMarketReport | null;
   hasFailedCities: boolean;
   blueprint: MaceioBlueprint | null;
+  intro?: MaceioIntroData | null;
   steps: { id: StageId; title: string; status: 'waiting' | 'running' | 'done' | 'attention' | 'failed' | 'cancelled' }[];
 }
 export function useMaceioMarket(selection: MaceioSelection, authorizedCities: string[], token: string, ready: boolean) {
@@ -52,17 +54,22 @@ export function useMaceioMarket(selection: MaceioSelection, authorizedCities: st
       }, seed);
       if (controller.signal.aborted) return;
       cache.current = result;
+      const intro = await collectMaceioIntro(selection, authorizedCities, {token,signal:controller.signal,onProgress:message=>{
+        if(!controller.signal.aborted)setState(current=>current?.key===key?{...current,message}:current);
+      }});
+      if(controller.signal.aborted)return;
+      const introFailed=intro.cities.some(city=>!city.unitsComplete||!city.buildingsComplete);
       activate('reconciliation');
       activate('structure');
       const blueprint = await prepareMaceioBlueprint(selection, authorizedCities, { signal: controller.signal, onProgress: (completed, total) => {
         if (!controller.signal.aborted) setState(current => current?.key === key ? { ...current, message: `${completed} de ${total} posições organizadas` } : current);
       } });
       if (controller.signal.aborted) return;
-      const finishedSteps: MaceioGenerationState['steps'] = MACEIO_GENERATION_STEPS.map(step => ({ ...step, status: step.id === 'validation' ? 'done' : step.id === 'sources' ? report.metrics ? 'done' : 'attention' : step.id === 'reconciliation' ? report.metrics && !report.issues.length ? 'done' : 'attention' : blueprint ? 'done' : 'waiting' }));
+      const finishedSteps: MaceioGenerationState['steps'] = MACEIO_GENERATION_STEPS.map(step => ({ ...step, status: step.id === 'validation' ? 'done' : step.id === 'sources' ? report.metrics&&!introFailed ? 'done' : 'attention' : step.id === 'reconciliation' ? report.metrics && !report.issues.length ? 'done' : 'attention' : blueprint ? 'done' : 'waiting' }));
       setState({
         key, phase: 'done', startedAt, finishedAt: new Date().toISOString(),
-        message: !report.metrics || report.issues.length ? 'Estrutura organizada; confira os balanços e as fontes pendentes.' : 'Núcleo municipal vertical integrado; o conteúdo das demais páginas segue em implantação.',
-        report, hasFailedCities: result.collection.failedCities.length > 0 || report.cities.some(city => city.status === 'incomplete'), blueprint, steps: finishedSteps,
+        message: !report.metrics || report.issues.length || introFailed ? 'Prévia organizada; confira os balanços e as fontes pendentes.' : 'Núcleo vertical e fontes de lançamentos consultados; confira os slides e as pendências de conteúdo.',
+        report, intro, hasFailedCities: introFailed || result.collection.failedCities.length > 0 || report.cities.some(city => city.status === 'incomplete'), blueprint, steps: finishedSteps,
       });
     } catch {
       if (!controller.signal.aborted) setState(current => ({ key, phase: 'error', startedAt, message: 'Não foi possível concluir a consulta. Confira sua autenticação e tente novamente.', report: null, hasFailedCities: false, blueprint: null, steps: (current?.steps ?? steps).map(step => ({ ...step, status: step.status === 'running' ? 'failed' : step.status })) }));
