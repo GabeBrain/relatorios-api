@@ -587,6 +587,14 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-11-16 — Maceió: slides21–40 e CAGED adiado — Lucas/Codex
+
+- **Pedido/entrega:** Lucas informou BigQuery do setor já conectado ao Rebrain, adiou CAGED e pediu continuidade. Prévia mensal/trimestral agora navega1–40na ordem/arte dos originais; lançamentos por padrão/tipologia/bairro, MCMV22/33, VGL/VGV, vendas e oferta final. [Contrato e limites](../features/relatorios-institucionais/maceio/SLIDES_21_40_2026-11-16.md).
+- **Fontes/regras:**42fontes no mensal/36no trimestral, por município, padrão/tipologia/histórico; lançamentos já concluídos reaproveitados quando cobrem a janela longa. Tipologias/bairros exigem soma compatível com o municipal; capacidade/estoque não substituem fluxos. Negativos preservados, oferta só no fechamento. VGL/VGVaguardam índice por padrão; INCC-DI somente após escolha explícita, com origem/base e sem fallback de competência.
+- **Validação:**58testes Maceió, tipos/lint/build;320verificações de lâminas em1440/390claro/escuro e8cenários de página com API interceptada e resposta lenta, núcleo válido/reprovado e escolha de índice. Sem coleta autenticada, BigQuery real, exportação nova ou homologação. Reutilizados Select/Tabs/Dialog/Button/BrainLoadingState e navegação do lote anterior. Hashes originais preservados.
+- **Base/limite:** `41ca0f53`, main, origin0/0 na abertura; `ARTE.md` anterior fora do staging. Nenhuma alteração nos outros motores ou na integração RAIS/ponte BigQuery. Próximo41–60; CAGED adiado por decisão de Lucas.
+- **Monday:** [Panorama Maceió / SINDUSCON](https://brain381753.monday.com/boards/18398638577/pulses/13149406169) — `13149406169`. Sem escrita.
+
 ### 2026-11-16 — Maceió: prévia1–20 na arte original — Lucas/Codex
 
 - **Pedido/entrega:** após a grade estrutural do Claude, Lucas pediu padrão visual Fortaleza e implantação1–20 na ordem original. Mensal/trimestral agora têm navegação, ampliação, textos nativos e arte Maceió; inventário recolhido, consulta/balanços preservados. [Detalhes e limites](../features/relatorios-institucionais/maceio/SLIDES_01_20_2026-11-16.md).
@@ -1810,6 +1818,8 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 
 ## 2. Etapas
 
+- **16/11 — Maceió, continuação:** prévia1–40mensal/trimestral implementada e conferida com fixtures; fontes por padrão/tipologia/histórico, MCMV, valores com índice explícito e oferta final. Próximo41–60. Integração CAGED adiada por Lucas; conta do setor com BigQuery conectado ao Rebrain informada, não testada aqui.
+
 - **16/11 — Maceió, visual1–20:** prévia mensal/trimestral na arte original e fontes independentes de lançamentos implementadas. CAGED9–14mantém pendência explícita; demais blocos/exportação ainda em implantação. Substitui o estado antigo de somente estrutura abaixo.
 
 - **16/11 — Maceió:** pacote de referência e plano para Claude preparados; implantação runtime ainda não iniciada. Originais82/87conferidos estruturalmente, revisão de conteúdo pendente.
@@ -1959,6 +1969,8 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 ---
 
 ## 3. Pendências
+
+- **16/11 — Maceió, após40:** continuar41–60, validar respostas reais/fluxos granulares e homologar padrões/INCC com analista; exportação depois. CAGED/BigQuery ficam para retomada solicitada, sem bloquear os demais blocos.
 
 - **16/11 — Maceió, após1–20:** integrar CAGED, validar coleta real e métodos de contagem/padrão/janelas com analista; continuar21–40e exportação. `ARTE.md` de trabalho anterior segue fora do commit deste lote.
 

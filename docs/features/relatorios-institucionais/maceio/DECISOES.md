@@ -2,6 +2,14 @@
 
 Registro de fatos comprovados, hipóteses e decisões. Atualizado a cada entrega.
 
+## 16/11/2026 — Continuação com Codex
+
+- **D7 — CAGED adiado:** Lucas informou BigQuery do setor já conectado ao Rebrain e pediu continuar a implantação, deixando CAGED para depois. Código RAIS/ponte Empresas localizado; acesso real não exercitado. Não confundir conexão informada do produto com autenticação disponível ao agente.
+- **D8 — INCC explícito:** série de Maceió ainda não comprovada; prévia começa sem índice escolhido. INCC-DI é opção explícita para conferência, com origem/mês-base visíveis e guarda por competência; não adotar automaticamente por ser usado em Fortaleza.
+- **D9 — MCMV:** logo dos originais comprova recorte específico22/33. Não mostrar o total vertical nessas posições nem converter Econômico em MCMV por inferência.
+- **D10 — Rankings:** exigir fluxo explícito por tipologia, identificação/bairro e soma reconciliada ao total municipal. Sem substituir fluxos por estoque/capacidade. Divergência ou campos ausentes mantêm a página em conferência.
+- **D11 — Continuação:** navegação1–40mantém posições originais dos dois modelos; próximos41–60. Rota continua oculta e exportação segue posterior à implantação do conjunto.
+
 ## 16/11/2026 — inventário inicial
 
 ### Fatos comprovados (extração OOXML dos originais)

@@ -18,16 +18,19 @@ try{
    const row={city,state:'AL',building_type:'Vertical'};
    if(metric==='building-with-history')return reply({data:[row],meta:{total:1}});
    if(metric==='building')return reply({data:[{...row,building_id:city,release_date:'2026-05-01',standard:'Luxo'}],meta:{current_page:1,last_page:1,total:1}});
+   if(metric==='building-with-history-internal')return reply({data:[{...row,building_id:city,neighborhood:'Bairro de teste',typologies_history:[]}],meta:{current_page:1,last_page:1,total:1}});
    assert.ok(['releases','sales','stock'].includes(metric));const start=url.searchParams.get('start_period').slice(0,7),end=url.searchParams.get('end_period').slice(0,7),months=[];
    for(const d=new Date(`${start}-01T00:00:00Z`);d.toISOString().slice(0,7)<=end;d.setUTCMonth(d.getUTCMonth()+1))months.push(d.toISOString().slice(0,7));
    if(months.length>12){historyCalls++;if(!delayed){delayed=true;await new Promise(r=>setTimeout(r,800));}}
-   const data=months.map(month=>({...row,group:'Médio Padrão',period:`${month}-01`,[metric==='stock'?'stock':metric==='sales'?'liquid_sales':'releases_in_period']:coreBroken&&metric==='sales'?null:metric==='stock'?100:1}));
+   const data=months.map(month=>({...row,group:'Médio Padrão',period:`${month}-01`,vgv_release:1000,vgv_liquid_sales:1000,[metric==='stock'?'stock':metric==='sales'?'liquid_sales':'releases_in_period']:coreBroken&&metric==='sales'?null:metric==='stock'?100:1}));
    return reply({data,meta:{current_page:1,last_page:1,total:data.length},links:{next:null}});
   });
   const page=await context.newPage();page.on('pageerror',e=>errors.push(e.message));await page.goto(`${base}/rebrain/relatorios-institucionais/maceio`);await page.evaluate(dark=>document.documentElement.classList.toggle('dark',dark),dark);
   await page.getByRole('button',{name:'Gerar relatório',exact:true}).waitFor();await page.getByRole('button',{name:'Gerar relatório',exact:true}).click();
   await page.getByRole('region',{name:'Carregamento do relatório Maceió'}).waitFor();assert.ok(await page.getByRole('complementary').isVisible());
-  await page.getByRole('button',{name:'20',exact:true}).waitFor({timeout:60000});await page.getByRole('button',{name:'19',exact:true}).click();assert.equal(await page.locator('[data-maceio-chart]').count(),1);assert.equal(historyCalls,7);
+  await page.getByRole('button',{name:'40',exact:true}).waitFor({timeout:60000});await page.getByRole('button',{name:'19',exact:true}).click();assert.equal(await page.locator('[data-maceio-chart]').count(),1);assert.equal(historyCalls,35);
+  await page.getByRole('button',{name:'40',exact:true}).click();assert.equal(await page.locator('[data-maceio-chart]').count(),1);
+  await page.getByRole('button',{name:'26',exact:true}).click();assert.equal(await page.locator('[data-maceio-pending]').count(),1);await page.locator('#maceio-monetary-policy').click();await page.getByRole('option',{name:'INCC-DI · usar após confirmar o critério',exact:true}).click();assert.equal(await page.locator('[data-maceio-chart]').count(),1);
   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
   await page.screenshot({path:resolve(folder,`page-${width}-${dark}-${coreBroken}.png`),fullPage:true});results.push({width,dark,coreBroken,historyCalls});await context.close();
  }

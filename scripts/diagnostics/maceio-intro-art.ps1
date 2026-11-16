@@ -1,3 +1,4 @@
+param([int]$FirstSlide=1,[int]$LastSlide=40)
 $ErrorActionPreference = 'Stop'
 function Get-MaceioStaticText($slide) {
  $result=@()
@@ -28,9 +29,11 @@ try {
   $output=Join-Path $root ('src/features/relatorios-institucionais/maceio/assets/'+$kind)
   New-Item -ItemType Directory -Force -Path $output | Out-Null
   $deck=$office.Presentations.Open($source,-1,0,0)
-  $records=@{}
+  $records=[ordered]@{}
+  $previous=Join-Path $output 'layout.json'
+  if(Test-Path -LiteralPath $previous){$existing=Get-Content -LiteralPath $previous -Raw -Encoding UTF8 | ConvertFrom-Json;foreach($property in $existing.PSObject.Properties){$records[$property.Name]=$property.Value}}
   try {
-   foreach ($n in 1..20) {
+   foreach ($n in $FirstSlide..$LastSlide) {
     $slide=$deck.Slides.Item($n); $slots=@(); $charts=@()
     foreach ($shape in @($slide.Shapes)) {
      if ($shape.HasChart -eq -1) {
@@ -44,10 +47,11 @@ try {
       if ($n -eq 2 -and $text -match '2026') {$slot='period'}
       if ($n -eq 7 -and $text -match '2026') {$slot='period'}
       if ($n -eq 7 -and $text -match 'representam') {$slot='territory-note'}
+      if ($n -in @(25,36) -and $shape.Top -lt 150 -and $text -match '2026') {$slot='heading'}
       if ($slot) {
        $slots+=@{kind=$slot;x=[double]$shape.Left*4/3;y=[double]$shape.Top*4/3;width=[double]$shape.Width*4/3;height=[double]$shape.Height*4/3}
        $shape.TextFrame2.TextRange.Font.Fill.Transparency=1
-      } elseif (($n -ge 9 -and $n -le 14 -and ($text -match '%' -or $text -match '^[+\u2212-]?\d')) -or ($n -ge 16 -and ($text -match '%' -or $text -match '2026' -or $text.Trim() -eq '*'))) {
+      } elseif (($n -ge 9 -and $n -le 14 -and ($text -match '%' -or $text -match '^[+\u2212-]?\d')) -or ($n -ge 16 -and ($text -match '%' -or $text -match '2026' -or $text -match 'INCC' -or $text.Trim() -in @('*','-')))) {
        $shape.Visible=0
       }
      } elseif ($n -ge 9 -and $n -le 14) {
@@ -64,6 +68,6 @@ try {
   } finally {$deck.Close()}
   $records | ConvertTo-Json -Depth 12 | Set-Content -LiteralPath (Join-Path $output 'layout.json') -Encoding UTF8
   if((Get-FileHash -LiteralPath $source).Hash -ne $hash){throw 'Original was modified'}
-  Write-Output "$kind : 20 artworks extracted; original SHA256 unchanged"
+  Write-Output "$kind : artworks $FirstSlide-$LastSlide extracted; original SHA256 unchanged"
  }
 } finally {if($owned){$office.Quit()}; [void][Runtime.InteropServices.Marshal]::ReleaseComObject($office)}

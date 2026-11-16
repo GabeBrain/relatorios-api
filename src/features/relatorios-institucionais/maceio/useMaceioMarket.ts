@@ -3,6 +3,7 @@ import { collectMaceioMarket, type MaceioCollection } from './api';
 import type { MaceioMarketReport } from './market';
 import { prepareMaceioBlueprint, type MaceioBlueprint, type MaceioSelection } from './model';
 import { collectMaceioIntro, type MaceioIntroData } from './intro-data';
+import { collectMaceioMarketSlides } from './market-slides-data';
 
 export const MACEIO_GENERATION_STEPS = [
   { id: 'validation', title: 'Validar o recorte' },
@@ -58,7 +59,11 @@ export function useMaceioMarket(selection: MaceioSelection, authorizedCities: st
         if(!controller.signal.aborted)setState(current=>current?.key===key?{...current,message}:current);
       }});
       if(controller.signal.aborted)return;
-      const introFailed=intro.cities.some(city=>!city.unitsComplete||!city.buildingsComplete);
+      intro.slides=await collectMaceioMarketSlides(selection,authorizedCities,intro,{token,signal:controller.signal,onProgress:message=>{
+        if(!controller.signal.aborted)setState(current=>current?.key===key?{...current,message}:current);
+      }});
+      if(controller.signal.aborted)return;
+      const introFailed=intro.cities.some(city=>!city.unitsComplete||!city.buildingsComplete)||intro.slides.sources.some(source=>!source.complete);
       activate('reconciliation');
       activate('structure');
       const blueprint = await prepareMaceioBlueprint(selection, authorizedCities, { signal: controller.signal, onProgress: (completed, total) => {

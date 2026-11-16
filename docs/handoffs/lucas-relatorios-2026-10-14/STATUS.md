@@ -1,5 +1,9 @@
 # Estado do handoff
 
+## 16/11/2026 — Maceió: continuação21–40
+
+Lucas determinou adiar CAGED e continuar a implantação; informou BigQuery do setor já conectado ao Rebrain. Base `41ca0f53`, origin único0/0 após fetch, main; `ARTE.md` anterior preservado sem staging. [Entrega](../../features/relatorios-institucionais/maceio/SLIDES_21_40_2026-11-16.md): navegação1–40na arte original, fontes por padrão/tipologia/histórico independentes, MCMV22/33específico, rankings com reconciliação, escolha explícita de INCC-DI para VGL/VGV e estoque no fechamento.58testes, tipos/lint/build,320casos de lâminas e8cenários na página real com API interceptada. Sem geração autenticada, consulta BigQuery ou homologação. CAGED e definição metodológica seguem separados da continuação41–60; exportação posterior. Nenhuma escrita Monday.
+
 ## 16/11/2026 — Maceió: primeiro lote visual com Codex
 
 Lucas pediu substituir a grade pelo padrão Fortaleza e iniciar1–20na mesma sequência/arte dos originais. Base `f519b5dc`, origin único0/0 após fetch, main com apenas `ARTE.md` anterior não versionado (preservado). [Entrega](../../features/relatorios-institucionais/maceio/SLIDES_01_20_2026-11-16.md): prévia1–20mensal/trimestral, assets derivados/textos nativos, fontes independentes de cadastro e histórico de unidades, gráficos16–20com guardas. CAGED9–14sem integração, sem números antigos; estatísticas demográficas antigas removidas.51testes/tipos/lint/build aprovados;160casos de lâminas+8cenários de página Edge com API interceptada e resposta lenta. Sem geração autenticada, exportação Maceió ou homologação; rota segue oculta. Fontes/métodos pendentes com analista e próximo bloco21–40. Nenhuma escrita Monday. Registros antigos “sem push” do Claude não descrevem mais o Git atual: `f519b5dc` já estava no origin na abertura desta rodada.

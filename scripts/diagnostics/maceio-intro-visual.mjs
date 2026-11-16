@@ -15,11 +15,11 @@ try{
   const page=await context.newPage();page.on('pageerror',e=>errors.push(e.message));await page.goto(url);await page.getByRole('button',{name:'20',exact:true}).waitFor();await page.evaluate(dark=>document.documentElement.classList.toggle('dark',dark),dark);
   for(const quarterly of [false,true]){
    if(quarterly)await page.getByRole('button',{name:'Trocar modelo',exact:true}).click();
-   for(let n=1;n<=20;n++){
+    for(let n=1;n<=40;n++){
     await page.getByRole('button',{name:String(n),exact:true}).click();const slide=page.getByRole('img',{name:`Maceió · slide ${n}`,exact:true});await slide.waitFor();
     await slide.locator('image').evaluateAll(async nodes=>{await Promise.all(nodes.map(node=>new Promise((done,fail)=>{const img=new Image();img.onload=done;img.onerror=fail;img.src=node.getAttribute('href');if(img.complete&&img.naturalWidth)done();})));});
     assert.ok(!(await slide.textContent()).includes('NaN'));
-    if(n>=16)assert.equal(await slide.locator('[data-maceio-chart]').count(),1);
+    if(n>=16&&![29,39].includes(n))assert.equal(await slide.locator('[data-maceio-chart]').count(),1);
     if(n>=9&&n<=14)assert.equal(await slide.locator('[data-maceio-pending]').count(),1);
     assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+1));
     await slide.screenshot({path:resolve(folder,`${quarterly?'quarterly':'monthly'}-${n}-${width}-${dark}.png`)});results.push({quarterly,n,width,dark});

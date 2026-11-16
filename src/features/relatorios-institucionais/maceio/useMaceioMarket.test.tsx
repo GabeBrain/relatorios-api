@@ -8,6 +8,7 @@ import { marketFixture } from './__tests__/market-fixture';
 
 vi.mock('./api', async importOriginal => ({ ...(await importOriginal<typeof import('./api')>()), collectMaceioMarket: vi.fn() }));
 vi.mock('./intro-data',()=>({collectMaceioIntro:vi.fn(async()=>({cities:[],collectedAt:'2026-11-16T12:00:00Z'}))}));
+vi.mock('./market-slides-data',()=>({collectMaceioMarketSlides:vi.fn(async()=>({sources:[],start:'2021-01',end:'2026-05',finishedAt:'2026-11-16T12:00:00Z'}))}));
 const collect = vi.mocked(collectMaceioMarket);
 
 const selection: MaceioSelection = { uf: 'AL', city: 'Maceió', territory: 'capital-rm', periodicity: 'monthly', year: 2026, position: 5 };

@@ -2,14 +2,15 @@ import { httpRequest } from '@/lib/http-client';
 import { marketMonth, normalizeMarketText, type MarketRow } from './market';
 import { maceioPeriod, maceioScope, type MaceioSelection } from './model';
 import type { MaceioEnvelope, MaceioRequest } from './api';
+import type { MaceioMarketSlidesData } from './market-slides-data';
 
 export interface LaunchCitySource { city:string; units:MarketRow[]; buildings:MarketRow[]; unitsComplete:boolean; buildingsComplete:boolean; issues:string[] }
-export interface MaceioIntroData { cities:LaunchCitySource[]; collectedAt:string }
+export interface MaceioIntroData { cities:LaunchCitySource[]; collectedAt:string; slides?:MaceioMarketSlidesData }
 export interface MaceioSeries { labels:string[]; capital:number[]; rm:number[]; issue:string|null; note:string }
 export function maceioSlideIssue(page:number,selection:MaceioSelection,data:MaceioIntroData|null){
   if(page>=9&&page<=14)return 'Fonte CAGED ainda não integrada para esta competência. Os números da referência não são usados como dados atuais.';
   if(page===17)return buildMaceioPattern(selection,data).issue;
-  if(page>=16)return buildMaceioLaunchSeries(page,selection,data).issue;
+  if(page>=16&&page<=20)return buildMaceioLaunchSeries(page,selection,data).issue;
   return null;
 }
 export function shiftMonth(month:string, delta:number) {
@@ -26,7 +27,7 @@ export async function collectMaceioIntro(selection:MaceioSelection,authorized:st
   const scope=maceioScope(selection,authorized);
   if(!options.token||!scope.valid)throw new Error('Confirme a autenticação e o recorte completo.');
   const check=()=>{if(options.signal?.aborted)throw new DOMException('Consulta cancelada.','AbortError');};
-  const end=maceioPeriod(selection).end,months=launchMonths(selection,61),cities:LaunchCitySource[]=[];
+  const end=maceioPeriod(selection).end,months=launchMonths(selection,Math.max(61,60+Number(end.slice(5,7)))),cities:LaunchCitySource[]=[];
   const request:MaceioRequest=options.request??(args=>httpRequest<MaceioEnvelope>(args));
   for(const city of scope.cities){
     const source:LaunchCitySource={city,units:[],buildings:[],unitsComplete:false,buildingsComplete:false,issues:[]};

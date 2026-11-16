@@ -5,6 +5,8 @@ Plano de implantação original: [IMPLANTACAO_CLAUDE.md](IMPLANTACAO_CLAUDE.md).
 
 ## Etapa atual
 
+**16/11 — continuação21–40 com Codex:** [entrega/contratos/limites](SLIDES_21_40_2026-11-16.md). Prévia1–40mensal/trimestral com arte original, fontes independentes por padrão/tipologia/histórico, recorte MCMV22/33, rankings reconciliados e oferta no fechamento.58testes e320casos visuais+8cenários de página com API interceptada; tipos/lint/build aprovados. **CAGED adiado por Lucas**, que informou BigQuery do setor já conectado ao Rebrain. VGL/VGVaguardam escolha do índice do analista por padrão, com INCC-DI disponível explicitamente para conferência. Próximo:41–60, sem reabrir CAGED nesta etapa. Geração autenticada, métodos e exportação pendentes. Estados anteriores abaixo são históricos.
+
 **16/11 — lote visual1–20 com Codex:** [entrega e limites](SLIDES_01_20_2026-11-16.md). Prévia navegável mensal/trimestral na arte original, fontes independentes de cadastro/histórico e gráficos de lançamentos; grade recolhida para inventário. CAGED9–14segue pendente de fonte, sem números antigos.51testes,160verificações de slides e8cenários de página com API interceptada; tipos/lint/build aprovados. Próximo: integrar CAGED e conciliar metodologia/fontes, depois21–40. Exportação e geração autenticada real pendentes. Registros abaixo preservam as etapas anteriores.
 
 **Etapa 1 concluída (inventário e contrato inicial)** — periodicidade, recorte e composição comprovados nos

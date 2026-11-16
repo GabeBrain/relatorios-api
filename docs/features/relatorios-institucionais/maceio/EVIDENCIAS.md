@@ -1,5 +1,9 @@
 # Evidências — Panorama Maceió / SINDUSCON-AL
 
+## 16/11/2026 — Continuação21–40, CAGED adiado
+
+[Entrega e contratos](SLIDES_21_40_2026-11-16.md).58testes Maceió, tipos/lint/build;320casos de lâminas e8cenários da página real com API interceptada, incluindo índice não escolhido/escolhido e falha do núcleo. Originais preservados por SHA256. Sem coleta autenticada, consulta BigQuery ou exportação nova. Informação de Lucas: BigQuery do setor já conectado ao Rebrain, integração CAGED fica para depois.
+
 ## 16/11/2026 — Slides1–20 no padrão visual original
 
 [Entrega, fontes, validações e limites](SLIDES_01_20_2026-11-16.md).51testes aprovados (47Maceió+4layout), tipos/lint/build;160casos de lâminas e8cenários de geração com API interceptada. Arte extraída em memória no PowerPoint com hashes originais preservados. CAGED9–14sem integração; nenhuma consulta autenticada, exportação ou homologação declarada. `ARTE.md` anterior não versionado preservado.

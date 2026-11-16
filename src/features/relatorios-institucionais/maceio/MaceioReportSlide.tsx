@@ -2,6 +2,8 @@ import monthly from './assets/monthly/layout.json';
 import quarterly from './assets/quarterly/layout.json';
 import { buildMaceioLaunchSeries, buildMaceioPattern, maceioSlideIssue, type MaceioIntroData, type MaceioSeries } from './intro-data';
 import { maceioCities, maceioPeriod, type MaceioSelection } from './model';
+import {buildMaceioMarketSlide,type MonetaryPolicy} from './market-slides-data';
+import MaceioGroupedChart from './MaceioGroupedChart';
 
 const artworks=import.meta.glob('./assets/*/*.png',{eager:true,query:'?url',import:'default'}) as Record<string,string>;
 interface TextLine {text:string;x:number;y:number;size:number;bold:boolean;italic:boolean;color:string}
@@ -10,20 +12,22 @@ const colors=['#5B7537','#FFC000'];
 function Pending({message}:{message:string}){
   return <g data-maceio-pending><rect x={290} y={290} width={700} height={150} rx={16} fill="#EDF2E6"/><text x={640} y={346} textAnchor="middle" fill="#425428" fontSize={25} fontWeight={700}>Aguardando conferência da fonte</text><text x={640} y={388} textAnchor="middle" fill="#425428" fontSize={18}>{message}</text></g>;
 }
-const number=(value:number)=>value.toLocaleString('pt-BR');
-function LineChart({series,rolling,selection,page}:{series:MaceioSeries;rolling:boolean;selection:MaceioSelection;page:number}){
+function LineChart({series,rolling,selection,page,money=false,stock=false}:{series:MaceioSeries;rolling:boolean;selection:MaceioSelection;page:number;money?:boolean;stock?:boolean}){
+  const number=(value:number)=>value.toLocaleString('pt-BR',{maximumFractionDigits:money?1:0});
   const values=[series.capital,series.rm],max=Math.max(1,...values.flat()),min=Math.min(0,...values.flat());
-  const quarterly=selection.periodicity==='quarterly'&&!rolling;
-  const left=64,right=quarterly?985:1230,top=230,bottom=510,x=(i:number)=>left+(right-left)*i/Math.max(1,series.labels.length-1),y=(v:number)=>bottom-(v-min)/(max-min)*(bottom-top);
+  const quarterly=selection.periodicity==='quarterly'&&!rolling&&!stock;
+  const left=64,right=quarterly?985:1230,top=[22,33].includes(page)?270:230,bottom=510,x=(i:number)=>left+(right-left)*i/Math.max(1,series.labels.length-1),y=(v:number)=>bottom-(v-min)/(max-min)*(bottom-top);
   const first=0,last=series.labels.length-1,prior=rolling?last-12:last-(series.labels.length===17?4:12);
   const delta=(now:number,before:number)=>before===0?'—':`${now>=before?'+':''}${((now-before)/before*100).toLocaleString('pt-BR',{maximumFractionDigits:1})}%`;
   const yearStep=series.labels.length===17?4:12;
   const columns=rolling?3:2,cell=445/columns;
   const annual=quarterly?[1,0].map(back=>values.map(items=>Array.from({length:selection.position},(_,i)=>items[last-back*4-i]).reduce((a,b)=>a+b,0))):[];
-  const annualMax=Math.max(1,...annual.map(items=>items[0]+items[1]));
+  const annualMin=Math.min(0,...annual.map(items=>items.filter(value=>value<0).reduce((a,b)=>a+b,0))),annualMax=Math.max(1,...annual.map(items=>items.filter(value=>value>0).reduce((a,b)=>a+b,0)));
+  const barY=(value:number)=>540-(value-annualMin)/(annualMax-annualMin)*250;
+  const title=money?(page<30?'VGL':'VGV'):stock?'OFERTA FINAL':page>=30?'UNIDADES VENDIDAS':page===16||page===18?'EMPREENDIMENTOS LANÇADOS':'UNIDADES LANÇADAS';
   return <g data-maceio-chart>
     <g transform="translate(780 70)" fontSize={13} textAnchor="middle">
-      <rect width={445} height={120} fill="#F9F9F9" stroke="#262626"/><text x={222.5} y={23} fill="#262626">VARIAÇÕES | {page===16||page===18?'EMPREENDIMENTOS':'UNIDADES'} LANÇADOS</text>
+      <rect width={445} height={120} fill="#F9F9F9" stroke="#262626"/><text x={222.5} y={23} fill="#262626">VARIAÇÕES | {title}</text>
       {Array.from({length:columns},(_,i)=><g key={i}><rect x={i*cell} y={32} width={cell} height={28} fill="#B5B5B5" stroke="#262626"/><text x={cell/2+i*cell} y={52} fill="#262626">{series.labels[last-(columns-i)*yearStep]} × {series.labels[last-(columns-1-i)*yearStep]}</text></g>)}
       {values.map((items,k)=><g key={k}>{Array.from({length:columns},(_,i)=><g key={i}><rect x={i*cell} y={60+k*30} width={cell} height={30} fill={colors[k]} stroke="#262626"/><text x={cell/2+i*cell} y={81+k*30} fill={k?'#262626':'white'} fontSize={19} fontWeight={700}>{delta(items[last-(columns-1-i)*yearStep],items[last-(columns-i)*yearStep])}</text></g>)}</g>)}
     </g>
@@ -34,7 +38,7 @@ function LineChart({series,rolling,selection,page}:{series:MaceioSeries;rolling:
     </g>)}
     {series.labels.map((label,i)=><text key={i} x={x(i)} y={548} transform={quarterly?undefined:`rotate(-48 ${x(i)} 548)`} textAnchor={quarterly?'middle':'end'} fill="#262626" fontSize={rolling?12:16}>{label}</text>)}
     <g fontSize={20} fontWeight={700}><line x1={quarterly?240:380} x2={quarterly?270:410} y1={610} y2={610} stroke={colors[0]} strokeWidth={4}/><text x={quarterly?278:418} y={616}>Maceió</text><line x1={quarterly?440:580} x2={quarterly?470:610} y1={610} y2={610} stroke={colors[1]} strokeWidth={4}/><text x={quarterly?478:618} y={616}>Região Metropolitana</text></g>
-    {quarterly&&<g data-maceio-accumulated><text x={1135} y={215} textAnchor="middle" fontSize={19} fontWeight={700}>ACUMULADO NO ANO</text>{annual.map((items,i)=>{const cap=items[0]/annualMax*250,rm=items[1]/annualMax*250;return <g key={i}><rect x={1050+i*110} y={540-cap} width={70} height={cap} fill={colors[0]}/><rect x={1050+i*110} y={540-cap-rm} width={70} height={rm} fill={colors[1]}/><text x={1085+i*110} y={540-cap/2+6} textAnchor="middle" fontSize={17} fontWeight={700} fill="white">{number(items[0])}</text><text x={1085+i*110} y={540-cap-rm/2+6} textAnchor="middle" fontSize={17} fontWeight={700} fill="#262626">{number(items[1])}</text><text x={1085+i*110} y={570} textAnchor="middle" fontSize={17}>{selection.position===2?'1S':''}{selection.year-1+i}</text></g>})}</g>}
+    {quarterly&&<g data-maceio-accumulated><text x={1135} y={215} textAnchor="middle" fontSize={19} fontWeight={700}>ACUMULADO NO ANO</text><line x1={1035} x2={1245} y1={barY(0)} y2={barY(0)} stroke="#D4D4D4"/>{annual.map((items,i)=>{let positive=0,negative=0;return <g key={i}>{items.map((value,k)=>{const from=value>=0?positive:negative,to=from+value;if(value>=0)positive=to;else negative=to;const y1=barY(from),y2=barY(to);return <g key={k}><rect x={1050+i*110} y={Math.min(y1,y2)} width={70} height={Math.abs(y1-y2)} fill={colors[k]}/>{Math.abs(y1-y2)<24&&<rect x={1050+i*110} y={(y1+y2)/2-12} width={70} height={24} fill={colors[k]}/>}<text x={1085+i*110} y={(y1+y2)/2+6} textAnchor="middle" fontSize={17} fontWeight={700} fill={k?'#262626':'white'}>{number(value)}</text></g>})}<text x={1085+i*110} y={570} textAnchor="middle" fontSize={17}>{selection.position===2?'1S':''}{selection.year-1+i}</text></g>})}</g>}
   </g>;
 }
 function PatternChart({selection,data}:{selection:MaceioSelection;data:MaceioIntroData|null}){
@@ -45,17 +49,20 @@ function PatternChart({selection,data}:{selection:MaceioSelection;data:MaceioInt
   const cumulative=(i:number,k:number)=>shares[i].slice(0,k).reduce((a,b)=>a+b,0);
   return <g data-maceio-chart>{pattern.names.map((name,k)=><polygon key={name} fill={palette[k]} points={[...shares.map((_,i)=>`${x(i)},${base-cumulative(i,k+1)*height}`),...shares.map((_,i)=>i).reverse().map(i=>`${x(i)},${base-cumulative(i,k)*height}`)].join(' ')}/>)}{shares.map((values,i)=><g key={i}>{values.map((v,k)=>v>.05&&<text key={k} x={x(i)} y={base-(cumulative(i,k)+v/2)*height+6} textAnchor="middle" fontSize={18} fill={k<2?'white':'#262626'}>{Math.round(v*100)}%</text>)}<text x={x(i)} y={572} textAnchor="middle" fontSize={21}>{pattern.years[i]}{i===5?'*':''}</text></g>)}{pattern.names.map((name,i)=><g key={name}><rect x={230+i*220} y={604} width={16} height={16} fill={palette[i]}/><text x={253+i*220} y={618} fontSize={17}>{name}</text></g>)}</g>;
 }
-export default function MaceioReportSlide({page,selection,data}:{page:number;selection:MaceioSelection;data:MaceioIntroData|null}){
+export default function MaceioReportSlide({page,selection,data,monetaryPolicy='unconfirmed'}:{page:number;selection:MaceioSelection;data:MaceioIntroData|null;monetaryPolicy?:MonetaryPolicy}){
   const kind=selection.periodicity,layouts=(kind==='monthly'?monthly:quarterly) as Record<string,Layout>,layout=layouts[String(page)];
   const period=maceioPeriod(selection),month=period.end.slice(0,7);
   const date=kind==='monthly'?new Intl.DateTimeFormat('pt-BR',{month:'long',year:'numeric',timeZone:'UTC'}).format(new Date(`${month}-01T00:00:00Z`)):period.label;
-  const issue=maceioSlideIssue(page,selection,data),series=page>=16&&page!==17?buildMaceioLaunchSeries(page,selection,data):null;
+  const issue=maceioSlideIssue(page,selection,data),series=page>=16&&page<=20&&page!==17?buildMaceioLaunchSeries(page,selection,data):null;
+  const market=page>=21&&![29,39].includes(page)?buildMaceioMarketSlide(page,selection,data?.slides??null,monetaryPolicy):null;
   return <svg viewBox="0 0 1280 720" role="img" aria-label={`Maceió · slide ${page}`} style={{fontFamily:'Tahoma, sans-serif',background:'white',colorScheme:'light'}} className="block aspect-video h-auto w-full">
     <image href={artworks[`./assets/${kind}/${page}.png`]} width={1280} height={720}/>
     {layout.texts.map((line,i)=><g key={i}>{page===6&&line.x>100&&line.y>150&&line.size>=20&&<circle cx={line.x-24} cy={line.y+line.size*.6} r={2.5} fill={line.color}/>}<text x={line.x} y={Math.max(0,line.y)} dominantBaseline="text-before-edge" fontSize={line.size} fontWeight={line.bold?700:400} fontStyle={line.italic?'italic':undefined} fill={line.color}>{[...line.text].filter(char=>char.charCodeAt(0)>=32).join('')}</text></g>)}
-    {layout.slots.map(slot=><g key={slot.kind}>{slot.kind==='period'?<text x={slot.x+10} y={slot.y+12} dominantBaseline="text-before-edge" fontSize={page===2?20:32} fontWeight={700} fill={page===2?'#385723':'#262626'}>{date}</text>:<><text x={slot.x+24} y={slot.y+25} dominantBaseline="text-before-edge" fill="white" fontSize={25} fontWeight={700}>{maceioCities(kind).length} municípios no recorte do estudo</text><text x={slot.x+24} y={slot.y+78} dominantBaseline="text-before-edge" fill="white" fontSize={20}>Maceió e Região Metropolitana · Alagoas</text></>}</g>)}
+    {layout.slots.map(slot=><g key={slot.kind}>{slot.kind==='heading'?<><text x={62} y={38} fontSize={34} fontWeight={700} fill="#262626">{kind==='quarterly'?(page===25?'RANKING DE LANÇAMENTOS':'RANKING DE VENDAS'):(page===25?'UNIDADES VERTICAIS LANÇADAS':'UNIDADES VERTICAIS VENDIDAS')}</text><text x={62} y={86} fontSize={page===36?25:32} fontWeight={700} fill="#5B7537">{page===25?'POR BAIRRO':kind==='monthly'?'POR BAIRROS (MACEIÓ) E POR CIDADES':'POR BAIRRO (MACEIÓ) E POR CIDADE'} · {date.toLocaleUpperCase('pt-BR')}</text></>:slot.kind==='period'?<text x={slot.x+10} y={slot.y+12} dominantBaseline="text-before-edge" fontSize={page===2?20:32} fontWeight={700} fill={page===2?'#385723':'#262626'}>{date}</text>:<><text x={slot.x+24} y={slot.y+25} dominantBaseline="text-before-edge" fill="white" fontSize={25} fontWeight={700}>{maceioCities(kind).length} municípios no recorte do estudo</text><text x={slot.x+24} y={slot.y+78} dominantBaseline="text-before-edge" fill="white" fontSize={20}>Maceió e Região Metropolitana · Alagoas</text></>}</g>)}
     {page>=9&&page<=14&&<Pending message="CAGED · competência selecionada"/>}
     {page===17&&<PatternChart selection={selection} data={data}/>}
-    {series&&(issue?<Pending message="Histórico completo de lançamentos necessário"/>:<LineChart series={series} rolling={page===18||page===20} selection={selection} page={page}/>)}
+    {series&&page<=20&&(issue?<Pending message="Histórico completo de lançamentos necessário"/>:<LineChart series={series} rolling={page===18||page===20} selection={selection} page={page}/>)}
+    {market&&(market.issue?<Pending message={market.money?'Valores nominais e série INCC a conferir':'Confira a cobertura e o recorte das fontes'}/>:market.kind==='line'?<LineChart series={market.series} rolling={[27,31,38].includes(page)} selection={selection} page={page} money={market.money} stock={page===40}/>:<MaceioGroupedChart model={market}/>)}
+    {market?.money&&!market.issue&&<text x={60} y={630} fontSize={13} fill="#425428">Valores em R$ milhões · INCC-DI · base {month}</text>}
   </svg>;
 }

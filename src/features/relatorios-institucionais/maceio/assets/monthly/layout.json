@@ -1,35 +1,39 @@
 ﻿{
-    "16":  {
+    "11":  {
                "texts":  [
                              {
                                  "italic":  false,
-                                 "text":  "EMPREENDIMENTOS VERTICAIS",
-                                 "color":  "#262626",
+                                 "text":  "DESEMPENHO POR ESTADO | SALDO CONSTRUÇÃO CIVIL",
+                                 "color":  "#2B2929",
                                  "bold":  true,
-                                 "y":  1.1602099736531575,
-                                 "x":  64.524932861328125,
-                                 "size":  42.666666666666664
+                                 "y":  36.893544514973961,
+                                 "x":  111.4444071451823,
+                                 "size":  37.333333333333336
                              },
                              {
                                  "italic":  false,
-                                 "text":  "LANÇADOS",
-                                 "color":  "#5B7537",
+                                 "text":  "FONTE: CAGED – Saldo do Emprego Formal por Município e Setor de Atividade Econômica",
+                                 "color":  "#2B2929",
                                  "bold":  true,
-                                 "y":  52.360209147135414,
-                                 "x":  64.524932861328125,
-                                 "size":  42.666666666666664
+                                 "y":  675.00651041666663,
+                                 "x":  9.59999974568685,
+                                 "size":  13.333333333333334
+                             },
+                             {
+                                 "italic":  false,
+                                 "text":  "*Dados Parciais",
+                                 "color":  "#2B2929",
+                                 "bold":  true,
+                                 "y":  691.00651041666663,
+                                 "x":  9.59999974568685,
+                                 "size":  13.333333333333334
                              }
                          ],
                "slots":  [
 
                          ],
                "charts":  [
-                              {
-                                  "y":  175.44818115234375,
-                                  "width":  1236.2103678385417,
-                                  "height":  437.74959309895831,
-                                  "x":  16.755170186360676
-                              }
+
                           ]
            },
     "3":  {
@@ -43,36 +47,25 @@
 
                          ]
           },
-    "5":  {
-              "texts":  [
-
-                        ],
-              "slots":  [
-
-                        ],
-              "charts":  [
-
-                         ]
-          },
-    "18":  {
+    "20":  {
                "texts":  [
                              {
                                  "italic":  false,
-                                 "text":  "EMPREENDIMENTOS VERTICAIS LANÇADOS\u000b",
+                                 "text":  "UNIDADES VERTICAIS LANÇADAS\u000b",
                                  "color":  "#262626",
                                  "bold":  true,
-                                 "y":  18.463096618652344,
-                                 "x":  47.973332722981773,
-                                 "size":  42.666666666666664
+                                 "y":  31.59412129720052,
+                                 "x":  67.8352762858073,
+                                 "size":  40
                              },
                              {
                                  "italic":  false,
                                  "text":  "ACUMULADO 12 MESES",
                                  "color":  "#5B7537",
                                  "bold":  true,
-                                 "y":  69.663096110026046,
-                                 "x":  47.973332722981773,
-                                 "size":  42.666666666666664
+                                 "y":  79.594121297200516,
+                                 "x":  67.8352762858073,
+                                 "size":  40
                              },
                              {
                                  "italic":  false,
@@ -89,10 +82,10 @@
                          ],
                "charts":  [
                               {
-                                  "y":  166.73679606119791,
-                                  "width":  1232.580810546875,
-                                  "height":  462.62068684895831,
-                                  "x":  23.709607442220051
+                                  "y":  164.30655924479166,
+                                  "width":  1259.517822265625,
+                                  "height":  460.515380859375,
+                                  "x":  0
                               }
                           ]
            },
@@ -170,77 +163,6 @@
 
                           ]
            },
-    "2":  {
-              "texts":  [
-                            {
-                                "italic":  false,
-                                "text":  "MACEIÓ E REGIÃO METROPOLITANA",
-                                "color":  "#385723",
-                                "bold":  true,
-                                "y":  392.9354248046875,
-                                "x":  134.88661702473959,
-                                "size":  18.666666666666668
-                            },
-                            {
-                                "italic":  false,
-                                "text":  "MERCADO IMOBILIÁRIO",
-                                "color":  "#385723",
-                                "bold":  true,
-                                "y":  218.22414143880209,
-                                "x":  131.53763834635416,
-                                "size":  18.666666666666668
-                            },
-                            {
-                                "italic":  false,
-                                "text":  "REALIZAÇÃO",
-                                "color":  "#2B2929",
-                                "bold":  true,
-                                "y":  139.71810913085938,
-                                "x":  871.30078125,
-                                "size":  21.333333333333332
-                            },
-                            {
-                                "italic":  false,
-                                "text":  "APOIO:",
-                                "color":  "#2B2929",
-                                "bold":  true,
-                                "y":  301.66792805989581,
-                                "x":  897.07633463541663,
-                                "size":  21.333333333333332
-                            }
-                        ],
-              "slots":  [
-                            {
-                                "y":  518.06298828125,
-                                "width":  118.17626953125,
-                                "x":  121.93764241536458,
-                                "height":  32.312545776367188,
-                                "kind":  "period"
-                            }
-                        ],
-              "charts":  [
-
-                         ]
-          },
-    "8":  {
-              "texts":  [
-                            {
-                                "italic":  false,
-                                "text":  "EMPREGO",
-                                "color":  "#171A13",
-                                "bold":  true,
-                                "y":  276.15999348958331,
-                                "x":  457.51517740885419,
-                                "size":  64
-                            }
-                        ],
-              "slots":  [
-
-                        ],
-              "charts":  [
-
-                         ]
-          },
     "17":  {
                "texts":  [
                              {
@@ -283,15 +205,39 @@
                               }
                           ]
            },
-    "11":  {
+    "40":  {
                "texts":  [
                              {
                                  "italic":  false,
-                                 "text":  "DESEMPENHO POR ESTADO | SALDO CONSTRUÇÃO CIVIL",
+                                 "text":  "OFERTA FINAL VERTICAL",
+                                 "color":  "#262626",
+                                 "bold":  true,
+                                 "y":  62.080942789713539,
+                                 "x":  71.4370625813802,
+                                 "size":  42.666666666666664
+                             }
+                         ],
+               "slots":  [
+
+                         ],
+               "charts":  [
+                              {
+                                  "y":  167.99989827473959,
+                                  "width":  1248.540771484375,
+                                  "height":  457.09090169270831,
+                                  "x":  11.118740081787109
+                              }
+                          ]
+           },
+    "13":  {
+               "texts":  [
+                             {
+                                 "italic":  false,
+                                 "text":  "SALDO POR SETOR DE ATIVIDADE | ALAGOAS",
                                  "color":  "#2B2929",
                                  "bold":  true,
-                                 "y":  36.893544514973961,
-                                 "x":  111.4444071451823,
+                                 "y":  32.703936258951821,
+                                 "x":  206.7171630859375,
                                  "size":  37.333333333333336
                              },
                              {
@@ -320,6 +266,271 @@
 
                           ]
            },
+    "27":  {
+               "texts":  [
+                             {
+                                 "italic":  false,
+                                 "text":  "VGL (R$ EM MILHÕES)\u000b",
+                                 "color":  "#262626",
+                                 "bold":  true,
+                                 "y":  23.103096008300781,
+                                 "x":  63.721155802408852,
+                                 "size":  42.666666666666664
+                             },
+                             {
+                                 "italic":  false,
+                                 "text":  "ACUMULADO 12 MESES",
+                                 "color":  "#5B7537",
+                                 "bold":  true,
+                                 "y":  74.303095499674484,
+                                 "x":  63.721155802408852,
+                                 "size":  42.666666666666664
+                             }
+                         ],
+               "slots":  [
+
+                         ],
+               "charts":  [
+                              {
+                                  "y":  172,
+                                  "width":  1256.5518391927083,
+                                  "height":  456,
+                                  "x":  8
+                              }
+                          ]
+           },
+    "30":  {
+               "texts":  [
+                             {
+                                 "italic":  false,
+                                 "text":  "UNIDADES VERTICAIS VENDIDAS",
+                                 "color":  "#000000",
+                                 "bold":  true,
+                                 "y":  65.28094482421875,
+                                 "x":  71.4370625813802,
+                                 "size":  37.333333333333336
+                             },
+                             {
+                                 "italic":  false,
+                                 "text":  "MACEIÓ + RM ",
+                                 "color":  "#F9F9F9",
+                                 "bold":  true,
+                                 "y":  11.388346354166666,
+                                 "x":  1124.6476236979167,
+                                 "size":  18.666666666666668
+                             }
+                         ],
+               "slots":  [
+
+                         ],
+               "charts":  [
+                              {
+                                  "y":  172.79988606770834,
+                                  "width":  1251.238037109375,
+                                  "height":  445.322509765625,
+                                  "x":  8.42152214050293
+                              }
+                          ]
+           },
+    "18":  {
+               "texts":  [
+                             {
+                                 "italic":  false,
+                                 "text":  "EMPREENDIMENTOS VERTICAIS LANÇADOS\u000b",
+                                 "color":  "#262626",
+                                 "bold":  true,
+                                 "y":  18.463096618652344,
+                                 "x":  47.973332722981773,
+                                 "size":  42.666666666666664
+                             },
+                             {
+                                 "italic":  false,
+                                 "text":  "ACUMULADO 12 MESES",
+                                 "color":  "#5B7537",
+                                 "bold":  true,
+                                 "y":  69.663096110026046,
+                                 "x":  47.973332722981773,
+                                 "size":  42.666666666666664
+                             },
+                             {
+                                 "italic":  false,
+                                 "text":  "MACEIÓ + RM ",
+                                 "color":  "#F9F9F9",
+                                 "bold":  true,
+                                 "y":  11.388346354166666,
+                                 "x":  1124.6476236979167,
+                                 "size":  18.666666666666668
+                             }
+                         ],
+               "slots":  [
+
+                         ],
+               "charts":  [
+                              {
+                                  "y":  166.73679606119791,
+                                  "width":  1232.580810546875,
+                                  "height":  462.62068684895831,
+                                  "x":  23.709607442220051
+                              }
+                          ]
+           },
+    "36":  {
+               "texts":  [
+                             {
+                                 "italic":  true,
+                                 "text":  "Foram considerados somente os bairros com maior volume de vendas.",
+                                 "color":  "#000000",
+                                 "bold":  false,
+                                 "y":  611.50089518229163,
+                                 "x":  44.620681762695313,
+                                 "size":  14.666666666666666
+                             },
+                             {
+                                 "italic":  false,
+                                 "text":  "MACEIÓ + RM ",
+                                 "color":  "#F9F9F9",
+                                 "bold":  true,
+                                 "y":  11.388346354166666,
+                                 "x":  1124.6476236979167,
+                                 "size":  18.666666666666668
+                             }
+                         ],
+               "slots":  [
+                             {
+                                 "y":  26.629920959472656,
+                                 "width":  1266.48779296875,
+                                 "x":  61.838740030924477,
+                                 "height":  104.72041829427083,
+                                 "kind":  "heading"
+                             }
+                         ],
+               "charts":  [
+                              {
+                                  "y":  151.35926310221353,
+                                  "width":  592.47623697916663,
+                                  "height":  417.28169759114581,
+                                  "x":  51.083465576171875
+                              },
+                              {
+                                  "y":  141.89700317382813,
+                                  "width":  592.47623697916663,
+                                  "height":  436.20597330729169,
+                                  "x":  675.8109130859375
+                              }
+                          ]
+           },
+    "29":  {
+               "texts":  [
+                             {
+                                 "italic":  false,
+                                 "text":  "VENDAS\u000b",
+                                 "color":  "#171A13",
+                                 "bold":  true,
+                                 "y":  268.12577311197919,
+                                 "x":  489.83475748697919,
+                                 "size":  64
+                             },
+                             {
+                                 "italic":  false,
+                                 "text":  "VERTICAIS",
+                                 "color":  "#171A13",
+                                 "bold":  true,
+                                 "y":  344.92578125,
+                                 "x":  443.5880126953125,
+                                 "size":  64
+                             }
+                         ],
+               "slots":  [
+
+                         ],
+               "charts":  [
+
+                          ]
+           },
+    "23":  {
+               "texts":  [
+                             {
+                                 "italic":  false,
+                                 "text":  "UNIDADES VERTICAIS LANÇADAS ",
+                                 "color":  "#2E3525",
+                                 "bold":  true,
+                                 "y":  27.790130615234375,
+                                 "x":  71.437164306640625,
+                                 "size":  42.666666666666664
+                             },
+                             {
+                                 "italic":  false,
+                                 "text":  "POR TIPOLOGIA",
+                                 "color":  "#5B7537",
+                                 "bold":  true,
+                                 "y":  78.990132649739579,
+                                 "x":  71.437164306640625,
+                                 "size":  42.666666666666664
+                             },
+                             {
+                                 "italic":  false,
+                                 "text":  "MACEIÓ + RM ",
+                                 "color":  "#F9F9F9",
+                                 "bold":  true,
+                                 "y":  11.388346354166666,
+                                 "x":  1124.6476236979167,
+                                 "size":  18.666666666666668
+                             }
+                         ],
+               "slots":  [
+
+                         ],
+               "charts":  [
+                              {
+                                  "y":  183.72420247395834,
+                                  "width":  1020.6439615885416,
+                                  "height":  417.18770345052081,
+                                  "x":  116.4594217936198
+                              }
+                          ]
+           },
+    "19":  {
+               "texts":  [
+                             {
+                                 "italic":  false,
+                                 "text":  "UNIDADES VERTICAIS ",
+                                 "color":  "#262626",
+                                 "bold":  true,
+                                 "y":  29.29816182454427,
+                                 "x":  61.214594523111977,
+                                 "size":  42.666666666666664
+                             },
+                             {
+                                 "italic":  false,
+                                 "text":  "LANÇADAS",
+                                 "color":  "#5B7537",
+                                 "bold":  true,
+                                 "y":  80.498163859049484,
+                                 "x":  61.214594523111977,
+                                 "size":  42.666666666666664
+                             },
+                             {
+                                 "italic":  false,
+                                 "text":  "MACEIÓ + RM ",
+                                 "color":  "#F9F9F9",
+                                 "bold":  true,
+                                 "y":  11.388346354166666,
+                                 "x":  1124.6476236979167,
+                                 "size":  18.666666666666668
+                             }
+                         ],
+               "slots":  [
+
+                         ],
+               "charts":  [
+                              {
+                                  "y":  113.28126017252605,
+                                  "width":  1238.5556640625,
+                                  "height":  525.47371419270837,
+                                  "x":  22.068870544433594
+                              }
+                          ]
+           },
     "1":  {
               "texts":  [
 
@@ -331,6 +542,301 @@
 
                          ]
           },
+    "5":  {
+              "texts":  [
+
+                        ],
+              "slots":  [
+
+                        ],
+              "charts":  [
+
+                         ]
+          },
+    "4":  {
+              "texts":  [
+
+                        ],
+              "slots":  [
+
+                        ],
+              "charts":  [
+
+                         ]
+          },
+    "8":  {
+              "texts":  [
+                            {
+                                "italic":  false,
+                                "text":  "EMPREGO",
+                                "color":  "#171A13",
+                                "bold":  true,
+                                "y":  276.15999348958331,
+                                "x":  457.51517740885419,
+                                "size":  64
+                            }
+                        ],
+              "slots":  [
+
+                        ],
+              "charts":  [
+
+                         ]
+          },
+    "26":  {
+               "texts":  [
+                             {
+                                 "italic":  false,
+                                 "text":  "VGL – VALOR GERAL LANÇADO ",
+                                 "color":  "#262626",
+                                 "bold":  true,
+                                 "y":  42.880945841471352,
+                                 "x":  49.418685913085938,
+                                 "size":  42.666666666666664
+                             },
+                             {
+                                 "italic":  false,
+                                 "text":  "(em R$ milhões)",
+                                 "color":  "#5B7537",
+                                 "bold":  true,
+                                 "y":  94.080942789713546,
+                                 "x":  49.418685913085938,
+                                 "size":  32
+                             },
+                             {
+                                 "italic":  false,
+                                 "text":  "MACEIÓ + RM ",
+                                 "color":  "#F9F9F9",
+                                 "bold":  true,
+                                 "y":  11.388346354166666,
+                                 "x":  1124.6476236979167,
+                                 "size":  18.666666666666668
+                             }
+                         ],
+               "slots":  [
+
+                         ],
+               "charts":  [
+                              {
+                                  "y":  145.50971476236978,
+                                  "width":  1253.3645833333333,
+                                  "height":  499.1275634765625,
+                                  "x":  6.2949078877766924
+                              }
+                          ]
+           },
+    "39":  {
+               "texts":  [
+                             {
+                                 "italic":  false,
+                                 "text":  "OFERTA",
+                                 "color":  "#171A13",
+                                 "bold":  true,
+                                 "y":  298.92283121744794,
+                                 "x":  512.33329264322913,
+                                 "size":  64
+                             }
+                         ],
+               "slots":  [
+
+                         ],
+               "charts":  [
+
+                          ]
+           },
+    "14":  {
+               "texts":  [
+                             {
+                                 "italic":  false,
+                                 "text":  "DESEMPENHO POR ESTADOS | REGIÃO NORDESTE",
+                                 "color":  "#2B2929",
+                                 "bold":  true,
+                                 "y":  44.830551147460938,
+                                 "x":  180.272705078125,
+                                 "size":  37.333333333333336
+                             },
+                             {
+                                 "italic":  false,
+                                 "text":  "FONTE: CAGED – Saldo do Emprego Formal por Município e Setor de Atividade Econômica",
+                                 "color":  "#2B2929",
+                                 "bold":  true,
+                                 "y":  675.00651041666663,
+                                 "x":  9.59999974568685,
+                                 "size":  13.333333333333334
+                             },
+                             {
+                                 "italic":  false,
+                                 "text":  "*Dados Parciais",
+                                 "color":  "#2B2929",
+                                 "bold":  true,
+                                 "y":  691.00651041666663,
+                                 "x":  9.59999974568685,
+                                 "size":  13.333333333333334
+                             }
+                         ],
+               "slots":  [
+
+                         ],
+               "charts":  [
+
+                          ]
+           },
+    "37":  {
+               "texts":  [
+                             {
+                                 "italic":  false,
+                                 "text":  "VGV – VALOR GERAL VENDIDO ",
+                                 "color":  "#262626",
+                                 "bold":  true,
+                                 "y":  27.822151184082031,
+                                 "x":  58.830551147460938,
+                                 "size":  42.666666666666664
+                             },
+                             {
+                                 "italic":  false,
+                                 "text":  "(em R$ milhões)",
+                                 "color":  "#5B7537",
+                                 "bold":  true,
+                                 "y":  79.022150675455734,
+                                 "x":  58.830551147460938,
+                                 "size":  32
+                             }
+                         ],
+               "slots":  [
+
+                         ],
+               "charts":  [
+                              {
+                                  "y":  142.05952962239584,
+                                  "width":  1242.1480305989583,
+                                  "height":  479.75862630208331,
+                                  "x":  12
+                              }
+                          ]
+           },
+    "22":  {
+               "texts":  [
+                             {
+                                 "italic":  false,
+                                 "text":  "UNIDADES VERTICAIS ",
+                                 "color":  "#262626",
+                                 "bold":  true,
+                                 "y":  23.135012308756512,
+                                 "x":  65.19390869140625,
+                                 "size":  42.666666666666664
+                             },
+                             {
+                                 "italic":  false,
+                                 "text":  "LANÇADAS",
+                                 "color":  "#5B7537",
+                                 "bold":  true,
+                                 "y":  74.3350118001302,
+                                 "x":  65.19390869140625,
+                                 "size":  42.666666666666664
+                             },
+                             {
+                                 "italic":  false,
+                                 "text":  "MACEIÓ + RM ",
+                                 "color":  "#F9F9F9",
+                                 "bold":  true,
+                                 "y":  11.388346354166666,
+                                 "x":  1124.6476236979167,
+                                 "size":  18.666666666666668
+                             }
+                         ],
+               "slots":  [
+
+                         ],
+               "charts":  [
+                              {
+                                  "y":  165.71579996744791,
+                                  "width":  1252.9224446614583,
+                                  "height":  440.892822265625,
+                                  "x":  6.7371126810709638
+                              }
+                          ]
+           },
+    "28":  {
+               "texts":  [
+                             {
+                                 "italic":  false,
+                                 "text":  "VGL (R$ EM MILHÕES) ",
+                                 "color":  "#2E3525",
+                                 "bold":  true,
+                                 "y":  26.135012308756512,
+                                 "x":  38.333752950032554,
+                                 "size":  42.666666666666664
+                             },
+                             {
+                                 "italic":  false,
+                                 "text":  "VERTICAL",
+                                 "color":  "#5B7537",
+                                 "bold":  true,
+                                 "y":  77.3350118001302,
+                                 "x":  38.333752950032554,
+                                 "size":  42.666666666666664
+                             },
+                             {
+                                 "italic":  false,
+                                 "text":  "MACEIÓ + RM ",
+                                 "color":  "#F9F9F9",
+                                 "bold":  true,
+                                 "y":  11.388346354166666,
+                                 "x":  1124.6476236979167,
+                                 "size":  18.666666666666668
+                             }
+                         ],
+               "slots":  [
+
+                         ],
+               "charts":  [
+                              {
+                                  "y":  183.82120768229166,
+                                  "width":  1198.7701009114583,
+                                  "height":  402.11515299479169,
+                                  "x":  41.224566141764321
+                              }
+                          ]
+           },
+    "25":  {
+               "texts":  [
+                             {
+                                 "italic":  true,
+                                 "text":  "Foram considerados somente os bairros com maior volume de lançamentos.",
+                                 "color":  "#000000",
+                                 "bold":  false,
+                                 "y":  611.50089518229163,
+                                 "x":  44.620681762695313,
+                                 "size":  14.666666666666666
+                             },
+                             {
+                                 "italic":  false,
+                                 "text":  "MACEIÓ ",
+                                 "color":  "#F9F9F9",
+                                 "bold":  true,
+                                 "y":  11.388346354166666,
+                                 "x":  1166.2892252604167,
+                                 "size":  18.666666666666668
+                             }
+                         ],
+               "slots":  [
+                             {
+                                 "y":  10.160104751586914,
+                                 "width":  909.74763997395837,
+                                 "x":  51.063308715820313,
+                                 "height":  104.72041829427083,
+                                 "kind":  "heading"
+                             }
+                         ],
+               "charts":  [
+                              {
+                                  "y":  108.9080301920573,
+                                  "width":  588.40987141927087,
+                                  "height":  481.61238606770831,
+                                  "x":  345.79508463541669
+                              }
+                          ]
+           },
     "9":  {
               "texts":  [
                             {
@@ -368,34 +874,67 @@
 
                          ]
           },
-    "14":  {
+    "33":  {
                "texts":  [
                              {
                                  "italic":  false,
-                                 "text":  "DESEMPENHO POR ESTADOS | REGIÃO NORDESTE",
-                                 "color":  "#2B2929",
+                                 "text":  "UNIDADES VERTICAIS",
+                                 "color":  "#262626",
                                  "bold":  true,
-                                 "y":  44.830551147460938,
-                                 "x":  180.272705078125,
-                                 "size":  37.333333333333336
+                                 "y":  12.420997619628906,
+                                 "x":  80.530604044596359,
+                                 "size":  42.666666666666664
                              },
                              {
                                  "italic":  false,
-                                 "text":  "FONTE: CAGED – Saldo do Emprego Formal por Município e Setor de Atividade Econômica",
-                                 "color":  "#2B2929",
+                                 "text":  "VENDIDAS",
+                                 "color":  "#5B7537",
                                  "bold":  true,
-                                 "y":  675.00651041666663,
-                                 "x":  9.59999974568685,
-                                 "size":  13.333333333333334
+                                 "y":  63.6209971110026,
+                                 "x":  80.530604044596359,
+                                 "size":  42.666666666666664
                              },
                              {
                                  "italic":  false,
-                                 "text":  "*Dados Parciais",
-                                 "color":  "#2B2929",
+                                 "text":  "MACEIÓ + RM ",
+                                 "color":  "#F9F9F9",
                                  "bold":  true,
-                                 "y":  691.00651041666663,
-                                 "x":  9.59999974568685,
-                                 "size":  13.333333333333334
+                                 "y":  11.388346354166666,
+                                 "x":  1124.6476236979167,
+                                 "size":  18.666666666666668
+                             }
+                         ],
+               "slots":  [
+
+                         ],
+               "charts":  [
+                              {
+                                  "y":  174.09364827473959,
+                                  "width":  1227.6344401041667,
+                                  "height":  428.88114420572919,
+                                  "x":  7.2746454874674482
+                              }
+                          ]
+           },
+    "15":  {
+               "texts":  [
+                             {
+                                 "italic":  false,
+                                 "text":  "LANÇAMENTOS\u000b",
+                                 "color":  "#000000",
+                                 "bold":  true,
+                                 "y":  275.6923828125,
+                                 "x":  392.761474609375,
+                                 "size":  64
+                             },
+                             {
+                                 "italic":  false,
+                                 "text":  "VERTICAIS",
+                                 "color":  "#000000",
+                                 "bold":  true,
+                                 "y":  352.49239095052081,
+                                 "x":  459.761474609375,
+                                 "size":  64
                              }
                          ],
                "slots":  [
@@ -403,6 +942,249 @@
                          ],
                "charts":  [
 
+                          ]
+           },
+    "34":  {
+               "texts":  [
+                             {
+                                 "italic":  false,
+                                 "text":  "UNIDADES VERTICAIS VENDIDAS ",
+                                 "color":  "#2E3525",
+                                 "bold":  true,
+                                 "y":  38.188870747884117,
+                                 "x":  63.208607991536461,
+                                 "size":  42.666666666666664
+                             },
+                             {
+                                 "italic":  false,
+                                 "text":  "POR TIPOLOGIA",
+                                 "color":  "#5B7537",
+                                 "bold":  true,
+                                 "y":  89.388875325520829,
+                                 "x":  63.208607991536461,
+                                 "size":  42.666666666666664
+                             },
+                             {
+                                 "italic":  false,
+                                 "text":  "MACEIÓ + RM ",
+                                 "color":  "#F9F9F9",
+                                 "bold":  true,
+                                 "y":  11.388346354166666,
+                                 "x":  1124.6476236979167,
+                                 "size":  18.666666666666668
+                             }
+                         ],
+               "slots":  [
+
+                         ],
+               "charts":  [
+                              {
+                                  "y":  150.43674723307291,
+                                  "width":  1097.7129720052083,
+                                  "height":  467.02689615885419,
+                                  "x":  105.1144307454427
+                              }
+                          ]
+           },
+    "21":  {
+               "texts":  [
+                             {
+                                 "italic":  false,
+                                 "text":  "UNIDADES VERTICAIS LANÇADAS",
+                                 "color":  "#2E3525",
+                                 "bold":  true,
+                                 "y":  27.790130615234375,
+                                 "x":  71.437164306640625,
+                                 "size":  42.666666666666664
+                             },
+                             {
+                                 "italic":  false,
+                                 "text":  "POR PADRÃO",
+                                 "color":  "#5B7537",
+                                 "bold":  true,
+                                 "y":  78.990132649739579,
+                                 "x":  71.437164306640625,
+                                 "size":  42.666666666666664
+                             },
+                             {
+                                 "italic":  false,
+                                 "text":  "MACEIÓ + RM ",
+                                 "color":  "#F9F9F9",
+                                 "bold":  true,
+                                 "y":  11.388346354166666,
+                                 "x":  1124.6476236979167,
+                                 "size":  18.666666666666668
+                             }
+                         ],
+               "slots":  [
+
+                         ],
+               "charts":  [
+                              {
+                                  "y":  178.88189697265625,
+                                  "width":  1190.8523763020833,
+                                  "height":  441.242919921875,
+                                  "x":  51.891866048177086
+                              }
+                          ]
+           },
+    "24":  {
+               "texts":  [
+                             {
+                                 "italic":  false,
+                                 "text":  "UNIDADES VERTICAIS LANÇADAS ",
+                                 "color":  "#2E3525",
+                                 "bold":  true,
+                                 "y":  27.790130615234375,
+                                 "x":  71.437164306640625,
+                                 "size":  42.666666666666664
+                             },
+                             {
+                                 "italic":  false,
+                                 "text":  "POR PADRÃO",
+                                 "color":  "#5B7537",
+                                 "bold":  true,
+                                 "y":  78.990132649739579,
+                                 "x":  71.437164306640625,
+                                 "size":  42.666666666666664
+                             },
+                             {
+                                 "italic":  false,
+                                 "text":  "MACEIÓ + RM ",
+                                 "color":  "#F9F9F9",
+                                 "bold":  true,
+                                 "y":  11.388346354166666,
+                                 "x":  1124.6476236979167,
+                                 "size":  18.666666666666668
+                             }
+                         ],
+               "slots":  [
+
+                         ],
+               "charts":  [
+                              {
+                                  "y":  152.30771891276041,
+                                  "width":  1201.1337890625,
+                                  "height":  467.02689615885419,
+                                  "x":  61.838633219401039
+                              }
+                          ]
+           },
+    "16":  {
+               "texts":  [
+                             {
+                                 "italic":  false,
+                                 "text":  "EMPREENDIMENTOS VERTICAIS",
+                                 "color":  "#262626",
+                                 "bold":  true,
+                                 "y":  1.1602099736531575,
+                                 "x":  64.524932861328125,
+                                 "size":  42.666666666666664
+                             },
+                             {
+                                 "italic":  false,
+                                 "text":  "LANÇADOS",
+                                 "color":  "#5B7537",
+                                 "bold":  true,
+                                 "y":  52.360209147135414,
+                                 "x":  64.524932861328125,
+                                 "size":  42.666666666666664
+                             }
+                         ],
+               "slots":  [
+
+                         ],
+               "charts":  [
+                              {
+                                  "y":  175.44818115234375,
+                                  "width":  1236.2103678385417,
+                                  "height":  437.74959309895831,
+                                  "x":  16.755170186360676
+                              }
+                          ]
+           },
+    "35":  {
+               "texts":  [
+                             {
+                                 "italic":  false,
+                                 "text":  "UNIDADES VERTICAIS VENDIDAS ",
+                                 "color":  "#2E3525",
+                                 "bold":  true,
+                                 "y":  27.790130615234375,
+                                 "x":  71.437164306640625,
+                                 "size":  42.666666666666664
+                             },
+                             {
+                                 "italic":  false,
+                                 "text":  "POR PADRÃO",
+                                 "color":  "#5B7537",
+                                 "bold":  true,
+                                 "y":  78.990132649739579,
+                                 "x":  71.437164306640625,
+                                 "size":  42.666666666666664
+                             },
+                             {
+                                 "italic":  false,
+                                 "text":  "MACEIÓ + RM ",
+                                 "color":  "#F9F9F9",
+                                 "bold":  true,
+                                 "y":  11.388346354166666,
+                                 "x":  1124.6476236979167,
+                                 "size":  18.666666666666668
+                             }
+                         ],
+               "slots":  [
+
+                         ],
+               "charts":  [
+                              {
+                                  "y":  177.13521321614584,
+                                  "width":  1097.7129720052083,
+                                  "height":  467.02689615885419,
+                                  "x":  91.143513997395829
+                              }
+                          ]
+           },
+    "32":  {
+               "texts":  [
+                             {
+                                 "italic":  false,
+                                 "text":  "UNIDADES VERTICAIS ",
+                                 "color":  "#2E3525",
+                                 "bold":  true,
+                                 "y":  27.790130615234375,
+                                 "x":  46.609553019205727,
+                                 "size":  42.666666666666664
+                             },
+                             {
+                                 "italic":  false,
+                                 "text":  "VENDIDAS",
+                                 "color":  "#5B7537",
+                                 "bold":  true,
+                                 "y":  78.990132649739579,
+                                 "x":  46.609553019205727,
+                                 "size":  42.666666666666664
+                             },
+                             {
+                                 "italic":  false,
+                                 "text":  "MACEIÓ + RM ",
+                                 "color":  "#F9F9F9",
+                                 "bold":  true,
+                                 "y":  11.388346354166666,
+                                 "x":  1124.6476236979167,
+                                 "size":  18.666666666666668
+                             }
+                         ],
+               "slots":  [
+
+                         ],
+               "charts":  [
+                              {
+                                  "y":  178.88199869791666,
+                                  "width":  1215.4414876302083,
+                                  "height":  432.48649088541669,
+                                  "x":  27.3027826944987
+                              }
                           ]
            },
     "7":  {
@@ -509,53 +1291,77 @@
 
                          ]
           },
-    "15":  {
+    "2":  {
+              "texts":  [
+                            {
+                                "italic":  false,
+                                "text":  "MACEIÓ E REGIÃO METROPOLITANA",
+                                "color":  "#385723",
+                                "bold":  true,
+                                "y":  392.9354248046875,
+                                "x":  134.88661702473959,
+                                "size":  18.666666666666668
+                            },
+                            {
+                                "italic":  false,
+                                "text":  "MERCADO IMOBILIÁRIO",
+                                "color":  "#385723",
+                                "bold":  true,
+                                "y":  218.22414143880209,
+                                "x":  131.53763834635416,
+                                "size":  18.666666666666668
+                            },
+                            {
+                                "italic":  false,
+                                "text":  "REALIZAÇÃO",
+                                "color":  "#2B2929",
+                                "bold":  true,
+                                "y":  139.71810913085938,
+                                "x":  871.30078125,
+                                "size":  21.333333333333332
+                            },
+                            {
+                                "italic":  false,
+                                "text":  "APOIO:",
+                                "color":  "#2B2929",
+                                "bold":  true,
+                                "y":  301.66792805989581,
+                                "x":  897.07633463541663,
+                                "size":  21.333333333333332
+                            }
+                        ],
+              "slots":  [
+                            {
+                                "y":  518.06298828125,
+                                "width":  118.17626953125,
+                                "x":  121.93764241536458,
+                                "height":  32.312545776367188,
+                                "kind":  "period"
+                            }
+                        ],
+              "charts":  [
+
+                         ]
+          },
+    "38":  {
                "texts":  [
                              {
                                  "italic":  false,
-                                 "text":  "LANÇAMENTOS\u000b",
-                                 "color":  "#000000",
-                                 "bold":  true,
-                                 "y":  275.6923828125,
-                                 "x":  392.761474609375,
-                                 "size":  64
-                             },
-                             {
-                                 "italic":  false,
-                                 "text":  "VERTICAIS",
-                                 "color":  "#000000",
-                                 "bold":  true,
-                                 "y":  352.49239095052081,
-                                 "x":  459.761474609375,
-                                 "size":  64
-                             }
-                         ],
-               "slots":  [
-
-                         ],
-               "charts":  [
-
-                          ]
-           },
-    "20":  {
-               "texts":  [
-                             {
-                                 "italic":  false,
-                                 "text":  "UNIDADES VERTICAIS LANÇADAS\u000b",
+                                 "text":  "VGV (em R$ milhões)\u000b",
                                  "color":  "#262626",
                                  "bold":  true,
-                                 "y":  31.59412129720052,
-                                 "x":  67.8352762858073,
-                                 "size":  40
+                                 "y":  26.709920247395832,
+                                 "x":  67.835383097330734,
+                                 "size":  42.666666666666664
                              },
                              {
                                  "italic":  false,
                                  "text":  "ACUMULADO 12 MESES",
                                  "color":  "#5B7537",
                                  "bold":  true,
-                                 "y":  79.594121297200516,
-                                 "x":  67.8352762858073,
-                                 "size":  40
+                                 "y":  77.909922281901046,
+                                 "x":  67.835383097330734,
+                                 "size":  42.666666666666664
                              },
                              {
                                  "italic":  false,
@@ -572,10 +1378,10 @@
                          ],
                "charts":  [
                               {
-                                  "y":  164.30655924479166,
-                                  "width":  1259.517822265625,
-                                  "height":  460.515380859375,
-                                  "x":  0
+                                  "y":  186.93332926432291,
+                                  "width":  1198.4156087239583,
+                                  "height":  454.62068684895831,
+                                  "x":  38.480840047200523
                               }
                           ]
            },
@@ -688,45 +1494,25 @@
 
                          ]
           },
-    "4":  {
-              "texts":  [
-
-                        ],
-              "slots":  [
-
-                        ],
-              "charts":  [
-
-                         ]
-          },
-    "19":  {
+    "31":  {
                "texts":  [
                              {
                                  "italic":  false,
-                                 "text":  "UNIDADES VERTICAIS ",
+                                 "text":  "UNIDADES VERTICAIS VENDIDAS",
                                  "color":  "#262626",
                                  "bold":  true,
-                                 "y":  29.29816182454427,
-                                 "x":  61.214594523111977,
+                                 "y":  22.595591227213543,
+                                 "x":  67.835383097330734,
                                  "size":  42.666666666666664
                              },
                              {
                                  "italic":  false,
-                                 "text":  "LANÇADAS",
+                                 "text":  "ACUMULADO 12 MESES",
                                  "color":  "#5B7537",
                                  "bold":  true,
-                                 "y":  80.498163859049484,
-                                 "x":  61.214594523111977,
+                                 "y":  73.795588175455734,
+                                 "x":  67.835383097330734,
                                  "size":  42.666666666666664
-                             },
-                             {
-                                 "italic":  false,
-                                 "text":  "MACEIÓ + RM ",
-                                 "color":  "#F9F9F9",
-                                 "bold":  true,
-                                 "y":  11.388346354166666,
-                                 "x":  1124.6476236979167,
-                                 "size":  18.666666666666668
                              }
                          ],
                "slots":  [
@@ -734,48 +1520,11 @@
                          ],
                "charts":  [
                               {
-                                  "y":  113.28126017252605,
-                                  "width":  1238.5556640625,
-                                  "height":  525.47371419270837,
-                                  "x":  22.068870544433594
+                                  "y":  177,
+                                  "width":  1198.4156087239583,
+                                  "height":  454.62068684895831,
+                                  "x":  38.480840047200523
                               }
-                          ]
-           },
-    "13":  {
-               "texts":  [
-                             {
-                                 "italic":  false,
-                                 "text":  "SALDO POR SETOR DE ATIVIDADE | ALAGOAS",
-                                 "color":  "#2B2929",
-                                 "bold":  true,
-                                 "y":  32.703936258951821,
-                                 "x":  206.7171630859375,
-                                 "size":  37.333333333333336
-                             },
-                             {
-                                 "italic":  false,
-                                 "text":  "FONTE: CAGED – Saldo do Emprego Formal por Município e Setor de Atividade Econômica",
-                                 "color":  "#2B2929",
-                                 "bold":  true,
-                                 "y":  675.00651041666663,
-                                 "x":  9.59999974568685,
-                                 "size":  13.333333333333334
-                             },
-                             {
-                                 "italic":  false,
-                                 "text":  "*Dados Parciais",
-                                 "color":  "#2B2929",
-                                 "bold":  true,
-                                 "y":  691.00651041666663,
-                                 "x":  9.59999974568685,
-                                 "size":  13.333333333333334
-                             }
-                         ],
-               "slots":  [
-
-                         ],
-               "charts":  [
-
                           ]
            }
 }
