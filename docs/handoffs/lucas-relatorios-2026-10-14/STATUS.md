@@ -1,5 +1,9 @@
 # Estado do handoff
 
+## 16/11/2026 — Maceió: Etapas 1 e 2 com Claude
+
+Lucas/Claude. Base `90304aa7` (local, à frente do origin desde a abertura), main, árvore limpa, origin único. Hashes dos dois originais conferidos contra o manifesto; extração OOXML na ordem real comprovou maio = mensal (82) e junho = trimestral 2T2026 (87), recorte 7/6 municípios por edição. Documentos de contrato em `docs/features/relatorios-institucionais/maceio/` (PLAN/MAPA_SLIDES/MATRIZ/DECISOES/EVIDENCIAS). Estrutura implantada em `src/features/relatorios-institucionais/maceio/` com rota oculta `/rebrain/relatorios-institucionais/maceio` — somente rota, sem menu/busca/início, por decisão de Lucas na sessão. 16 testes novos, regressão 671/672 (timeout pré-existente de SP sob carga, passa isolado), tipos/lint/build aprovados. Sem coleta autenticada, sem fontes confirmadas, sem exportação; homologação com o analista. Sem escrita Monday. Commits locais sem push até autorização.
+
 ## 16/11/2026 — Próximo modelo: Maceió com Claude
 
 Lucas pediu plano MD e pasta de referências na Área de Trabalho. [Implantação Maceió](../../features/relatorios-institucionais/maceio/IMPLANTACAO_CLAUDE.md) e manifesto versionados; originais Drive maio82/junho87baixados e conferidos por tamanho/SHA256/ZIP, sem revisão visual ou metodológica. Base `0317ff32`, main limpa, origin único, fetch0/0. Sem implementação de Maceió ou coleta Geobrain nesta sessão; Claude deve começar por inventário/periodicidade/recorte e matriz de fontes. Coqueiro Seco/CAGED/INCC destacados; homologação do analista. Sem escrita no Monday de Maceió.

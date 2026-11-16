@@ -7,8 +7,10 @@ Plano de implantação original: [IMPLANTACAO_CLAUDE.md](IMPLANTACAO_CLAUDE.md).
 
 **Etapa 1 concluída (inventário e contrato inicial)** — periodicidade, recorte e composição comprovados nos
 originais ([MAPA_SLIDES.md](MAPA_SLIDES.md), [EVIDENCIAS.md](EVIDENCIAS.md)).
-**Etapa 2 em andamento** — estrutura do domínio `src/features/relatorios-institucionais/maceio/` com
-manifesto nas posições originais, rota oculta e escopo validado pelo GeoApiScopeEngine.
+**Etapa 2 (estrutura e rota) concluída em 16/11** — domínio `src/features/relatorios-institucionais/maceio/`
+com manifesto nas posições originais (82/87), rota oculta `/rebrain/relatorios-institucionais/maceio`
+(somente rota, sem menu) e escopo validado integralmente pelo GeoApiScopeEngine. Próximo: contrato de
+fontes (bloco 3).
 
 ## Decisões vigentes
 
@@ -19,8 +21,8 @@ sem menu/busca/início; ordem e padrão visual idênticos ao original.
 ## Próximos blocos (em ordem)
 
 1. ~~Inventário OOXML e documentos de contrato~~ — feito 16/11.
-2. **Estrutura e rota** (`model.ts`, `references.json`, página com GeoApiScopeEngine, blueprint local,
-   abas de estrutura/referências/metodologia) — sem coleta de dados ainda.
+2. ~~Estrutura e rota~~ (`model.ts`, `references.json`, página com GeoApiScopeEngine, blueprint local,
+   abas de estrutura/referências/metodologia; sem coleta de dados) — feito 16/11.
 3. **Contrato de fontes**: mapear endpoints reais por indicador na MATRIZ_INDICADORES (consultando
    adaptadores de Fortaleza como referência de paginação/guardas, sem copiar regras locais), com coleta
    independente por fonte (núcleo reprovado não bloqueia as demais — lição das 64 pendências de Fortaleza).

@@ -4,7 +4,7 @@
 
 ## Onde trabalhar
 
-**Maceió — handoff para Claude,16/11:** [plano de implantação](maceio/IMPLANTACAO_CLAUDE.md) e [manifesto das referências](maceio/REFERENCIAS.json). Originais maio82/junho87 baixados e conferidos por tamanho/hash; pacote local na Área de Trabalho de Lucas. Periodicidade de junho, recortes municipais, CAGED/INCC e metodologia precisam de conferência no original. Preparação documental, sem implementação runtime.
+**Maceió — inventário comprovado e estrutura, 16/11:** [plano](maceio/PLAN.md), [mapa de slides](maceio/MAPA_SLIDES.md), [matriz](maceio/MATRIZ_INDICADORES.csv), [decisões](maceio/DECISOES.md) e [evidências](maceio/EVIDENCIAS.md). Periodicidade comprovada por extração OOXML: maio = mensal (82), junho = trimestral 2T2026 (87); recorte 7/6 municípios por edição (Coqueiro Seco só na mensal). Estrutura implantada em `src/features/relatorios-institucionais/maceio/` com rota oculta `/rebrain/relatorios-institucionais/maceio` (sem menu, decisão de Lucas). Fontes, prévia de conteúdo, exportação e homologação pendentes. Handoff original: [IMPLANTACAO_CLAUDE.md](maceio/IMPLANTACAO_CLAUDE.md).
 
 **Fortaleza — arquivos reais e referências, 16/11:** [comparação mensal/trimestral e correção dos títulos](fortaleza/COMPARACAO_REFERENCIAS_2026-11-16.md). Mensal agosto comparado a julho no período comum; lançamentos de julho e VGV na mesma base conferem. Preços, estoque, casas e padrões divergem e seguem para o analista. Títulos dos mapas e IVV corrigidos no gerador; valores dos anexos preservados.
 

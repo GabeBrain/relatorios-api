@@ -1,5 +1,13 @@
 # Rebrain (Plataforma) — Documento Vivo
 
+## 16/11/2026 — Maceió/SINDUSCON-AL: estrutura e rota oculta (Etapa 2) — Lucas (Inovação), com Claude
+
+- **Feito:** domínio `src/features/relatorios-institucionais/maceio/` com `references.json` gerado do inventário real (82 posições mensais / 87 trimestrais, hashes e drive ids), `model.ts` (recorte por edição — mensal 7 municípios com Coqueiro Seco, trimestral 6 —, validação integral contra o catálogo autorizado, período, blueprint local nas posições originais com progresso/cancelamento) e `MaceioInstitutionalPage.tsx` (seletor de periodicidade/período, GeoApiScopeEngine sem fallback IBGE, `BrainLoadingState`, abas Estrutura/Referências/Metodologia). Rota lazy `/rebrain/relatorios-institucionais/maceio` registrada só em `App.tsx` — **sem item em menu, busca ou início**, por decisão de Lucas.
+- **Validação:** 16 testes novos do modelo aprovados; regressão de `relatorios-institucionais` com 671/672 (única falha: timeout pré-existente de `sp/market-details.test.tsx` sob carga, passa isolado); `tsc`, `eslint` e `npm run build` limpos, página em chunk lazy próprio (31,97 kB). Runtime no navegador não verificado (sem sessão autenticada); asserções headless no vitest.
+- **Etapas:** Etapas 1 e 2 concluídas. Próximo bloco: contrato de fontes por indicador (coleta independente por fonte, lição das 64 pendências de Fortaleza), depois composições mensais na ordem original.
+- **Pendências:** endpoints por indicador a confirmar; fórmulas (IVV, escoamento, ponderação de preços) e INCC/CAGED em comprovação; render dos slides achatados; geração autenticada e homologação do analista.
+- **Monday:** [Panorama Maceió / SINDUSCON](https://brain381753.monday.com/boards/18398638577/pulses/13149406169) — `13149406169`
+
 ## 16/11/2026 — Maceió/SINDUSCON-AL: inventário comprovado dos originais (Etapa 1) — Lucas (Inovação), com Claude
 
 - **Feito:** extração OOXML dos dois PPTX de referência na ordem real de `presentation.xml`, com hashes conferidos contra o manifesto. **Periodicidade comprovada:** maio/2026 é a edição mensal (82 slides, séries de 25 meses) e junho/2026 é a trimestral 2T2026 (87 slides, séries de 17 trimestres, acumulado semestral, rankings 2T, bloco comercial exclusivo). Recorte por edição: mensal com 7 municípios (inclui Coqueiro Seco), trimestral com 6.

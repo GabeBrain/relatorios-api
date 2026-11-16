@@ -23,7 +23,32 @@ Contagem de gráficos embutidos: 42 (maio) e 48 (junho).
 seriais Excel convertidos em datas nos acumulados) e junho com categorias trimestrais (`2T/22`…`2T/26`,
 17 pontos) e semestrais (`1S25`/`1S26`).
 
-**Limites desta verificação:**
+## 16/11/2026 — Etapa 2: estrutura e rota oculta (sessão Claude)
+
+**Implementado:** `src/features/relatorios-institucionais/maceio/` com `references.json` (gerado do
+inventário real: 82+87 posições, hashes, drive ids, 16:9), `model.ts` (recorte por edição com validação
+integral contra o catálogo autorizado via GeoApiScopeEngine, período mensal/trimestral, blueprint local
+nas posições originais com progresso e cancelamento) e `MaceioInstitutionalPage.tsx` (seleção de
+periodicidade/período, `BrainLoadingState` em overlay, abas Estrutura/Referências/Metodologia).
+Rota lazy `/rebrain/relatorios-institucionais/maceio` registrada apenas em `App.tsx` — **sem** item em
+`AppLayout`, `CommandPalette` ou `Home`, por decisão de Lucas (D3).
+
+**Validações executadas:**
+
+- `vitest` do módulo: 16 testes novos de `model.test.ts`, todos aprovados (posições preservadas,
+  recorte 7/6 municípios, cidade ausente relatada sem encolher o conjunto, períodos, cancelamento, progresso).
+- Regressão `src/features/relatorios-institucionais`: 672 testes, 671 aprovados; a única falha foi
+  timeout de 5s em `sp/market-details.test.tsx` sob carga da suíte (o mesmo arquivo passa isolado em 2,6s),
+  flutuação pré-existente sem relação com os arquivos tocados.
+- `tsc --noEmit` exit 0; `eslint` nos arquivos novos e `App.tsx` exit 0; `npm run build` exit 0 com
+  `MaceioInstitutionalPage` em chunk lazy próprio (31,97 kB).
+
+**Não verificado (limite de ambiente):** comportamento em runtime no navegador (estados de carregamento,
+escopo real do token, claro/escuro, mobile) — sem sessão autenticada do Geobrain nesta sessão. Equivalente
+headless adotado: asserções sobre o blueprint e o escopo no vitest; a varredura visual parametrizada
+(padrão `scripts/diagnostics/fortaleza-*-visual.mjs`) entra quando houver conteúdo de páginas a verificar.
+
+**Limites da verificação da Etapa 1:**
 
 - Extração estrutural não substitui conferência visual: slides achatados como imagem (emprego, IVV líquidas,
   IVV por área útil, horizontal, comercial) ainda precisam de render dos originais para mapear a composição.

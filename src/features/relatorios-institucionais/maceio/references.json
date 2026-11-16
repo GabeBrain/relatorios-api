@@ -1,0 +1,1382 @@
+[
+  {
+    "id": "maio-2026-mensal",
+    "label": "Maio 2026 (mensal)",
+    "file": "5.2026_Panorama_Maceio_Sinduscon_AL_VAP_01jul_16h05.pptx",
+    "sourceId": "1cEve8fIEYPWTHwNzVr2G0MeZHNYMAijh",
+    "sha256": "1ec1cd87364c56fae9d75616f1708e4ed89b8e3f9fb66167e4e31a439111c6c9",
+    "bytes": 27375769,
+    "widthEmu": "12192000",
+    "heightEmu": "6858000",
+    "slideCount": 82,
+    "chartCount": 42,
+    "slides": [
+      {
+        "number": 1,
+        "title": "(sem texto)",
+        "kind": "editorial",
+        "charts": 0,
+        "tables": 0,
+        "pictures": 1
+      },
+      {
+        "number": 2,
+        "title": "MACEIÓ E REGIÃO METROPOLITANA",
+        "kind": "editorial",
+        "charts": 0,
+        "tables": 0,
+        "pictures": 6
+      },
+      {
+        "number": 3,
+        "title": "(sem texto)",
+        "kind": "editorial",
+        "charts": 0,
+        "tables": 0,
+        "pictures": 1
+      },
+      {
+        "number": 4,
+        "title": "(sem texto)",
+        "kind": "editorial",
+        "charts": 0,
+        "tables": 0,
+        "pictures": 1
+      },
+      {
+        "number": 5,
+        "title": "(sem texto)",
+        "kind": "editorial",
+        "charts": 0,
+        "tables": 0,
+        "pictures": 1
+      },
+      {
+        "number": 6,
+        "title": "SUMÁRIO",
+        "kind": "editorial",
+        "charts": 0,
+        "tables": 0,
+        "pictures": 1
+      },
+      {
+        "number": 7,
+        "title": "MACEIÓ E REGIÃO METROPOLITANA",
+        "kind": "editorial",
+        "charts": 0,
+        "tables": 0,
+        "pictures": 1
+      },
+      {
+        "number": 8,
+        "title": "EMPREGO",
+        "kind": "editorial",
+        "charts": 0,
+        "tables": 0,
+        "pictures": 2
+      },
+      {
+        "number": 9,
+        "title": "SALDO DO EMPREGO FORMAL NO BRASIL | CONSTRUÇÃO CIVIL",
+        "kind": "analytical",
+        "charts": 0,
+        "tables": 0,
+        "pictures": 3
+      },
+      {
+        "number": 10,
+        "title": "DESEMPENHO POR ESTADO | SALDO TOTAL",
+        "kind": "analytical",
+        "charts": 0,
+        "tables": 0,
+        "pictures": 1
+      },
+      {
+        "number": 11,
+        "title": "DESEMPENHO POR ESTADO | SALDO CONSTRUÇÃO CIVIL",
+        "kind": "analytical",
+        "charts": 0,
+        "tables": 0,
+        "pictures": 1
+      },
+      {
+        "number": 12,
+        "title": "SALDO DO EMPREGO FORMAL EM ALAGOAS | CONSTRUÇÃO CIVIL",
+        "kind": "analytical",
+        "charts": 0,
+        "tables": 0,
+        "pictures": 2
+      },
+      {
+        "number": 13,
+        "title": "SALDO POR SETOR DE ATIVIDADE | ALAGOAS",
+        "kind": "analytical",
+        "charts": 0,
+        "tables": 0,
+        "pictures": 1
+      },
+      {
+        "number": 14,
+        "title": "DESEMPENHO POR ESTADOS | REGIÃO NORDESTE",
+        "kind": "analytical",
+        "charts": 0,
+        "tables": 0,
+        "pictures": 1
+      },
+      {
+        "number": 15,
+        "title": "LANÇAMENTOSVERTICAIS",
+        "kind": "editorial",
+        "charts": 0,
+        "tables": 0,
+        "pictures": 2
+      },
+      {
+        "number": 16,
+        "title": "EMPREENDIMENTOS VERTICAIS LANÇADOS",
+        "kind": "analytical",
+        "charts": 1,
+        "tables": 0,
+        "pictures": 1
+      },
+      {
+        "number": 17,
+        "title": "EMPREENDIMENTOS VERTICAIS LANÇADOS POR PADRÃO",
+        "kind": "analytical",
+        "charts": 1,
+        "tables": 0,
+        "pictures": 1
+      },
+      {
+        "number": 18,
+        "title": "EMPREENDIMENTOS VERTICAIS LANÇADOSACUMULADO 12 MESES",
+        "kind": "analytical",
+        "charts": 1,
+        "tables": 1,
+        "pictures": 1
+      },
+      {
+        "number": 19,
+        "title": "UNIDADES VERTICAIS LANÇADAS",
+        "kind": "analytical",
+        "charts": 1,
+        "tables": 1,
+        "pictures": 1
+      },
+      {
+        "number": 20,
+        "title": "UNIDADES VERTICAIS LANÇADASACUMULADO 12 MESES",
+        "kind": "analytical",
+        "charts": 1,
+        "tables": 1,
+        "pictures": 1
+      },
+      {
+        "number": 21,
+        "title": "UNIDADES VERTICAIS LANÇADAS POR PADRÃO",
+        "kind": "analytical",
+        "charts": 1,
+        "tables": 0,
+        "pictures": 1
+      },
+      {
+        "number": 22,
+        "title": "UNIDADES VERTICAIS LANÇADAS",
+        "kind": "analytical",
+        "charts": 1,
+        "tables": 0,
+        "pictures": 2
+      },
+      {
+        "number": 23,
+        "title": "UNIDADES VERTICAIS LANÇADAS POR TIPOLOGIA",
+        "kind": "analytical",
+        "charts": 1,
+        "tables": 0,
+        "pictures": 1
+      },
+      {
+        "number": 24,
+        "title": "UNIDADES VERTICAIS LANÇADAS POR PADRÃO",
+        "kind": "analytical",
+        "charts": 1,
+        "tables": 0,
+        "pictures": 1
+      },
+      {
+        "number": 25,
+        "title": "UNIDADES VERTICAIS LANÇADAS POR BAIRRO – MAIO/2026",
+        "kind": "analytical",
+        "charts": 1,
+        "tables": 0,
+        "pictures": 1
+      },
+      {
+        "number": 26,
+        "title": "VGL – VALOR GERAL LANÇADO (em R$ milhões)",
+        "kind": "analytical",
+        "charts": 1,
+        "tables": 1,
+        "pictures": 1
+      },
+      {
+        "number": 27,
+        "title": "VGL (R$ EM MILHÕES)ACUMULADO 12 MESES",
+        "kind": "analytical",
+        "charts": 1,
+        "tables": 1,
+        "pictures": 1
+      },
+      {
+        "number": 28,
+        "title": "VGL (R$ EM MILHÕES) VERTICAL",
+        "kind": "analytical",
+        "charts": 1,
+        "tables": 0,
+        "pictures": 1
+      },
+      {
+        "number": 29,
+        "title": "VENDASVERTICAIS",
+        "kind": "editorial",
+        "charts": 0,
+        "tables": 0,
+        "pictures": 2
+      },
+      {
+        "number": 30,
+        "title": "UNIDADES VERTICAIS VENDIDAS",
+        "kind": "analytical",
+        "charts": 1,
+        "tables": 1,
+        "pictures": 1
+      },
+      {
+        "number": 31,
+        "title": "UNIDADES VERTICAIS VENDIDAS ACUMULADO 12 MESES",
+        "kind": "analytical",
+        "charts": 1,
+        "tables": 1,
+        "pictures": 1
+      },
+      {
+        "number": 32,
+        "title": "UNIDADES VERTICAIS VENDIDAS",
+        "kind": "analytical",
+        "charts": 1,
+        "tables": 0,
+        "pictures": 1
+      },
+      {
+        "number": 33,
+        "title": "UNIDADES VERTICAIS VENDIDAS",
+        "kind": "analytical",
+        "charts": 1,
+        "tables": 1,
+        "pictures": 2
+      },
+      {
+        "number": 34,
+        "title": "UNIDADES VERTICAIS VENDIDAS POR TIPOLOGIA",
+        "kind": "analytical",
+        "charts": 1,
+        "tables": 0,
+        "pictures": 1
+      },
+      {
+        "number": 35,
+        "title": "UNIDADES VERTICAIS VENDIDAS POR PADRÃO",
+        "kind": "analytical",
+        "charts": 1,
+        "tables": 0,
+        "pictures": 1
+      },
+      {
+        "number": 36,
+        "title": "UNIDADES VERTICAIS VENDIDAS POR BAIRROS (MACEIÓ) E POR CIDADES – MAIO 2026",
+        "kind": "analytical",
+        "charts": 2,
+        "tables": 0,
+        "pictures": 1
+      },
+      {
+        "number": 37,
+        "title": "VGV – VALOR GERAL VENDIDO (em R$ milhões)",
+        "kind": "analytical",
+        "charts": 1,
+        "tables": 1,
+        "pictures": 1
+      },
+      {
+        "number": 38,
+        "title": "VGV (em R$ milhões)ACUMULADO 12 MESES",
+        "kind": "analytical",
+        "charts": 1,
+        "tables": 1,
+        "pictures": 1
+      },
+      {
+        "number": 39,
+        "title": "OFERTA",
+        "kind": "editorial",
+        "charts": 0,
+        "tables": 0,
+        "pictures": 2
+      },
+      {
+        "number": 40,
+        "title": "OFERTA FINAL VERTICAL",
+        "kind": "analytical",
+        "charts": 1,
+        "tables": 1,
+        "pictures": 1
+      },
+      {
+        "number": 41,
+        "title": "TEMPO DE ESCOAMENTO DO ESTOQUE EM MESES",
+        "kind": "analytical",
+        "charts": 1,
+        "tables": 0,
+        "pictures": 1
+      },
+      {
+        "number": 42,
+        "title": "OFERTA FINAL POR TIPOLOGIA",
+        "kind": "analytical",
+        "charts": 1,
+        "tables": 0,
+        "pictures": 1
+      },
+      {
+        "number": 43,
+        "title": "OFERTA FINAL POR PADRÃO",
+        "kind": "analytical",
+        "charts": 1,
+        "tables": 0,
+        "pictures": 1
+      },
+      {
+        "number": 44,
+        "title": "ÍNDICE DE VELOCIDADE DE VENDAS | IVV",
+        "kind": "editorial",
+        "charts": 0,
+        "tables": 0,
+        "pictures": 2
+      },
+      {
+        "number": 45,
+        "title": "IVV (%) MACEIÓ",
+        "kind": "analytical",
+        "charts": 1,
+        "tables": 0,
+        "pictures": 1
+      },
+      {
+        "number": 46,
+        "title": "ÍNDICE DE VELOCIDADE DE VENDAS LÍQUIDAS",
+        "kind": "analytical",
+        "charts": 0,
+        "tables": 0,
+        "pictures": 2
+      },
+      {
+        "number": 47,
+        "title": "IVV POR ÁREA ÚTIL EM m² VERTICAL Maio 2026",
+        "kind": "analytical",
+        "charts": 0,
+        "tables": 0,
+        "pictures": 2
+      },
+      {
+        "number": 48,
+        "title": "IVV POR ÁREA ÚTIL EM m² VERTICAL Acumulado 12 meses",
+        "kind": "analytical",
+        "charts": 0,
+        "tables": 0,
+        "pictures": 2
+      },
+      {
+        "number": 49,
+        "title": "EVOLUÇÃO DOS PREÇOS",
+        "kind": "editorial",
+        "charts": 0,
+        "tables": 0,
+        "pictures": 2
+      },
+      {
+        "number": 50,
+        "title": "EVOLUÇÃO DOS PREÇOS – R$/M² VERTICAL MACEIÓ",
+        "kind": "analytical",
+        "charts": 1,
+        "tables": 0,
+        "pictures": 1
+      },
+      {
+        "number": 51,
+        "title": "EVOLUÇÃO DOS PREÇOS – R$/M² VERTICAL MACEIÓ",
+        "kind": "analytical",
+        "charts": 1,
+        "tables": 0,
+        "pictures": 1
+      },
+      {
+        "number": 52,
+        "title": "EVOLUÇÃO DOS PREÇOS – R$/M² VERTICAL MACEIÓ",
+        "kind": "analytical",
+        "charts": 1,
+        "tables": 0,
+        "pictures": 1
+      },
+      {
+        "number": 53,
+        "title": "EVOLUÇÃO DOS PREÇOS – R$/M² VERTICAL MACEIÓ",
+        "kind": "analytical",
+        "charts": 1,
+        "tables": 0,
+        "pictures": 1
+      },
+      {
+        "number": 54,
+        "title": "EVOLUÇÃO DOS PREÇOS – R$/M² VERTICAL MACEIÓ",
+        "kind": "analytical",
+        "charts": 1,
+        "tables": 0,
+        "pictures": 1
+      },
+      {
+        "number": 55,
+        "title": "PREÇOS POR TIPOLOGIA E PADRÃO",
+        "kind": "editorial",
+        "charts": 0,
+        "tables": 0,
+        "pictures": 2
+      },
+      {
+        "number": 56,
+        "title": "TICKET MÉDIO POR PADRÃO RESIDENCIAL MACEIÓ E REGIÃO METROPOLITANA (R$ Mil)",
+        "kind": "analytical",
+        "charts": 1,
+        "tables": 0,
+        "pictures": 1
+      },
+      {
+        "number": 57,
+        "title": "PREÇO MÉDIO M²/PRIVATIVO POR PADRÃO RESIDENCIAL",
+        "kind": "analytical",
+        "charts": 1,
+        "tables": 0,
+        "pictures": 1
+      },
+      {
+        "number": 58,
+        "title": "PREÇO MÉDIO M²/PRIVATIVO POR PADRÃO",
+        "kind": "analytical",
+        "charts": 1,
+        "tables": 0,
+        "pictures": 1
+      },
+      {
+        "number": 59,
+        "title": "TICKET MÉDIO POR TIPOLOGIA (R$ Mil)",
+        "kind": "analytical",
+        "charts": 1,
+        "tables": 0,
+        "pictures": 1
+      },
+      {
+        "number": 60,
+        "title": "PREÇO MÉDIO M²/PRIVATIVO POR TIPOLOGIA",
+        "kind": "analytical",
+        "charts": 1,
+        "tables": 0,
+        "pictures": 1
+      },
+      {
+        "number": 61,
+        "title": "ESTADO ATUAL DO MERCADO RESIDENCIAL VERTICAL",
+        "kind": "editorial",
+        "charts": 0,
+        "tables": 0,
+        "pictures": 2
+      },
+      {
+        "number": 62,
+        "title": "OFERTA FINAL POR ANO DE LANÇAMENTO",
+        "kind": "analytical",
+        "charts": 0,
+        "tables": 1,
+        "pictures": 1
+      },
+      {
+        "number": 63,
+        "title": "OFERTA FINAL POR PADRÃO",
+        "kind": "analytical",
+        "charts": 0,
+        "tables": 1,
+        "pictures": 1
+      },
+      {
+        "number": 64,
+        "title": "OFERTA FINAL POR TIPOLOGIA",
+        "kind": "analytical",
+        "charts": 0,
+        "tables": 1,
+        "pictures": 1
+      },
+      {
+        "number": 65,
+        "title": "OFERTA FINAL POR TIPOLOGIA E METRAGEM",
+        "kind": "analytical",
+        "charts": 0,
+        "tables": 1,
+        "pictures": 1
+      },
+      {
+        "number": 66,
+        "title": "MÍNIMO, MÉDIA E MÁXIMO DO PREÇO POR TIPOLOGIA",
+        "kind": "analytical",
+        "charts": 0,
+        "tables": 1,
+        "pictures": 1
+      },
+      {
+        "number": 67,
+        "title": "OFERTA LANÇADA",
+        "kind": "analytical",
+        "charts": 2,
+        "tables": 0,
+        "pictures": 1
+      },
+      {
+        "number": 68,
+        "title": "TEMPO MÉDIO DA OFERTA LANÇADA FINAL POR PADRÃO",
+        "kind": "analytical",
+        "charts": 2,
+        "tables": 0,
+        "pictures": 1
+      },
+      {
+        "number": 69,
+        "title": "VGV OFERTADO E DISPONÍVEL POR PADRÃO",
+        "kind": "analytical",
+        "charts": 0,
+        "tables": 1,
+        "pictures": 1
+      },
+      {
+        "number": 70,
+        "title": "MERCADO HORIZONTAL MACEIÓ",
+        "kind": "editorial",
+        "charts": 0,
+        "tables": 0,
+        "pictures": 2
+      },
+      {
+        "number": 71,
+        "title": "OFERTA LANÇADA E FINAL POR TIPO",
+        "kind": "analytical",
+        "charts": 0,
+        "tables": 0,
+        "pictures": 2
+      },
+      {
+        "number": 72,
+        "title": "OFERTA LANÇADA E FINAL POR ANO DE LANÇAMENTO",
+        "kind": "analytical",
+        "charts": 0,
+        "tables": 0,
+        "pictures": 2
+      },
+      {
+        "number": 73,
+        "title": "PREÇO MÉDIO DO M² PRIVATIVO POR TIPOLOGIA",
+        "kind": "analytical",
+        "charts": 0,
+        "tables": 0,
+        "pictures": 2
+      },
+      {
+        "number": 74,
+        "title": "MERCADO HORIZONTAL RM MACEIÓ",
+        "kind": "editorial",
+        "charts": 0,
+        "tables": 0,
+        "pictures": 2
+      },
+      {
+        "number": 75,
+        "title": "OFERTA LANÇADA E FINAL POR TIPO- RM de MACEIÓ",
+        "kind": "analytical",
+        "charts": 0,
+        "tables": 0,
+        "pictures": 2
+      },
+      {
+        "number": 76,
+        "title": "OFERTA LANÇADA E FINAL POR ANO DE LANÇAMENTO - RM de MACEIÓ",
+        "kind": "analytical",
+        "charts": 0,
+        "tables": 0,
+        "pictures": 2
+      },
+      {
+        "number": 77,
+        "title": "PREÇO MÉDIO DO M² PRIVATIVO POR TIPOLOGIA - RM de MACEIÓ",
+        "kind": "analytical",
+        "charts": 0,
+        "tables": 0,
+        "pictures": 2
+      },
+      {
+        "number": 78,
+        "title": "CONSULTORES DO ESTUDO",
+        "kind": "editorial",
+        "charts": 0,
+        "tables": 0,
+        "pictures": 2
+      },
+      {
+        "number": 79,
+        "title": "EQUIPE TÉCNICA",
+        "kind": "editorial",
+        "charts": 0,
+        "tables": 0,
+        "pictures": 7
+      },
+      {
+        "number": 80,
+        "title": "(sem texto)",
+        "kind": "editorial",
+        "charts": 0,
+        "tables": 0,
+        "pictures": 1
+      },
+      {
+        "number": 81,
+        "title": "(sem texto)",
+        "kind": "editorial",
+        "charts": 0,
+        "tables": 0,
+        "pictures": 1
+      },
+      {
+        "number": 82,
+        "title": "(sem texto)",
+        "kind": "editorial",
+        "charts": 0,
+        "tables": 0,
+        "pictures": 1
+      }
+    ]
+  },
+  {
+    "id": "junho-2t2026-trimestral",
+    "label": "Junho / 2T2026 (trimestral)",
+    "file": "Brain_Panorama_Maceio_Sinduson_AL_06.2026_vApres.pptx",
+    "sourceId": "1ZsPTMbpvsc6U40kYnvQCMbvQUVCgkDrX",
+    "sha256": "351eeed288f1479f792f2848bf955198ad620916ed573034c2a1a0e14f6b4a14",
+    "bytes": 26373126,
+    "widthEmu": "12192000",
+    "heightEmu": "6858000",
+    "slideCount": 87,
+    "chartCount": 48,
+    "slides": [
+      {
+        "number": 1,
+        "title": "(sem texto)",
+        "kind": "editorial",
+        "charts": 0,
+        "tables": 0,
+        "pictures": 1
+      },
+      {
+        "number": 2,
+        "title": "MACEIÓ E REGIÃO METROPOLITANA",
+        "kind": "editorial",
+        "charts": 0,
+        "tables": 0,
+        "pictures": 6
+      },
+      {
+        "number": 3,
+        "title": "(sem texto)",
+        "kind": "editorial",
+        "charts": 0,
+        "tables": 0,
+        "pictures": 1
+      },
+      {
+        "number": 4,
+        "title": "(sem texto)",
+        "kind": "editorial",
+        "charts": 0,
+        "tables": 0,
+        "pictures": 1
+      },
+      {
+        "number": 5,
+        "title": "(sem texto)",
+        "kind": "editorial",
+        "charts": 0,
+        "tables": 0,
+        "pictures": 1
+      },
+      {
+        "number": 6,
+        "title": "SUMÁRIO",
+        "kind": "editorial",
+        "charts": 0,
+        "tables": 0,
+        "pictures": 1
+      },
+      {
+        "number": 7,
+        "title": "MACEIÓ E REGIÃO METROPOLITANA",
+        "kind": "editorial",
+        "charts": 0,
+        "tables": 0,
+        "pictures": 1
+      },
+      {
+        "number": 8,
+        "title": "EMPREGO",
+        "kind": "editorial",
+        "charts": 0,
+        "tables": 0,
+        "pictures": 2
+      },
+      {
+        "number": 9,
+        "title": "SALDO DO EMPREGO FORMAL NO BRASIL | CONSTRUÇÃO CIVIL",
+        "kind": "analytical",
+        "charts": 0,
+        "tables": 0,
+        "pictures": 3
+      },
+      {
+        "number": 10,
+        "title": "DESEMPENHO POR ESTADO | SALDO TOTAL",
+        "kind": "analytical",
+        "charts": 0,
+        "tables": 0,
+        "pictures": 1
+      },
+      {
+        "number": 11,
+        "title": "DESEMPENHO POR ESTADO | SALDO CONSTRUÇÃO CIVIL",
+        "kind": "analytical",
+        "charts": 0,
+        "tables": 0,
+        "pictures": 1
+      },
+      {
+        "number": 12,
+        "title": "SALDO DO EMPREGO FORMAL EM ALAGOAS | CONSTRUÇÃO CIVIL",
+        "kind": "analytical",
+        "charts": 0,
+        "tables": 0,
+        "pictures": 2
+      },
+      {
+        "number": 13,
+        "title": "SALDO POR SETOR DE ATIVIDADE | ALAGOAS",
+        "kind": "analytical",
+        "charts": 0,
+        "tables": 0,
+        "pictures": 1
+      },
+      {
+        "number": 14,
+        "title": "DESEMPENHO POR ESTADOS | REGIÃO NORDESTE",
+        "kind": "analytical",
+        "charts": 0,
+        "tables": 0,
+        "pictures": 1
+      },
+      {
+        "number": 15,
+        "title": "LANÇAMENTOSVERTICAIS",
+        "kind": "editorial",
+        "charts": 0,
+        "tables": 0,
+        "pictures": 2
+      },
+      {
+        "number": 16,
+        "title": "EMPREENDIMENTOS VERTICAIS LANÇADOS",
+        "kind": "analytical",
+        "charts": 2,
+        "tables": 1,
+        "pictures": 1
+      },
+      {
+        "number": 17,
+        "title": "EMPREENDIMENTOS VERTICAIS LANÇADOS POR PADRÃO",
+        "kind": "analytical",
+        "charts": 1,
+        "tables": 0,
+        "pictures": 1
+      },
+      {
+        "number": 18,
+        "title": "EMPREENDIMENTOS VERTICAIS LANÇADOSACUMULADO 12 MESES",
+        "kind": "analytical",
+        "charts": 1,
+        "tables": 1,
+        "pictures": 1
+      },
+      {
+        "number": 19,
+        "title": "UNIDADES VERTICAIS LANÇADAS",
+        "kind": "analytical",
+        "charts": 2,
+        "tables": 1,
+        "pictures": 1
+      },
+      {
+        "number": 20,
+        "title": "UNIDADES VERTICAIS LANÇADASACUMULADO 12 MESES",
+        "kind": "analytical",
+        "charts": 1,
+        "tables": 1,
+        "pictures": 1
+      },
+      {
+        "number": 21,
+        "title": "PARTICIPAÇÃO DAS UNIDADES VERTICAIS LANÇADAS POR PADRÃO",
+        "kind": "analytical",
+        "charts": 1,
+        "tables": 0,
+        "pictures": 1
+      },
+      {
+        "number": 22,
+        "title": "UNIDADES VERTICAIS LANÇADAS",
+        "kind": "analytical",
+        "charts": 2,
+        "tables": 1,
+        "pictures": 2
+      },
+      {
+        "number": 23,
+        "title": "PARTICIPAÇÃO DAS UNIDADES VERTICAIS LANÇADAS POR TIPOLOGIA",
+        "kind": "analytical",
+        "charts": 1,
+        "tables": 0,
+        "pictures": 1
+      },
+      {
+        "number": 24,
+        "title": "PARTICIPAÇÃO DAS UNIDADES VERTICAIS LANÇADAS POR PADRÃO",
+        "kind": "analytical",
+        "charts": 1,
+        "tables": 0,
+        "pictures": 1
+      },
+      {
+        "number": 25,
+        "title": "RAKING DE LANÇAMENTOS POR BAIRRO – 2T 2026",
+        "kind": "analytical",
+        "charts": 1,
+        "tables": 0,
+        "pictures": 1
+      },
+      {
+        "number": 26,
+        "title": "VGL – VALOR GERAL LANÇADO (em R$ milhões)",
+        "kind": "analytical",
+        "charts": 2,
+        "tables": 1,
+        "pictures": 1
+      },
+      {
+        "number": 27,
+        "title": "VGL (em R$ milhões) ACUMULADO 12 MESES",
+        "kind": "analytical",
+        "charts": 1,
+        "tables": 1,
+        "pictures": 2
+      },
+      {
+        "number": 28,
+        "title": "VGL (R$ EM MILHÕES) VERTICAL",
+        "kind": "analytical",
+        "charts": 1,
+        "tables": 0,
+        "pictures": 1
+      },
+      {
+        "number": 29,
+        "title": "VENDASVERTICAIS",
+        "kind": "editorial",
+        "charts": 0,
+        "tables": 0,
+        "pictures": 2
+      },
+      {
+        "number": 30,
+        "title": "UNIDADES VERTICAIS VENDIDAS",
+        "kind": "analytical",
+        "charts": 2,
+        "tables": 1,
+        "pictures": 1
+      },
+      {
+        "number": 31,
+        "title": "UNIDADES VERTICAIS VENDIDAS ACUMULADO 12 MESES",
+        "kind": "analytical",
+        "charts": 1,
+        "tables": 1,
+        "pictures": 1
+      },
+      {
+        "number": 32,
+        "title": "PARTICIPAÇÃO DAS UNIDADES VENDIDAS POR PADRÃO",
+        "kind": "analytical",
+        "charts": 1,
+        "tables": 0,
+        "pictures": 1
+      },
+      {
+        "number": 33,
+        "title": "UNIDADES VERTICAIS VENDIDAS",
+        "kind": "analytical",
+        "charts": 2,
+        "tables": 1,
+        "pictures": 2
+      },
+      {
+        "number": 34,
+        "title": "PARTICIPAÇÃO DAS UNIDADES VERTICAIS VENDIDAS POR TIPOLOGIA",
+        "kind": "analytical",
+        "charts": 1,
+        "tables": 0,
+        "pictures": 1
+      },
+      {
+        "number": 35,
+        "title": "PARTICIPAÇÃO DAS UNIDADES VERTICAIS VENDIDAS POR PADRÃO",
+        "kind": "analytical",
+        "charts": 1,
+        "tables": 0,
+        "pictures": 1
+      },
+      {
+        "number": 36,
+        "title": "RANKING DE VENDAS POR BAIRRO (MACEIÓ) E POR CIDADE | 2T2026",
+        "kind": "analytical",
+        "charts": 2,
+        "tables": 0,
+        "pictures": 1
+      },
+      {
+        "number": 37,
+        "title": "VGV – VALOR GERAL VENDIDO (em R$ milhões)",
+        "kind": "analytical",
+        "charts": 2,
+        "tables": 1,
+        "pictures": 2
+      },
+      {
+        "number": 38,
+        "title": "VGV (em R$ milhões) ACUMULADO 12 MESES",
+        "kind": "analytical",
+        "charts": 1,
+        "tables": 1,
+        "pictures": 2
+      },
+      {
+        "number": 39,
+        "title": "OFERTA",
+        "kind": "editorial",
+        "charts": 0,
+        "tables": 0,
+        "pictures": 2
+      },
+      {
+        "number": 40,
+        "title": "OFERTA FINAL VERTICAL",
+        "kind": "analytical",
+        "charts": 1,
+        "tables": 1,
+        "pictures": 1
+      },
+      {
+        "number": 41,
+        "title": "OFERTA FINAL POR TIPOLOGIA",
+        "kind": "analytical",
+        "charts": 1,
+        "tables": 0,
+        "pictures": 1
+      },
+      {
+        "number": 42,
+        "title": "OFERTA FINAL POR PADRÃO",
+        "kind": "analytical",
+        "charts": 1,
+        "tables": 0,
+        "pictures": 1
+      },
+      {
+        "number": 43,
+        "title": "VSO / IVV",
+        "kind": "editorial",
+        "charts": 0,
+        "tables": 0,
+        "pictures": 2
+      },
+      {
+        "number": 44,
+        "title": "IVV (%) MACEIÓ",
+        "kind": "analytical",
+        "charts": 1,
+        "tables": 0,
+        "pictures": 1
+      },
+      {
+        "number": 45,
+        "title": "ÍNDICE DE VELOCIDADE DE VENDAS LÍQUIDAS",
+        "kind": "analytical",
+        "charts": 0,
+        "tables": 0,
+        "pictures": 2
+      },
+      {
+        "number": 46,
+        "title": "IVV POR ÁREA ÚTIL EM m² VERTICAL Junho 2026",
+        "kind": "analytical",
+        "charts": 0,
+        "tables": 0,
+        "pictures": 2
+      },
+      {
+        "number": 47,
+        "title": "IVV POR ÁREA ÚTIL EM m² VERTICAL Acumulado 12 meses",
+        "kind": "analytical",
+        "charts": 0,
+        "tables": 0,
+        "pictures": 2
+      },
+      {
+        "number": 48,
+        "title": "EVOLUÇÃO DOS PREÇOS",
+        "kind": "editorial",
+        "charts": 0,
+        "tables": 0,
+        "pictures": 2
+      },
+      {
+        "number": 49,
+        "title": "EVOLUÇÃO DOS PREÇOS – R$/M² VERTICAL MACEIÓ",
+        "kind": "analytical",
+        "charts": 1,
+        "tables": 0,
+        "pictures": 1
+      },
+      {
+        "number": 50,
+        "title": "EVOLUÇÃO DOS PREÇOS – R$/M² VERTICAL MACEIÓ",
+        "kind": "analytical",
+        "charts": 1,
+        "tables": 0,
+        "pictures": 1
+      },
+      {
+        "number": 51,
+        "title": "EVOLUÇÃO DOS PREÇOS – R$/M² VERTICAL MACEIÓ",
+        "kind": "analytical",
+        "charts": 1,
+        "tables": 0,
+        "pictures": 1
+      },
+      {
+        "number": 52,
+        "title": "EVOLUÇÃO DOS PREÇOS – R$/M² VERTICAL MACEIÓ",
+        "kind": "analytical",
+        "charts": 1,
+        "tables": 0,
+        "pictures": 1
+      },
+      {
+        "number": 53,
+        "title": "EVOLUÇÃO DOS PREÇOS – R$/M² VERTICAL MACEIÓ",
+        "kind": "analytical",
+        "charts": 1,
+        "tables": 0,
+        "pictures": 1
+      },
+      {
+        "number": 54,
+        "title": "PREÇOS POR TIPOLOGIA E PADRÃO",
+        "kind": "editorial",
+        "charts": 0,
+        "tables": 0,
+        "pictures": 2
+      },
+      {
+        "number": 55,
+        "title": "TICKET MÉDIO POR PADRÃO RESIDENCIAL MACEIÓ E REGIÃO METROPOLITANA (R$ Mil)",
+        "kind": "analytical",
+        "charts": 1,
+        "tables": 0,
+        "pictures": 1
+      },
+      {
+        "number": 56,
+        "title": "PREÇO MÉDIO M²/PRIVATIVO POR PADRÃO RESIDENCIAL",
+        "kind": "analytical",
+        "charts": 1,
+        "tables": 0,
+        "pictures": 1
+      },
+      {
+        "number": 57,
+        "title": "PREÇO MÉDIO M²/PRIVATIVO POR PADRÃO",
+        "kind": "analytical",
+        "charts": 1,
+        "tables": 0,
+        "pictures": 1
+      },
+      {
+        "number": 58,
+        "title": "TICKET MÉDIO POR TIPOLOGIA (R$ Mil)",
+        "kind": "analytical",
+        "charts": 1,
+        "tables": 0,
+        "pictures": 1
+      },
+      {
+        "number": 59,
+        "title": "PREÇO MÉDIO M²/PRIVATIVO POR TIPOLOGIA",
+        "kind": "analytical",
+        "charts": 1,
+        "tables": 0,
+        "pictures": 1
+      },
+      {
+        "number": 60,
+        "title": "ESTADO ATUAL DO MERCADO RESIDENCIAL VERTICAL",
+        "kind": "editorial",
+        "charts": 0,
+        "tables": 0,
+        "pictures": 2
+      },
+      {
+        "number": 61,
+        "title": "OFERTA FINAL POR ANO DE LANÇAMENTO",
+        "kind": "analytical",
+        "charts": 0,
+        "tables": 1,
+        "pictures": 1
+      },
+      {
+        "number": 62,
+        "title": "OFERTA FINAL POR PADRÃO",
+        "kind": "analytical",
+        "charts": 0,
+        "tables": 1,
+        "pictures": 1
+      },
+      {
+        "number": 63,
+        "title": "OFERTA FINAL POR PADRÃO",
+        "kind": "analytical",
+        "charts": 0,
+        "tables": 1,
+        "pictures": 1
+      },
+      {
+        "number": 64,
+        "title": "OFERTA FINAL POR TIPOLOGIA",
+        "kind": "analytical",
+        "charts": 0,
+        "tables": 1,
+        "pictures": 1
+      },
+      {
+        "number": 65,
+        "title": "OFERTA FINAL POR TIPOLOGIA",
+        "kind": "analytical",
+        "charts": 0,
+        "tables": 1,
+        "pictures": 1
+      },
+      {
+        "number": 66,
+        "title": "OFERTA FINAL POR TIPOLOGIA E METRAGEM",
+        "kind": "analytical",
+        "charts": 0,
+        "tables": 1,
+        "pictures": 1
+      },
+      {
+        "number": 67,
+        "title": "MÍNIMO, MÉDIA E MÁXIMO DO PREÇO POR TIPOLOGIA",
+        "kind": "analytical",
+        "charts": 0,
+        "tables": 1,
+        "pictures": 1
+      },
+      {
+        "number": 68,
+        "title": "OFERTA LANÇADA",
+        "kind": "analytical",
+        "charts": 2,
+        "tables": 0,
+        "pictures": 1
+      },
+      {
+        "number": 69,
+        "title": "TEMPO MÉDIO DA OFERTA LANÇADA FINAL POR PADRÃO",
+        "kind": "analytical",
+        "charts": 2,
+        "tables": 0,
+        "pictures": 1
+      },
+      {
+        "number": 70,
+        "title": "VGV OFERTADO E DISPONÍVEL POR PADRÃO",
+        "kind": "analytical",
+        "charts": 0,
+        "tables": 1,
+        "pictures": 1
+      },
+      {
+        "number": 71,
+        "title": "MERCADO HORIZONTAL MACEIÓ",
+        "kind": "editorial",
+        "charts": 0,
+        "tables": 0,
+        "pictures": 2
+      },
+      {
+        "number": 72,
+        "title": "OFERTA LANÇADA E FINAL POR TIPO",
+        "kind": "analytical",
+        "charts": 0,
+        "tables": 0,
+        "pictures": 2
+      },
+      {
+        "number": 73,
+        "title": "OFERTA LANÇADA E FINAL POR ANO DE LANÇAMENTO",
+        "kind": "analytical",
+        "charts": 0,
+        "tables": 0,
+        "pictures": 2
+      },
+      {
+        "number": 74,
+        "title": "PREÇO MÉDIO DO M² PRIVATIVO POR TIPOLOGIA",
+        "kind": "analytical",
+        "charts": 0,
+        "tables": 0,
+        "pictures": 2
+      },
+      {
+        "number": 75,
+        "title": "MERCADO HORIZONTAL RM MACEIÓ",
+        "kind": "editorial",
+        "charts": 0,
+        "tables": 0,
+        "pictures": 2
+      },
+      {
+        "number": 76,
+        "title": "OFERTA LANÇADA E FINAL POR TIPO- RM de MACEIÓ",
+        "kind": "analytical",
+        "charts": 0,
+        "tables": 0,
+        "pictures": 2
+      },
+      {
+        "number": 77,
+        "title": "OFERTA LANÇADA E FINAL POR ANO DE LANÇAMENTO - RM de MACEIÓ",
+        "kind": "analytical",
+        "charts": 0,
+        "tables": 0,
+        "pictures": 2
+      },
+      {
+        "number": 78,
+        "title": "PREÇO MÉDIO DO M² PRIVATIVO POR TIPOLOGIA - RM de MACEIÓ",
+        "kind": "analytical",
+        "charts": 0,
+        "tables": 0,
+        "pictures": 2
+      },
+      {
+        "number": 79,
+        "title": "MERCADO VERTICAL COMERCIAL MACEIÓ",
+        "kind": "editorial",
+        "charts": 0,
+        "tables": 0,
+        "pictures": 2
+      },
+      {
+        "number": 80,
+        "title": "OFERTA LANÇADA E FINAL POR PADRÃOMACEIÓ",
+        "kind": "analytical",
+        "charts": 0,
+        "tables": 0,
+        "pictures": 2
+      },
+      {
+        "number": 81,
+        "title": "OFERTA LANÇADA E FINAL POR ANA DE LANÇAMENTOMACEIÓ",
+        "kind": "analytical",
+        "charts": 0,
+        "tables": 0,
+        "pictures": 2
+      },
+      {
+        "number": 82,
+        "title": "PREÇO MÉDIO POR PADRÃOMACEIÓ",
+        "kind": "analytical",
+        "charts": 0,
+        "tables": 0,
+        "pictures": 2
+      },
+      {
+        "number": 83,
+        "title": "CONSULTORES DO ESTUDO",
+        "kind": "editorial",
+        "charts": 0,
+        "tables": 0,
+        "pictures": 2
+      },
+      {
+        "number": 84,
+        "title": "EQUIPE TÉCNICA",
+        "kind": "editorial",
+        "charts": 0,
+        "tables": 0,
+        "pictures": 6
+      },
+      {
+        "number": 85,
+        "title": "(sem texto)",
+        "kind": "editorial",
+        "charts": 0,
+        "tables": 0,
+        "pictures": 1
+      },
+      {
+        "number": 86,
+        "title": "(sem texto)",
+        "kind": "editorial",
+        "charts": 0,
+        "tables": 0,
+        "pictures": 1
+      },
+      {
+        "number": 87,
+        "title": "(sem texto)",
+        "kind": "editorial",
+        "charts": 0,
+        "tables": 0,
+        "pictures": 1
+      }
+    ]
+  }
+]
