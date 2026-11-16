@@ -3,6 +3,7 @@ import { introMonth } from './intro-view';
 import type { FortalezaSelection } from './model';
 import type { MonthlyBin, MonthlySlideData } from './monthly-market';
 import layouts from './assets/monthly/layout.json';
+import { FortalezaAnalysisHeading } from './FortalezaAnalysisHeading';
 import './intro-slides.css';
 const artwork = import.meta.glob('./assets/monthly/*.png', { eager:true, import:'default', query:'?url' }) as Record<string,string>;
 const colors = ['#1B4059','#42CCA2'];
@@ -47,10 +48,13 @@ export function Rolling({ data }: { data: NonNullable<MonthlySlideData['rolling'
 }
 export default function FortalezaMonthlyMarketSlide({ page,selection,cities,data }: { page:number; selection:FortalezaSelection; cities:string[]; data:MonthlySlideData | null }) {
   const divider = [18,21,29,32].includes(page);
+  const lotsTitle:Record<number,string[]>={19:['UNIDADES LANÇADAS POR MÊS –','LOTEAMENTOS'],20:['VGL POR MÊS (EM MILHÕES) –','LOTEAMENTOS'],30:['UNIDADES VENDIDAS POR MÊS –','LOTEAMENTOS'],31:['VGV POR MÊS (EM MILHÕES) –','LOTEAMENTOS']};
+  const heading=lotsTitle[page];
   const scope = layouts.find(layout => layout.page === page)?.scope;
   const money = data?.unit === 'milhões';
   return <svg className="fortaleza-intro-slide block aspect-video h-auto w-full" viewBox="0 0 1280 720" role="img" aria-label={`Fortaleza · slide ${page}`}>
-    <FortalezaArtwork href={artwork[`./assets/monthly/${page}.png`]} kind="monthly" page={page}/>
+    <FortalezaArtwork href={artwork[`./assets/monthly/${page}.png`]} kind="monthly" page={page} omitText={Boolean(heading)}/>
+    {heading&&<FortalezaAnalysisHeading lines={heading} scope="Fortaleza e Região Metropolitana"/>}
     {divider ? <>
       {scope && <text x={scope.x + scope.width} y={scope.y + 30} textAnchor="end" fill="white" fontSize={cities.join(', ').length > 70 ? 20 : 25}>{cities.length ? cities.join(', ') : 'Selecione o recorte autorizado'}</text>}
       <text x={1180} y={scope ? Math.max(365,scope.y + scope.height + 36) : 400} textAnchor="end" fill="white" fontSize={18}>{introMonth(selection.position)} de {selection.year}</text>

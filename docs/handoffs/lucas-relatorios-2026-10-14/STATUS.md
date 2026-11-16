@@ -1,5 +1,9 @@
 # Estado do handoff
 
+## 16/11/2026 — Mensal: cabeçalhos30/45/46
+
+Lucas/Codex. Base `fe4ea18d`, main limpa na abertura, origin único, fetch0/0. Corrigido cabeçalho do slide30 e relacionados19/20/31 de loteamentos com o componente compartilhado. IVV45/46 já corrigido na base, confirmado na nova exportação. Dados e fórmulas preservados. 301testes/24arquivos e240verificações visuais sem erros; PPTX/PDF60baixados, slides30/45/46 renderizados e inspecionados no PowerPoint. Ensaio local com replay municipal e cadastro/históricos detalhados sintéticos, sem coleta autenticada. Anexos recebidos não regravados: atualização da página e nova exportação necessárias. Homologação metodológica com o analista. Sem escrita Monday.
+
 ## 16/11/2026 — Comparação dos PPTX reais e títulos
 
 Lucas/Codex. Base `60413d5c`, main limpa/atualizada na abertura desta revisão, origin único. Trimestral2T2026 real e mensalagosto reais recebidos de Lucas; referênciasjunho/2T2026 e julho/2026 com hashes conferidos. Extração completa dos quatro PPTX e abertura somente em leitura no PowerPoint, sem alteração dos arquivos. [Comparação dos dados e limites](../../features/relatorios-institucionais/fortaleza/COMPARACAO_REFERENCIAS_2026-11-16.md): lançamentos mensais de julho coincidem; VGV lançado coincide na mesma base INCC. Diferenças de preço/m², estoque, casas e padrões precisam ser conciliadas pelo analista; Lucas conduz implementação pela Inovação, sem atribuição de homologação.

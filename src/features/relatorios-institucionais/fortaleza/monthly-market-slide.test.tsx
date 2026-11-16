@@ -8,6 +8,14 @@ import { FORTALEZA_CITIES } from './model';
 afterEach(cleanup);
 const cities = [...FORTALEZA_CITIES];
 describe('Fortaleza — prévia mensal12/14 e16–25', () => {
+  it.each([19,20,30,31])('cabeçalho de loteamentos %s mantém título e recorte fora da régua antiga',page=>{
+    const data=buildMonthlySlide(page,monthlyMarketFixture(),selection,cities);
+    const {container}=render(<FortalezaMonthlyMarketSlide page={page} selection={selection} cities={cities} data={data}/>);
+    expect(container.querySelectorAll('[data-fortaleza-analysis-title] tspan')).toHaveLength(2);
+    expect(screen.getByText('LOTEAMENTOS')).toBeTruthy();
+    expect(container.querySelector('[data-fortaleza-header-rule-mask]')?.getAttribute('y')).toBe('90');
+    expect(container.querySelectorAll('[data-fortaleza-analysis-scope]')).toHaveLength(1);
+  });
   it.each([12,14,16,17,19,20,22,23,24,25])('slide %s renderiza dados próprios e mantém geometria16:9', page => {
     const data = buildMonthlySlide(page,monthlyMarketFixture(),selection,cities);
     expect(data.status).toBe('ready');

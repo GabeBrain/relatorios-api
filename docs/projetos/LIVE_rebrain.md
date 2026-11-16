@@ -562,6 +562,13 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-11-16 — Fortaleza mensal: cabeçalhos de loteamentos e conferência do IVV — Lucas/Codex
+
+- **Correção:** slide30 e blocos relacionados19/20/31 reutilizam `FortalezaAnalysisHeading`, separando título/recorte da régua verde e preservando a tag roxa. Sem alteração de dados ou fórmulas. Slides45/46 já corrigidos na base `fe4ea18d`, reconferidos nesta rodada.
+- **Validação:** 301 testes/24 arquivos, 240 verificações visuais mensais sem erros e download PPTX/PDF com60páginas. Slides30/45/46 do novo PPTX renderizados e inspecionados no PowerPoint; ensaio com agregados de replay e cadastro/históricos detalhados sintéticos, sem coleta autenticada.
+- **Etapa/pendência:** correção visual concluída no gerador; atualizar a página e exportar novamente para aplicar ao arquivo. Conciliação metodológica segue com o analista. Anexos de Lucas preservados.
+- **Monday:** [Estudo Fortaleza](https://brain381753.monday.com/boards/18398638577/pulses/13149406420) — `13149406420`. Sem escrita Monday.
+
 ### 2026-11-16 — Fortaleza: comparação dos PPTX reais e cabeçalhos sem sobreposição — Lucas/Codex
 
 - **Ambiente/funcionalidade:** Rebrain, relatórios Fortaleza mensal e trimestral; Lucas conduz implementação pela Inovação, homologação com o analista.
@@ -1755,6 +1762,8 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 
 ## 2. Etapas
 
+- **16/11 — Fortaleza mensal, complemento:** cabeçalhos19/20/30/31 corrigidos;45/46 confirmados no PPTX novo, com301testes e240verificações visuais aprovados. Sem mudança numérica.
+
 - **16/11 — Fortaleza, dados e visual:** comparação de PPTX reais entregue e títulos mapas/IVV corrigidos. Lançamentos/VGV mensal têm conciliação no período comum; preços, estoque, casas e padrões permanecem em revisão pelo analista.
 
 - **16/11 — Fortaleza 2T2026:** causa das 64 pendências reproduzida e corrigida no fluxo de coleta; fontes independentes e diagnóstico com cobertura explícita. A revisão de 13/11 não comprovou disponibilidade real; próxima evidência é o JSON de nova geração com 45 fontes municipais/10 detalhadas.
@@ -1896,6 +1905,8 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 ---
 
 ## 3. Pendências
+
+- **16/11 — Fortaleza mensal, complemento:** atualizar a página após publicação e exportar novamente para receber os cabeçalhos corrigidos; conciliação dos dados continua com o analista.
 
 - **16/11 — Fortaleza, comparação:** analista confirma fotografia/base, ponderação de preço/m², universo de casas, rótulos de padrão e intenção dos totais dos quadros originais. Regenerar os arquivos para aplicar o cabeçalho corrigido; mapas seguem esquemáticos.
 

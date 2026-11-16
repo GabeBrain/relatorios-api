@@ -58,6 +58,8 @@ As próprias referências têm diferenças retrospectivas: o preço/m² de junho
 
 ## Cabeçalhos corrigidos no gerador
 
+Complemento mensal solicitado por Lucas: slide30 e blocos de loteamentos19/20/31 agora usam o mesmo cabeçalho compartilhado, sem cruzar régua ou tag. IVV45/46 reconferido no novo PPTX. 301testes/24arquivos, 240verificações mensais e17verificações de exportação aprovados; PPTX/PDF60baixados e slides30/45/46 renderizados e inspecionados no PowerPoint. Ensaio usa replay municipal e cadastro/históricos detalhados sintéticos, sem nova consulta autenticada. Os arquivos recebidos permanecem intactos; a correção exige nova exportação no sistema atualizado.
+
 Pedido de Lucas: 49/54 sobre a régua verde e 49–53 invadindo a tag roxa. Correção aplicada aos mapas 49–53/71 e IVV trimestral54/72; o mesmo padrão cobre IVV mensal45/46.
 
 - Títulos em duas linhas, 30 pt, inteiramente antes de x1000; a tag começa em x1028.

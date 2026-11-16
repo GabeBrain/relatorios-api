@@ -21,12 +21,12 @@ try{
     await page.getByRole('button',{name:String(count),exact:true}).waitFor();await page.evaluate(async dark=>{document.documentElement.classList.toggle('dark',dark);await document.fonts.ready;},dark);
     assert.ok(await page.getByRole('button',{name:'Baixar PPTX de conferência',exact:true}).isEnabled());
     const names=[];
-    for(const number of process.argv.includes('--export')?(quarterly?[42,54,59,68,75,83]:[2,3,4,5,6,7,10,45,47,52]):Array.from({length:count},(_,index)=>index+1)){
+    for(const number of process.argv.includes('--export')?(quarterly?[42,54,59,68,75,83]:[2,3,4,5,6,7,10,19,20,30,31,45,46,47,52]):Array.from({length:count},(_,index)=>index+1)){
       await page.getByRole('button',{name:String(number),exact:true}).click();const slide=page.locator(`[data-editable-slide="${number}"] > svg[role="img"]`);await slide.waitFor();
       await slide.locator('image').evaluateAll(async nodes=>{await Promise.all(nodes.map(node=>new Promise((resolve,reject)=>{const image=new Image();image.onload=resolve;image.onerror=reject;image.src=node.getAttribute('href');if(image.complete&&image.naturalWidth)resolve();})));});
       await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
       const content=await slide.textContent();assert.ok(!content.includes('Aguardando conferência da fonte'));assert.ok(!content.includes('NaN'));
-      if(quarterly?[49,50,51,52,53,54,71,72].includes(number):[45,46].includes(number)){
+      if(quarterly?[49,50,51,52,53,54,71,72].includes(number):[19,20,30,31,45,46].includes(number)){
         const safe=await slide.evaluate(svg=>{
           const frame=svg.getBoundingClientRect(),title=svg.querySelector('[data-fortaleza-analysis-title]').getBoundingClientRect(),scope=svg.querySelector('[data-fortaleza-analysis-scope]').getBoundingClientRect(),mask=svg.querySelector('[data-fortaleza-header-rule-mask]');
           return (title.right-frame.left)*1280/frame.width<1000&&scope.top>title.bottom&&Number(mask.getAttribute('y'))===90;
