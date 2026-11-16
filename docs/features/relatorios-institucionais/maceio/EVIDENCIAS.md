@@ -48,6 +48,32 @@ escopo real do token, claro/escuro, mobile) — sem sessão autenticada do Geobr
 headless adotado: asserções sobre o blueprint e o escopo no vitest; a varredura visual parametrizada
 (padrão `scripts/diagnostics/fortaleza-*-visual.mjs`) entra quando houver conteúdo de páginas a verificar.
 
+## 16/11/2026 — Bloco 3: núcleo municipal vertical (sessão Claude)
+
+**Implementado:** `market.ts` (reconciliação do balanço oferta anterior + lançamentos − vendas = oferta final,
+por padrão e total, preservando vendas negativas e sem transformar ausência em zero), `api.ts`
+(`collectMaceioMarket`: amostra de recorte, três fontes `temporal-analysis-city/{releases,sales,stock}` por
+município com paginação curta validada, guardas de competência/universo, retry por cidade preservando
+sucessos do mesmo recorte), `useMaceioMarket.ts` (etapas validar → fontes → balanços → prévia, cancelamento,
+invalidação por token/escopo/período, fonte reprovada reconsultada no retry — nunca congelada no cache),
+`MaceioGenerationPanel`/`MaceioMarketPanel` e ligação na página ("Gerar prévia vertical").
+
+**Validações executadas:**
+
+- 42 testes do módulo Maceió (modelo, mercado, API com request injetado e hook), incluindo: conjunto mensal
+  exige os 7 municípios com Coqueiro Seco; links de paginação não mudam host/escopo; 401 sem repetição de
+  credenciais e sem vazamento de corpo/erro da fonte; 429 com Retry-After; cancelamento sem resultado parcial;
+  retry refaz fonte recebida mas reprovada; relatório serializado nunca contém o token.
+- `tsc --noEmit` e `eslint` exit 0; `npm run build` exit 0 (chunk lazy 51,87 kB).
+- Regressão `relatorios-institucionais` + `panorama-secovi-fiergs`: 1181/1186 aprovados (2 pulados).
+  As 3 falhas são timeouts de 5s **pré-existentes** nesta máquina: `sp/market-details.test.tsx` (passa isolado)
+  e 2 casos de `panorama-secovi-fiergs/__tests__/free-scopes-selection.test.tsx`, que falham também isolados
+  com `git status` vazio para aquela pasta — ocorrem na base, sem relação com os arquivos desta entrega.
+
+**Não verificado (limite de ambiente):** consulta autenticada real à API Geobrain (sem sessão nesta máquina);
+o fixture injeta as respostas. Uma geração autenticada do recorte AL é necessária antes de qualquer
+afirmação sobre as respostas reais das fontes.
+
 **Limites da verificação da Etapa 1:**
 
 - Extração estrutural não substitui conferência visual: slides achatados como imagem (emprego, IVV líquidas,

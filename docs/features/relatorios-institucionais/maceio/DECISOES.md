@@ -28,6 +28,7 @@ Registro de fatos comprovados, hipóteses e decisões. Atualizado a cada entrega
 | D3 | Acesso somente por rota `/rebrain/relatorios-institucionais/maceio`, sem item em menu/busca/início | Pedido de Lucas em 16/11 | Adotada |
 | D4 | Reutilizar padrão de operação Fortaleza (page/model/blueprint/GeoApiScopeEngine) e exportador nativo compartilhado, sem copiar regras locais de Fortaleza/Secovi/FIERGS | Handoff | Adotada |
 | D5 | Ordem dos slides gerados = ordem exata do original; padrão visual idêntico à arte Maceió | Pedido de Lucas em 16/11 | Adotada (fidelidade visual verificada por bloco na Etapa 3) |
+| D6 | Núcleo de coleta vertical nasce no módulo Maceió (não extraído de Fortaleza nesta sessão): evita regressão nos 672 testes de Fortaleza; extração transversal fica para quando o contrato estiver comprovado em runtime pelos dois consumidores (ou com Recife) | AGENTS.md: extensão transversal exige testes dos consumidores existentes | Adotada |
 
 ### Hipóteses em aberto (não implementar sem comprovação)
 

@@ -9,8 +9,10 @@ Plano de implantação original: [IMPLANTACAO_CLAUDE.md](IMPLANTACAO_CLAUDE.md).
 originais ([MAPA_SLIDES.md](MAPA_SLIDES.md), [EVIDENCIAS.md](EVIDENCIAS.md)).
 **Etapa 2 (estrutura e rota) concluída em 16/11** — domínio `src/features/relatorios-institucionais/maceio/`
 com manifesto nas posições originais (82/87), rota oculta `/rebrain/relatorios-institucionais/maceio`
-(somente rota, sem menu) e escopo validado integralmente pelo GeoApiScopeEngine. Próximo: contrato de
-fontes (bloco 3).
+(somente rota, sem menu) e escopo validado integralmente pelo GeoApiScopeEngine.
+**Bloco 3 (núcleo municipal vertical) concluído em 16/11** — coleta por município de lançamentos/vendas/oferta
+com reconciliação de balanço, retry por cidade, painéis e prévia estrutural ligada à consulta. Falta geração
+autenticada real. Próximo: fontes complementares (CAGED, VGL/VGV + INCC, preços, IVV) e composições por bloco.
 
 ## Decisões vigentes
 
@@ -23,9 +25,10 @@ sem menu/busca/início; ordem e padrão visual idênticos ao original.
 1. ~~Inventário OOXML e documentos de contrato~~ — feito 16/11.
 2. ~~Estrutura e rota~~ (`model.ts`, `references.json`, página com GeoApiScopeEngine, blueprint local,
    abas de estrutura/referências/metodologia; sem coleta de dados) — feito 16/11.
-3. **Contrato de fontes**: mapear endpoints reais por indicador na MATRIZ_INDICADORES (consultando
-   adaptadores de Fortaleza como referência de paginação/guardas, sem copiar regras locais), com coleta
-   independente por fonte (núcleo reprovado não bloqueia as demais — lição das 64 pendências de Fortaleza).
+3. ~~Núcleo municipal vertical~~ (coleta releases/sales/stock por município, balanço, retry, painéis) —
+   feito 16/11; geração autenticada real pendente. As demais fontes (CAGED, INCC, preços, IVV, cadastro,
+   históricos longos) entram como consultas independentes: núcleo reprovado não bloqueia as demais —
+   lição das 64 pendências de Fortaleza.
 4. **Blocos de composição mensal**, na ordem original: capa/sumário/cidades (1–7) → emprego (8–14, fonte
    CAGED externa, com pendência clara quando ausente) → lançamentos (15–28) → vendas (29–38) → oferta (39–43)
    → IVV (44–48) → preços (49–60) → estado atual (61–69) → horizontal (70–77) → consultores/fechamento (78–82).

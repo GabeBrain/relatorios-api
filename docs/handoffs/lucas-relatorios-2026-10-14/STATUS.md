@@ -1,5 +1,9 @@
 # Estado do handoff
 
+## 16/11/2026 — Maceió: núcleo vertical (bloco 3) com Claude
+
+Mesma sessão das Etapas 1–2. Coleta municipal vertical (releases/sales/stock) com balanço, retry por cidade e painéis, ligada à rota oculta. 42 testes do módulo com request injetado; tipos/lint/build limpos; regressão relatórios+FIERGS 1181/1186 com 3 timeouts pré-existentes (FIERGS falha na base, pasta sem diff). Sem geração autenticada real; fixture não é coleta. Commits locais sem push.
+
 ## 16/11/2026 — Maceió: Etapas 1 e 2 com Claude
 
 Lucas/Claude. Base `90304aa7` (local, à frente do origin desde a abertura), main, árvore limpa, origin único. Hashes dos dois originais conferidos contra o manifesto; extração OOXML na ordem real comprovou maio = mensal (82) e junho = trimestral 2T2026 (87), recorte 7/6 municípios por edição. Documentos de contrato em `docs/features/relatorios-institucionais/maceio/` (PLAN/MAPA_SLIDES/MATRIZ/DECISOES/EVIDENCIAS). Estrutura implantada em `src/features/relatorios-institucionais/maceio/` com rota oculta `/rebrain/relatorios-institucionais/maceio` — somente rota, sem menu/busca/início, por decisão de Lucas na sessão. 16 testes novos, regressão 671/672 (timeout pré-existente de SP sob carga, passa isolado), tipos/lint/build aprovados. Sem coleta autenticada, sem fontes confirmadas, sem exportação; homologação com o analista. Sem escrita Monday. Commits locais sem push até autorização.

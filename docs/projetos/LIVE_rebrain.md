@@ -1,5 +1,13 @@
 # Rebrain (Plataforma) — Documento Vivo
 
+## 16/11/2026 — Maceió/SINDUSCON-AL: núcleo municipal vertical integrado (bloco 3) — Lucas (Inovação), com Claude
+
+- **Feito:** coleta autenticada por município (`api.ts`) das fontes `temporal-analysis-city/releases|sales|stock` com amostra de recorte, paginação curta validada e guardas de competência/universo; reconciliação do balanço por padrão e total (`market.ts`) preservando vendas negativas e sem transformar ausência em zero; hook `useMaceioMarket` com etapas, cancelamento, invalidação por token/escopo/período e retry que reconsulta fontes reprovadas (sem congelar erro em cache); painéis de etapas e de balanço ligados à página, com botão "Gerar prévia vertical". O conjunto mensal exige os 7 municípios (com Coqueiro Seco); o trimestral, 6.
+- **Decisão D6:** o núcleo nasce no módulo Maceió, sem extração transversal de Fortaleza nesta sessão, para não arriscar os 672 testes existentes; extração fica para quando o contrato estiver comprovado em runtime pelos dois consumidores.
+- **Validação:** 42 testes do módulo (API com request injetado: 401/429, paginação hostil, retry preservando sucessos, cancelamento, token nunca serializado); tipos/lint/build limpos (chunk lazy 51,87 kB). Regressão relatórios + Secovi/FIERGS 1181/1186: as 3 falhas são timeouts de 5s pré-existentes nesta máquina (SP passa isolado; FIERGS falha também na base, pasta sem nenhum diff).
+- **Pendências:** geração autenticada real do recorte AL; fontes complementares (CAGED, VGL/VGV+INCC, preços, IVV) e composições por bloco; diagnóstico exportável; exportação PPTX/PDF; homologação do analista.
+- **Monday:** [Panorama Maceió / SINDUSCON](https://brain381753.monday.com/boards/18398638577/pulses/13149406169) — `13149406169`
+
 ## 16/11/2026 — Maceió/SINDUSCON-AL: estrutura e rota oculta (Etapa 2) — Lucas (Inovação), com Claude
 
 - **Feito:** domínio `src/features/relatorios-institucionais/maceio/` com `references.json` gerado do inventário real (82 posições mensais / 87 trimestrais, hashes e drive ids), `model.ts` (recorte por edição — mensal 7 municípios com Coqueiro Seco, trimestral 6 —, validação integral contra o catálogo autorizado, período, blueprint local nas posições originais com progresso/cancelamento) e `MaceioInstitutionalPage.tsx` (seletor de periodicidade/período, GeoApiScopeEngine sem fallback IBGE, `BrainLoadingState`, abas Estrutura/Referências/Metodologia). Rota lazy `/rebrain/relatorios-institucionais/maceio` registrada só em `App.tsx` — **sem item em menu, busca ou início**, por decisão de Lucas.
