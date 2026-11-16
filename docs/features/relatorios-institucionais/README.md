@@ -4,6 +4,8 @@
 
 ## Onde trabalhar
 
+**Maceió — handoff para Claude,16/11:** [plano de implantação](maceio/IMPLANTACAO_CLAUDE.md) e [manifesto das referências](maceio/REFERENCIAS.json). Originais maio82/junho87 baixados e conferidos por tamanho/hash; pacote local na Área de Trabalho de Lucas. Periodicidade de junho, recortes municipais, CAGED/INCC e metodologia precisam de conferência no original. Preparação documental, sem implementação runtime.
+
 **Fortaleza — arquivos reais e referências, 16/11:** [comparação mensal/trimestral e correção dos títulos](fortaleza/COMPARACAO_REFERENCIAS_2026-11-16.md). Mensal agosto comparado a julho no período comum; lançamentos de julho e VGV na mesma base conferem. Preços, estoque, casas e padrões divergem e seguem para o analista. Títulos dos mapas e IVV corrigidos no gerador; valores dos anexos preservados.
 
 **Fortaleza 2T2026 — diagnóstico real, 16/11:** [causa dos 64 bloqueios e correção da coleta](fortaleza/COLETA_TRIMESTRAL_64_SLIDES_2026-11-16.md). O núcleo reprovado pulava os 45 históricos municipais e 10 detalhados; consultas agora independentes, com guardas por fonte preservadas. Regressores reproduzem o resumo real 8/64/17. Nova geração autenticada necessária para conferir as respostas reais das fontes antes não consultadas.

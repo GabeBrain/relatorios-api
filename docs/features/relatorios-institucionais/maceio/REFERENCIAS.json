@@ -1,0 +1,22 @@
+{
+    "downloaded_at":  "2026-11-16",
+    "review":  "Original PPTX downloaded; ZIP slide count and SHA256 verified. No visual or methodological review in this handoff.",
+    "files":  [
+                  {
+                      "name":  "5.2026_Panorama_Maceio_Sinduscon_AL_VAP_01jul_16h05.pptx",
+                      "drive_id":  "1cEve8fIEYPWTHwNzVr2G0MeZHNYMAijh",
+                      "url":  "https://drive.google.com/file/d/1cEve8fIEYPWTHwNzVr2G0MeZHNYMAijh/view",
+                      "size_bytes":  27375769,
+                      "sha256":  "1ec1cd87364c56fae9d75616f1708e4ed89b8e3f9fb66167e4e31a439111c6c9",
+                      "slide_count_ooxml":  82
+                  },
+                  {
+                      "name":  "Brain_Panorama_Maceio_Sinduson_AL_06.2026_vApres.pptx",
+                      "drive_id":  "1ZsPTMbpvsc6U40kYnvQCMbvQUVCgkDrX",
+                      "url":  "https://drive.google.com/file/d/1ZsPTMbpvsc6U40kYnvQCMbvQUVCgkDrX/view",
+                      "size_bytes":  26373126,
+                      "sha256":  "351eeed288f1479f792f2848bf955198ad620916ed573034c2a1a0e14f6b4a14",
+                      "slide_count_ooxml":  87
+                  }
+              ]
+}

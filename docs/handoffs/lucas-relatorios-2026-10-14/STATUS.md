@@ -1,5 +1,9 @@
 # Estado do handoff
 
+## 16/11/2026 — Próximo modelo: Maceió com Claude
+
+Lucas pediu plano MD e pasta de referências na Área de Trabalho. [Implantação Maceió](../../features/relatorios-institucionais/maceio/IMPLANTACAO_CLAUDE.md) e manifesto versionados; originais Drive maio82/junho87baixados e conferidos por tamanho/SHA256/ZIP, sem revisão visual ou metodológica. Base `0317ff32`, main limpa, origin único, fetch0/0. Sem implementação de Maceió ou coleta Geobrain nesta sessão; Claude deve começar por inventário/periodicidade/recorte e matriz de fontes. Coqueiro Seco/CAGED/INCC destacados; homologação do analista. Sem escrita no Monday de Maceió.
+
 ## 16/11/2026 — Fortaleza liberado na navegação
 
 Lucas/Codex, pedido explícito para liberar acesso via menu. Base `49d1b593`, main limpa, origin único, fetch0/0. Incluído `Sinduscon — Fortaleza` no grupo de Relatórios Automatizados, busca rápida e página inicial, reutilizando os componentes existentes e a rota lazy mensal/trimestral. Autenticação e geração preservadas. Sete testes de layout/autenticação, tipos e lint aprovados; Edge headless confirmou os três acessos em1440/390px e claro/escuro. Sem coleta autenticada ou confirmação do deploy; homologação dos dados segue com o analista. Sem escrita Monday. Publicação segue autorização de push já concedida na sessão.

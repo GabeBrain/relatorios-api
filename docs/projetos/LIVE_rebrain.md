@@ -562,6 +562,14 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-11-16 — Maceió: pacote de implantação para Claude — Lucas/Codex
+
+- **Pedido:** preparar MD e pasta de referências na Área de Trabalho para implantação pelo Claude, próximo modelo após Fortaleza.
+- **Entrega:** [plano](../features/relatorios-institucionais/maceio/IMPLANTACAO_CLAUDE.md), [manifesto](../features/relatorios-institucionais/maceio/REFERENCIAS.json), índices e handoff atualizados. Dois originais Drive baixados, tamanhos e SHA256 conferidos; ZIPs íntegros com82slides emmaio e87emjunho. Sem revisão visual/metodológica nesta preparação.
+- **Contrato:** inventário e matriz antes de ampliar indicadores, fontes independentes, GeoApiScopeEngine, BrainLoadingState, exportação nativa e diagnóstico; diferenças Coqueiro Seco/CAGED/INCC explícitas. Homologação com analista, não Lucas.
+- **Ambiente:** base `0317ff32`, main limpa, origin único atualizado0/0 na abertura; nenhuma implementação Maceió ou alteração dos motores existentes.
+- **Monday:** [Panorama Maceió / SINDUSCON](https://brain381753.monday.com/boards/18398638577/pulses/13149406169) — `13149406169`. Sem escrita neste card.
+
 ### 2026-11-16 — Fortaleza: acesso pelos menus e início — Lucas/Codex
 
 - **Pedido/alteração:** liberar acesso ao relatório já existente. Entrada `Sinduscon — Fortaleza` em Rebrain → Relatórios Automatizados, busca rápida (Ctrl+K) e card na jornada de relatórios da página inicial; mesma rota mensal/trimestral, sem alterar autenticação ou regras de geração.
@@ -1769,6 +1777,8 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 
 ## 2. Etapas
 
+- **16/11 — Maceió:** pacote de referência e plano para Claude preparados; implantação runtime ainda não iniciada. Originais82/87conferidos estruturalmente, revisão de conteúdo pendente.
+
 - **16/11 — Fortaleza, acesso:** mensal/trimestral disponíveis pelo menu Rebrain → Relatórios Automatizados, pela busca e pelo início; navegação local verificada em desktop/celular e claro/escuro.
 
 - **16/11 — Fortaleza mensal, complemento:** cabeçalhos19/20/30/31 corrigidos;45/46 confirmados no PPTX novo, com301testes e240verificações visuais aprovados. Sem mudança numérica.
@@ -1914,6 +1924,8 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 ---
 
 ## 3. Pendências
+
+- **16/11 — Maceió:** Claude inventaria os dois originais, confirma periodicidade/municípios e mapeia dados, CAGED/INCC e fórmulas antes da integração; analista homologa conteúdo. Plano completo no handoff Maceió.
 
 - **16/11 — Fortaleza, acesso:** confirmar atualização do menu no ambiente publicado. A visibilidade do atalho não altera as pendências metodológicas a cargo do analista.
 
