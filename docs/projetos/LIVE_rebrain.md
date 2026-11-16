@@ -562,6 +562,17 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-11-16 — Fortaleza: 64 pendências causadas por históricos não consultados — Lucas/Codex
+
+- **Ambiente/funcionalidade:** Rebrain, trimestral Fortaleza/SINDUSCON 2T2026; hook compartilhado com mensal.
+- **Evidência:** diagnóstico real de Lucas, 09h04, SHA `d8f5ef6b…`: 8 disponíveis/64 pendentes/17 editoriais, cadastro concluído, cinco núcleos consultados e zero históricos municipais/detalhados. Aquiraz, Caucaia e Maracanaú reprovados por diferença de padrões.
+- **Correção:** retirar a dependência global de `report.metrics` para consultar cadastro/históricos e organizar páginas. Guardas de cada fonte e avisos do núcleo preservados; JSON registra fontes esperadas, consultadas e concluídas. Não preenche lacunas nem aprova os totais reprovados.
+- **Validação:** 289 testes/24 arquivos; reprodução exata das 64 pendências e caso com fonte realmente ausente. Página real com rede interceptada: 45+10 fontes trimestrais coletadas e avisos mantidos; mensal40+10, carregamento Brain, seis cenários de coleta/recuperação aprovados. Zero pendências somente nas fixtures completas.
+- **Arquivos/evidências:** `useFortalezaMarket.ts`, diagnóstico, fixture sanitizada e [investigação completa](../features/relatorios-institucionais/fortaleza/COLETA_TRIMESTRAL_64_SLIDES_2026-11-16.md).
+- **Commits:** base `36981733`, entrega identificada por `fix(fortaleza): collect histories independently of core balance`.
+- **Monday:** [Estudo Fortaleza](https://brain381753.monday.com/boards/18398638577/pulses/13149406420) — `13149406420`.
+- **Impacto em Etapas/Pendências:** corrigido o bloqueio de coleta identificado no diagnóstico; precisa nova geração real 2T2026 para observar as 55 respostas antes puladas. Navegador conectado indisponível nesta sessão; geração autenticada/deploy/homologação não confirmados. Sem escrita Monday.
+
 ### 2026-11-13 — Fortaleza mensal/trimestral: recuperação, IVV e conferência dos arquivos — Lucas/Codex
 
 - **Ambiente/funcionalidade:** Rebrain, relatórios Fortaleza/SINDUSCON mensal60 e trimestral89.
@@ -1733,6 +1744,8 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 
 ## 2. Etapas
 
+- **16/11 — Fortaleza 2T2026:** causa das 64 pendências reproduzida e corrigida no fluxo de coleta; fontes independentes e diagnóstico com cobertura explícita. A revisão de 13/11 não comprovou disponibilidade real; próxima evidência é o JSON de nova geração com 45 fontes municipais/10 detalhadas.
+
 - **13/11 — Fortaleza mensal/trimestral:** revisão adicional validada com 287 testes, 604 cenários visuais, recuperação simulada e downloads reais locais; envio autorizado. Aceite com dados reais permanece pendente.
 
 - **13/11 ? Fortaleza trimestral:** revisão local de cobertura por tipologia, rastreabilidade e cabeçalhos concluída; [evidência](../features/relatorios-institucionais/fortaleza/REVISAO_TRIMESTRAL_2026-11-13.md). Homologação real pendente.
@@ -1870,6 +1883,8 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 ---
 
 ## 3. Pendências
+
+- **16/11 — Fortaleza 2T2026:** após disponibilizar a correção, gerar novamente e conferir as respostas das 55 fontes antes não consultadas. Resolver eventuais falhas reais pelo novo diagnóstico, sem converter ausências em zero; avisos do balanço inicial e homologação continuam separados.
 
 - **13/11 — Fortaleza mensal/trimestral:** após publicação autorizada, gerar relatório/JSON reais pareados, conferir cobertura e homologar métodos/equipe/amostra histórica. Downloads60/89 e recuperação não são mais pendências de implementação; confirmação de deploy e validação autenticada seguem abertas.
 

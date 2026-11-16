@@ -1,10 +1,11 @@
 import {chromium} from '@playwright/test';
 import {spawn} from 'node:child_process';
-import {mkdir,writeFile} from 'node:fs/promises';
+import {mkdir,writeFile,readFile} from 'node:fs/promises';
 import {resolve} from 'node:path';
 import assert from 'node:assert/strict';
 
-const folder=resolve('.local-inputs/relatorios-lucas/fortaleza/review-2026-11-13/recovery');
+const skippedSources=process.argv.includes('--skipped-sources');
+const folder=resolve(`.local-inputs/relatorios-lucas/fortaleza/${skippedSources?'skipped-sources-2026-11-16':'review-2026-11-13/recovery'}`);
 await mkdir(folder,{recursive:true});
 const base='http://127.0.0.1:4193',cities=['Fortaleza','Aquiraz','Caucaia','Eusébio','Maracanaú'];
 const server=spawn(process.execPath,[resolve('scripts/diagnostics/report-preview-server.mjs'),'4193'],{windowsHide:true,stdio:'ignore'});
@@ -14,8 +15,8 @@ try{
   let ready=false;
   for(let i=0;i<80&&!ready;i++){try{ready=(await fetch(base)).ok;}catch{}if(!ready)await new Promise(done=>setTimeout(done,250));}
   assert.ok(ready);browser=await chromium.launch({channel:'msedge',headless:true});
-  for(const quarterly of [false,true])for(const fault of ['core','intro']){
-    const width=fault==='core'?1440:390,kind=quarterly?'trimestral':'mensal';
+  for(const quarterly of [false,true])for(const fault of skippedSources?['sparse-core']:['core','intro']){
+    const width=fault==='core'||skippedSources&&!quarterly?1440:390,kind=quarterly?'trimestral':'mensal';
     const context=await browser.newContext({viewport:{width,height:1000}});
     await context.addInitScript(()=>localStorage.setItem('brain-auth',JSON.stringify({state:{token:'synthetic-recovery-only',email:'fixture@example.invalid',issuedAt:Date.now(),expiresAt:Date.now()+3600000},version:0})));
     let broken=true,slow=true;const calls=[];
@@ -37,7 +38,7 @@ try{
       if(metric==='building-with-history-internal'){
         const months=Array.from({length:quarterly?27:13},(_,i)=>new Date(Date.UTC(2026,6-(quarterly?27:13)+i,1)).toISOString().slice(0,7));
         const products=type==='Vertical'?['Standard']:['Condomínio de Casas','Loteamento Fechado','Loteamento Aberto'];
-        const data=products.map((standard,i)=>({building_id:`${city}/${type}/${i}`,city,state:'CE',building_type:type,standard,release_date:'2020-01-01',neighborhood:'Bairro sintético',typologies:[{id:i+1,type_of_typology:'Padrão'}],typologies_history:months.map(month=>({period:`${month}-01`,typology_id:i+1,qty:100,typology_stock:10,sold_in_period:1,number_bedroom:2,private_area:50,price:100000,price_private_area:2000}))}));
+        const data=products.map((standard,i)=>({building_id:`${city}/${type}/${i}`,city,state:'CE',building_type:type,standard,release_date:'2020-01-01',neighborhood:'Bairro sintético',latitude:-3.6-cities.indexOf(city)*.02,longitude:-38.6+i*.01,typologies:[{id:i+1,type_of_typology:'Padrão'}],typologies_history:months.map(month=>({period:`${month}-01`,typology_id:i+1,qty:100,typology_stock:10,sold_in_period:1,number_bedroom:2,private_area:50,price:100000,price_private_area:2000}))}));
         return reply({data,meta:{total:data.length,current_page:1,last_page:1}});
       }
       assert.ok(['releases','sales','stock'].includes(metric));
@@ -46,7 +47,7 @@ try{
       call.short=months.length<10;
       const groups=type==='Horizontal'?['Condomínio de Casas','Loteamento Fechado','Loteamento Aberto']:['Standard'];
       const field=metric==='stock'?'stock':metric==='sales'?'liquid_sales':'releases_in_period';
-      const rows=months.flatMap(month=>groups.map(group=>({city,state:'CE',building_type:type,group,period:`${month}-01`,[field]:broken&&fault==='core'&&city==='Aquiraz'&&metric==='sales'&&months.length<10?null:metric==='stock'?100:1,vgv_release:100000,vgv_liquid_sales:100000})));
+      const rows=months.flatMap(month=>groups.map(group=>({city,state:'CE',building_type:type,group:fault==='sparse-core'&&months.length<10&&metric==='sales'&&['Aquiraz','Caucaia','Maracanaú'].includes(city)&&month===months[0]?'Econômico':group,period:`${month}-01`,[field]:broken&&fault==='core'&&city==='Aquiraz'&&metric==='sales'&&months.length<10?null:metric==='stock'?100:1,vgv_release:100000,vgv_liquid_sales:100000})));
       return reply({data:rows,meta:{total:rows.length,current_page:1,last_page:1},links:{next:null}});
     });
     const page=await context.newPage();page.on('pageerror',error=>errors.push(error.message));
@@ -63,6 +64,23 @@ try{
     await loading.screenshot({path:resolve(folder,`${kind}-${fault}-loading.png`)});
     const retry=page.getByRole('button',{name:'Tentar cidades faltantes',exact:true});await retry.waitFor({timeout:60000});
     assert.ok(await generate.isEnabled());
+    if(skippedSources){
+      const [download]=await Promise.all([page.waitForEvent('download'),page.getByRole('button',{name:'Baixar diagnóstico JSON',exact:true}).click()]);
+      const path=resolve(folder,`${kind}-diagnostic.json`);await download.saveAs(path);const diagnostic=JSON.parse(await readFile(path,'utf8'));
+      assert.equal(diagnostic.collection.core,'incomplete');assert.equal(diagnostic.sources.municipal.length,quarterly?45:40);assert.equal(diagnostic.sources.detailed.length,10);
+      assert.equal(diagnostic.summary['source-pending'],0);assert.equal(diagnostic.slides.length,quarterly?89:60);
+      assert.equal(diagnostic.warnings.filter(issue=>issue.includes('Os padrões cobertos diferem')).length,3);
+      const captured=calls.length;
+      for(const number of quarterly?[12,42,54,68,83]:[12,37,45,52]){
+        await page.getByRole('navigation',{name:'Slides implementados',exact:true}).getByRole('button',{name:String(number),exact:true}).click();
+        const slide=page.locator(`[data-editable-slide="${number}"] > svg[role="img"]`);
+        assert.ok(!(await slide.textContent()).includes('Aguardando conferência'));
+        await slide.screenshot({path:resolve(folder,`${kind}-${number}.png`)});
+      }
+      assert.equal(calls.length,captured);assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1),false);
+      results.push({kind,fault,width,municipal:diagnostic.sources.municipal.length,detailed:diagnostic.sources.detailed.length,summary:diagnostic.summary,core:diagnostic.collection.core,brainLoading:true,externalRequests:'intercepted'});
+      await context.close();continue;
+    }
     const before=calls.length;broken=false;
     await retry.click();
     await page.waitForFunction(label=>![...document.querySelectorAll('button')].find(button=>button.textContent===label)?.disabled,quarterly?'Gerar prévia vertical':'Gerar prévia mensal');

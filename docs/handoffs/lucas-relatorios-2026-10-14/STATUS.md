@@ -1,5 +1,11 @@
 # Estado do handoff
 
+## 16/11/2026 — Diagnóstico real trimestral: 64 slides aguardando fonte
+
+Lucas/Codex. Main limpa na abertura; origin único; fetch mostrou dois commits remotos, incorporados por fast-forward até `36981733` (Corretor/Slide Maker, sem alterações Fortaleza). Diagnóstico recebido do usuário registra8/64/17 e zero históricos municipais/detalhados: `report.metrics` nulo pulava as55consultas. Correção desacopla os históricos do núcleo, preservando todas as guardas e avisos. [Causa, evidência e limites](../../features/relatorios-institucionais/fortaleza/COLETA_TRIMESTRAL_64_SLIDES_2026-11-16.md).
+
+289testes e seis cenários Edge com API interceptada aprovados; tipos/lint/build conferidos no fechamento. Navegador conectado indisponível (pipe nativo e browser host ausentes), sem nova coleta autenticada. Arquivo bruto do usuário preservado; cópia em `.local-inputs`, fixture versionada somente com agregados/avisos/hash. Nova geração real2T2026 necessária para observar45fontes municipais+10detalhadas. Sem escrita Monday, credenciais ou mudanças nos outros projetos.
+
 ## 13/11/2026 — Push autorizado e segunda revisão dos dois relatórios
 
 Lucas autorizou integrar/enviar a revisão e aprofundar mensal/trimestral. `44febf82` enviado após merge `b203bee9` com os dois commits remotos, preservando os logs. Base desta rodada: `b203bee9`, origin único, fetch final 0 atrás/0 à frente antes do novo commit. 287 testes, tipos, lint e build aprovados; 604 cenários visuais e quatro cenários de recuperação na página real com API interceptada; downloads locais PPTX/PDF 60/89 conferidos. [Correções e evidências](../../features/relatorios-institucionais/fortaleza/REVISAO_TRIMESTRAL_2026-11-13.md). Sem sessão autenticada Geobrain confirmada ou coleta real; homologação e confirmação do deploy pendentes. Sem escrita Monday. Autorização de push desta sessão permanece aplicável à revisão solicitada.

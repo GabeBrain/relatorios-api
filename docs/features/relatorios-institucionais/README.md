@@ -4,6 +4,8 @@
 
 ## Onde trabalhar
 
+**Fortaleza 2T2026 — diagnóstico real, 16/11:** [causa dos 64 bloqueios e correção da coleta](fortaleza/COLETA_TRIMESTRAL_64_SLIDES_2026-11-16.md). O núcleo reprovado pulava os 45 históricos municipais e 10 detalhados; consultas agora independentes, com guardas por fonte preservadas. Regressores reproduzem o resumo real 8/64/17. Nova geração autenticada necessária para conferir as respostas reais das fontes antes não consultadas.
+
 **Fortaleza mensal/trimestral — revisão geral, 13/11:** [correções, fontes e limites](fortaleza/REVISAO_TRIMESTRAL_2026-11-13.md). Histórico parcial por tipologia bloqueia preços; fontes reprovadas são consultadas novamente. Cabeçalhos mensais/trimestrais e referência zero do IVV corrigidos. 287 testes, 604 cenários visuais, quatro cenários de recuperação e downloads PPTX/PDF 60/89 conferidos. Primeira revisão enviada por autorização de Lucas; geração autenticada e homologação continuam pendentes.
 
 **SP — revisão do analista,11/11:** [correções, comparação dos artefatos e retomada](sp/CORRECOES_ANALISTA_2026-11-11.md). Tahoma nativo, sumário30pt, trimestre no subtítulo, Top10 percentual e fotos/exportação revisados localmente. Escoamento adiado por Lucas; preços/histórico dependem de conciliação de método e base, sem travar os demais ajustes. Sem publicação deste lote.
