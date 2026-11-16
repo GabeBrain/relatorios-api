@@ -562,6 +562,13 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-11-16 — Fortaleza: acesso pelos menus e início — Lucas/Codex
+
+- **Pedido/alteração:** liberar acesso ao relatório já existente. Entrada `Sinduscon — Fortaleza` em Rebrain → Relatórios Automatizados, busca rápida (Ctrl+K) e card na jornada de relatórios da página inicial; mesma rota mensal/trimestral, sem alterar autenticação ou regras de geração.
+- **Padrão/validação:** reutilizados NavLink, CommandItem e ToolCard existentes. Sete testes de layout/autenticação, TypeScript e ESLint aprovados; Edge headless confirmou card, clique no menu, pesquisa e destino em1440/390px, claro/escuro, sem erros de página. Estado sem token preservado; não houve geração autenticada ou confirmação do deploy.
+- **Base:** `49d1b593`, origin único atualizado0/0, main limpa na abertura. Liberação solicitada por Lucas nesta sessão; publicação segue a autorização de push já concedida.
+- **Monday:** [Estudo Fortaleza](https://brain381753.monday.com/boards/18398638577/pulses/13149406420) — `13149406420`. Sem escrita Monday.
+
 ### 2026-11-16 — Fortaleza mensal: cabeçalhos de loteamentos e conferência do IVV — Lucas/Codex
 
 - **Correção:** slide30 e blocos relacionados19/20/31 reutilizam `FortalezaAnalysisHeading`, separando título/recorte da régua verde e preservando a tag roxa. Sem alteração de dados ou fórmulas. Slides45/46 já corrigidos na base `fe4ea18d`, reconferidos nesta rodada.
@@ -1762,6 +1769,8 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 
 ## 2. Etapas
 
+- **16/11 — Fortaleza, acesso:** mensal/trimestral disponíveis pelo menu Rebrain → Relatórios Automatizados, pela busca e pelo início; navegação local verificada em desktop/celular e claro/escuro.
+
 - **16/11 — Fortaleza mensal, complemento:** cabeçalhos19/20/30/31 corrigidos;45/46 confirmados no PPTX novo, com301testes e240verificações visuais aprovados. Sem mudança numérica.
 
 - **16/11 — Fortaleza, dados e visual:** comparação de PPTX reais entregue e títulos mapas/IVV corrigidos. Lançamentos/VGV mensal têm conciliação no período comum; preços, estoque, casas e padrões permanecem em revisão pelo analista.
@@ -1905,6 +1914,8 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 ---
 
 ## 3. Pendências
+
+- **16/11 — Fortaleza, acesso:** confirmar atualização do menu no ambiente publicado. A visibilidade do atalho não altera as pendências metodológicas a cargo do analista.
 
 - **16/11 — Fortaleza mensal, complemento:** atualizar a página após publicação e exportar novamente para receber os cabeçalhos corrigidos; conciliação dos dados continua com o analista.
 
