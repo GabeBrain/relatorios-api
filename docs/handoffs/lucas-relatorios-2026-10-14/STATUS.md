@@ -1,5 +1,9 @@
 # Estado do handoff
 
+## 16/11/2026 — Encerramento e retomada em17/11
+
+Lucas pediu enviar o estado atual e retomar amanhã. `41ca0f53` e `6f380d8c` já publicados em `origin/main`; fetch final confirmou0/0. Incluído sem alterações o `maceio/ARTE.md` preparado anteriormente por Claude, até então não versionado; renderizações locais82/87e hashes dos originais conferidos. Código até40validado com58testes,320casos de lâminas+8cenários de página, tipos/lint/build. Próximo bloco41–60, na sequência/arte original; rota ainda oculta e exportação posterior. CAGED adiado por Lucas: aproveitar futuramente a infraestrutura BigQuery de Empregados, cuja fonte atual é RAIS anual e não substitui os saldos mensais CAGED. Acesso direto do agente ao BigQuery não configurado/testado. Métodos/INCC e homologação com analista; sem ensaio autenticado ou deploy confirmado. Sem escrita Monday.
+
 ## 16/11/2026 — Maceió: continuação21–40
 
 Lucas determinou adiar CAGED e continuar a implantação; informou BigQuery do setor já conectado ao Rebrain. Base `41ca0f53`, origin único0/0 após fetch, main; `ARTE.md` anterior preservado sem staging. [Entrega](../../features/relatorios-institucionais/maceio/SLIDES_21_40_2026-11-16.md): navegação1–40na arte original, fontes por padrão/tipologia/histórico independentes, MCMV22/33específico, rankings com reconciliação, escolha explícita de INCC-DI para VGL/VGV e estoque no fechamento.58testes, tipos/lint/build,320casos de lâminas e8cenários na página real com API interceptada. Sem geração autenticada, consulta BigQuery ou homologação. CAGED e definição metodológica seguem separados da continuação41–60; exportação posterior. Nenhuma escrita Monday.

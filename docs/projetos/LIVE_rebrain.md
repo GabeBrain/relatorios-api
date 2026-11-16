@@ -587,6 +587,13 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-11-16 — Maceió: fechamento para retomada em17/11 — Lucas/Codex
+
+- **Estado:** implementação1–40publicada em `41ca0f53`/`6f380d8c`;58testes,320verificações de lâminas e8de página, tipos/lint/build aprovados. Sem geração autenticada/homologação/deploy confirmado.
+- **Documentação:** incorporado sem reescrita o [ARTE.md](../features/relatorios-institucionais/maceio/ARTE.md), autoria original Claude; renders locais82/87e hashes originais conferidos. Handoff atualizado a pedido de Lucas, sem alteração de produto nesta entrega.
+- **Retomada:**41–60na ordem e identidade visual originais. CAGED segue adiado; RAIS de Empregados fornece estrutura BigQuery reutilizável, mas os indicadores mensais precisam de fonte CAGED própria. Acesso direto do agente ainda não configurado. Exportação posterior; revisão metodológica/INCC com o analista.
+- **Monday:** [Panorama Maceió / SINDUSCON](https://brain381753.monday.com/boards/18398638577/pulses/13149406169) — `13149406169`. Sem escrita.
+
 ### 2026-11-16 — Maceió: slides21–40 e CAGED adiado — Lucas/Codex
 
 - **Pedido/entrega:** Lucas informou BigQuery do setor já conectado ao Rebrain, adiou CAGED e pediu continuidade. Prévia mensal/trimestral agora navega1–40na ordem/arte dos originais; lançamentos por padrão/tipologia/bairro, MCMV22/33, VGL/VGV, vendas e oferta final. [Contrato e limites](../features/relatorios-institucionais/maceio/SLIDES_21_40_2026-11-16.md).
