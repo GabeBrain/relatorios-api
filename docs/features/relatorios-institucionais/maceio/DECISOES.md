@@ -1,0 +1,46 @@
+# Decisões — Panorama Maceió / SINDUSCON-AL
+
+Registro de fatos comprovados, hipóteses e decisões. Atualizado a cada entrega.
+
+## 16/11/2026 — inventário inicial
+
+### Fatos comprovados (extração OOXML dos originais)
+
+- **Maio/2026 é a edição mensal** (82 slides): séries de 25 meses, rankings "MAIO/2026", IVV mensal.
+- **Junho/2026 é a edição trimestral 2T2026** (87 slides): séries de 17 trimestres (2T/22–2T/26),
+  acumulado semestral 1S25 vs 1S26, rankings "2T 2026", participações 2T/2025 vs 2T/2026.
+- Recorte: mensal lista 7 municípios (com Coqueiro Seco); trimestral lista 6 (sem Coqueiro Seco).
+- A edição trimestral tem bloco exclusivo **mercado vertical comercial Maceió** (posições 79–82) e separa
+  as tabelas de oferta final Maceió/RM (61–65); a mensal consolida (62–64) e tem slide exclusivo de
+  **tempo de escoamento do estoque** (posição 41).
+- VGL/VGV trazem a nota "Valores atualizados pelo INCC" no original.
+- Vendas RM mensais têm valor negativo no cache (jun/24 = −8): distratos aparecem com sinal.
+- Vários slides analíticos estão achatados como imagem no original (IVV líquidas, IVV por área útil,
+  emprego/CAGED, blocos horizontal e comercial): a composição real exige render; os dados virão de fonte,
+  não da imagem.
+
+### Decisões desta sessão
+
+| # | Decisão | Base | Status |
+|---|---|---|---|
+| D1 | Manifesto com posições originais preservadas: 82 (mensal) e 87 (trimestral), sem renumeração | Handoff + extração | Adotada |
+| D2 | Recorte municipal por edição: mensal = 7 cidades, trimestral = 6; nenhuma união/exclusão automática | Slide 7 de cada original | Adotada |
+| D3 | Acesso somente por rota `/rebrain/relatorios-institucionais/maceio`, sem item em menu/busca/início | Pedido de Lucas em 16/11 | Adotada |
+| D4 | Reutilizar padrão de operação Fortaleza (page/model/blueprint/GeoApiScopeEngine) e exportador nativo compartilhado, sem copiar regras locais de Fortaleza/Secovi/FIERGS | Handoff | Adotada |
+| D5 | Ordem dos slides gerados = ordem exata do original; padrão visual idêntico à arte Maceió | Pedido de Lucas em 16/11 | Adotada (fidelidade visual verificada por bloco na Etapa 3) |
+
+### Hipóteses em aberto (não implementar sem comprovação)
+
+- Fórmulas de IVV, escoamento, tempo médio de oferta e ponderação de preços.
+- Fonte/endpoint de cada indicador (coluna `fonte_endpoint` da matriz está "a confirmar").
+- Natureza das vendas (brutas vs líquidas) por slide.
+- Critério de padrões locais (Compacto…Super Luxo) e eventual faixa econômica.
+
+### Perguntas objetivas ao analista
+
+1. **Coqueiro Seco**: a diferença de recorte entre maio (7 municípios) e junho (6) é mudança de escopo
+   permanente, erro de uma edição, ou recorte distinto por periodicidade? Qual conjunto vale para novas edições?
+2. **INCC**: qual fonte/versão/mês-base é usada na correção de VGL/VGV e do VGV ofertado?
+3. **IVV líquidas** (mensal 46 / trimestral 45): qual a fórmula e por que separada do IVV principal?
+4. **Horizontal**: o bloco cobre casas e loteamentos ou apenas um dos produtos?
+5. **Preço m²**: média simples por unidade em oferta ou ponderada? Qual denominador de área?

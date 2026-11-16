@@ -1,0 +1,32 @@
+# Evidências — Panorama Maceió / SINDUSCON-AL
+
+Comandos, versões, resultados e limites de cada verificação. Nada aqui declara homologação.
+
+## 16/11/2026 — inventário OOXML (sessão Claude)
+
+**Ambiente:** Windows 11, Python 3.14.6, repositório em `main` (base `90304aa7`).
+
+**Integridade dos originais** — `Get-FileHash -Algorithm SHA256` sobre a pasta
+`Referências - Maceió SINDUSCON` da Área de Trabalho:
+
+- `5.2026_Panorama_Maceio_Sinduscon_AL_VAP_01jul_16h05.pptx` → `1ec1cd87364c56fae9d75616f1708e4ed89b8e3f9fb66167e4e31a439111c6c9` (27.375.769 bytes) — **confere** com REFERENCIAS.json.
+- `Brain_Panorama_Maceio_Sinduson_AL_06.2026_vApres.pptx` → `351eeed288f1479f792f2848bf955198ad620916ed573034c2a1a0e14f6b4a14` (26.373.126 bytes) — **confere**.
+
+**Extração** — script Python (stdlib `zipfile` + `ElementTree`, somente leitura) percorrendo
+`ppt/presentation.xml` → `sldIdLst` → relationships, na ordem real de apresentação. Por slide: títulos,
+textos, tabelas (linhas×colunas e células), caches de gráfico (tipos, séries, categorias, valores),
+contagem de imagens e notas. Saída em `.local-inputs/relatorios-lucas/maceio/inventario/{maio_2026,junho_2026}.json`
+(local, não versionado). Resultado: 82 slides (maio) e 87 (junho), ordem idêntica à numeração do MAPA_SLIDES.md.
+Contagem de gráficos embutidos: 42 (maio) e 48 (junho).
+
+**Periodicidade** — comprovada pelos caches: maio com categorias mensais (`mai/24`…`mai/26`, 25 pontos;
+seriais Excel convertidos em datas nos acumulados) e junho com categorias trimestrais (`2T/22`…`2T/26`,
+17 pontos) e semestrais (`1S25`/`1S26`).
+
+**Limites desta verificação:**
+
+- Extração estrutural não substitui conferência visual: slides achatados como imagem (emprego, IVV líquidas,
+  IVV por área útil, horizontal, comercial) ainda precisam de render dos originais para mapear a composição.
+- Nenhuma fonte de dados foi consultada; nenhum valor foi reproduzido; a matriz de indicadores está com
+  `estado_metodologico = Não executado` em todas as linhas.
+- Nenhuma declaração de runtime: a implantação (Etapa 2) ainda não existia no início desta sessão.

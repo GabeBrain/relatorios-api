@@ -1,5 +1,14 @@
 # Rebrain (Plataforma) — Documento Vivo
 
+## 16/11/2026 — Maceió/SINDUSCON-AL: inventário comprovado dos originais (Etapa 1) — Lucas (Inovação), com Claude
+
+- **Feito:** extração OOXML dos dois PPTX de referência na ordem real de `presentation.xml`, com hashes conferidos contra o manifesto. **Periodicidade comprovada:** maio/2026 é a edição mensal (82 slides, séries de 25 meses) e junho/2026 é a trimestral 2T2026 (87 slides, séries de 17 trimestres, acumulado semestral, rankings 2T, bloco comercial exclusivo). Recorte por edição: mensal com 7 municípios (inclui Coqueiro Seco), trimestral com 6.
+- **Documentos:** `docs/features/relatorios-institucionais/maceio/` ganhou `PLAN.md`, `MAPA_SLIDES.md` (169 posições mapeadas com bloco, composição, janela e fonte candidata), `MATRIZ_INDICADORES.csv` (contrato inicial, todas as linhas "Não executado"), `DECISOES.md` (D1–D5 e 5 perguntas ao analista) e `EVIDENCIAS.md`.
+- **Decisões de Lucas na sessão:** acesso somente por rota, sem menu/busca/início; ordem dos slides e padrão visual idênticos ao original; base nos sistemas FIERGS/Secovi, SP institucional e Fortaleza.
+- **Limites:** nenhuma fonte consultada, nenhum endpoint confirmado, slides achatados como imagem pendem de render; sem homologação.
+- **Etapas:** Etapa 1 concluída; Etapa 2 (estrutura e rota) em andamento na mesma sessão.
+- **Monday:** [Panorama Maceió / SINDUSCON](https://brain381753.monday.com/boards/18398638577/pulses/13149406169) — `13149406169`
+
 ## 13/11/2026 — Assistente de Projetos: Sugestão de análise falhava em estudos com vários lotes — Diego Cabrero, com Claude
 
 - **Causa (confirmada por SQL de leitura):** no Sabel (403 slides), o Luna devolveu memos de lote com 9,5 e 10,5 KB, contra o teto fixo de 8 KB herdado do perfil mini. As duas tentativas falharam pagando um lote cada e não chegaram à compilação. A tela mostrava só "Não foi possível concluir esta etapa".
