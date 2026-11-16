@@ -1,5 +1,11 @@
 # Estado do handoff
 
+## 16/11/2026 — Comparação dos PPTX reais e títulos
+
+Lucas/Codex. Base `60413d5c`, main limpa/atualizada na abertura desta revisão, origin único. Trimestral2T2026 real e mensalagosto reais recebidos de Lucas; referênciasjunho/2T2026 e julho/2026 com hashes conferidos. Extração completa dos quatro PPTX e abertura somente em leitura no PowerPoint, sem alteração dos arquivos. [Comparação dos dados e limites](../../features/relatorios-institucionais/fortaleza/COMPARACAO_REFERENCIAS_2026-11-16.md): lançamentos mensais de julho coincidem; VGV lançado coincide na mesma base INCC. Diferenças de preço/m², estoque, casas e padrões precisam ser conciliadas pelo analista; Lucas conduz implementação pela Inovação, sem atribuição de homologação.
+
+Correção visual no gerador: mapas49–53/71 e IVV54/72 (mensal45/46) com título fora da régua verde e da tag roxa. Valores/fórmulas preservados. 297testes, tipos/lint/build, 364cenários trimestrais e240mensais aprovados; exportação de teste89emPPTX/PDF e renders noPowerPoint conferidos. Anexos recebidos não regravados; nova exportação necessária para aplicar o cabeçalho. Sem escrita Monday ou nova coleta autenticada.
+
 ## 16/11/2026 — Diagnóstico real trimestral: 64 slides aguardando fonte
 
 Lucas/Codex. Main limpa na abertura; origin único; fetch mostrou dois commits remotos, incorporados por fast-forward até `36981733` (Corretor/Slide Maker, sem alterações Fortaleza). Diagnóstico recebido do usuário registra8/64/17 e zero históricos municipais/detalhados: `report.metrics` nulo pulava as55consultas. Correção desacopla os históricos do núcleo, preservando todas as guardas e avisos. [Causa, evidência e limites](../../features/relatorios-institucionais/fortaleza/COLETA_TRIMESTRAL_64_SLIDES_2026-11-16.md).

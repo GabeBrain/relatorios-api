@@ -13,6 +13,12 @@ import FortalezaReportSlide from './FortalezaReportSlide';
 import { FortalezaGenerationPanel } from './FortalezaGenerationPanel';
 const selection={...monthlyMarketSelection,periodicity:'quarterly' as const,position:2},cities=[...FORTALEZA_CITIES];
 describe('Fortaleza trimestral — preços, fechamento e tabelas 41–89',()=>{
+  it.each([49,50,51,52,53,54,71,72])('cabeçalho %i usa duas linhas e cobre a régua antiga abaixo da tag roxa',page=>{
+    const svg=renderToStaticMarkup(<FortalezaReportSlide page={page} selection={selection} cities={cities} data={null} monthlyLaunches={null} editorial={createFortalezaEditorial()}/>);
+    expect(svg).toContain('data-fortaleza-analysis-heading');expect(svg).toContain('data-fortaleza-header-rule-mask');
+    expect(svg).toContain('y="90" width="1280" height="100"');expect(svg).toContain('font-size="40"');
+    expect(svg).toContain(page===54||page===72?'LÍQUIDAS (IVV)':'VERTICAIS');
+  });
   it('bloqueia preço quando uma tipologia desaparece, mesmo havendo outra observação no mesmo mês',()=>{
     const prices=quarterlyPriceFixture(selection),source=prices.sources[0],record=source.records[0],history=record.typologies_history as Record<string,unknown>[];
     record.typologies_history=[...history,...history.slice(0,-1).map(row=>({...row,typology_id:999,price_private_area:9000}))];

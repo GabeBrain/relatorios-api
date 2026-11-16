@@ -562,6 +562,17 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-11-16 — Fortaleza: comparação dos PPTX reais e cabeçalhos sem sobreposição — Lucas/Codex
+
+- **Ambiente/funcionalidade:** Rebrain, relatórios Fortaleza mensal e trimestral; Lucas conduz implementação pela Inovação, homologação com o analista.
+- **Comparação:** quatro PPTX extraídos e abertos em leitura no PowerPoint. Mensal agosto confrontado com julho no período comum: lançamentos2.231iguais; VGV ajustado à mesma base INCC coincide. Preço/m² de julho12.099versus9.360,90, estoque e padrões divergem. No trimestral, lançamentos4.128versus4.715, preço/m²11.977versus9.295,30e casas393versus69; causas/métodos ainda a conciliar. [Evidência detalhada](../features/relatorios-institucionais/fortaleza/COMPARACAO_REFERENCIAS_2026-11-16.md).
+- **Correção visual:** título dos mapas49–53/71 e IVV54/72, também mensal45/46, dividido em duas linhas; régua verde antiga coberta abaixo da tag roxa. Área da marca preservada. Mesmo cabeçalho na prévia/PPTX/PDF, sem alterar dados ou regravar os anexos.
+- **Validação:** 297 testes/24 arquivos, tipos/lint/build,364cenários trimestrais e240mensais; asserções de geometria e inspeção das capturas. Exportação de teste89emPPTX/PDF e renders49/54/72noPowerPoint conferidos; dados desse teste sintéticos.
+- **Arquivos:** `FortalezaAnalysisHeading.tsx`, renderizadores de análise/mapas, testes e diagnósticos visuais.
+- **Commits:** base `60413d5c`, entrega identificada por `fix(fortaleza): keep analysis titles clear of reference branding`.
+- **Monday:** [Estudo Fortaleza](https://brain381753.monday.com/boards/18398638577/pulses/13149406420) — `13149406420`.
+- **Impacto em Etapas/Pendências:** correção de sobreposição validada; nova exportação deve usar o gerador atualizado. Dados reais disponíveis não significam equivalência aos originais; preço/universos/classificação seguem para o analista. Sem escrita Monday.
+
 ### 2026-11-16 — Fortaleza: 64 pendências causadas por históricos não consultados — Lucas/Codex
 
 - **Ambiente/funcionalidade:** Rebrain, trimestral Fortaleza/SINDUSCON 2T2026; hook compartilhado com mensal.
@@ -1744,6 +1755,8 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 
 ## 2. Etapas
 
+- **16/11 — Fortaleza, dados e visual:** comparação de PPTX reais entregue e títulos mapas/IVV corrigidos. Lançamentos/VGV mensal têm conciliação no período comum; preços, estoque, casas e padrões permanecem em revisão pelo analista.
+
 - **16/11 — Fortaleza 2T2026:** causa das 64 pendências reproduzida e corrigida no fluxo de coleta; fontes independentes e diagnóstico com cobertura explícita. A revisão de 13/11 não comprovou disponibilidade real; próxima evidência é o JSON de nova geração com 45 fontes municipais/10 detalhadas.
 
 - **13/11 — Fortaleza mensal/trimestral:** revisão adicional validada com 287 testes, 604 cenários visuais, recuperação simulada e downloads reais locais; envio autorizado. Aceite com dados reais permanece pendente.
@@ -1883,6 +1896,8 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 ---
 
 ## 3. Pendências
+
+- **16/11 — Fortaleza, comparação:** analista confirma fotografia/base, ponderação de preço/m², universo de casas, rótulos de padrão e intenção dos totais dos quadros originais. Regenerar os arquivos para aplicar o cabeçalho corrigido; mapas seguem esquemáticos.
 
 - **16/11 — Fortaleza 2T2026:** após disponibilizar a correção, gerar novamente e conferir as respostas das 55 fontes antes não consultadas. Resolver eventuais falhas reais pelo novo diagnóstico, sem converter ausências em zero; avisos do balanço inicial e homologação continuam separados.
 

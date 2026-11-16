@@ -30,9 +30,16 @@ try{
       assert.ok(!(await slide.textContent()).includes('Aguardando conferência'));
       assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1),false);
       assert.equal(await slide.locator('image').evaluateAll(nodes=>nodes.every(node=>Boolean(node.getAttribute('href')))),true);
+      if([49,50,51,52,53,54,71,72].includes(number)){
+        const geometry=await slide.evaluate(svg=>{
+          const box=svg.getBoundingClientRect(),title=svg.querySelector('[data-fortaleza-analysis-title]').getBoundingClientRect(),scope=svg.querySelector('[data-fortaleza-analysis-scope]').getBoundingClientRect(),mask=svg.querySelector('[data-fortaleza-header-rule-mask]');
+          return {titleRight:(title.right-box.left)*1280/box.width,titleBottom:(title.bottom-box.top)*720/box.height,scopeTop:(scope.top-box.top)*720/box.height,ruleCovered:Number(mask.getAttribute('y'))<=110&&Number(mask.getAttribute('y'))+Number(mask.getAttribute('height'))>=115,badgePreserved:Number(mask.getAttribute('y'))>87};
+        });
+        assert.ok(geometry.titleRight<1000,`Título invadiu a tag: ${number}`);assert.ok(geometry.scopeTop>geometry.titleBottom,`Título e recorte sobrepostos: ${number}`);assert.ok(geometry.ruleCovered&&geometry.badgePreserved);
+      }
       if([16,19,31,32].includes(number))assert.equal(await slide.locator('[data-municipal-row]').count(),6);
       else if(number>=11&&number<=39&&![20,23,26,28,33,36].includes(number))assert.equal(await slide.getByLabel('Histórico trimestral').locator('circle').count(),9);
-      if([1,2,10,12,16,37,42,49,55,59,68,75,83,86,88,89].includes(number))await slide.screenshot({path:resolve(folder,`${number}-${width}-${dark}.png`)});
+      if([1,2,10,12,16,37,42,49,50,51,52,53,54,55,59,68,71,72,75,83,86,88,89].includes(number))await slide.screenshot({path:resolve(folder,`${number}-${width}-${dark}.png`)});
       results.push({number,width,dark});
     }
     for(const mode of ['missing','empty']){

@@ -26,6 +26,12 @@ try{
       await slide.locator('image').evaluateAll(async nodes=>{await Promise.all(nodes.map(node=>new Promise((resolve,reject)=>{const image=new Image();image.onload=resolve;image.onerror=reject;image.src=node.getAttribute('href');if(image.complete&&image.naturalWidth)resolve();})));});
       await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
       const content=await slide.textContent();assert.ok(!content.includes('Aguardando conferência da fonte'));assert.ok(!content.includes('NaN'));
+      if(quarterly?[49,50,51,52,53,54,71,72].includes(number):[45,46].includes(number)){
+        const safe=await slide.evaluate(svg=>{
+          const frame=svg.getBoundingClientRect(),title=svg.querySelector('[data-fortaleza-analysis-title]').getBoundingClientRect(),scope=svg.querySelector('[data-fortaleza-analysis-scope]').getBoundingClientRect(),mask=svg.querySelector('[data-fortaleza-header-rule-mask]');
+          return (title.right-frame.left)*1280/frame.width<1000&&scope.top>title.bottom&&Number(mask.getAttribute('y'))===90;
+        });assert.ok(safe,`Título encostou na régua/tag: ${number}`);
+      }
       if(number===2){assert.ok(content.includes('Base consultada:'));assert.ok(content.includes('não representa'));}
       if(!quarterly&&number>=3&&number<=7){
         names.push(...[...content.matchAll(/Projeto sintético \d+/g)].map(match=>match[0]));
