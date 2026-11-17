@@ -63,6 +63,8 @@ export function buildMaceioDiagnostic(selection: MaceioSelection, state: Diagnos
     collection: { vertical: collectionStatus(sources?.sources), horizontal: collectionStatus(sources?.horizontal), commercial: collectionStatus(sources?.commercial) },
     criteria: { prices: 'stock-weighted', monetaryIndex: maceioMonetaryPolicy(selection), monetaryBase: maceioPeriod(selection).end.slice(0, 7),
       emptyPeriods: 'completed-scoped-scan-as-zero; failed scans and missing numeric fields remain unavailable',
+      launchesByTypology: 'explicit monthly flow; otherwise historical qty only in project launch month; monthly municipal reconciliation required',
+      horizontalClassification: 'Fechado = Loteamento Fechado; Condomínio de Chácaras kept separate for analyst review; price standards alone do not identify product',
       patternGrouping: { Compacto:'Compactos', Econômico:'MCMV', Standard:'Médio Padrão', Médio:'Médio Padrão', 'Médio-Alto':'Médio Padrão', Alto:'Luxo', Luxo:'Luxo' } },
     summary: Object.fromEntries(statuses.map(status => [status, slides.filter(slide => slide.status === status).length])) as Record<Status, number>,
     slides,

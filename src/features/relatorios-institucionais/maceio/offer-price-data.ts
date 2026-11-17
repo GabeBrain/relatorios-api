@@ -1,4 +1,5 @@
 import { maceioPatternFamily } from './classification';
+import { maceioHistoricalLaunch } from './historical-launch';
 import { maceioCities, maceioPeriod, type MaceioSelection } from './model';
 import { marketMonth, normalizeMarketText, type MarketRow } from './market';
 import { shiftMonth } from './intro-data';
@@ -80,11 +81,12 @@ function snapshots(data: MaceioMarketSlidesData, cities: readonly string[], mont
         if (period !== month) continue;
         if (seen.has(typology)) throw new Error('Tipologia repetida na mesma competência.');
         seen.add(typology); observed = true;
-        result.push({ city, standard: String(building.standard ?? ''), bedroom: row.number_bedroom, area: row.private_area, price: row.price, stock: requiredNumber(row.typology_stock), releases: row.releases_in_period, sales: row.sold_in_period });
+        result.push({ city, standard: String(building.standard ?? ''), bedroom: row.number_bedroom, area: row.private_area, price: row.price, stock: requiredNumber(row.typology_stock), releases: maceioHistoricalLaunch(row,release,month), sales: row.sold_in_period });
       }
       if (!observed || [...established].some(id => !seen.has(id))) throw new Error(`${city}: fotografia ${month} incompleta; não usamos cadastro atual ou estoque zero como substitutos.`);
     }
-    if (total(result.filter(row => row.city === city).map(row => row.stock)) !== quantity(data, city, 'stock', month)) throw new Error(`${city}: estoque granular diverge do estoque municipal em ${month}.`);
+    const actual=total(result.filter(row=>row.city===city).map(row=>row.stock)),expected=quantity(data,city,'stock',month);
+    if (actual !== expected) throw new Error(`${city}: estoque granular diverge do estoque municipal em ${month}: histórico ${actual}, municipal ${expected}, diferença ${actual-expected}.`);
   }
   return result;
 }

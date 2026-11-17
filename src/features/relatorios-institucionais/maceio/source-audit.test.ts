@@ -3,6 +3,19 @@ import { auditMaceioSource } from './source-audit';
 import type { SlideSource } from './market-slides-data';
 import { buildMaceioDiagnostic } from './diagnostic';
 describe('evidência agregada de bloqueios das fontes', () => {
+  it('separa estoque elegível de lançamento futuro sem esconder a divergência',()=>{
+    const source:SlideSource={city:'Marechal Deodoro',metric:'details',group:'Empreendimento',complete:true,issue:null,requests:1,rows:[
+      {building_id:'private-a',release_date:'2026-05-01',standard:'Econômico',work:'Fechado',typologies_history:[{period:'2026-05-01',typology_id:1,type_of_typology:'Garden',typology_stock:192,qty:200,sold_in_period:8}]},
+      {building_id:'private-b',release_date:'2026-06-01',typologies_history:[{period:'2026-05-01',typology_id:1,typology_stock:91,qty:100}]},
+    ]};
+    const audit=auditMaceioSource(source,['2026-05']);
+    expect(audit.monthly[0].stock.value).toBe(283);
+    expect(audit.monthly[0].eligibility?.stock.value).toBe(192);
+    expect(audit.monthly[0].eligibility?.excludedFutureOrInvalidReleaseStock.value).toBe(91);
+    expect(audit.monthly[0].eligibility?.launches.value).toBe(200);
+    expect(audit.monthly[0].eligibility?.byTypologyKind[0].value).toBe('Garden');
+    expect(JSON.stringify(audit)).not.toContain('private-');
+  });
   it('expõe os rótulos reais de tipo, padrão e produto sem exportar cadastros individuais', () => {
     const source: SlideSource = { city: 'Maceió', metric: 'details', group: 'Empreendimento', complete: true, issue: null, requests: 1, rows: [{
       building_id: 'private-project', name: 'private-name', address: 'private-address', standard: 'Categoria recebida', work: 'Produto recebido', release_date: '2026-04-01',

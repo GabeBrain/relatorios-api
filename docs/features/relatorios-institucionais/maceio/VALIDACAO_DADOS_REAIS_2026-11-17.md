@@ -1,5 +1,21 @@
 # Maceió — bloqueios após a coleta real — 17/11/2026
 
+## Continuação — diagnóstico (4), rankings e horizontais
+
+Base `d2371881`, main/origin0/0após fetch. Arquivo real(4), gerado às19:59UTC:35disponíveis/25fontes/22editoriais, sem falha nas63consultas imobiliárias. Liberados23slides pelo lote anterior. Permanecem19imobiliários: rankings25/36, área47/48,11slides de oferta/preços/estado atual com divergência de Marechal Deodoro e4horizontais por produto sem correspondência. CAGED9–14fora do escopo.
+
+Conferência visual direta das tabelas incorporadas nos dois PPTX originais: capital usa Condomínio de Casas/Loteamento Fechado;RM também usa Loteamento Aberto. Não há Sem classificação nem Chácaras no original. Ao conferir isso, Lucas determinou: **“Fechado vira loteamento fechado. Condomínio de chácaras [...] cria uma categoria a parte [...] depois eu vejo com o analista”.** Aplicados Fechado→Loteamento Fechado e Chácaras em linha própria, nas duas edições. Nenhuma autorização para classificar Econômico ou campo vazio como casas, nem para criar Sem classificação; esses casos continuam bloqueados.
+
+Correções técnicas:
+
+- Ranking ignora empreendimentos lançados após o fechamento e fotografias anteriores ao lançamento, evitando somar históricos retroativos de projetos futuros ou exigir vendas desses projetos.
+- Lançamentos por tipologia usam fluxo mensal explícito quando disponível. Sem esse campo, usam `qty` histórico somente na competência do lançamento do empreendimento e zero fora dela. É o critério de coorte existente no institucionalSP, com reconciliação obrigatória de **cada mês** contra lançamentos municipais. Não usa quantidade cadastral atual nem diferença de estoques; fluxo explícito nulo/inválido não é substituído. Aplicado ao ranking e ao IVV por área. Vendas continuam exigindo `sold_in_period` explícito, preservando distratos.
+- Erro de estoque mostra valores histórico/municipal/diferença. Auditoria acrescenta `monthly.eligibility`: estoque e fluxos elegíveis, estoque excluído por lançamento futuro/data inválida, composição por padrão/tipo da unidade/produto horizontal. Totais brutos anteriores preservados; nenhum ID/nome/endereço exportado. Isso permite localizar o desvio de Marechal sem inventar uma exclusão de unidades.
+
+**Pendência real:** auditoria atual informa283unidades brutas do histórico e192municipais em Marechal/maio2026, mas não separa, retroativamente, os registros elegíveis já usados pelos leitores. Não afirmar que os91de diferença são todos futuros; precisa do novo JSON com elegibilidade. Reconciliação segue bloqueando divergência. Outros campos numéricos/produtos ausentes também não são preenchidos sem evidência. Sem token/controleOpera para nova coleta autenticada; após publicação autorizada, gerar mensal/trimestral e conferir o JSON. Não declarar19slides resolvidos com base em testes sintéticos.
+
+Validação:160testes/15arquivos Maceió aprovados, incluindo recorte por data, quantidade histórica de lançamento, reconciliação mensal, nulos/distratos e separação de estoque futuro. Tipos/lint dirigidos aprovados. Padrões e fluxos visuais existentes preservados; sem mudança de carregamento. SP/CAGED/outros motores intocados. Sem push/deploy/Monday neste lote.
+
 ## Atualização posterior — diagnóstico (3), decisões e correções
 
 Recebido `maceio-mensal-2026-05-diagnostico (3).json`, gerado às19:36:20UTC:12disponíveis/48fontes/22editoriais;63consultas imobiliárias completas, zero falhas. Garden/Cobertura deixaram de bloquear após `1c63413f`, liberando7slides. Dos48pendentes,6são CAGED e42imobiliários.32têm como primeiro bloqueio Pilar; não significa que os demais dados desses slides já estejam homologados.

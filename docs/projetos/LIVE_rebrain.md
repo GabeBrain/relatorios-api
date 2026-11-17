@@ -1,5 +1,14 @@
 # Rebrain (Plataforma) — Documento Vivo
 
+## 17/11/2026 — Maceió: rankings, fluxo de lançamentos e produtos horizontais — Codex
+
+- **Evidência:** diagnóstico real(4):35disponíveis/25fontes/22editoriais;23slides liberados após `d2371881`,19imobiliários ainda bloqueados. CAGED fora do lote; base main/origin0/0após fetch.
+- **Entrega:** rankings respeitam data de lançamento/projetos futuros; lançamentos usam fluxo explícito ou `qty` histórico só no mês do lançamento, reconciliando cada competência com municipal. Mesma leitura aplicada à área; vendas não são deduzidas de estoques. Divergências mostram histórico/municipal/delta e JSON separa estoques elegíveis/futuros e composições agregadas, sem cadastros individuais.
+- **Decisão de Lucas:** após conferência visual dos dois originais, Fechado→Loteamento Fechado e Condomínio de Chácaras em categoria própria, a revisar com analista. Econômico/campo vazio não viram casas e não foi autorizada linha Sem classificação.
+- **Validação/etapas:**160testes/15arquivos, tipos/lint e build aprovados; auditoria/diagnóstico finais reconferidos em8testes. Sem token/acessoOpera para geração autenticada; dados reais precisam de novo JSON após publicação. [Investigação](../features/relatorios-institucionais/maceio/VALIDACAO_DADOS_REAIS_2026-11-17.md). Visual existente preservado, CAGED/SP intocados.
+- **Pendências:** localizar diferença elegível de Marechal, conferir fluxos e produtos remanescentes; não excluir unidades/ajustar saldos para liberar slides. Não declarar19slides resolvidos. Sem push/deploy/Monday neste lote.
+- **Monday:** [Panorama Maceió / SINDUSCON](https://brain381753.monday.com/boards/18398638577/pulses/13149406169) — `13149406169`.
+
 ## 17/11/2026 — Maceió: classificações, varreduras vazias e IVV histórico — Codex
 
 - **Pedido/evidência:** diagnóstico mensal(3) com12disponíveis/48fontes/22editoriais;63consultas imobiliárias completas. Lucas pediu corrigir os42bloqueios imobiliários, mantendo6CAGED fora. Base `1c63413f`, main/origin0/0após fetch.

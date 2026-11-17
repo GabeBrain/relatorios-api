@@ -47,7 +47,8 @@ function details(data:MaceioMarketSlidesData,selection:MaceioSelection,cities:re
     if(municipal.length!==1||!municipal[0].complete)throw new Error(`${city}: estoque municipal ${segment} indisponível para reconciliação.`);
     const rows=municipal[0].rows.filter(row=>marketMonth(row.period)===end),groups=new Set<string>();
     const expected=sum(rows.map(row=>{const group=norm(row.group);if(norm(row.city)!==norm(city)||row.state!=='AL'||norm(row.building_type)!==norm(segment)||!group||/^(total|subtotal)(\b|$)/.test(group)||groups.has(group))throw new Error('Estoque municipal duplicado ou fora do universo.');groups.add(group);return number(row.stock);}));
-    if(expected!==sum(result.filter(row=>row.city===city).map(row=>row.stock)))throw new Error(`${city}: estoque granular diverge do total municipal ${segment}.`);
+    const actual=sum(result.filter(row=>row.city===city).map(row=>row.stock));
+    if(expected!==actual)throw new Error(`${city}: estoque granular diverge do total municipal ${segment} em ${end}: histórico ${actual}, municipal ${expected}, diferença ${actual-expected}.`);
   }
   const active=new Set(result.filter(row=>row.stock>0).map(row=>row.id));
   return result.filter(row=>active.has(row.id));

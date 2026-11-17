@@ -14,7 +14,7 @@ export function maceioHorizontalProduct(building: Record<string, unknown>): stri
   for (const value of values) {
     const name = normalizeMarketText(value);
     const product = ({ 'condominio de casas': 'Condomínio de Casas', 'condominio de casas/sobrados': 'Condomínio de Casas',
-      'loteamento fechado': 'Loteamento Fechado', 'loteamento aberto': 'Loteamento Aberto',
+      fechado: 'Loteamento Fechado', 'loteamento fechado': 'Loteamento Fechado', 'loteamento aberto': 'Loteamento Aberto',
       'condominio de chacaras': 'Condomínio de Chácaras' } as Record<string, string>)[name];
     if (product) return product;
   }

@@ -1,5 +1,11 @@
 # Estado do handoff
 
+## 17/11/2026 — Maceió:19bloqueios imobiliários após geração real
+
+Diagnóstico(4):35disponíveis/25fontes/22editoriais,63consultas completas; lote `d2371881` liberou23slides. Nesta continuação, corrigidos recorte de projetos futuros nos rankings, lançamentos por quantidade histórica exclusivamente no mês de lançamento com reconciliação municipal mensal e detalhamento numérico da divergência de estoque. Lucas autorizou Fechado→Loteamento Fechado e categoria própria Chácaras para conferência posterior com o analista; demais produtos ambíguos não foram classificados.
+
+[Evidências e limites](../../features/relatorios-institucionais/maceio/VALIDACAO_DADOS_REAIS_2026-11-17.md):160testes/15arquivos, tipos/lint aprovados. Nova auditoria de elegibilidade necessária para localizar o desvio real de Marechal; não ajustar estoque para fechar nem declarar19slides resolvidos sem nova geração. Originais conferidos visualmente, sem alteração; nenhuma geração autenticada nova pelo agente, sem token/acessoOpera. CAGED preservado. Base `d2371881`, main/origin0/0após fetch; sem push/Monday.
+
 ## 17/11/2026 — Maceió: correções após diagnóstico com48pendências
 
 Base `1c63413f`, main/origin0/0após fetch. Lucas pediu corrigir todos os bloqueios exceto CAGED. Confirmou correspondências dos sete padrões da API para quatro famílias do original. Depois autorizou tratar competências sem registros em consultas completas como zero no mercado pesquisado, registrando a distinção de falha/campo inválido. Isso substitui a pendência anterior de interpretação de Pilar/Coqueiro, preservada como histórico abaixo; não comprova inexistência fora do mercado pesquisado.
