@@ -5,6 +5,7 @@ import { buildMaceioMarketSlide, type SlideSource } from './market-slides-data';
 import { buildOfferPriceSlide } from './offer-price-data';
 import { buildRemainingSlide } from './remaining-data';
 import { buildCagedSlide } from './caged';
+import { maceioMonetaryPolicy } from './criteria';
 
 export type DiagnosticGeneration = Pick<MaceioGenerationState, 'phase' | 'startedAt' | 'finishedAt' | 'blueprint' | 'report' | 'intro'>;
 type Status = 'available' | 'source-pending' | 'method-pending' | 'editorial-review' | 'not-implemented';
@@ -23,9 +24,9 @@ export function buildMaceioDiagnostic(selection: MaceioSelection, state: Diagnos
     if (page === 17) return calculated(buildMaceioPattern(selection, intro));
     if (page >= 16 && page <= 20) return calculated(buildMaceioLaunchSeries(page, selection, intro));
     if (page >= 21 && page <= 40 && ![29, 39].includes(page)) {
-      const value = buildMaceioMarketSlide(page, selection, intro?.slides ?? null);
+      const value = buildMaceioMarketSlide(page, selection, intro?.slides ?? null, maceioMonetaryPolicy(selection));
       // No INCC series is silently selected or presented as homologated.
-      return calculated(value, value.money && Boolean(value.issue));
+      return calculated(value, value.money && maceioMonetaryPolicy(selection) === 'unconfirmed');
     }
     if (page >= 41 && page <= 60) {
       const value = buildOfferPriceSlide(page, selection, intro?.slides ?? null, 'stock-weighted');
@@ -41,7 +42,7 @@ export function buildMaceioDiagnostic(selection: MaceioSelection, state: Diagnos
   const sources = intro?.slides;
   const metadata = (items: SlideSource[] | undefined) => (items ?? []).map(source => ({
     city: source.city, metric: source.metric, group: source.group, complete: source.complete,
-    rows: source.rows.length, issue: source.issue,
+    rows: source.rows.length, issue: source.issue, failure: source.failure ?? null, endpoint: source.endpoint ?? null,
   }));
   return {
     schema: 'maceio-diagnostic-v1', generatedAt: state.finishedAt ?? new Date(state.startedAt).toISOString(),
@@ -50,14 +51,14 @@ export function buildMaceioDiagnostic(selection: MaceioSelection, state: Diagnos
     period: maceioPeriod(selection), cities: [...maceioCities(selection.periodicity)],
     reference: { file: reference.file, sourceId: reference.sourceId, slideCount: reference.slideCount },
     homologated: false,
-    criteria: { prices: 'stock-weighted', monetaryIndex: 'unconfirmed' },
+    criteria: { prices: 'stock-weighted', monetaryIndex: maceioMonetaryPolicy(selection), monetaryBase: maceioPeriod(selection).end.slice(0, 7) },
     summary: Object.fromEntries(statuses.map(status => [status, slides.filter(slide => slide.status === status).length])) as Record<Status, number>,
     slides,
     sources: {
       vertical: metadata(sources?.sources), horizontal: metadata(sources?.horizontal), commercial: metadata(sources?.commercial),
-      launches: intro?.cities.map(city => ({ city: city.city, unitsComplete: city.unitsComplete, buildingsComplete: city.buildingsComplete, issues: city.issues })) ?? [],
+      launches: intro?.cities.map(city => ({ city: city.city, unitsComplete: city.unitsComplete, buildingsComplete: city.buildingsComplete, issues: city.issues, failures: city.failures ?? [] })) ?? [],
       caged: intro?.caged?.report ? { snapshotVersion: intro.caged.report.snapshotVersion, publishedThrough: intro.caged.report.publishedThrough, coverageStart: intro.caged.report.coverageStart } : null,
     },
-    limits: ['Diagnóstico de conferência; não equivale à homologação.', 'Preços ponderados pelo estoque histórico; critério registrado para revisão do analista.', 'Valores corrigidos pelo INCC permanecem indisponíveis até a definição da série.'],
+    limits: ['Diagnóstico de conferência; não equivale à homologação.', 'Preços ponderados pelo estoque histórico; critério registrado para revisão do analista.', maceioMonetaryPolicy(selection) === 'INCC-DI' ? 'VGL/VGV corrigidos pelo INCC-DI até o mês de fechamento; série autorizada por Lucas em 17/11/2026.' : 'Valores corrigidos pelo INCC permanecem indisponíveis até a definição da série.'],
   };
 }

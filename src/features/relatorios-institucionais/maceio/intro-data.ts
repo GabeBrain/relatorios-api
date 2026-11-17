@@ -1,3 +1,5 @@
+import { checkMaceioNext, scopeMaceioRow, MaceioSourceError, sourceFailure } from './source-contract';
+import { requestWithRetry } from '@/features/panorama-secovi-fiergs/lib/request-with-retry';
 import { httpRequest } from '@/lib/http-client';
 import { marketMonth, normalizeMarketText, type MarketRow } from './market';
 import { maceioPeriod, maceioScope, type MaceioSelection } from './model';
@@ -5,7 +7,7 @@ import type { MaceioEnvelope, MaceioRequest } from './api';
 import type { MaceioMarketSlidesData } from './market-slides-data';
 import {cagedIssue,type CagedSource} from './caged';
 
-export interface LaunchCitySource { city:string; units:MarketRow[]; buildings:MarketRow[]; unitsComplete:boolean; buildingsComplete:boolean; issues:string[] }
+export interface LaunchCitySource { city:string; units:MarketRow[]; buildings:MarketRow[]; unitsComplete:boolean; buildingsComplete:boolean; issues:string[]; failures?:{source:string;code:string;httpStatus:number|null}[] }
 export interface MaceioIntroData { cities:LaunchCitySource[]; collectedAt:string; slides?:MaceioMarketSlidesData; caged?:CagedSource }
 export interface MaceioSeries { labels:string[]; capital:number[]; rm:number[]; issue:string|null; note:string }
 export function maceioSlideIssue(page:number,selection:MaceioSelection,data:MaceioIntroData|null){
@@ -40,21 +42,22 @@ export async function collectMaceioIntro(selection:MaceioSelection,authorized:st
           check();options.onProgress?.(`${city} · ${kind==='units'?'histórico de unidades lançadas':'cadastro de lançamentos'} · página ${page}`);
           const url=`https://geobrain.com.br/public-api/${kind==='units'?'temporal-analysis-city/releases':'building'}`;
           const query={city,uf:'AL',...(kind==='units'?{'type[]':['Vertical'],group_by:'Padrão',start_period:`${months[0]}-01`,end_period:end}:{type:'Vertical'}),per_page:100,page};
-          const result=await request({url,query,headers:{Authorization:`Bearer ${options.token}`},includeAuth:false,signal:options.signal,timeoutMs:20000,cache:'no-store'});
+          const result=await requestWithRetry(()=>request({url,query,headers:{Authorization:`Bearer ${options.token}`},includeAuth:false,signal:options.signal,timeoutMs:60000,cache:'no-store'}),{signal:options.signal,attempts:2});
           check();
-          if(!result.ok)throw new Error('Fonte indisponível');
+          if(!result.ok)throw new MaceioSourceError(result.status===null?'NETWORK':'HTTP',result.status);
           const data=result.data,meta=data?.meta;
           if(!Array.isArray(data?.data)||!meta||meta.current_page!==page||!Number.isSafeInteger(meta.total)||meta.total!<0||!Number.isSafeInteger(meta.last_page)||meta.last_page!<page||meta.last_page!>100||data.data.length>100)throw new Error('Paginação incompleta');
           expectedTotal??=meta.total;expectedLast??=meta.last_page;
           if(expectedTotal!==meta.total||expectedLast!==meta.last_page)throw new Error('Fonte mudou durante a consulta');
-          if(data.links?.next){const next=new URL(data.links.next,url);if(next.origin!==new URL(url).origin||next.pathname!==new URL(url).pathname||next.searchParams.get('city')!==city||Number(next.searchParams.get('page'))!==page+1)throw new Error('Paginação fora do escopo');}
-          for(const row of data.data){if(normalizeMarketText(row.city)!==normalizeMarketText(city)||row.state!=='AL'||normalizeMarketText(row.building_type)!=='vertical')throw new Error('Recorte não confirmado');if(kind==='units'){const month=marketMonth(row.period);if(!month||month<months[0]||month>end.slice(0,7))throw new Error('Competência fora da janela');}}
-          rows.push(...data.data);
+          checkMaceioNext(data.links?.next,url,query,page,expectedLast,true);
+          const scoped=data.data.map(row=>scopeMaceioRow(row,city,'Vertical',kind==='units'));
+          for(const row of scoped){if(kind==='units'){const month=marketMonth(row.period);if(!month||month<months[0]||month>end.slice(0,7))throw new MaceioSourceError('PERIOD');}}
+          rows.push(...scoped);
           if(page===expectedLast){if(rows.length!==expectedTotal)throw new Error('Fonte parcial');break;}
           if(!data.data.length)throw new Error('Página vazia');
         }
         source[kind]=rows;source[kind==='units'?'unitsComplete':'buildingsComplete']=true;
-      }catch{check();source.issues.push(`${city}: ${kind==='units'?'histórico de unidades':'cadastro de empreendimentos'} não concluído. Tente novamente.`);}
+      }catch(error){check();(source.failures??=[]).push({source:kind,...sourceFailure(error)});source.issues.push(`${city}: ${kind==='units'?'histórico de unidades':'cadastro de empreendimentos'} não concluído. Tente novamente.`);}
     }
     cities.push(source);
   }

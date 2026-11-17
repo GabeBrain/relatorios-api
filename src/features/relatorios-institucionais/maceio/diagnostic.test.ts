@@ -27,6 +27,6 @@ describe('diagnóstico Maceió', () => {
     expect(diagnostic.summary['source-pending']).toBeLessThan(buildMaceioDiagnostic(selection, state).summary['source-pending']);
     expect(JSON.stringify(diagnostic)).not.toContain('building_id');
     expect(JSON.stringify(diagnostic)).not.toContain('typologies_history');
-    expect(diagnostic.criteria).toEqual({ prices: 'stock-weighted', monetaryIndex: 'unconfirmed' });
+    expect(diagnostic.criteria).toEqual({ prices: 'stock-weighted', monetaryIndex: 'INCC-DI', monetaryBase: '2026-05' });
   });
 });

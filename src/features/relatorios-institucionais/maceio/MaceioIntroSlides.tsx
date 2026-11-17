@@ -8,9 +8,10 @@ import { buildMaceioMarketSlide, type MonetaryPolicy } from './market-slides-dat
 import {buildOfferPriceSlide,type PricePolicy} from './offer-price-data';
 import {buildRemainingSlide} from './remaining-data';
 import {buildCagedSlide} from './caged';
+import { maceioMonetaryPolicy } from './criteria';
 
 const introTitles=['Abertura Brain','Sobre este relatório','Apresentação institucional','Presença e atuação','Soluções Brain','Sumário','Municípios do estudo','Emprego','Saldo do emprego formal no Brasil · construção civil','Desempenho por estado · saldo total','Desempenho por estado · construção civil','Emprego em Alagoas · construção civil','Saldo por setor · Alagoas','Desempenho dos estados do Nordeste','Lançamentos verticais','Empreendimentos verticais lançados','Empreendimentos lançados por padrão','Empreendimentos lançados · acumulado 12 meses','Unidades verticais lançadas','Unidades lançadas · acumulado 12 meses'];
-export default function MaceioIntroSlides({selection,data,initialMonetaryPolicy='unconfirmed',initialPricePolicy='stock-weighted'}:{selection:MaceioSelection;data:MaceioIntroData|null;initialMonetaryPolicy?:MonetaryPolicy;initialPricePolicy?:PricePolicy}){
+export default function MaceioIntroSlides({selection,data,initialMonetaryPolicy=maceioMonetaryPolicy(selection),initialPricePolicy='stock-weighted'}:{selection:MaceioSelection;data:MaceioIntroData|null;initialMonetaryPolicy?:MonetaryPolicy;initialPricePolicy?:PricePolicy}){
  const [page,setPage]=useState(1),[expanded,setExpanded]=useState(false),[monetaryPolicy]=useState<MonetaryPolicy>(initialMonetaryPolicy),[pricePolicy]=useState<PricePolicy>(initialPricePolicy);
  const reference=maceioReference(selection.periodicity),market=page>=21&&page<=40&&![29,39].includes(page)?buildMaceioMarketSlide(page,selection,data?.slides??null,monetaryPolicy):null;
  const advanced=page>=41&&page<=60?buildOfferPriceSlide(page,selection,data?.slides??null,pricePolicy):null;
@@ -24,6 +25,7 @@ export default function MaceioIntroSlides({selection,data,initialMonetaryPolicy=
   <header className="space-y-1"><h2 className="text-lg font-semibold">Slides do relatório · {selection.periodicity==='monthly'?'Mensal':'Trimestral'}</h2><p className="text-sm text-muted-foreground">Prévia: {reference.slideCount} slides, na sequência original · {maceioPeriod(selection).label}. Fontes e métodos pendentes permanecem identificados.</p></header>
   {navigation}
   <div className="flex flex-wrap items-center justify-between gap-2"><p className="text-sm font-medium">Slide {page} · {title}</p><Button variant="outline" onClick={()=>setExpanded(true)}>Ampliar slides</Button></div>
+  {market?.money && monetaryPolicy === 'INCC-DI' && <p className="text-sm text-muted-foreground">Valores corrigidos pelo INCC-DI · base {maceioPeriod(selection).label}.</p>}
   {[...(advanced?.warnings??[]),...(remaining?.warnings??[])].map(warning=><p key={warning} role="status" className="text-sm text-muted-foreground">{warning}</p>)}
   {caged?.warning&&<p role="status" className="text-sm text-muted-foreground">{caged.warning}</p>}
 

@@ -17,13 +17,15 @@ try{
     cagedCalls++;await new Promise(r=>setTimeout(r,1600));return state==='error'?reply({error:'source unavailable'},502):reply({report:state==='empty'?{...caged,completePeriods:[],rows:[]}:caged});
    }
    if(url.pathname==='/public-api/monitored-cities')return reply({data:cities.map(city=>({city,state:'AL'})),links:{next:null}});
-   if(url.hostname!=='geobrain.com.br')return route.abort();const city=url.searchParams.get('city'),metric=url.pathname.split('/').at(-1),row={city,state:'AL',building_type:url.searchParams.get('type')??url.searchParams.get('type[]')??'Vertical'};
+   if(!['geobrain.com.br','app.geobrain.com.br'].includes(url.hostname))return route.abort();const city=url.searchParams.get('city'),metric=url.pathname.split('/').at(-1),row={city,state:'AL',building_type:url.searchParams.get('type')??url.searchParams.get('type[]')??'Vertical'};
+   if(metric==='building-with-history-internal'&&route.request().method()!=='POST')return route.fulfill({status:405,body:'method'});
    if(metric==='building-with-history')return reply({data:[row],meta:{total:1}});
    if(metric==='building')return reply({data:[{...row,building_id:city,release_date:'2026-05-01',standard:'Luxo'}],meta:{current_page:1,last_page:1,total:1}});
    const sources=row.building_type==='Vertical'?fixture.sources:row.building_type==='Horizontal'?fixture.horizontal:fixture.commercial,group=url.searchParams.get('group_by')??'Padrão';
    const source=sources?.find(s=>s.city===city&&s.metric===(metric==='building-with-history-internal'?'details':metric)&&s.group===(metric==='building-with-history-internal'?'Empreendimento':group));assert.ok(source);
    let data=source.rows;if(metric!=='building-with-history-internal'){const start=url.searchParams.get('start_period').slice(0,7),end=url.searchParams.get('end_period').slice(0,7);data=data.filter(row=>row.period.slice(0,7)>=start&&row.period.slice(0,7)<=end);}
-   const page=Number(url.searchParams.get('page')??1),last=Math.max(1,Math.ceil(data.length/100));return reply({data:data.slice((page-1)*100,page*100),meta:{current_page:page,last_page:last,total:data.length},links:{next:page===last?null:`${url.origin}${url.pathname}?city=${encodeURIComponent(city)}&page=${page+1}`}});
+   if(metric!=='building-with-history-internal')data=data.map(({city:_city,state:_state,...fields})=>fields);
+   const page=Number(url.searchParams.get('page')??1),last=Math.max(1,Math.ceil(data.length/100));return reply({data:data.slice((page-1)*100,page*100),meta:{current_page:page,last_page:last,total:data.length},links:{next:page===last?null:`${url.origin}${url.pathname}?page=${page+1}`}});
   });
   const page=await context.newPage();page.on('pageerror',e=>errors.push(e.message));await page.goto(`${base}/rebrain/relatorios-institucionais/maceio`);await page.evaluate(dark=>document.documentElement.classList.toggle('dark',dark),dark);
   await page.locator('#maceio-position').click();await page.getByRole('option',{name:'maio',exact:true}).click();if(quarterly){await page.locator('#maceio-periodicity').click();await page.getByRole('option',{name:'Trimestral',exact:true}).click();}

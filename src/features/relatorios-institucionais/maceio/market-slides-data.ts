@@ -1,3 +1,5 @@
+import { checkMaceioNext, scopeMaceioRow, MACEIO_HISTORY_URL, MaceioSourceError, sourceFailure } from './source-contract';
+import { readBuildingPage } from '@/features/panorama-secovi-fiergs/domain/building-source';
 import { httpRequest } from '@/lib/http-client';
 import { requestWithRetry } from '@/features/panorama-secovi-fiergs/lib/request-with-retry';
 import { marketMonth, normalizeMarketText, type MarketRow } from './market';
@@ -9,7 +11,7 @@ import incc from '../fortaleza/incc-di.json';
 export type MonetaryPolicy='unconfirmed'|'INCC-DI';
 export type SlideMetric='releases'|'sales'|'stock'|'details';
 export type SlideGroup='Padrão'|'Tipologia'|'Empreendimento';
-export interface SlideSource {city:string;metric:SlideMetric;group:SlideGroup;rows:MarketRow[];complete:boolean;issue:string|null;requests:number}
+export interface SlideSource {city:string;metric:SlideMetric;group:SlideGroup;rows:MarketRow[];complete:boolean;issue:string|null;requests:number;failure?:{code:string;httpStatus:number|null};endpoint?:string}
 export interface MaceioMarketSlidesData {start:string;end:string;sources:SlideSource[];finishedAt:string;horizontal?:SlideSource[];commercial?:SlideSource[]}
 export interface MaceioChartData {kind:'line'|'area'|'comparison'|'ranking';series:MaceioSeries;groups:string[];values:number[][];years:string[];ranking:{label:string;value:number}[];cities:{label:string;value:number}[];issue:string|null;note:string;money:boolean}
 const patterns=['Luxo','Médio Padrão','MCMV','Compactos'];
@@ -38,20 +40,24 @@ export async function collectMaceioMarketSlides(selection:MaceioSelection,author
     let expectedTotal:number|undefined,expectedLast:number|undefined;
     for(let page=1;page<=100;page++){
      check();options.onProgress?.(`${segment} · ${sources.filter(Boolean).length} de ${tasks.length} fontes · ${task.city} · ${task.metric} · ${task.group} · página ${page}`);
-     const url=`https://geobrain.com.br/public-api/${task.metric==='details'?'building-with-history-internal':`temporal-analysis-city/${task.metric}`}`;
-     const query={city:task.city,uf:'AL',...(task.metric==='details'?{type:segment}:{'type[]':[segment],group_by:task.group}),start_period:`${options.closingOnly?period.end.slice(0,7):months[0]}-01`,end_period:period.end,page,per_page:100};
-     const response=await requestWithRetry(()=>{source.requests++;return request({url,query,headers:{Authorization:`Bearer ${options.token}`},includeAuth:false,signal:options.signal,timeoutMs:20000,cache:'no-store'});},{signal:options.signal,attempts:2});check();
-     const data=response.data,meta=data?.meta;
+     const url=task.metric==='details'?MACEIO_HISTORY_URL:`https://geobrain.com.br/public-api/temporal-analysis-city/${task.metric}`;source.endpoint=url;
+     const query={city:task.city,uf:'AL',...(task.metric==='details'?{type:segment}:{'type[]':[segment],group_by:task.group,start_period:`${options.closingOnly?period.end.slice(0,7):months[0]}-01`,end_period:period.end}),page,per_page:100};
+     const response=await requestWithRetry(()=>{source.requests++;return request({method:task.metric==='details'?'POST':'GET',url,query,headers:{...(task.metric==='details'?{'Content-Type':'application/json'}:{}),Authorization:`Bearer ${options.token}`},includeAuth:false,signal:options.signal,timeoutMs:60000,cache:'no-store'});},{signal:options.signal,attempts:2});check();
+     if(!response.ok)throw new MaceioSourceError(response.status===null?'NETWORK':'HTTP',response.status);
+     const raw=response.data;
+     const detailed=task.metric==='details'&&raw?readBuildingPage(raw as unknown as Record<string,unknown>,{city:task.city,uf:'AL'},page,'building-with-history-internal-v2'):null;
+     const data=detailed?{...raw,data:detailed.buildings,meta:{current_page:page,last_page:detailed.lastPage,total:detailed.total??undefined}}:raw,meta=data?.meta;
      if(!response.ok||!Array.isArray(data?.data)||!meta||meta.current_page!==page||!Number.isSafeInteger(meta.total)||meta.total!<0||!Number.isSafeInteger(meta.last_page)||meta.last_page!<page||meta.last_page!>100||data.data.length>100)throw new Error();
      expectedTotal??=meta.total;expectedLast??=meta.last_page;
      if(meta.total!==expectedTotal||meta.last_page!==expectedLast||(!data.data.length&&meta.total!>0))throw new Error();
-     const link=data.links?.next;if(link){const urlNext=new URL(link,url);if(urlNext.origin!==new URL(url).origin||urlNext.pathname!==new URL(url).pathname||urlNext.searchParams.get('city')!==task.city||Number(urlNext.searchParams.get('page'))!==page+1)throw new Error();}
-     for(const row of data.data){if(normalizeMarketText(row.city)!==normalizeMarketText(task.city)||row.state!=='AL'||normalizeMarketText(row.building_type)!==normalizeMarketText(segment))throw new Error();if(task.metric!=='details'){const month=marketMonth(row.period);if(!month||month<(options.closingOnly?period.end.slice(0,7):months[0])||month>period.end.slice(0,7))throw new Error();}}
-     source.rows.push(...data.data);
+     const link=data.links?.next;checkMaceioNext(link,url,query,page,expectedLast,task.metric==='details');
+     const scoped=data.data.map(row=>scopeMaceioRow(row,task.city,segment,task.metric!=='details'));
+     for(const row of scoped){if(task.metric!=='details'){const month=marketMonth(row.period);if(!month||month<(options.closingOnly?period.end.slice(0,7):months[0])||month>period.end.slice(0,7))throw new MaceioSourceError('PERIOD');}}
+     source.rows.push(...scoped);
      if(page===expectedLast){if(source.rows.length!==expectedTotal||link)throw new Error();source.complete=true;break;}
     }
     if(!source.complete)throw new Error();
-   }catch{check();source.complete=false;source.rows=[];source.issue=`${task.city}: fonte ${task.metric}/${task.group} não concluída. Tente novamente.`;}
+   }catch(error){check();source.failure=sourceFailure(error);source.complete=false;source.rows=[];source.issue=`${task.city}: fonte ${task.metric}/${task.group} não concluída. Tente novamente.`;}
    sources[index]=source;
   }
  }

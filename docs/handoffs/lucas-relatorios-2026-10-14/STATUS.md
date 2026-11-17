@@ -1,5 +1,13 @@
 # Estado do handoff
 
+## 17/11/2026 — Maceió mensal: fontes pendentes e série INCC-DI autorizada
+
+Codex, base `7b57f0ce`, main limpa/origin único0/0 após fetch. Lucas forneceu JSON real de maio/2026:0disponíveis/55fontes/5critérios/22editoriais; pediu corrigir fontes exceto CAGED e autorizou INCC-DI, explicitamente identificado. Ajustes locais: recurso temporal oficial sem cidade/UF por linha, cursor sem city com requisição reconstruída no escopo, POST v2 para histórico detalhado com parser BuildingSource existente e sem corte de fotografias, timeout60s/retry limitado e diagnóstico de falha sanitizado/HTTP. INCC-DI padrão somente mensal, base no fechamento, explícito na prévia/arte/metodologia/JSON; sem índice ou valor nominal não há preenchimento.
+
+[Evidência e limites](../../features/relatorios-institucionais/maceio/FONTES_MENSAL_2026-11-17.md).134testes inicialmente aprovados e testes focados posteriores aprovados. Mensal sintético chega a60disponíveis+22editoriais; CAGED indisponível mantém apenas6fontes pendentes. Falta comprovar geração autenticada real no ambiente do usuário; Opera bloqueado pela ferramenta e nenhum tokenGeobrain local. Após autorização de push/publicação, gerar novo JSON e conferir falhasHTTP/cobertura/categorias/campos monetários. Sem mudança em CAGED/GCP/ponte, domínios paralelos, push/deploy ou Monday neste lote. Fechamento registra resultado final do navegador/build.
+
+Fechamento deste lote:134testes do módulo, typecheck/lint e build final aprovados;12cenários finais de navegador sintético aprovados sem erros de página, com download JSON, contratos públicos/v2 e indicação INCC-DI. Captura desktop revisada. Commit local isolado; publicação continua aguardando autorização.
+
 ## 17/11/2026 — Maceió: padrão de prévia e diagnóstico JSON
 
 Codex, base `ab8201eb`, main, origin único 0/0 após fetch. Usuário rejeitou inventário editorial e seletor de fórmula na prévia e pediu total aguardando fonte/exportação JSON. Removidos inventário/ação de conferir estrutura e seletores técnicos; preço usa ponderação histórica já implementada e registrada na origem/diagnóstico, sem exigir escolha por geração. INCC continua sem série presumida e valores corrigidos permanecem pendentes.

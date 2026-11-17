@@ -3,6 +3,7 @@ import { requestWithRetry } from '@/features/panorama-secovi-fiergs/lib/request-
 import { collectByCity, type CollectionResult } from '@/features/panorama-secovi-fiergs/domain/collection';
 import { maceioPeriod, maceioScope, type MaceioSelection } from './model';
 import { buildCityMarket, buildMaceioMarket, marketMonth, normalizeMarketText, type CityMarketInput, type MarketMetric, type MarketRow } from './market';
+import { scopeMaceioRow } from './source-contract';
 
 const BASE = 'https://geobrain.com.br/public-api';
 export interface MaceioEnvelope {
@@ -58,7 +59,9 @@ export async function collectMaceioMarket(selection: MaceioSelection, authorized
         throw new MaceioReadError('A fonte não respondeu nesta tentativa. Confira a conexão e tente novamente.');
       }
       if (!Array.isArray(response.data?.data)) throw new MaceioReadError('A fonte respondeu fora do contrato esperado.');
-      return response.data;
+      return path.startsWith('temporal-analysis-city/')
+        ? { ...response.data, data: response.data.data.map(row => scopeMaceioRow(row, city, 'Vertical', true)) }
+        : response.data;
     };
     try {
       options.onProgress?.(`${city} · conferindo o recorte vertical`);

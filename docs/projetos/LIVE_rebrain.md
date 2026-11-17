@@ -1,5 +1,15 @@
 # Rebrain (Plataforma) — Documento Vivo
 
+## 17/11/2026 — Maceió mensal: fontes públicas, histórico v2 e INCC-DI — Codex
+
+- **Pedido/evidência:** diagnóstico real de maio/2026 com0disponíveis/55fontes/5critérios/22editoriais; corrigir mensal, excluindo CAGED. Lucas autorizou **INCC-DI** e pediu identificação explícita da série.
+- **Correção:** recursos temporais não exigem mais cidade/UF por linha, conforme OpenAPI; identidade vem da query autorizada e conflitos explícitos são rejeitados. Cursores podem omitir filtros, com próxima chamada reconstruída no escopo original e totais/contagem estáveis. Histórico detalhado usa POST v2 já adotado no projeto, parser compartilhado de BuildingSource, sem cortar fotografias por período. Timeout60s/retry limitado; falhas sanitizadas categorizadas e HTTP no JSON.
+- **INCC-DI:** no mensal, VGL/VGV26–28/37–38 corrigidos até o fechamento; série/base identificadas na prévia, arte, metodologia e JSON. Trimestral não recebe série presumida. Ausência de índice/nominal continua pendente. [Contrato e limites](../features/relatorios-institucionais/maceio/FONTES_MENSAL_2026-11-17.md).
+- **Validação:**134testes do módulo, tipos/lint e build final de produção aprovados.12cenários finais de navegador aprovados sem erros de página; mensal/trimestral, desktop/mobile, claro/escuro e fonte sucesso/vazia/erro; download real do JSON e indicação INCC-DI verificados. Mensal sintético:60disponíveis+22editoriais; com CAGED indisponível,54disponíveis+6fontes (somente9–14)+22editoriais. Captura desktop revisada; sem coleta autenticada nova.
+- **Limite/pendências:** não há token Geobrain configurado nem controle da sessão Opera; não foi refeita coleta autenticada de maio/2026. Após publicação autorizada, gerar novo JSON real e conferir permissões v2/cobertura/campos nominais/categorias. CAGED/job/rota/Scheduler permanecem fora deste lote.
+- **Base/autoria:** `7b57f0ce`, main limpa, origin único0/0 após fetch; Codex. Commit desta entrega local. Sem push/deploy/Monday.
+- **Monday:** [Panorama Maceió / SINDUSCON](https://brain381753.monday.com/boards/18398638577/pulses/13149406169) — `13149406169`.
+
 ## 17/11/2026 — Maceió: prévia limpa e diagnóstico JSON — Codex
 
 - **Pedido:** Lucas apontou inventário/“sem texto” e seletor de preços fora do padrão; faltavam total aguardando fonte e download JSON.
@@ -1885,6 +1895,8 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 
 ## 2. Etapas
 
+- **17/11 — Maceió mensal, correção de fontes:** contratos temporais/paginação e histórico POST v2 ajustados; INCC-DI autorizado por Lucas e explícito no mensal.134testes e12cenários de navegador sintético aprovados; geração autenticada real ainda não refeita.
+
 - **17/11 — Maceió, prévia/diagnóstico:** inventário/seletor técnico removidos, resumo de fontes e exportação JSON por slide implementados localmente. 129 testes, build e 12 cenários de navegador aprovados; publicação depende de autorização.
 
 - **17/11 — CAGED em ativação:** recursos GCP/job v1 criados pelo usuário; carga falhou no subsetor inválido de maio/2017. Correção local estrita com 7 testes; ainda sem nova imagem ou snapshot remoto.
@@ -2046,6 +2058,8 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 ---
 
 ## 3. Pendências
+
+- **17/11 — Maceió mensal, conferir fonte real após correção:** autorizar push, publicar frontend e gerar maio/2026 novamente; avaliar novo JSON com códigos de falha/HTTP, cobertura e valores monetários. INCC-DI do mensal já autorizado, trimestral segue separado. Não confundir ensaio sintético sem pendências com dados reais homologados. CAGED excluído deste pedido.
 
 - **17/11 — Maceió, publicar interface:** autorizar push da limpeza de prévia e diagnóstico JSON. Conferir geração autenticada e homologar critérios; carga CAGED remota ainda em execução, rota/Scheduler pendentes. Arquivo JSON não substitui exportação PPTX/PDF.
 

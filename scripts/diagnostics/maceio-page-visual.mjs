@@ -14,8 +14,9 @@ try{
    const url=new URL(route.request().url());if(url.hostname==='127.0.0.1')return route.continue();
    const reply=data=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(data)});
    if(url.pathname==='/public-api/monitored-cities'){await new Promise(r=>setTimeout(r,800));return reply({data:cities.map(city=>({city,state:'AL'})),links:{next:null}});}
-   if(url.hostname!=='geobrain.com.br')return route.abort();const city=url.searchParams.get('city'),metric=url.pathname.split('/').at(-1);
+   if(!['geobrain.com.br','app.geobrain.com.br'].includes(url.hostname))return route.abort();const city=url.searchParams.get('city'),metric=url.pathname.split('/').at(-1);
    const row={city,state:'AL',building_type:url.searchParams.get('type')??url.searchParams.get('type[]')??'Vertical'};
+   if(metric==='building-with-history-internal'&&route.request().method()!=='POST')return route.fulfill({status:405,body:'method'});
    if(metric==='building-with-history')return reply({data:[row],meta:{total:1}});
    if(metric==='building')return reply({data:[{...row,building_id:city,release_date:'2026-05-01',standard:'Luxo'}],meta:{current_page:1,last_page:1,total:1}});
    const segment=row.building_type,group=url.searchParams.get('group_by')??'Padrão';
@@ -30,8 +31,9 @@ try{
     if(long){historyKeys.add(`${city}/${metric}/${group}`);if(!delayed){delayed=true;await new Promise(r=>setTimeout(r,800));}}
     if(coreBroken&&!long&&metric==='sales')data=data.map(row=>({...row,liquid_sales:null}));
    }
+   if(metric!=='building-with-history-internal')data=data.map(({city:_city,state:_state,...fields})=>fields);
    const number=Number(url.searchParams.get('page')??1),last=Math.max(1,Math.ceil(data.length/100));
-   return reply({data:data.slice((number-1)*100,number*100),meta:{current_page:number,last_page:last,total:data.length},links:{next:number===last?null:`${url.origin}${url.pathname}?city=${encodeURIComponent(city)}&page=${number+1}`}});
+   return reply({data:data.slice((number-1)*100,number*100),meta:{current_page:number,last_page:last,total:data.length},links:{next:number===last?null:`${url.origin}${url.pathname}?page=${number+1}`}});
   });
   const page=await context.newPage();page.on('pageerror',e=>errors.push(e.message));await page.goto(`${base}/rebrain/relatorios-institucionais/maceio`);await page.evaluate(dark=>document.documentElement.classList.toggle('dark',dark),dark);
   await page.locator('#maceio-position').click();await page.getByRole('option',{name:'maio',exact:true}).click();
@@ -41,7 +43,7 @@ try{
   await page.getByRole('region',{name:'Carregamento do relatório Maceió'}).waitFor();assert.ok(await page.getByRole('complementary').isVisible());
   await page.getByRole('button',{name:'40',exact:true}).waitFor({timeout:60000});await page.getByRole('button',{name:'19',exact:true}).click();assert.equal(await page.locator('[data-maceio-chart]').count(),1);assert.equal(historyKeys.size,quarterly?36:42);
   await page.getByRole('button',{name:'40',exact:true}).click();assert.equal(await page.locator('[data-maceio-chart]').count(),1);
-  await page.getByRole('button',{name:'26',exact:true}).click();assert.equal(await page.locator('[data-maceio-pending]').count(),1);assert.equal(await page.locator('#maceio-monetary-policy').count(),0);
+  await page.getByRole('button',{name:'26',exact:true}).click();assert.equal(await page.locator('[data-maceio-pending]').count(),quarterly?1:0);assert.equal(await page.locator('#maceio-monetary-policy').count(),0);
   await page.getByRole('button',{name:quarterly?'72':'71',exact:true}).click();assert.equal(await page.locator('[data-maceio-chart]').count(),1);
   await page.getByRole('button',{name:quarterly?'74':'73',exact:true}).click();assert.equal(await page.locator('[data-maceio-pending]').count(),0);
   assert.equal(await page.locator('#maceio-price-policy').count(),0);assert.equal(await page.locator('[data-maceio-chart]').count(),1);
