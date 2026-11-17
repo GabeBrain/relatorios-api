@@ -11,7 +11,7 @@ describe('Maceió · contratos dos slides21–40',()=>{
   const data=marketSlidesFixture(selection),all=buildMaceioMarketSlide(30,selection,data),mcmv=buildMaceioMarketSlide(33,selection,data);
   expect(mcmv.issue).toBeNull();expect(mcmv.series.capital.at(-1)).toBeLessThan(all.series.capital.at(-1)!);
   const source=data.sources.find(source=>source.city==='Maceió'&&source.metric==='sales'&&source.group==='Padrão')!;
-  source.rows=source.rows.filter(row=>row.group!=='MCMV');expect(buildMaceioMarketSlide(33,selection,data).issue).toMatch(/MCMV/);
+  source.rows=source.rows.filter(row=>row.group!=='MCMV');expect(buildMaceioMarketSlide(33,selection,data).series.capital.at(-1)).toBe(0);
  });
  it('estoque trimestral usa só o último mês; vendas somam os três meses',()=>{
   const s={...selection,periodicity:'quarterly' as const,position:2},data=marketSlidesFixture(s);
@@ -23,7 +23,7 @@ describe('Maceió · contratos dos slides21–40',()=>{
   const data=marketSlidesFixture(selection),source=data.sources.find(source=>source.city==='Maceió'&&source.metric==='sales'&&source.group==='Padrão')!;
   source.rows.filter(row=>row.period==='2026-05-01').forEach(row=>row.liquid_sales=-2);
   expect(buildMaceioMarketSlide(30,selection,data).series.capital.at(-1)).toBe(-8);
-  source.rows=source.rows.filter(row=>row.period!=='2026-05-01');expect(buildMaceioMarketSlide(30,selection,data).issue).toMatch(/competências/);
+  source.rows=source.rows.filter(row=>row.period!=='2026-05-01');expect(buildMaceioMarketSlide(30,selection,data).series.capital.at(-1)).toBe(0);
  });
  it('soma12meses por fechamento e preserva38posições nos acumulados novos',()=>{
   const data=marketSlidesFixture(selection),model=buildMaceioMarketSlide(31,selection,data),source=data.sources.find(source=>source.city==='Maceió'&&source.metric==='sales'&&source.group==='Padrão')!;
@@ -41,7 +41,7 @@ describe('Maceió · contratos dos slides21–40',()=>{
   const data=marketSlidesFixture(selection);expect(buildMaceioMarketSlide(23,selection,data).issue).toBeNull();
   data.sources.find(source=>source.city==='Maceió'&&source.metric==='releases'&&source.group==='Tipologia')!.rows.at(-1)!.releases_in_period=0;
   expect(buildMaceioMarketSlide(23,selection,data).issue).toMatch(/diverge/);
-  data.sources.find(source=>source.city==='Maceió'&&source.metric==='releases'&&source.group==='Padrão')!.rows[0].group='Econômico';expect(buildMaceioMarketSlide(21,selection,data).issue).toMatch(/correspondência/);
+  data.sources.find(source=>source.city==='Maceió'&&source.metric==='releases'&&source.group==='Padrão')!.rows[0].group='Categoria desconhecida';expect(buildMaceioMarketSlide(21,selection,data).issue).toMatch(/correspondência/);
  });
  it('rankings exigem fluxos explícitos e soma integral, sem substituir capacidade',()=>{
   const data=marketSlidesFixture(selection),rank=buildMaceioMarketSlide(25,selection,data);expect(rank.issue).toBeNull();expect(rank.ranking).toHaveLength(2);expect(rank.cities).toHaveLength(0);

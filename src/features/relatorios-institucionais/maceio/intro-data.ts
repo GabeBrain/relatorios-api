@@ -1,3 +1,4 @@
+import { maceioPatternFamily } from './classification';
 import { checkMaceioNext, scopeMaceioRow, MaceioSourceError, sourceFailure } from './source-contract';
 import { requestWithRetry } from '@/features/panorama-secovi-fiergs/lib/request-with-retry';
 import { httpRequest } from '@/lib/http-client';
@@ -66,7 +67,7 @@ export async function collectMaceioIntro(selection:MaceioSelection,authorized:st
 
 export function buildMaceioLaunchSeries(page:number,selection:MaceioSelection,data:MaceioIntroData|null):MaceioSeries {
   const buildings=page===16||page===18,rolling=page===18||page===20;
-  const note=buildings?'Empreendimentos distintos pelo ID e mês de lançamento do cadastro atual; revisões cadastrais podem alterar o histórico.':'Unidades lançadas por competência e padrão da fonte municipal vertical; ausência de mês não representa zero.';
+  const note=buildings?'Empreendimentos distintos pelo ID e mês de lançamento do cadastro atual; revisões cadastrais podem alterar o histórico.':'Unidades lançadas por competência e padrão da fonte municipal vertical; competências sem registros em consulta concluída contam como zero no mercado pesquisado, por decisão do analista. Falhas não representam zero.';
   const empty=(issue:string):MaceioSeries=>({labels:[],capital:[],rm:[],issue,note});
   if(!data)return empty('Gere o relatório para consultar as fontes de lançamentos.');
   const scope=maceioScope(selection,data.cities.map(item=>item.city));
@@ -74,7 +75,7 @@ export function buildMaceioLaunchSeries(page:number,selection:MaceioSelection,da
   const months=launchMonths(selection,61),totals=new Map<string,{capital:number;rm:number}>(months.map(month=>[month,{capital:0,rm:0}]));
   for(const source of data.cities){
     if(!(buildings?source.buildingsComplete:source.unitsComplete))return empty(source.issues.join(' ')||'Fonte de lançamentos incompleta.');
-    const seen=new Set<string>(),observed=new Set<string>();
+    const seen=new Set<string>();
     for(const row of buildings?source.buildings:source.units){
       const month=marketMonth(buildings?row.release_date:row.period);
       if(!month)return empty('Há lançamentos sem competência válida na fonte.');
@@ -83,11 +84,10 @@ export function buildMaceioLaunchSeries(page:number,selection:MaceioSelection,da
       const id=buildings?String(row.building_id??row.id??''):`${month}/${normalizeMarketText(group)}`;
       const value=buildings?1:Number(row.releases_in_period);
       if(!id||(!buildings&&(!group||/^(total|subtotal)(\b|$)/i.test(group)||!['number','string'].includes(typeof row.releases_in_period)||!/^\d+$/.test(String(row.releases_in_period))||!Number.isSafeInteger(value)||value<0))||seen.has(id))return empty('Fonte com identificadores duplicados ou quantidades inválidas.');
-      seen.add(id);observed.add(month);
+      seen.add(id);
       const bucket=totals.get(month)!;bucket[normalizeMarketText(source.city)==='maceio'?'capital':'rm']+=value;
       if(!Number.isSafeInteger(bucket.capital)||!Number.isSafeInteger(bucket.rm))return empty('Quantidade fora do limite seguro.');
     }
-    if(!buildings&&months.some(month=>!observed.has(month)))return empty(`${source.city}: faltam competências no histórico de unidades lançadas.`);
   }
   const keys=rolling?months.slice(-39):selection.periodicity==='monthly'?months.slice(-25):months.slice(-51).filter((_,index)=>index%3===2);
   const values=keys.map(month=>{
@@ -110,7 +110,7 @@ export function buildMaceioPattern(selection:MaceioSelection,data:MaceioIntroDat
       const month=marketMonth(row.release_date),id=String(row.building_id??row.id??'');
       if(!month||!id||seen.has(id))return {years,names,values,issue:'Cadastro sem identificação ou data de lançamento confiável.'};
       seen.add(id);const year=years.indexOf(Number(month.slice(0,4)));if(year<0||month>end)continue;
-      const pattern=names.findIndex(name=>normalizeMarketText(name)===normalizeMarketText(row.standard));
+      const pattern=names.findIndex(name=>normalizeMarketText(name)===normalizeMarketText(maceioPatternFamily(row.standard)));
       if(pattern<0)return {years,names,values,issue:'A correspondência entre os padrões da API e Luxo, Médio Padrão, MCMV e Compactos precisa de confirmação.'};
       values[year][pattern]++;
     }

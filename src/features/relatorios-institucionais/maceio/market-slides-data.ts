@@ -1,3 +1,4 @@
+import { maceioPatternFamily } from './classification';
 import { checkMaceioNext, scopeMaceioRow, MACEIO_HISTORY_URL, MaceioSourceError, sourceFailure } from './source-contract';
 import { readBuildingPage } from '@/features/panorama-secovi-fiergs/domain/building-source';
 import { httpRequest } from '@/lib/http-client';
@@ -72,7 +73,7 @@ export function readNumber(value:unknown,negative:boolean,money=false):number|nu
 const fields={releases:'releases_in_period',sales:'liquid_sales',stock:'stock'} as const;
 const moneyFields={releases:'vgv_release',sales:'vgv_liquid_sales',stock:'vgv_stock'} as const;
 interface Cell {city:string;month:string;group:string;value:number}
-export function readCells(selection:MaceioSelection,data:MaceioMarketSlidesData,metric:Exclude<SlideMetric,'details'>,group:SlideGroup,money:boolean,policy:MonetaryPolicy){
+export function readCells(selection:MaceioSelection,data:MaceioMarketSlidesData,metric:Exclude<SlideMetric,'details'>,group:SlideGroup,money:boolean,policy:MonetaryPolicy,requiredMonths?:readonly string[]){
  const scope=maceioScope(selection,[...new Set(data.sources.map(source=>source.city))]),months=maceioSourceMonths(selection),cells:Cell[]=[];
  if(!scope.valid||data.start!==months[0]||data.end!==months.at(-1))return {cells,issue:'O histórico não corresponde ao recorte/período selecionado.'};
  if(money&&policy!=='INCC-DI')return {cells,issue:'A série do INCC de Maceió ainda precisa ser definida pelo analista. Escolha o índice somente após confirmar o critério.'};
@@ -82,7 +83,7 @@ export function readCells(selection:MaceioSelection,data:MaceioMarketSlidesData,
   const source=data.sources.find(item=>item.city===city&&item.metric===metric&&item.group===group);
   if(!source?.complete)return {cells:[],issue:source?.issue??`${city}: fonte ${metric}/${group} ausente.`};
   const seen=new Set<string>(),observed=new Set<string>();
-  for(const row of source.rows){const month=marketMonth(row.period),label=typeof row.group==='string'?row.group.trim():'';
+  for(const row of source.rows){const month=marketMonth(row.period),label=typeof row.group==='string'||typeof row.group==='number'?String(row.group).trim():'';
    if(!month||!months.includes(month)||!label||/^(total|subtotal)(\b|$)/i.test(label))return {cells:[],issue:`${city}: competência ou grupo inválido no histórico.`};
    const key=`${month}/${normalizeMarketText(label)}`,raw=readNumber(row[money?moneyFields[metric]:fields[metric]],metric==='sales',money);
    if(seen.has(key)||raw===null)return {cells:[],issue:`${city}: duplicação ou quantidade inválida na fonte.`};seen.add(key);observed.add(month);
@@ -90,7 +91,10 @@ export function readCells(selection:MaceioSelection,data:MaceioMarketSlidesData,
    const value=money?raw*base/indices[month]/1e6:raw;
    cells.push({city,month,group:label,value});
   }
-  if(months.some(month=>!observed.has(month)))return {cells:[],issue:`${city}: faltam competências no histórico ${metric}/${group}.`};
+  if((requiredMonths??months).some(month=>!months.includes(month)))return {cells:[],issue:'Periodo solicitado fora da consulta.'};
+  // Lucas confirmed: a completed scoped scan without records means zero in the surveyed market.
+  // Missing numeric fields on existing records still fail above.
+  for(const month of months.filter(month=>!observed.has(month)))for(const label of group==='Tipologia'?['1','2','3','4']:patterns)cells.push({city,month,group:label,value:0});
  }
  return {cells,issue:null};
 }
@@ -102,14 +106,13 @@ function calculateMaceioMarketSlide(page:number,selection:MaceioSelection,data:M
  const rolling=[27,31,38].includes(page),area=[21,28,32].includes(page),comparison=[23,24,34,35].includes(page),ranking=[25,36].includes(page);
  const kind=area?'area':comparison?'comparison':ranking?'ranking':'line';
  const emptySeries:MaceioSeries={labels:[],capital:[],rm:[],issue:null,note:''};
- const note=money?'Valores em R$ milhões, corrigidos por INCC-DI ao mês do fechamento; série escolhida explicitamente para conferência metodológica.':metric==='stock'?'Oferta no último mês de cada período, sem soma de estoques.':'Fluxos municipais verticais por competência. Vendas líquidas negativas preservadas; ausência não equivale a zero.';
+ const note=(money?'Valores em R$ milhões, corrigidos por INCC-DI ao mês do fechamento; série escolhida explicitamente para conferência metodológica.':metric==='stock'?'Oferta no último mês de cada período, sem soma de estoques.':'Fluxos municipais verticais por competência. Vendas líquidas negativas preservadas.')+' Competências sem registros em consulta concluída contam como zero no mercado pesquisado, por decisão do analista. Falhas ou campos inválidos não viram zero.';
  const result:MaceioChartData={kind,series:emptySeries,groups:[],values:[],years:[],ranking:[],cities:[],issue:null,note,money};
  const block=(issue:string)=>({...result,issue});if(!data)return block('Gere o relatório para consultar as fontes deste bloco.');
  const read=readCells(selection,data,metric,'Padrão',money,policy);if(read.issue)return block(read.issue);
- let cells=read.cells;const months=maceioSourceMonths(selection),end=months.at(-1)!;
+ let cells=read.cells.map(cell=>({...cell,group:maceioPatternFamily(cell.group)??cell.group}));const months=maceioSourceMonths(selection),end=months.at(-1)!;
  if([22,33].includes(page)){
   if(cells.some(cell=>!patterns.some(name=>normalizeMarketText(name)===normalizeMarketText(cell.group))))return block('A classificação MCMV não foi confirmada nos padrões da fonte.');
-  for(const city of maceioScope(selection,data.sources.map(source=>source.city)).cities)if(months.some(month=>!cells.some(cell=>cell.city===city&&cell.month===month&&normalizeMarketText(cell.group)==='mcmv')))return block(`${city}: a série MCMV exige observações explícitas por competência.`);
   cells=cells.filter(cell=>normalizeMarketText(cell.group)==='mcmv');
  }
  const periodMonths=(year:number)=>maceioPeriod({...selection,year}).months;
@@ -125,7 +128,7 @@ function calculateMaceioMarketSlide(page:number,selection:MaceioSelection,data:M
   if(input.issue)return block(input.issue);result.groups=groups;result.years=[selection.year-1,selection.year].map(year=>selection.periodicity==='monthly'?`${end.slice(5)}/${year}`:`${selection.position}T/${year}`);
   result.values=[selection.year-1,selection.year].map(year=>groups.map(()=>0));
   for(const [index,year] of [selection.year-1,selection.year].entries()){
-   const window=periodMonths(year),values=input.cells.filter(cell=>window.includes(cell.month));
+   const window=periodMonths(year),values=input.cells.map(cell=>({...cell,group:typology?cell.group:maceioPatternFamily(cell.group)??cell.group})).filter(cell=>window.includes(cell.month));
    for(const cell of values){const raw=normalizeMarketText(cell.group),match=typology?/^([1-4])(?:\s+(?:dorm|dormitorio|dormitorios|quarto|quartos))?$/.exec(raw):null;
     const groupIndex=typology?match?Number(match[1])-1:-1:groups.findIndex(name=>normalizeMarketText(name)===raw);
     if(groupIndex<0)return block('Categoria da fonte sem correspondência comprovada com os grupos do original.');result.values[index][groupIndex]+=cell.value;

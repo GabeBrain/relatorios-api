@@ -48,6 +48,8 @@ export function buildMaceioDiagnostic(selection: MaceioSelection, state: Diagnos
   const metadata = (items: SlideSource[] | undefined, closingOnly = false) => (items ?? []).map(source => ({
     city: source.city, metric: source.metric, group: source.group, complete: source.complete,
     rows: source.rows.length, issue: source.issue, failure: source.failure ?? null, endpoint: source.endpoint ?? null,
+    zeroMonths: source.complete && source.metric!=='details'
+      ? (closingOnly ? [maceioPeriod(selection).end.slice(0,7)] : maceioSourceMonths(selection)).filter(month=>!source.rows.some(row=>String(row.period).slice(0,7)===month)) : [],
     audit: auditMaceioSource(source, closingOnly ? [maceioPeriod(selection).end.slice(0, 7)] : maceioSourceMonths(selection)),
   }));
   return {
@@ -59,7 +61,9 @@ export function buildMaceioDiagnostic(selection: MaceioSelection, state: Diagnos
     homologated: false,
     auditVersion: 'maceio-source-audit-v1',
     collection: { vertical: collectionStatus(sources?.sources), horizontal: collectionStatus(sources?.horizontal), commercial: collectionStatus(sources?.commercial) },
-    criteria: { prices: 'stock-weighted', monetaryIndex: maceioMonetaryPolicy(selection), monetaryBase: maceioPeriod(selection).end.slice(0, 7) },
+    criteria: { prices: 'stock-weighted', monetaryIndex: maceioMonetaryPolicy(selection), monetaryBase: maceioPeriod(selection).end.slice(0, 7),
+      emptyPeriods: 'completed-scoped-scan-as-zero; failed scans and missing numeric fields remain unavailable',
+      patternGrouping: { Compacto:'Compactos', Econômico:'MCMV', Standard:'Médio Padrão', Médio:'Médio Padrão', 'Médio-Alto':'Médio Padrão', Alto:'Luxo', Luxo:'Luxo' } },
     summary: Object.fromEntries(statuses.map(status => [status, slides.filter(slide => slide.status === status).length])) as Record<Status, number>,
     slides,
     sources: {

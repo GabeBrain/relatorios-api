@@ -28,7 +28,9 @@ describe('diagnóstico Maceió', () => {
     expect(diagnostic.summary['source-pending']).toBeLessThan(buildMaceioDiagnostic(selection, state).summary['source-pending']);
     expect(JSON.stringify(diagnostic)).not.toContain('building_id');
     expect(JSON.stringify(diagnostic)).not.toContain('typologies_history');
-    expect(diagnostic.criteria).toEqual({ prices: 'stock-weighted', monetaryIndex: 'INCC-DI', monetaryBase: '2026-05' });
+    expect(diagnostic.criteria.emptyPeriods).toContain('completed-scoped-scan-as-zero');
+    expect(diagnostic.criteria.patternGrouping.Standard).toBe('Médio Padrão');
+    expect(diagnostic.criteria).toMatchObject({ prices: 'stock-weighted', monetaryIndex: 'INCC-DI', monetaryBase: '2026-05' });
   });
   it('trimestral completo só mantém CAGED pendente, com vertical, horizontal, comercial e INCC-DI disponíveis', () => {
     const quarterly: MaceioSelection = { ...selection, periodicity: 'quarterly', position: 2 };
@@ -37,7 +39,9 @@ describe('diagnóstico Maceió', () => {
     expect(diagnostic.slides).toHaveLength(87);
     expect(diagnostic.slides.filter(s => s.status === 'source-pending').map(s => s.number)).toEqual([9, 10, 11, 12, 13, 14]);
     expect(diagnostic.summary).toEqual({ available: 58, 'source-pending': 6, 'method-pending': 0, 'editorial-review': 23, 'not-implemented': 0 });
-    expect(diagnostic.criteria).toEqual({ prices: 'stock-weighted', monetaryIndex: 'INCC-DI', monetaryBase: '2026-06' });
+    expect(diagnostic.criteria.emptyPeriods).toContain('completed-scoped-scan-as-zero');
+    expect(diagnostic.criteria.patternGrouping.Standard).toBe('Médio Padrão');
+    expect(diagnostic.criteria).toMatchObject({ prices: 'stock-weighted', monetaryIndex: 'INCC-DI', monetaryBase: '2026-06' });
     expect(diagnostic.slides.filter(s => [26, 27, 28, 37, 38, 72, 73, 74, 76, 77, 78, 80, 81, 82].includes(s.number)).every(s => s.status === 'available')).toBe(true);
     expect(diagnostic.cities).toHaveLength(6);
     expect(diagnostic.cities).not.toContain('Coqueiro Seco');

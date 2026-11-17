@@ -1,5 +1,26 @@
 # Maceió — bloqueios após a coleta real — 17/11/2026
 
+## Atualização posterior — diagnóstico (3), decisões e correções
+
+Recebido `maceio-mensal-2026-05-diagnostico (3).json`, gerado às19:36:20UTC:12disponíveis/48fontes/22editoriais;63consultas imobiliárias completas, zero falhas. Garden/Cobertura deixaram de bloquear após `1c63413f`, liberando7slides. Dos48pendentes,6são CAGED e42imobiliários.32têm como primeiro bloqueio Pilar; não significa que os demais dados desses slides já estejam homologados.
+
+Decisões expressas de Lucas nesta sessão, posteriores às restrições registradas abaixo:
+
+- **Famílias:** Compacto→Compactos; Econômico→MCMV; Standard/Médio/Médio-Alto→Médio Padrão; Alto/Luxo→Luxo. Aplicadas aos gráficos agrupados, cadastro de lançamentos e estágio por família, mensal/trimestral. Padrões desconhecidos continuam pendentes.
+- **Varredura vazia:** após pedir registrar a interpretação de Pilar/Coqueiro Seco para depois, Lucas decidiu: “se não teve nada considera0então, pois se a varredura concluiu e deu0provavelmente é0mesmo”. Competências sem linhas em consulta completa contam como zero no mercado pesquisado. Não é comprovação de inexistência no município inteiro. Falhas, consultas parciais e campos nulos/inválidos dentro de linhas continuam indisponíveis. Reconciliação entre estoque granular e municipal permanece obrigatória. A decisão fica em `criteria.emptyPeriods` e os meses derivados em `sources.*.zeroMonths`; auditoria bruta conserva `null` e `missingMonths`, sem fingir resposta explícita da API.
+
+Correções adicionais:
+
+- Grupos numéricos por dormitórios passam a ser aceitos como os equivalentes textuais; nenhuma tipologia desconhecida é convertida.
+- Produtos horizontais reconhecem rótulos explícitos em `work` e demais campos, inclusive `Condomínio de Casas/Sobrados` e `Condomínio de Chácaras`. “Fechado” isolado e padrões de preço como “Econômico” não definem produto. Chácaras permanecem em categoria própria, sem serem somadas a casas ou lotes.
+- Escoamento preserva Médio-Alto como categoria própria, evitando excluir esse padrão recebido da API.
+- Tabela histórica do IVV preserva os meses válidos e mostra `null` nas competências com balanço inválido, com motivo datado em advertências. Média anual considera só meses reconciliados, explicitamente. Série mensal mantém o bloqueio de balanço inválido; nenhuma quantidade é ajustada para fechar.
+- Nota de preços corrigida: universo inclui Garden/Cobertura, sem a antiga descrição incorreta “somente Padrão”.
+
+**Limites que continuam:** fluxos granulares ausentes nos slides47/48 não são inferidos de capacidade ou preço; produtos sem identificação explícita continuam pendentes; divergências reais de estoque continuam bloqueadas. Com novos primeiros bloqueios removidos, outros campos não disponíveis podem aparecer na próxima geração. Não afirmar que todos os42slides imobiliários foram liberados.
+
+Validação headless:156testes Maceió/14arquivos aprovados, incluindo as duas edições, famílias, produtos, tipos numéricos, consultas completas vazias, erros/campos nulos, reconciliação e preservação de meses válidos do IVV. Sem token Geobrain ou acesso ao Opera para executar geração real neste ambiente. Após publicação autorizada, solicitar novo JSON mensal/trimestral; não substituir conferência real por fixture. CAGED, SP e outros motores sem alteração.
+
 ## Evidência recebida
 
 Novo arquivo `maceio-mensal-2026-05-diagnostico (1).json`, gerado às18:23:53UTC:5disponíveis/55fontes/0critérios/22editoriais. **As49fontes verticais e14horizontais estão completas, sem falhaHTTP/contrato.** Cadastro/lançamentos dos7municípios também completos. Assim, as correções de transporte de `2cea2276` foram observadas na coleta real; isso não prova a validade dos indicadores.

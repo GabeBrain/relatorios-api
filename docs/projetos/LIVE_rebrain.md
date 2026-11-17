@@ -1,5 +1,14 @@
 # Rebrain (Plataforma) — Documento Vivo
 
+## 17/11/2026 — Maceió: classificações, varreduras vazias e IVV histórico — Codex
+
+- **Pedido/evidência:** diagnóstico mensal(3) com12disponíveis/48fontes/22editoriais;63consultas imobiliárias completas. Lucas pediu corrigir os42bloqueios imobiliários, mantendo6CAGED fora. Base `1c63413f`, main/origin0/0após fetch.
+- **Decisões:** Lucas confirmou Compacto→Compactos, Econômico→MCMV, Standard/Médio/Médio-Alto→Médio Padrão, Alto/Luxo→Luxo. Também autorizou zero para competências sem registros em consulta completa no mercado pesquisado; falhas e campos inválidos permanecem indisponíveis. Critérios/meses derivados registrados no JSON, sem alterar auditoria bruta.
+- **Entrega:** agrupamentos compartilhados entre mensal/trimestral; produtos explícitos em `work`; dormitórios numéricos; Médio-Alto preservado no escoamento; tabela histórica do IVV mantém meses válidos e sinaliza os divergentes, sem ajustar quantidades. [Evidências e limites](../features/relatorios-institucionais/maceio/VALIDACAO_DADOS_REAIS_2026-11-17.md).
+- **Validação:**156testes/14arquivos, tipos, lint e build aprovados. Sem token/acesso Opera para geração autenticada; validação real depende de publicação e novo JSON. Padrão visual existente preservado, sem alteração de coleta/carregamento. CAGED e SP intocados.
+- **Etapas/Pendências:** correções implementadas; conferir novos primeiros bloqueios e dados reais. Fluxos granulares ausentes, produtos ambíguos e divergências de estoque continuam bloqueados. Não considerar42slides resolvidos por plausibilidade. Sem push/deploy/Monday neste lote.
+- **Monday:** [Panorama Maceió / SINDUSCON](https://brain381753.monday.com/boards/18398638577/pulses/13149406169) — `13149406169`.
+
 ## 17/11/2026 — Maceió: Garden e Cobertura nos dois modelos — Codex
 
 - **Entrega:** por autorização de Lucas, retirada a exigência literal `type_of_typology=Padrão` dos leitores de preços/oferta e tabelas do mensal/trimestral. Não existe comprovação dessa exclusão no original. Preservados todos os registros, pesos e verificações de escopo, fotografia, duplicatas e estoque municipal; CAGED e SP não alterados. Base `f7a94c94`.

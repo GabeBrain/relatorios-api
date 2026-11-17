@@ -1,5 +1,11 @@
 # Estado do handoff
 
+## 17/11/2026 — Maceió: correções após diagnóstico com48pendências
+
+Base `1c63413f`, main/origin0/0após fetch. Lucas pediu corrigir todos os bloqueios exceto CAGED. Confirmou correspondências dos sete padrões da API para quatro famílias do original. Depois autorizou tratar competências sem registros em consultas completas como zero no mercado pesquisado, registrando a distinção de falha/campo inválido. Isso substitui a pendência anterior de interpretação de Pilar/Coqueiro, preservada como histórico abaixo; não comprova inexistência fora do mercado pesquisado.
+
+Implementados agrupamentos confirmados, zero de consulta completa com rastreio no JSON, grupos numéricos de dormitórios, produtos horizontais explícitos de `work`, Médio-Alto no escoamento e IVV histórico com meses válidos preservados/meses divergentes sinalizados. Não deduz fluxo de lançamento de capacidade nem produto de padrão econômico. [Decisões e pendências remanescentes](../../features/relatorios-institucionais/maceio/VALIDACAO_DADOS_REAIS_2026-11-17.md).156testes/14arquivos aprovados; nova geração autenticada ainda necessária para medir quantos slides liberaram. CAGED/SP/Monday sem alteração neste lote. Não declarar42slides imobiliários resolvidos sem novo JSON.
+
 ## 17/11/2026 — Maceió: inclusão de Garden e Cobertura autorizada
 
 Lucas confirmou que Garden e Cobertura devem participar dos cálculos aplicáveis no mensal e no trimestral. Removida a exigência literal de `type_of_typology=Padrão` dos dois leitores granulares; nenhuma unidade é excluída pelo nome do tipo. Mantidos segmento, identidade, competência, duplicatas, fotografia completa, reconciliação municipal, preço/área e ponderação por estoque. O original não comprova exclusão desses tipos. JSON real ampliado confirma Cobertura/Garden e divergência de estoque detalhado de Maceió (4.863 contra 4.160 em maio/2026); isso continua pendente, assim como cobertura municipal e correspondências dos padrões/produtos. CAGED e SP preservados. Testes headless: 56 aprovados, incluindo ambas as edições, tipos com mesmos pesos/totais e divergência ainda bloqueada. Sem nova geração autenticada: não há token neste ambiente. Publicação e novo diagnóstico real ainda necessários; sem push.

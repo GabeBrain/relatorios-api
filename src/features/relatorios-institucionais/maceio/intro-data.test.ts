@@ -14,9 +14,9 @@ describe('Maceió · fontes e séries dos slides16–20',()=>{
   expect(quarter.labels).toHaveLength(17);expect(quarter.labels.at(-1)).toBe('2T/26');expect(quarter.capital.at(-1)).toBe(280+277+274);
  });
  it('distingue zero explícito de ausência e bloqueia duplicação, booleano e subtotal',()=>{
-  for(const mutation of ['missing','duplicate','boolean','subtotal']){
+  for(const mutation of ['duplicate','boolean','subtotal']){
    const data=introFixture(selection),rows=data.cities[0].units;
-   if(mutation==='missing')rows.pop();if(mutation==='duplicate')rows.push({...rows.at(-1)!});if(mutation==='boolean')rows[0].releases_in_period=true;if(mutation==='subtotal')rows[0].group='Total';
+   if(mutation==='duplicate')rows.push({...rows.at(-1)!});if(mutation==='boolean')rows[0].releases_in_period=true;if(mutation==='subtotal')rows[0].group='Total';
    expect(buildMaceioLaunchSeries(19,selection,data).issue).toBeTruthy();
   }
   const data=introFixture(selection);data.cities.forEach(city=>city.units.forEach(row=>row.releases_in_period=0));
@@ -24,7 +24,7 @@ describe('Maceió · fontes e séries dos slides16–20',()=>{
  });
  it('não converte padrões desconhecidos e não duplica empreendimento',()=>{
   const data=introFixture(selection);expect(buildMaceioPattern(selection,data).issue).toBeNull();
-  data.cities[0].buildings[60].standard='Econômico';expect(buildMaceioPattern(selection,data).issue).toMatch(/correspondência/);
+  data.cities[0].buildings[60].standard='Categoria desconhecida';expect(buildMaceioPattern(selection,data).issue).toMatch(/correspondência/);
   data.cities[0].buildings.push({...data.cities[0].buildings[60]});expect(buildMaceioLaunchSeries(16,selection,data).issue).toBeTruthy();
  });
  it('consulta fontes independentes, sanitiza erros e não guarda token',async()=>{
