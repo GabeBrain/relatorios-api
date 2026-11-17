@@ -8,6 +8,8 @@ import {buildOfferPriceSlide,type PricePolicy} from './offer-price-data';
 import MaceioOfferPriceChart from './MaceioOfferPriceChart';
 import {buildRemainingSlide} from './remaining-data';
 import MaceioRemainingChart from './MaceioRemainingChart';
+import {buildCagedSlide} from './caged';
+import MaceioCagedChart from './MaceioCagedChart';
 
 const artworks=import.meta.glob('./assets/*/*.png',{eager:true,query:'?url',import:'default'}) as Record<string,string>;
 interface TextLine {text:string;x:number;y:number;size:number;bold:boolean;italic:boolean;color:string}
@@ -65,7 +67,7 @@ export default function MaceioReportSlide({page,selection,data,monetaryPolicy='u
     <image href={artworks[`./assets/${kind}/${page}.png`]} width={1280} height={720}/>
     {layout.texts.map((line,i)=><g key={i}>{page===6&&line.x>100&&line.y>150&&line.size>=20&&<circle cx={line.x-24} cy={line.y+line.size*.6} r={2.5} fill={line.color}/>}<text x={line.x} y={Math.max(0,line.y)} dominantBaseline="text-before-edge" fontSize={line.size} fontWeight={line.bold?700:400} fontStyle={line.italic?'italic':undefined} fill={line.color}>{[...line.text].filter(char=>char.charCodeAt(0)>=32).join('')}</text></g>)}
     {layout.slots.map(slot=><g key={slot.kind}>{slot.kind==='heading'?<><text x={62} y={38} fontSize={34} fontWeight={700} fill="#262626">{kind==='quarterly'?(page===25?'RANKING DE LANÇAMENTOS':'RANKING DE VENDAS'):(page===25?'UNIDADES VERTICAIS LANÇADAS':'UNIDADES VERTICAIS VENDIDAS')}</text><text x={62} y={86} fontSize={page===36?25:32} fontWeight={700} fill="#5B7537">{page===25?'POR BAIRRO':kind==='monthly'?'POR BAIRROS (MACEIÓ) E POR CIDADES':'POR BAIRRO (MACEIÓ) E POR CIDADE'} · {date.toLocaleUpperCase('pt-BR')}</text></>:slot.kind==='period'?<text x={slot.x+10} y={slot.y+12} dominantBaseline="text-before-edge" fontSize={page===2?20:32} fontWeight={700} fill={page===2?'#385723':'#262626'}>{date}</text>:<><text x={slot.x+24} y={slot.y+25} dominantBaseline="text-before-edge" fill="white" fontSize={25} fontWeight={700}>{maceioCities(kind).length} municípios no recorte do estudo</text><text x={slot.x+24} y={slot.y+78} dominantBaseline="text-before-edge" fill="white" fontSize={20}>Maceió e Região Metropolitana · Alagoas</text></>}</g>)}
-    {page>=9&&page<=14&&<Pending message="CAGED · competência selecionada"/>}
+    {page>=9&&page<=14&&<g><rect x={0} y={100} width={1280} height={550} fill="white"/>{issue?<Pending message="CAGED · confira a disponibilidade da competência"/>:<MaceioCagedChart model={buildCagedSlide(page,selection,data?.caged)}/>}</g>}
     {page===17&&<PatternChart selection={selection} data={data}/>}
     {series&&page<=20&&(issue?<Pending message="Histórico completo de lançamentos necessário"/>:<LineChart series={series} rolling={page===18||page===20} selection={selection} page={page}/>)}
     {market&&(market.issue?<Pending message={market.money?'Valores nominais e série INCC a conferir':'Confira a cobertura e o recorte das fontes'}/>:market.kind==='line'?<LineChart series={market.series} rolling={[27,31,38].includes(page)} selection={selection} page={page} money={market.money} stock={page===40}/>:<MaceioGroupedChart model={market}/>)}

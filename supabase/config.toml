@@ -19,6 +19,10 @@ verify_jwt = false
 # O token de entrada é o Bearer do GeoBrain, não um JWT do Supabase.
 verify_jwt = false
 
+[functions.caged-report]
+# Bearer Geobrain validado pela função, com recorte AL e paginação do catálogo.
+verify_jwt = false
+
 [functions.validacao-fechamento-approvals]
 # O token de entrada é o Bearer do GeoBrain, validado pela própria função.
 verify_jwt = false
