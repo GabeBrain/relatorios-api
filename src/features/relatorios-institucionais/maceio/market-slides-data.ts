@@ -25,7 +25,7 @@ export async function collectMaceioMarketSlides(selection:MaceioSelection,author
  const request:MaceioRequest=options.request??(args=>httpRequest<MaceioEnvelope>(args));
  const tasks=scope.cities.flatMap(city=>([
   {city,metric:'releases',group:'Padrão'},{city,metric:'sales',group:'Padrão'},{city,metric:'stock',group:'Padrão'},
-  {city,metric:'releases',group:'Tipologia'},{city,metric:'sales',group:'Tipologia'},{city,metric:'details',group:'Empreendimento'}
+  {city,metric:'releases',group:'Tipologia'},{city,metric:'sales',group:'Tipologia'},{city,metric:'stock',group:'Tipologia'},{city,metric:'details',group:'Empreendimento'}
  ] as const));
  const sources:SlideSource[]=new Array(tasks.length);let next=0;
  async function worker(){
@@ -58,14 +58,14 @@ export async function collectMaceioMarketSlides(selection:MaceioSelection,author
  return {start:months[0],end:period.end.slice(0,7),sources,finishedAt:new Date().toISOString()};
 }
 
-function readNumber(value:unknown,negative:boolean,money=false):number|null{
+export function readNumber(value:unknown,negative:boolean,money=false):number|null{
  if(!['number','string'].includes(typeof value)||!String(value).trim()||!/^[-+]?\d+(?:\.\d+)?$/.test(String(value)))return null;
  const number=Number(value);return Number.isFinite(number)&&Math.abs(number)<Number.MAX_SAFE_INTEGER/100&&(negative||number>=0)&&(money||Number.isSafeInteger(number))?number:null;
 }
 const fields={releases:'releases_in_period',sales:'liquid_sales',stock:'stock'} as const;
 const moneyFields={releases:'vgv_release',sales:'vgv_liquid_sales',stock:'vgv_stock'} as const;
 interface Cell {city:string;month:string;group:string;value:number}
-function readCells(selection:MaceioSelection,data:MaceioMarketSlidesData,metric:Exclude<SlideMetric,'details'>,group:SlideGroup,money:boolean,policy:MonetaryPolicy){
+export function readCells(selection:MaceioSelection,data:MaceioMarketSlidesData,metric:Exclude<SlideMetric,'details'>,group:SlideGroup,money:boolean,policy:MonetaryPolicy){
  const scope=maceioScope(selection,[...new Set(data.sources.map(source=>source.city))]),months=maceioSourceMonths(selection),cells:Cell[]=[];
  if(!scope.valid||data.start!==months[0]||data.end!==months.at(-1))return {cells,issue:'O histórico não corresponde ao recorte/período selecionado.'};
  if(money&&policy!=='INCC-DI')return {cells,issue:'A série do INCC de Maceió ainda precisa ser definida pelo analista. Escolha o índice somente após confirmar o critério.'};

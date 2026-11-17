@@ -3,7 +3,7 @@ import {spawn} from 'node:child_process';
 import {resolve} from 'node:path';
 import {mkdir,writeFile} from 'node:fs/promises';
 import assert from 'node:assert/strict';
-const base='http://127.0.0.1:4199',folder=resolve('.local-inputs/relatorios-lucas/maceio/page-visual-2026-11-16');await mkdir(folder,{recursive:true});
+const base='http://127.0.0.1:4199',folder=resolve('.local-inputs/relatorios-lucas/maceio/page-visual-2026-11-17');await mkdir(folder,{recursive:true});
 const server=spawn(process.execPath,[resolve('scripts/diagnostics/report-preview-server.mjs'),'4199'],{windowsHide:true,stdio:'ignore'});let browser;const results=[],errors=[];
 try{
  let ready=false;for(let i=0;i<80&&!ready;i++){try{ready=(await fetch(base)).ok;}catch{}if(!ready)await new Promise(r=>setTimeout(r,250));}assert.ok(ready);browser=await chromium.launch({channel:'msedge',headless:true});
@@ -28,7 +28,7 @@ try{
   const page=await context.newPage();page.on('pageerror',e=>errors.push(e.message));await page.goto(`${base}/rebrain/relatorios-institucionais/maceio`);await page.evaluate(dark=>document.documentElement.classList.toggle('dark',dark),dark);
   await page.getByRole('button',{name:'Gerar relatório',exact:true}).waitFor();await page.getByRole('button',{name:'Gerar relatório',exact:true}).click();
   await page.getByRole('region',{name:'Carregamento do relatório Maceió'}).waitFor();assert.ok(await page.getByRole('complementary').isVisible());
-  await page.getByRole('button',{name:'40',exact:true}).waitFor({timeout:60000});await page.getByRole('button',{name:'19',exact:true}).click();assert.equal(await page.locator('[data-maceio-chart]').count(),1);assert.equal(historyCalls,35);
+  await page.getByRole('button',{name:'40',exact:true}).waitFor({timeout:60000});await page.getByRole('button',{name:'19',exact:true}).click();assert.equal(await page.locator('[data-maceio-chart]').count(),1);assert.equal(historyCalls,42);
   await page.getByRole('button',{name:'40',exact:true}).click();assert.equal(await page.locator('[data-maceio-chart]').count(),1);
   await page.getByRole('button',{name:'26',exact:true}).click();assert.equal(await page.locator('[data-maceio-pending]').count(),1);await page.locator('#maceio-monetary-policy').click();await page.getByRole('option',{name:'INCC-DI · usar após confirmar o critério',exact:true}).click();assert.equal(await page.locator('[data-maceio-chart]').count(),1);
   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));

@@ -54,7 +54,7 @@ try {
       } elseif (($n -ge 9 -and $n -le 14 -and ($text -match '%' -or $text -match '^[+\u2212-]?\d')) -or ($n -ge 16 -and ($text -match '%' -or $text -match '2026' -or $text -match 'INCC' -or $text.Trim() -in @('*','-')))) {
        $shape.Visible=0
       }
-     } elseif ($n -ge 9 -and $n -le 14) {
+     } elseif (($n -ge 9 -and $n -le 14) -or ($n -ge 41 -and $shape.Width -gt 500 -and $shape.Height -gt 150 -and $shape.Top -gt 50 -and $shape.Top -lt 450)) {
       # These originals embed employment charts as pictures/groups, not data sources.
       # Preserve the small underline decoration only; branding belongs to the layout.
       if ($shape.Height -gt 22 -and $shape.Top -lt 630) {$shape.Visible=0}

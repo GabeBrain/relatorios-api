@@ -65,7 +65,7 @@ describe('Maceió · contratos dos slides21–40',()=>{
    return {ok:true,status:200,data:{data:source.rows.slice((page-1)*100,page*100),meta:{current_page:page,last_page:last,total:source.rows.length},links:{next:page===last?null:`${options.url}?city=${encodeURIComponent(city)}&page=${page+1}`}}} as unknown as Awaited<ReturnType<MaceioRequest>>;
   };
   const data=await collectMaceioMarketSlides(selection,[...maceioCities('monthly')],introFixture(selection),{token:'secret-fixture',request});
-  expect(data.sources).toHaveLength(42);expect(data.sources.filter(s=>s.metric==='sales').every(s=>!s.complete)).toBe(true);expect(buildMaceioMarketSlide(40,selection,data).issue).toBeNull();expect(JSON.stringify(data)).not.toContain('secret-fixture');
+  expect(data.sources).toHaveLength(49);expect(data.sources.filter(s=>s.metric==='sales').every(s=>!s.complete)).toBe(true);expect(buildMaceioMarketSlide(40,selection,data).issue).toBeNull();expect(JSON.stringify(data)).not.toContain('secret-fixture');
  });
  it('cancela a coleta e não publica conjunto parcial',async()=>{const controller=new AbortController();controller.abort();await expect(collectMaceioMarketSlides(selection,[...maceioCities('monthly')],introFixture(selection),{token:'x',signal:controller.signal})).rejects.toMatchObject({name:'AbortError'});});
  it('totais fora da precisão segura viram pendência recuperável em vez de derrubar a prévia',()=>{const data=marketSlidesFixture(selection);data.sources.filter(source=>source.metric==='sales'&&source.group==='Padrão').forEach(source=>source.rows.forEach(row=>row.liquid_sales=80_000_000_000_000));expect(buildMaceioMarketSlide(31,selection,data).issue).toMatch(/precisão/);});
