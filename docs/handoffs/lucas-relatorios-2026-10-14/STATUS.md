@@ -1,5 +1,11 @@
 # Estado do handoff
 
+## 17/11/2026 — CAGED Maceió: BigQuery acessível, alternativa MTE e consumo
+
+Codex, base `e8a067fb`, main limpa na abertura, origin único 0/0 após fetch. Git da máquina `Codex Test`; frente explicitamente solicitada: Maceió. Plugin BigQuery instalado confirmou identidade da conta do setor e SELECT; schemas acessíveis. MOV/FOR/EXC retornam somente jan–mar/2026; catálogo BD anuncia setembro, compatível com a defasagem de seis meses da versão aberta. Não presumir Pro nem autorização da identidade do Cloud Run. Código da ponte Empresas/Empregados localizado no repo vizinho Sistema Quanti, sem alteração ou leitura de secrets.
+
+[Evidências e cálculo](../../features/relatorios-institucionais/maceio/CAGED_ACESSO_E_CONSUMO_2026-11-17.md): XLSX oficial MTE setembro baixado via Drive (45.069.487 bytes), cabeçalhos/valores lidos; dois originais PPTX renderizados 9–14 somente em leitura com hashes preservados. Arquivo isolado não fecha cruzamento histórico ajustado UF × construção/setores AL nem 2017–2019. Usuário está avaliando MTE, atualização automática e consumo. Projeção agregados: uma query/uma tabela, mínimo ~10 MB por mensal ou trimestral, ~160 MB/ano para 12+4 edições. Dry run não informou bytes por segurança por linha; não é medição de produção. Integração runtime, escolha da fonte, revisão metodológica, carga inicial e automação continuam pendentes. Sem escrita BigQuery, Monday, deploy ou push. Investigação/documentação local.
+
 ## 17/11/2026 — Maceió: todos os restantes61–82/87
 
 Usuário solicitou todas as posições restantes. Base `dcd81c89`, main limpa, origin único0/0 após fetch;41–60 e documentação já publicados com autorização anterior. Ambiente desta máquina: Node24.19.0, dependências, Edge e PowerPoint disponíveis; originais locais conferidos por hash e abertos somente para leitura na extração das artes. Autoria: Codex, frente Maceió (`Codex Test` no Git).

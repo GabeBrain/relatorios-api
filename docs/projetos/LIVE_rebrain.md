@@ -1,5 +1,14 @@
 # Rebrain (Plataforma) — Documento Vivo
 
+## 17/11/2026 — Maceió: acesso CAGED e estimativa mensal/trimestral — Codex
+
+- **Ambiente/funcionalidade:** `/rebrain/relatorios-institucionais/maceio` — investigação da fonte de emprego 9–14, sem mudança runtime.
+- **O quê:** plugin BigQuery confirmou leitura da conta do setor; MOV/FOR/EXC acessíveis somente até março/2026. Fonte MTE setembro baixada (45,1 MB), cabeçalhos/valores conferidos e limites históricos identificados. Ponte HMAC Empresas/Empregados localizada. [Evidências, projeção de consumo e pendências](../features/relatorios-institucionais/maceio/CAGED_ACESSO_E_CONSUMO_2026-11-17.md).
+- **Consumo:** arquitetura proposta de agregados, uma query/uma tabela: ~10 MB por mensal ou trimestral sem cache, ~160 MB/ano em 12+4 edições. Dry run não retornou bytes devido à segurança por linha; não é medição runtime nem custo total da infraestrutura.
+- **Impacto em Etapas/Pendências:** acesso do agente ao BigQuery comprovado; decisão MTE/Pro, histórico ajustado UF × setor/2017–2019, integração da ponte e atualização automática permanecem pendentes. Nenhuma geração autenticada pela ponte, deploy ou agendador criado.
+- **Arquivos:** documento CAGED de investigação, PLAN Maceió e STATUS do handoff. **Commits:** base `e8a067fb`; investigação no commit desta entrada.
+- **Monday:** [Panorama Maceió / SINDUSCON](https://brain381753.monday.com/boards/18398638577/pulses/13149406169) — `13149406169`. Sem escrita. Sem push.
+
 ## 17/11/2026 — Maceió/SINDUSCON-AL: todos os restantes, prévia82/87 — Codex
 
 - **Ambiente/funcionalidade:** `/rebrain/relatorios-institucionais/maceio` — mensal61–82 e trimestral61–87, rota ainda oculta.
