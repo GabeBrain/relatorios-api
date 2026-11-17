@@ -1,5 +1,15 @@
 # Rebrain (Plataforma) — Documento Vivo
 
+## 17/11/2026 — Maceió/SINDUSCON-AL: prévia até60, oferta/IVV/preços — Codex
+
+- **Ambiente/funcionalidade:** `/rebrain/relatorios-institucionais/maceio` — prévia mensal e trimestral, acesso somente pela rota.
+- **Feito:** navegação/ampliação1–60 com arte original; escoamento somente no mensal; oferta por tipologia/padrão; IVV mensal, histórico anual e por área/mês/12meses; evolução de preços e comparação por padrão/tipologia. Preços exigem escolha explícita de ponderação para conferência. Estoque usa fechamento; histórico atual não preenche fotografias antigas; fluxos/estoques granulares reconciliados com municipais. Acrescentada fonte independente stock/Tipologia, sem mudar os outros motores. Seleção e nomes mensal/trimestral preservados a pedido do usuário. CAGED permanece adiado.
+- **Validação:**81testes Maceió,480verificações de slides e8cenários da página real no Edge com API sintética/resposta lenta aprovados; lint e build de produção aprovados. Regressão ampla565aprovados/2ignorados/2falhas em seleção FIERGS, reproduzidas isoladamente; domínio e dependências compartilhadas sem diff, fora deste lote. [Contratos/evidências/limites](../features/relatorios-institucionais/maceio/SLIDES_41_60_2026-11-17.md).
+- **Pendências:**61–80 e fechamento, exportação, disponibilidade real dos campos granulares/stock por Tipologia e homologação de IVV/escoamento/preços/INCC pelo analista. Tabela IVV anterior à janela ano−5 mostra ausência, não história inventada. Sem geração autenticada Geobrain, BigQuery ou deploy confirmado nesta sessão.
+- **Base Git:** `bce4228a`, main limpa e origin único0/0 após fetch na abertura. Código e documentação commitados localmente; envio exige autorização.
+- **Commits:** `017fe79e` (implementação, artes e testes); documentação neste registro de fechamento.
+- **Monday:** [Panorama Maceió / SINDUSCON](https://brain381753.monday.com/boards/18398638577/pulses/13149406169) — `13149406169`. Sem escrita.
+
 ## 16/11/2026 — Maceió/SINDUSCON-AL: núcleo municipal vertical integrado (bloco 3) — Lucas (Inovação), com Claude
 
 - **Feito:** coleta autenticada por município (`api.ts`) das fontes `temporal-analysis-city/releases|sales|stock` com amostra de recorte, paginação curta validada e guardas de competência/universo; reconciliação do balanço por padrão e total (`market.ts`) preservando vendas negativas e sem transformar ausência em zero; hook `useMaceioMarket` com etapas, cancelamento, invalidação por token/escopo/período e retry que reconsulta fontes reprovadas (sem congelar erro em cache); painéis de etapas e de balanço ligados à página, com botão "Gerar prévia vertical". O conjunto mensal exige os 7 municípios (com Coqueiro Seco); o trimestral, 6.
@@ -1825,6 +1835,8 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 
 ## 2. Etapas
 
+- **17/11 — Maceió, após60:** prévia mensal/trimestral1–60 implementada localmente, com oferta/IVV/preços e critérios explícitos;81testes,480verificações visuais e8cenários de página aprovados. Próximo61–80 e fechamento, depois exportação; fontes/métodos reais aguardam homologação. CAGED continua adiado. Estados anteriores abaixo são históricos.
+
 - **16/11 — Maceió, continuação:** prévia1–40mensal/trimestral implementada e conferida com fixtures; fontes por padrão/tipologia/histórico, MCMV, valores com índice explícito e oferta final. Próximo41–60. Integração CAGED adiada por Lucas; conta do setor com BigQuery conectado ao Rebrain informada, não testada aqui.
 
 - **16/11 — Maceió, visual1–20:** prévia mensal/trimestral na arte original e fontes independentes de lançamentos implementadas. CAGED9–14mantém pendência explícita; demais blocos/exportação ainda em implantação. Substitui o estado antigo de somente estrutura abaixo.
@@ -1976,6 +1988,8 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 ---
 
 ## 3. Pendências
+
+- **17/11 — Maceió, após60:** continuar61–80 nas ordens distintas dos modelos e depois finalizar/exportar; comprovar fontes granulares, correspondência dos padrões e métodos IVV/escoamento/preços/INCC com o analista. Histórico IVV anterior à janela coletada segue ausente e sinalizado. Geração autenticada e deploy não verificados; CAGED adiado. As pendências antigas41–60 abaixo foram atendidas nesta implementação local.
 
 - **16/11 — Maceió, após40:** continuar41–60, validar respostas reais/fluxos granulares e homologar padrões/INCC com analista; exportação depois. CAGED/BigQuery ficam para retomada solicitada, sem bloquear os demais blocos.
 

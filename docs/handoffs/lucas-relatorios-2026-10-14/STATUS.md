@@ -1,5 +1,15 @@
 # Estado do handoff
 
+## 17/11/2026 — Maceió: continuação41–60 com Codex
+
+Usuário autorizou continuar a sequência; preservados seletores/nomes mensal e trimestral e CAGED adiado. Base `bce4228a`, main limpa, origin único e fetch0/0. Git da máquina identifica `Codex Test`; autoria desta implementação: Codex, frente Maceió. Node24.19.0, dependências, PowerPoint e Edge disponíveis. Originais Drive já baixados para o Desktop nesta sessão e copiados para `.local-inputs`; hashes/tamanhos conferidos, abertos somente para leitura e preservados durante a extração das artes41–60.
+
+[Entrega/contratos/limites](../../features/relatorios-institucionais/maceio/SLIDES_41_60_2026-11-17.md): prévia1–60 nas duas edições; oferta por tipologia/padrão, escoamento mensal, IVV mensal/anual/por área e preços com ponderação explicitamente escolhida para conferência. Reutilizados GeoApiScopeEngine, Select/Dialog, arte original e BrainLoadingState com etapa/tempo real/cancelamento.81testes Maceió, lint/build,480verificações visuais e8cenários de página aprovados. Regressão obrigatória do handoff:565aprovados,2ignorados,2falhas FIERGS de seleção reproduzidas no arquivo isolado; não houve mudança nesse domínio ou dependências compartilhadas, nem ampliação da tarefa para corrigi-las.
+
+Sem geração autenticada Geobrain, consulta BigQuery, homologação ou deploy confirmado. Critérios de preços/escoamento/IVV/faixas, INCC e fontes granulares reais precisam de confirmação do analista; tabela IVV pré-janela coletada mostra ausência. Próximo61–80 nas sequências próprias, depois fechamento/exportação. Rota continua oculta. Sem escrita Monday. Commits locais; push depende de autorização.
+
+**Commit de implementação:** `017fe79e` (17/11, 09h27 BRT). Build final aprovado após todos os ajustes. Documentação incluída no commit de fechamento; envio não realizado.
+
 ## 16/11/2026 — Encerramento e retomada em17/11
 
 Lucas pediu enviar o estado atual e retomar amanhã. `41ca0f53` e `6f380d8c` já publicados em `origin/main`; fetch final confirmou0/0. Incluído sem alterações o `maceio/ARTE.md` preparado anteriormente por Claude, até então não versionado; renderizações locais82/87e hashes dos originais conferidos. Código até40validado com58testes,320casos de lâminas+8cenários de página, tipos/lint/build. Próximo bloco41–60, na sequência/arte original; rota ainda oculta e exportação posterior. CAGED adiado por Lucas: aproveitar futuramente a infraestrutura BigQuery de Empregados, cuja fonte atual é RAIS anual e não substitui os saldos mensais CAGED. Acesso direto do agente ao BigQuery não configurado/testado. Métodos/INCC e homologação com analista; sem ensaio autenticado ou deploy confirmado. Sem escrita Monday.
