@@ -1,5 +1,15 @@
 # Rebrain (Plataforma) — Documento Vivo
 
+## 17/11/2026 — Maceió/SINDUSCON-AL: todos os restantes, prévia82/87 — Codex
+
+- **Ambiente/funcionalidade:** `/rebrain/relatorios-institucionais/maceio` — mensal61–82 e trimestral61–87, rota ainda oculta.
+- **Feito:** estado atual (ano/padrão/dormitórios/área/preços/estágio/VGV), horizontal capital/RM, comercial exclusivo trimestral e equipe/fechamento. Tabelas SVG dinâmicas pela referência, sem fotografia de números antigos; fotos/artes editoriais preservadas por edição. Fontes horizontal/comercial separadas do vertical, paginadas, canceláveis e reconciliadas com estoque municipal. Critérios de universo/capacidade/classificação/preços explicitados para conferência. Seletores preservados.
+- **Validação:**107testes Maceió aprovados;676verificações visuais das posições82/87,196de revisão dos restantes e16cenários da página real com API sintética paginada/lenta, núcleo válido/reprovado e horizontal/comercial. Lint/tipos/build aprovados;34regressões de cálculo/referência do handoff aprovadas, sem alterar outros motores. [Composição, critérios e evidências](../features/relatorios-institucionais/maceio/SLIDES_RESTANTES_2026-11-17.md).
+- **Pendências/próximo:** usuário confirmou **CAGED9–14 dinâmico pela referência** como próxima frente. RAIS anual não substitui CAGED; nenhuma integração BigQuery foi feita nesta etapa. Exportação PPTX/PDF, fontes reais e homologação de métodos/INCC continuam pendentes. Todas as posições na prévia não significam relatório homologado ou exportador pronto. Sem geração autenticada/deploy observado.
+- **Base Git:** `dcd81c89`, main limpa, origin único0/0 após fetch. Os commits anteriores41–60 já foram enviados com autorização; este novo lote fica local até decisão de publicação.
+- **Commits:** `97b369cd` (implementação, fontes, artes e testes); documentação neste fechamento. Revisão final de24capturas67–69 e typecheck aprovados após o último ajuste de rótulos.
+- **Monday:** [Panorama Maceió / SINDUSCON](https://brain381753.monday.com/boards/18398638577/pulses/13149406169) — `13149406169`. Sem escrita.
+
 ## 17/11/2026 — Maceió/SINDUSCON-AL: prévia até60, oferta/IVV/preços — Codex
 
 - **Ambiente/funcionalidade:** `/rebrain/relatorios-institucionais/maceio` — prévia mensal e trimestral, acesso somente pela rota.
@@ -1835,6 +1845,8 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 
 ## 2. Etapas
 
+- **17/11 — Maceió, todas as posições:** prévia82mensais/87trimestrais implementada, incluindo estado atual, horizontal, comercial trimestral, equipe/fechamento.107testes e ensaios visuais/página aprovados. Próximo confirmado pelo usuário: CAGED9–14; depois exportação e homologação real. Estados anteriores de61–80/fechamento abaixo são históricos.
+
 - **17/11 — Maceió, após60:** prévia mensal/trimestral1–60 implementada localmente, com oferta/IVV/preços e critérios explícitos;81testes,480verificações visuais e8cenários de página aprovados. Próximo61–80 e fechamento, depois exportação; fontes/métodos reais aguardam homologação. CAGED continua adiado. Estados anteriores abaixo são históricos.
 
 - **16/11 — Maceió, continuação:** prévia1–40mensal/trimestral implementada e conferida com fixtures; fontes por padrão/tipologia/histórico, MCMV, valores com índice explícito e oferta final. Próximo41–60. Integração CAGED adiada por Lucas; conta do setor com BigQuery conectado ao Rebrain informada, não testada aqui.
@@ -1988,6 +2000,8 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 ---
 
 ## 3. Pendências
+
+- **17/11 — Maceió, após82/87:** integrar CAGED mensal à referência escolhida, usando a infraestrutura BigQuery como ponto de investigação (RAIS anual não substitui a série); desenvolver exportação PPTX/PDF e executar geração real delimitada para comprovar campos/granularidade/universo/classificações/INCC antes de homologar com o analista. Não restam posições de slide para compor; pendências antigas61–80/fechamento abaixo foram atendidas na prévia local.
 
 - **17/11 — Maceió, após60:** continuar61–80 nas ordens distintas dos modelos e depois finalizar/exportar; comprovar fontes granulares, correspondência dos padrões e métodos IVV/escoamento/preços/INCC com o analista. Histórico IVV anterior à janela coletada segue ausente e sinalizado. Geração autenticada e deploy não verificados; CAGED adiado. As pendências antigas41–60 abaixo foram atendidas nesta implementação local.
 

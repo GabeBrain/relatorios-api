@@ -1,5 +1,15 @@
 # Estado do handoff
 
+## 17/11/2026 — Maceió: todos os restantes61–82/87
+
+Usuário solicitou todas as posições restantes. Base `dcd81c89`, main limpa, origin único0/0 após fetch;41–60 e documentação já publicados com autorização anterior. Ambiente desta máquina: Node24.19.0, dependências, Edge e PowerPoint disponíveis; originais locais conferidos por hash e abertos somente para leitura na extração das artes. Autoria: Codex, frente Maceió (`Codex Test` no Git).
+
+[Entrega](../../features/relatorios-institucionais/maceio/SLIDES_RESTANTES_2026-11-17.md): prévia82mensais/87trimestrais, estado atual/horizontal/comercial separado/equipe/fechamento. Mantidos seletores, rota oculta, GeoApiScopeEngine e BrainLoadingState com progresso/cancelamento. Tabelas dinâmicas pela referência, não imagens com dados antigos; isso foi reforçado pelo usuário.107testes Maceió,676verificações visuais+196revisão dos restantes,16cenários de página com API sintética paginada/lenta, lint/tipos/build e34regressões de referência/cálculo aprovados. Sem mudança em FIERGS/SP/Fortaleza/políticas compartilhadas.
+
+Próxima frente confirmada pelo usuário: **CAGED9–14 dinâmico pela referência**; investigar infraestrutura BigQuery existente, sem usar RAIS anual como substituto. Não houve consulta BigQuery, coleta autenticada Geobrain, deploy ou homologação. Campos históricos/segmentos/subtipos/estágios/capacidade/classificações e métodos de VGV/preços/INCC permanecem candidatos até prova e aceite do analista. Exportação PPTX/PDF separada e pendente. Nenhuma escrita Monday; publicação deste lote depende de autorização.
+
+**Commit de implementação:** `97b369cd` (17/11, 09h49 BRT).24verificações adicionais e tipos aprovados após o último ajuste visual; documentação no commit de fechamento. Sem envio deste lote.
+
 ## 17/11/2026 — Maceió: continuação41–60 com Codex
 
 Usuário autorizou continuar a sequência; preservados seletores/nomes mensal e trimestral e CAGED adiado. Base `bce4228a`, main limpa, origin único e fetch0/0. Git da máquina identifica `Codex Test`; autoria desta implementação: Codex, frente Maceió. Node24.19.0, dependências, PowerPoint e Edge disponíveis. Originais Drive já baixados para o Desktop nesta sessão e copiados para `.local-inputs`; hashes/tamanhos conferidos, abertos somente para leitura e preservados durante a extração das artes41–60.
