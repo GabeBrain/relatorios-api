@@ -63,7 +63,14 @@ export function useMaceioMarket(selection: MaceioSelection, authorizedCities: st
         if(!controller.signal.aborted)setState(current=>current?.key===key?{...current,message}:current);
       }});
       if(controller.signal.aborted)return;
-      const introFailed=intro.cities.some(city=>!city.unitsComplete||!city.buildingsComplete)||intro.slides.sources.some(source=>!source.complete);
+      const extraOptions={token,signal:controller.signal,closingOnly:true,onProgress:(message:string)=>{
+        if(!controller.signal.aborted)setState(current=>current?.key===key?{...current,message}:current);
+      }};
+      intro.slides.horizontal=(await collectMaceioMarketSlides(selection,authorizedCities,intro,{...extraOptions,segment:'Horizontal'})).sources;
+      if(controller.signal.aborted)return;
+      if(selection.periodicity==='quarterly')intro.slides.commercial=(await collectMaceioMarketSlides({...selection,territory:'city',city:selection.city},authorizedCities,intro,{...extraOptions,segment:'Comercial'})).sources;
+      if(controller.signal.aborted)return;
+      const introFailed=intro.cities.some(city=>!city.unitsComplete||!city.buildingsComplete)||[...intro.slides.sources,...intro.slides.horizontal??[],...intro.slides.commercial??[]].some(source=>!source.complete);
       activate('reconciliation');
       activate('structure');
       const blueprint = await prepareMaceioBlueprint(selection, authorizedCities, { signal: controller.signal, onProgress: (completed, total) => {

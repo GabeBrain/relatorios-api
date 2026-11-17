@@ -6,6 +6,8 @@ import {buildMaceioMarketSlide,type MonetaryPolicy} from './market-slides-data';
 import MaceioGroupedChart from './MaceioGroupedChart';
 import {buildOfferPriceSlide,type PricePolicy} from './offer-price-data';
 import MaceioOfferPriceChart from './MaceioOfferPriceChart';
+import {buildRemainingSlide} from './remaining-data';
+import MaceioRemainingChart from './MaceioRemainingChart';
 
 const artworks=import.meta.glob('./assets/*/*.png',{eager:true,query:'?url',import:'default'}) as Record<string,string>;
 interface TextLine {text:string;x:number;y:number;size:number;bold:boolean;italic:boolean;color:string}
@@ -57,7 +59,8 @@ export default function MaceioReportSlide({page,selection,data,monetaryPolicy='u
   const date=kind==='monthly'?new Intl.DateTimeFormat('pt-BR',{month:'long',year:'numeric',timeZone:'UTC'}).format(new Date(`${month}-01T00:00:00Z`)):period.label;
   const issue=maceioSlideIssue(page,selection,data),series=page>=16&&page<=20&&page!==17?buildMaceioLaunchSeries(page,selection,data):null;
   const market=page>=21&&page<=40&&![29,39].includes(page)?buildMaceioMarketSlide(page,selection,data?.slides??null,monetaryPolicy):null;
-  const advanced=page>=41?buildOfferPriceSlide(page,selection,data?.slides??null,pricePolicy):null;
+  const advanced=page>=41&&page<=60?buildOfferPriceSlide(page,selection,data?.slides??null,pricePolicy):null;
+  const remaining=page>=61?buildRemainingSlide(page,selection,data?.slides??null,pricePolicy):null;
   return <svg viewBox="0 0 1280 720" role="img" aria-label={`Maceió · slide ${page}`} style={{fontFamily:'Tahoma, sans-serif',background:'white',colorScheme:'light'}} className="block aspect-video h-auto w-full">
     <image href={artworks[`./assets/${kind}/${page}.png`]} width={1280} height={720}/>
     {layout.texts.map((line,i)=><g key={i}>{page===6&&line.x>100&&line.y>150&&line.size>=20&&<circle cx={line.x-24} cy={line.y+line.size*.6} r={2.5} fill={line.color}/>}<text x={line.x} y={Math.max(0,line.y)} dominantBaseline="text-before-edge" fontSize={line.size} fontWeight={line.bold?700:400} fontStyle={line.italic?'italic':undefined} fill={line.color}>{[...line.text].filter(char=>char.charCodeAt(0)>=32).join('')}</text></g>)}
@@ -68,6 +71,7 @@ export default function MaceioReportSlide({page,selection,data,monetaryPolicy='u
     {market&&(market.issue?<Pending message={market.money?'Valores nominais e série INCC a conferir':'Confira a cobertura e o recorte das fontes'}/>:market.kind==='line'?<LineChart series={market.series} rolling={[27,31,38].includes(page)} selection={selection} page={page} money={market.money} stock={page===40}/>:<MaceioGroupedChart model={market}/>)}
     {market?.money&&!market.issue&&<text x={60} y={630} fontSize={13} fill="#425428">Valores em R$ milhões · INCC-DI · base {month}</text>}
     {advanced&&(advanced.issue?<Pending message="Confira as fontes e o critério deste indicador"/>:<MaceioOfferPriceChart model={advanced}/>)}
+    {remaining&&(remaining.issue?<Pending message="Confira o histórico e o universo deste bloco"/>:<MaceioRemainingChart model={remaining}/>)}
     {page===(kind==='monthly'?47:46)&&<g><text x={68} y={62} fontSize={38} fontWeight={700} fill="#262626">IVV POR ÁREA ÚTIL EM m² VERTICAL</text><text x={68} y={110} fontSize={34} fontWeight={700} fill="#5B7537">{new Intl.DateTimeFormat('pt-BR',{month:'long',year:'numeric',timeZone:'UTC'}).format(new Date(`${month}-01T00:00:00Z`))}</text></g>}
   </svg>;
 }

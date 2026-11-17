@@ -10,7 +10,7 @@ export type MonetaryPolicy='unconfirmed'|'INCC-DI';
 export type SlideMetric='releases'|'sales'|'stock'|'details';
 export type SlideGroup='Padrão'|'Tipologia'|'Empreendimento';
 export interface SlideSource {city:string;metric:SlideMetric;group:SlideGroup;rows:MarketRow[];complete:boolean;issue:string|null;requests:number}
-export interface MaceioMarketSlidesData {start:string;end:string;sources:SlideSource[];finishedAt:string}
+export interface MaceioMarketSlidesData {start:string;end:string;sources:SlideSource[];finishedAt:string;horizontal?:SlideSource[];commercial?:SlideSource[]}
 export interface MaceioChartData {kind:'line'|'area'|'comparison'|'ranking';series:MaceioSeries;groups:string[];values:number[][];years:string[];ranking:{label:string;value:number}[];cities:{label:string;value:number}[];issue:string|null;note:string;money:boolean}
 const patterns=['Luxo','Médio Padrão','MCMV','Compactos'];
 export const maceioSourceMonths=(selection:MaceioSelection)=>{
@@ -18,34 +18,35 @@ export const maceioSourceMonths=(selection:MaceioSelection)=>{
  return Array.from({length:count},(_,i)=>shiftMonth(end,i-count+1));
 };
 
-export async function collectMaceioMarketSlides(selection:MaceioSelection,authorized:string[],intro:MaceioIntroData,options:{token:string;signal?:AbortSignal;request?:MaceioRequest;onProgress?:(text:string)=>void}):Promise<MaceioMarketSlidesData>{
+export async function collectMaceioMarketSlides(selection:MaceioSelection,authorized:string[],intro:MaceioIntroData,options:{token:string;signal?:AbortSignal;request?:MaceioRequest;onProgress?:(text:string)=>void;segment?:'Vertical'|'Horizontal'|'Comercial';closingOnly?:boolean}):Promise<MaceioMarketSlidesData>{
  const scope=maceioScope(selection,authorized),months=maceioSourceMonths(selection),period=maceioPeriod(selection);
  if(!options.token||!scope.valid)throw new Error('Confirme autenticação e municípios do estudo.');
  const check=()=>{if(options.signal?.aborted)throw new DOMException('Consulta cancelada.','AbortError');};
  const request:MaceioRequest=options.request??(args=>httpRequest<MaceioEnvelope>(args));
+ const segment=options.segment??'Vertical';
  const tasks=scope.cities.flatMap(city=>([
   {city,metric:'releases',group:'Padrão'},{city,metric:'sales',group:'Padrão'},{city,metric:'stock',group:'Padrão'},
   {city,metric:'releases',group:'Tipologia'},{city,metric:'sales',group:'Tipologia'},{city,metric:'stock',group:'Tipologia'},{city,metric:'details',group:'Empreendimento'}
- ] as const));
+ ] as const).filter(task=>!options.closingOnly||task.metric==='details'||task.metric==='stock'&&task.group==='Padrão'));
  const sources:SlideSource[]=new Array(tasks.length);let next=0;
  async function worker(){
   while(next<tasks.length){check();const index=next++,task=tasks[index];
    const source:SlideSource={...task,rows:[],complete:false,issue:null,requests:0};
    const reused=intro.cities.find(item=>normalizeMarketText(item.city)===normalizeMarketText(task.city));
-   if(task.metric==='releases'&&task.group==='Padrão'&&reused?.unitsComplete&&new Set(reused.units.map(row=>marketMonth(row.period))).has(months[0])){sources[index]={...source,rows:reused.units,complete:true};continue;}
+   if(segment==='Vertical'&&task.metric==='releases'&&task.group==='Padrão'&&reused?.unitsComplete&&new Set(reused.units.map(row=>marketMonth(row.period))).has(months[0])){sources[index]={...source,rows:reused.units,complete:true};continue;}
    try{
     let expectedTotal:number|undefined,expectedLast:number|undefined;
     for(let page=1;page<=100;page++){
-     check();options.onProgress?.(`${sources.filter(Boolean).length} de ${tasks.length} fontes · ${task.city} · ${task.metric} · ${task.group} · página ${page}`);
+     check();options.onProgress?.(`${segment} · ${sources.filter(Boolean).length} de ${tasks.length} fontes · ${task.city} · ${task.metric} · ${task.group} · página ${page}`);
      const url=`https://geobrain.com.br/public-api/${task.metric==='details'?'building-with-history-internal':`temporal-analysis-city/${task.metric}`}`;
-     const query={city:task.city,uf:'AL',...(task.metric==='details'?{type:'Vertical'}:{'type[]':['Vertical'],group_by:task.group}),start_period:`${months[0]}-01`,end_period:period.end,page,per_page:100};
+     const query={city:task.city,uf:'AL',...(task.metric==='details'?{type:segment}:{'type[]':[segment],group_by:task.group}),start_period:`${options.closingOnly?period.end.slice(0,7):months[0]}-01`,end_period:period.end,page,per_page:100};
      const response=await requestWithRetry(()=>{source.requests++;return request({url,query,headers:{Authorization:`Bearer ${options.token}`},includeAuth:false,signal:options.signal,timeoutMs:20000,cache:'no-store'});},{signal:options.signal,attempts:2});check();
      const data=response.data,meta=data?.meta;
      if(!response.ok||!Array.isArray(data?.data)||!meta||meta.current_page!==page||!Number.isSafeInteger(meta.total)||meta.total!<0||!Number.isSafeInteger(meta.last_page)||meta.last_page!<page||meta.last_page!>100||data.data.length>100)throw new Error();
      expectedTotal??=meta.total;expectedLast??=meta.last_page;
      if(meta.total!==expectedTotal||meta.last_page!==expectedLast||(!data.data.length&&meta.total!>0))throw new Error();
      const link=data.links?.next;if(link){const urlNext=new URL(link,url);if(urlNext.origin!==new URL(url).origin||urlNext.pathname!==new URL(url).pathname||urlNext.searchParams.get('city')!==task.city||Number(urlNext.searchParams.get('page'))!==page+1)throw new Error();}
-     for(const row of data.data){if(normalizeMarketText(row.city)!==normalizeMarketText(task.city)||row.state!=='AL'||normalizeMarketText(row.building_type)!=='vertical')throw new Error();if(task.metric!=='details'){const month=marketMonth(row.period);if(!month||month<months[0]||month>period.end.slice(0,7))throw new Error();}}
+     for(const row of data.data){if(normalizeMarketText(row.city)!==normalizeMarketText(task.city)||row.state!=='AL'||normalizeMarketText(row.building_type)!==normalizeMarketText(segment))throw new Error();if(task.metric!=='details'){const month=marketMonth(row.period);if(!month||month<(options.closingOnly?period.end.slice(0,7):months[0])||month>period.end.slice(0,7))throw new Error();}}
      source.rows.push(...data.data);
      if(page===expectedLast){if(source.rows.length!==expectedTotal||link)throw new Error();source.complete=true;break;}
     }

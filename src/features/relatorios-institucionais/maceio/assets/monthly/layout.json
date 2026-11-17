@@ -2283,5 +2283,961 @@
                                   "x":  20.86950174967448
                               }
                           ]
+           },
+    "61":  {
+               "texts":  [
+                             {
+                                 "italic":  false,
+                                 "text":  "ESTADO ATUAL DO MERCADO ",
+                                 "color":  "#171A13",
+                                 "bold":  true,
+                                 "y":  290.879150390625,
+                                 "x":  265.26487223307294,
+                                 "size":  50.666666666666664
+                             },
+                             {
+                                 "italic":  false,
+                                 "text":  "RESIDENCIAL VERTICAL",
+                                 "color":  "#171A13",
+                                 "bold":  true,
+                                 "y":  351.67915852864581,
+                                 "x":  329.68483479817706,
+                                 "size":  50.666666666666664
+                             }
+                         ],
+               "slots":  [
+
+                         ],
+               "charts":  [
+
+                          ]
+           },
+    "62":  {
+               "texts":  [
+                             {
+                                 "italic":  false,
+                                 "text":  "OFERTA FINAL ",
+                                 "color":  "#2E3525",
+                                 "bold":  true,
+                                 "y":  35.306246439615883,
+                                 "x":  54.125564575195313,
+                                 "size":  42.666666666666664
+                             },
+                             {
+                                 "italic":  false,
+                                 "text":  "POR ANO DE LANÇAMENTO",
+                                 "color":  "#5B7537",
+                                 "bold":  true,
+                                 "y":  81.386245727539063,
+                                 "x":  54.125564575195313,
+                                 "size":  42.666666666666664
+                             },
+                             {
+                                 "italic":  false,
+                                 "text":  "MACEIÓ + RM ",
+                                 "color":  "#F9F9F9",
+                                 "bold":  true,
+                                 "y":  11.388346354166666,
+                                 "x":  1124.6476236979167,
+                                 "size":  18.666666666666668
+                             }
+                         ],
+               "slots":  [
+
+                         ],
+               "charts":  [
+
+                          ]
+           },
+    "63":  {
+               "texts":  [
+                             {
+                                 "italic":  false,
+                                 "text":  "OFERTA FINAL ",
+                                 "color":  "#2E3525",
+                                 "bold":  true,
+                                 "y":  35.306246439615883,
+                                 "x":  54.125564575195313,
+                                 "size":  42.666666666666664
+                             },
+                             {
+                                 "italic":  false,
+                                 "text":  "POR PADRÃO",
+                                 "color":  "#5B7537",
+                                 "bold":  true,
+                                 "y":  81.386245727539063,
+                                 "x":  54.125564575195313,
+                                 "size":  42.666666666666664
+                             },
+                             {
+                                 "italic":  false,
+                                 "text":  "MACEIÓ + RM ",
+                                 "color":  "#F9F9F9",
+                                 "bold":  true,
+                                 "y":  11.388346354166666,
+                                 "x":  1124.6476236979167,
+                                 "size":  18.666666666666668
+                             }
+                         ],
+               "slots":  [
+
+                         ],
+               "charts":  [
+
+                          ]
+           },
+    "64":  {
+               "texts":  [
+                             {
+                                 "italic":  false,
+                                 "text":  "OFERTA FINAL ",
+                                 "color":  "#2E3525",
+                                 "bold":  true,
+                                 "y":  26.731549580891926,
+                                 "x":  40.202730814615883,
+                                 "size":  42.666666666666664
+                             },
+                             {
+                                 "italic":  false,
+                                 "text":  "POR TIPOLOGIA",
+                                 "color":  "#5B7537",
+                                 "bold":  true,
+                                 "y":  72.811548868815109,
+                                 "x":  40.202730814615883,
+                                 "size":  42.666666666666664
+                             },
+                             {
+                                 "italic":  false,
+                                 "text":  "MACEIÓ + RM ",
+                                 "color":  "#F9F9F9",
+                                 "bold":  true,
+                                 "y":  11.388346354166666,
+                                 "x":  1124.6476236979167,
+                                 "size":  18.666666666666668
+                             }
+                         ],
+               "slots":  [
+
+                         ],
+               "charts":  [
+
+                          ]
+           },
+    "65":  {
+               "texts":  [
+                             {
+                                 "italic":  false,
+                                 "text":  "OFERTA FINAL ",
+                                 "color":  "#2E3525",
+                                 "bold":  true,
+                                 "y":  31.420158386230469,
+                                 "x":  84.431915283203125,
+                                 "size":  42.666666666666664
+                             },
+                             {
+                                 "italic":  false,
+                                 "text":  "POR TIPOLOGIA E METRAGEM ",
+                                 "color":  "#2E3525",
+                                 "bold":  true,
+                                 "y":  77.500157674153641,
+                                 "x":  84.431915283203125,
+                                 "size":  42.666666666666664
+                             },
+                             {
+                                 "italic":  false,
+                                 "text":  "MACEIÓ",
+                                 "color":  "#F9F9F9",
+                                 "bold":  true,
+                                 "y":  11.388346354166666,
+                                 "x":  1152.8976236979167,
+                                 "size":  18.666666666666668
+                             }
+                         ],
+               "slots":  [
+
+                         ],
+               "charts":  [
+
+                          ]
+           },
+    "66":  {
+               "texts":  [
+                             {
+                                 "italic":  false,
+                                 "text":  "MÍNIMO, MÉDIA E MÁXIMO DO PREÇO ",
+                                 "color":  "#2E3525",
+                                 "bold":  true,
+                                 "y":  35.549710591634117,
+                                 "x":  84.431915283203125,
+                                 "size":  42.666666666666664
+                             },
+                             {
+                                 "italic":  false,
+                                 "text":  "POR TIPOLOGIA",
+                                 "color":  "#2E3525",
+                                 "bold":  true,
+                                 "y":  81.6297098795573,
+                                 "x":  84.431915283203125,
+                                 "size":  42.666666666666664
+                             },
+                             {
+                                 "italic":  false,
+                                 "text":  "MACEIÓ",
+                                 "color":  "#F9F9F9",
+                                 "bold":  true,
+                                 "y":  11.388346354166666,
+                                 "x":  1152.8976236979167,
+                                 "size":  18.666666666666668
+                             }
+                         ],
+               "slots":  [
+
+                         ],
+               "charts":  [
+
+                          ]
+           },
+    "67":  {
+               "texts":  [
+                             {
+                                 "italic":  false,
+                                 "text":  "OFERTA",
+                                 "color":  "#F9F9F9",
+                                 "bold":  false,
+                                 "y":  231.66892496744791,
+                                 "x":  44.296432495117188,
+                                 "size":  18.666666666666668
+                             },
+                             {
+                                 "italic":  false,
+                                 "text":  "LANÇADA",
+                                 "color":  "#F9F9F9",
+                                 "bold":  false,
+                                 "y":  254.06892903645834,
+                                 "x":  38.209815979003906,
+                                 "size":  18.666666666666668
+                             },
+                             {
+                                 "italic":  false,
+                                 "text":  "OFERTA",
+                                 "color":  "#F9F9F9",
+                                 "bold":  false,
+                                 "y":  479.39302571614581,
+                                 "x":  43.457743326822914,
+                                 "size":  18.666666666666668
+                             },
+                             {
+                                 "italic":  false,
+                                 "text":  "FINAL",
+                                 "color":  "#F9F9F9",
+                                 "bold":  false,
+                                 "y":  501.79300944010419,
+                                 "x":  52.124409993489586,
+                                 "size":  18.666666666666668
+                             },
+                             {
+                                 "italic":  false,
+                                 "text":  "TEMPO MÉDIO DA OFERTA LANÇADA E FINAL ",
+                                 "color":  "#2E3525",
+                                 "bold":  true,
+                                 "y":  36.278739929199219,
+                                 "x":  72.684092203776046,
+                                 "size":  42.666666666666664
+                             },
+                             {
+                                 "italic":  false,
+                                 "text":  "POR TIPOLOGIA",
+                                 "color":  "#5B7537",
+                                 "bold":  true,
+                                 "y":  82.358739217122391,
+                                 "x":  72.684092203776046,
+                                 "size":  42.666666666666664
+                             },
+                             {
+                                 "italic":  false,
+                                 "text":  "MACEIÓ + RM ",
+                                 "color":  "#F9F9F9",
+                                 "bold":  true,
+                                 "y":  11.388346354166666,
+                                 "x":  1124.6476236979167,
+                                 "size":  18.666666666666668
+                             }
+                         ],
+               "slots":  [
+
+                         ],
+               "charts":  [
+                              {
+                                  "y":  164.85795084635416,
+                                  "width":  1082.8627115885417,
+                                  "height":  212.94844563802084,
+                                  "x":  151.741943359375
+                              },
+                              {
+                                  "y":  419.52229817708331,
+                                  "width":  1082.8627115885417,
+                                  "height":  212.94844563802084,
+                                  "x":  151.741943359375
+                              }
+                          ]
+           },
+    "68":  {
+               "texts":  [
+                             {
+                                 "italic":  false,
+                                 "text":  "TEMPO MÉDIO DA OFERTA LANÇADA FINAL ",
+                                 "color":  "#2E3525",
+                                 "bold":  true,
+                                 "y":  34.907297770182289,
+                                 "x":  78.816274007161454,
+                                 "size":  42.666666666666664
+                             },
+                             {
+                                 "italic":  false,
+                                 "text":  "POR PADRÃO",
+                                 "color":  "#5B7537",
+                                 "bold":  true,
+                                 "y":  80.987294514973954,
+                                 "x":  78.816274007161454,
+                                 "size":  42.666666666666664
+                             },
+                             {
+                                 "italic":  false,
+                                 "text":  "OFERTA",
+                                 "color":  "#F9F9F9",
+                                 "bold":  false,
+                                 "y":  231.66892496744791,
+                                 "x":  44.296432495117188,
+                                 "size":  18.666666666666668
+                             },
+                             {
+                                 "italic":  false,
+                                 "text":  "LANÇADA",
+                                 "color":  "#F9F9F9",
+                                 "bold":  false,
+                                 "y":  254.06892903645834,
+                                 "x":  38.209815979003906,
+                                 "size":  18.666666666666668
+                             },
+                             {
+                                 "italic":  false,
+                                 "text":  "OFERTA",
+                                 "color":  "#F9F9F9",
+                                 "bold":  false,
+                                 "y":  479.39302571614581,
+                                 "x":  42.086298624674477,
+                                 "size":  18.666666666666668
+                             },
+                             {
+                                 "italic":  false,
+                                 "text":  "FINAL",
+                                 "color":  "#F9F9F9",
+                                 "bold":  false,
+                                 "y":  501.79300944010419,
+                                 "x":  50.752965291341148,
+                                 "size":  18.666666666666668
+                             },
+                             {
+                                 "italic":  false,
+                                 "text":  "MACEIÓ + RM ",
+                                 "color":  "#F9F9F9",
+                                 "bold":  true,
+                                 "y":  11.388346354166666,
+                                 "x":  1124.6476236979167,
+                                 "size":  18.666666666666668
+                             }
+                         ],
+               "slots":  [
+
+                         ],
+               "charts":  [
+                              {
+                                  "y":  164.85795084635416,
+                                  "width":  1082.8627115885417,
+                                  "height":  212.94844563802084,
+                                  "x":  151.741943359375
+                              },
+                              {
+                                  "y":  419.52229817708331,
+                                  "width":  1082.8627115885417,
+                                  "height":  212.94844563802084,
+                                  "x":  151.741943359375
+                              }
+                          ]
+           },
+    "69":  {
+               "texts":  [
+                             {
+                                 "italic":  false,
+                                 "text":  "VGV OFERTADO E DISPONÍVEL ",
+                                 "color":  "#2E3525",
+                                 "bold":  true,
+                                 "y":  31.385510762532551,
+                                 "x":  75.914749145507813,
+                                 "size":  42.666666666666664
+                             },
+                             {
+                                 "italic":  false,
+                                 "text":  "POR PADRÃO",
+                                 "color":  "#5B7537",
+                                 "bold":  true,
+                                 "y":  77.465510050455734,
+                                 "x":  75.914749145507813,
+                                 "size":  42.666666666666664
+                             },
+                             {
+                                 "italic":  false,
+                                 "text":  "MACEIÓ + RM ",
+                                 "color":  "#F9F9F9",
+                                 "bold":  true,
+                                 "y":  11.388346354166666,
+                                 "x":  1124.6476236979167,
+                                 "size":  18.666666666666668
+                             }
+                         ],
+               "slots":  [
+
+                         ],
+               "charts":  [
+
+                          ]
+           },
+    "70":  {
+               "texts":  [
+                             {
+                                 "italic":  false,
+                                 "text":  "MERCADO HORIZONTAL",
+                                 "color":  "#385723",
+                                 "bold":  true,
+                                 "y":  290.879150390625,
+                                 "x":  317.43153889973956,
+                                 "size":  53.333333333333336
+                             },
+                             {
+                                 "italic":  false,
+                                 "text":  "MACEIÓ",
+                                 "color":  "#385723",
+                                 "bold":  true,
+                                 "y":  354.879150390625,
+                                 "x":  532.51826985677087,
+                                 "size":  53.333333333333336
+                             }
+                         ],
+               "slots":  [
+
+                         ],
+               "charts":  [
+
+                          ]
+           },
+    "71":  {
+               "texts":  [
+                             {
+                                 "italic":  false,
+                                 "text":  "OFERTA LANÇADA E FINAL ",
+                                 "color":  "#000000",
+                                 "bold":  true,
+                                 "y":  27.545511881510418,
+                                 "x":  71.800526936848954,
+                                 "size":  42.666666666666664
+                             },
+                             {
+                                 "italic":  false,
+                                 "text":  "POR TIPO\u000b",
+                                 "color":  "#5B7537",
+                                 "bold":  true,
+                                 "y":  73.625513712565109,
+                                 "x":  71.800526936848954,
+                                 "size":  42.666666666666664
+                             },
+                             {
+                                 "italic":  false,
+                                 "text":  "MACEIÓ",
+                                 "color":  "#F9F9F9",
+                                 "bold":  true,
+                                 "y":  11.388346354166666,
+                                 "x":  1152.8976236979167,
+                                 "size":  18.666666666666668
+                             }
+                         ],
+               "slots":  [
+
+                         ],
+               "charts":  [
+
+                          ]
+           },
+    "72":  {
+               "texts":  [
+                             {
+                                 "italic":  false,
+                                 "text":  "OFERTA LANÇADA E FINAL ",
+                                 "color":  "#000000",
+                                 "bold":  true,
+                                 "y":  31.385510762532551,
+                                 "x":  75.914749145507813,
+                                 "size":  42.666666666666664
+                             },
+                             {
+                                 "italic":  false,
+                                 "text":  "POR ANO DE LANÇAMENTO",
+                                 "color":  "#5B7537",
+                                 "bold":  true,
+                                 "y":  77.465510050455734,
+                                 "x":  75.914749145507813,
+                                 "size":  42.666666666666664
+                             },
+                             {
+                                 "italic":  false,
+                                 "text":  "MACEIÓ",
+                                 "color":  "#F9F9F9",
+                                 "bold":  true,
+                                 "y":  11.388346354166666,
+                                 "x":  1152.8976236979167,
+                                 "size":  18.666666666666668
+                             }
+                         ],
+               "slots":  [
+
+                         ],
+               "charts":  [
+
+                          ]
+           },
+    "73":  {
+               "texts":  [
+                             {
+                                 "italic":  false,
+                                 "text":  "PREÇO MÉDIO DO M² PRIVATIVO ",
+                                 "color":  "#000000",
+                                 "bold":  true,
+                                 "y":  30.288294474283855,
+                                 "x":  82.771865844726563,
+                                 "size":  42.666666666666664
+                             },
+                             {
+                                 "italic":  false,
+                                 "text":  "POR TIPOLOGIA\u000b",
+                                 "color":  "#5B7537",
+                                 "bold":  true,
+                                 "y":  76.368296305338546,
+                                 "x":  82.771865844726563,
+                                 "size":  42.666666666666664
+                             },
+                             {
+                                 "italic":  false,
+                                 "text":  "MACEIÓ",
+                                 "color":  "#F9F9F9",
+                                 "bold":  true,
+                                 "y":  11.388346354166666,
+                                 "x":  1152.8976236979167,
+                                 "size":  18.666666666666668
+                             }
+                         ],
+               "slots":  [
+
+                         ],
+               "charts":  [
+
+                          ]
+           },
+    "74":  {
+               "texts":  [
+                             {
+                                 "italic":  false,
+                                 "text":  "MERCADO HORIZONTAL",
+                                 "color":  "#385723",
+                                 "bold":  true,
+                                 "y":  290.879150390625,
+                                 "x":  317.43153889973956,
+                                 "size":  53.333333333333336
+                             },
+                             {
+                                 "italic":  false,
+                                 "text":  "RM MACEIÓ",
+                                 "color":  "#385723",
+                                 "bold":  true,
+                                 "y":  354.879150390625,
+                                 "x":  481.51826985677081,
+                                 "size":  53.333333333333336
+                             }
+                         ],
+               "slots":  [
+
+                         ],
+               "charts":  [
+
+                          ]
+           },
+    "75":  {
+               "texts":  [
+                             {
+                                 "italic":  false,
+                                 "text":  "OFERTA LANÇADA E FINAL ",
+                                 "color":  "#000000",
+                                 "bold":  true,
+                                 "y":  31.385510762532551,
+                                 "x":  75.914749145507813,
+                                 "size":  42.666666666666664
+                             },
+                             {
+                                 "italic":  false,
+                                 "text":  "POR TIPO- RM de MACEIÓ",
+                                 "color":  "#5B7537",
+                                 "bold":  true,
+                                 "y":  77.465510050455734,
+                                 "x":  75.914749145507813,
+                                 "size":  42.666666666666664
+                             },
+                             {
+                                 "italic":  false,
+                                 "text":  "RM",
+                                 "color":  "#F9F9F9",
+                                 "bold":  true,
+                                 "y":  11.388346354166666,
+                                 "x":  1176.23095703125,
+                                 "size":  18.666666666666668
+                             }
+                         ],
+               "slots":  [
+
+                         ],
+               "charts":  [
+
+                          ]
+           },
+    "76":  {
+               "texts":  [
+                             {
+                                 "italic":  false,
+                                 "text":  "OFERTA LANÇADA E FINAL ",
+                                 "color":  "#000000",
+                                 "bold":  true,
+                                 "y":  31.385510762532551,
+                                 "x":  75.914749145507813,
+                                 "size":  42.666666666666664
+                             },
+                             {
+                                 "italic":  false,
+                                 "text":  "POR ANO DE LANÇAMENTO - RM de MACEIÓ",
+                                 "color":  "#5B7537",
+                                 "bold":  true,
+                                 "y":  77.465510050455734,
+                                 "x":  75.914749145507813,
+                                 "size":  42.666666666666664
+                             },
+                             {
+                                 "italic":  false,
+                                 "text":  "RM",
+                                 "color":  "#F9F9F9",
+                                 "bold":  true,
+                                 "y":  11.388346354166666,
+                                 "x":  1176.23095703125,
+                                 "size":  18.666666666666668
+                             }
+                         ],
+               "slots":  [
+
+                         ],
+               "charts":  [
+
+                          ]
+           },
+    "77":  {
+               "texts":  [
+                             {
+                                 "italic":  false,
+                                 "text":  "PREÇO MÉDIO DO M² PRIVATIVO ",
+                                 "color":  "#000000",
+                                 "bold":  true,
+                                 "y":  22.938687642415363,
+                                 "x":  78.550552368164063,
+                                 "size":  42.666666666666664
+                             },
+                             {
+                                 "italic":  false,
+                                 "text":  "POR TIPOLOGIA - RM de MACEIÓ",
+                                 "color":  "#5B7537",
+                                 "bold":  true,
+                                 "y":  69.018686930338546,
+                                 "x":  78.550552368164063,
+                                 "size":  42.666666666666664
+                             },
+                             {
+                                 "italic":  false,
+                                 "text":  "RM",
+                                 "color":  "#F9F9F9",
+                                 "bold":  true,
+                                 "y":  11.388346354166666,
+                                 "x":  1176.23095703125,
+                                 "size":  18.666666666666668
+                             }
+                         ],
+               "slots":  [
+
+                         ],
+               "charts":  [
+
+                          ]
+           },
+    "78":  {
+               "texts":  [
+                             {
+                                 "italic":  false,
+                                 "text":  "CONSULTORES DO ESTUDO",
+                                 "color":  "#000000",
+                                 "bold":  true,
+                                 "y":  312.10614013671875,
+                                 "x":  341.61775716145831,
+                                 "size":  42.666666666666664
+                             }
+                         ],
+               "slots":  [
+
+                         ],
+               "charts":  [
+
+                          ]
+           },
+    "79":  {
+               "texts":  [
+                             {
+                                 "italic":  false,
+                                 "text":  "EQUIPE TÉCNICA",
+                                 "color":  "#3E5026",
+                                 "bold":  true,
+                                 "y":  56.065668741861977,
+                                 "x":  142.96220906575522,
+                                 "size":  37.333333333333336
+                             },
+                             {
+                                 "italic":  false,
+                                 "text":  "Fábio Tadeu Araújo",
+                                 "color":  "#000000",
+                                 "bold":  true,
+                                 "y":  321.01826985677081,
+                                 "x":  138.82771809895834,
+                                 "size":  18.093332926432293
+                             },
+                             {
+                                 "italic":  false,
+                                 "text":  "CEO",
+                                 "color":  "#000000",
+                                 "bold":  false,
+                                 "y":  346.02730305989581,
+                                 "x":  210.82771809895834,
+                                 "size":  18.093332926432293
+                             },
+                             {
+                                 "italic":  false,
+                                 "text":  "Marcos Kahtalian ",
+                                 "color":  "#000000",
+                                 "bold":  true,
+                                 "y":  318.39170328776044,
+                                 "x":  529.23465983072913,
+                                 "size":  18.093332926432293
+                             },
+                             {
+                                 "italic":  false,
+                                 "text":  "Sócio-Fundador",
+                                 "color":  "#000000",
+                                 "bold":  false,
+                                 "y":  344.73417154947919,
+                                 "x":  544.1502685546875,
+                                 "size":  18.093332926432293
+                             },
+                             {
+                                 "italic":  false,
+                                 "text":  "Teresa Cristina",
+                                 "color":  "#000000",
+                                 "bold":  true,
+                                 "y":  321.01826985677081,
+                                 "x":  952.12101236979163,
+                                 "size":  18.093332926432293
+                             },
+                             {
+                                 "italic":  false,
+                                 "text":  "Sócia e Gestora de Projetos",
+                                 "color":  "#000000",
+                                 "bold":  false,
+                                 "y":  346.02750651041669,
+                                 "x":  898.81241861979163,
+                                 "size":  18.093332926432293
+                             },
+                             {
+                                 "italic":  false,
+                                 "text":  "Fernando Ore",
+                                 "color":  "#000000",
+                                 "bold":  true,
+                                 "y":  569.79256184895837,
+                                 "x":  171.62860107421875,
+                                 "size":  18.093332926432293
+                             },
+                             {
+                                 "italic":  false,
+                                 "text":  "Inteligência",
+                                 "color":  "#000000",
+                                 "bold":  false,
+                                 "y":  598.11201985677087,
+                                 "x":  178.82965087890625,
+                                 "size":  18.093332926432293
+                             },
+                             {
+                                 "italic":  false,
+                                 "text":  "de Mercado",
+                                 "color":  "#000000",
+                                 "bold":  false,
+                                 "y":  618.11201985677087,
+                                 "x":  178.16298421223959,
+                                 "size":  18.093332926432293
+                             },
+                             {
+                                 "italic":  false,
+                                 "text":  "\"Colaboração na coleta, ",
+                                 "color":  "#2B2929",
+                                 "bold":  false,
+                                 "y":  415.50626627604169,
+                                 "x":  1028.6321614583333,
+                                 "size":  14.666666666666666
+                             },
+                             {
+                                 "italic":  false,
+                                 "text":  "inserção e análise de ",
+                                 "color":  "#2B2929",
+                                 "bold":  false,
+                                 "y":  433.10624186197919,
+                                 "x":  1028.6321614583333,
+                                 "size":  14.666666666666666
+                             },
+                             {
+                                 "italic":  false,
+                                 "text":  "conformidade dos dados - ",
+                                 "color":  "#2B2929",
+                                 "bold":  false,
+                                 "y":  450.70625813802081,
+                                 "x":  1028.6321614583333,
+                                 "size":  14.666666666666666
+                             },
+                             {
+                                 "italic":  false,
+                                 "text":  "Eng.º José Maurício ",
+                                 "color":  "#2B2929",
+                                 "bold":  true,
+                                 "y":  468.30623372395831,
+                                 "x":  1028.6321614583333,
+                                 "size":  14.666666666666666
+                             },
+                             {
+                                 "italic":  false,
+                                 "text":  "Falcão Brêda (Priorizza ",
+                                 "color":  "#2B2929",
+                                 "bold":  true,
+                                 "y":  485.90625,
+                                 "x":  1028.6321614583333,
+                                 "size":  14.666666666666666
+                             },
+                             {
+                                 "italic":  false,
+                                 "text":  "Engenharia)\". ",
+                                 "color":  "#2B2929",
+                                 "bold":  false,
+                                 "y":  503.50626627604169,
+                                 "x":  1028.6321614583333,
+                                 "size":  14.666666666666666
+                             },
+                             {
+                                 "italic":  false,
+                                 "text":  "Lucas Finoti",
+                                 "color":  "#000000",
+                                 "bold":  true,
+                                 "y":  569.31453450520837,
+                                 "x":  766.96647135416663,
+                                 "size":  18.093332926432293
+                             },
+                             {
+                                 "italic":  false,
+                                 "text":  "Inteligência de ",
+                                 "color":  "#000000",
+                                 "bold":  false,
+                                 "y":  592.00736490885413,
+                                 "x":  756.96647135416663,
+                                 "size":  18.093332926432293
+                             },
+                             {
+                                 "italic":  false,
+                                 "text":  "Mercado",
+                                 "color":  "#000000",
+                                 "bold":  false,
+                                 "y":  612.00736490885413,
+                                 "x":  784.2998046875,
+                                 "size":  18.093332926432293
+                             },
+                             {
+                                 "italic":  false,
+                                 "text":  "Mariana Andretta",
+                                 "color":  "#000000",
+                                 "bold":  true,
+                                 "y":  569.31453450520837,
+                                 "x":  450.30399576822919,
+                                 "size":  18.093332926432293
+                             },
+                             {
+                                 "italic":  false,
+                                 "text":  "Inteligência",
+                                 "color":  "#000000",
+                                 "bold":  false,
+                                 "y":  597.634033203125,
+                                 "x":  475.33841959635419,
+                                 "size":  18.093332926432293
+                             },
+                             {
+                                 "italic":  false,
+                                 "text":  "de Mercado",
+                                 "color":  "#000000",
+                                 "bold":  false,
+                                 "y":  617.634033203125,
+                                 "x":  474.6717529296875,
+                                 "size":  18.093332926432293
+                             }
+                         ],
+               "slots":  [
+
+                         ],
+               "charts":  [
+
+                          ]
+           },
+    "80":  {
+               "texts":  [
+
+                         ],
+               "slots":  [
+
+                         ],
+               "charts":  [
+
+                          ]
+           },
+    "81":  {
+               "texts":  [
+
+                         ],
+               "slots":  [
+
+                         ],
+               "charts":  [
+
+                          ]
+           },
+    "82":  {
+               "texts":  [
+
+                         ],
+               "slots":  [
+
+                         ],
+               "charts":  [
+
+                          ]
            }
 }

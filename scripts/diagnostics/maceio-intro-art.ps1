@@ -33,7 +33,7 @@ try {
   $previous=Join-Path $output 'layout.json'
   if(Test-Path -LiteralPath $previous){$existing=Get-Content -LiteralPath $previous -Raw -Encoding UTF8 | ConvertFrom-Json;foreach($property in $existing.PSObject.Properties){$records[$property.Name]=$property.Value}}
   try {
-   foreach ($n in $FirstSlide..$LastSlide) {
+   foreach ($n in $FirstSlide..([Math]::Min($LastSlide,$deck.Slides.Count))) {
     $slide=$deck.Slides.Item($n); $slots=@(); $charts=@()
     foreach ($shape in @($slide.Shapes)) {
      if ($shape.HasChart -eq -1) {
@@ -54,7 +54,7 @@ try {
       } elseif (($n -ge 9 -and $n -le 14 -and ($text -match '%' -or $text -match '^[+\u2212-]?\d')) -or ($n -ge 16 -and ($text -match '%' -or $text -match '2026' -or $text -match 'INCC' -or $text.Trim() -in @('*','-')))) {
        $shape.Visible=0
       }
-     } elseif (($n -ge 9 -and $n -le 14) -or ($n -ge 41 -and $shape.Width -gt 500 -and $shape.Height -gt 150 -and $shape.Top -gt 50 -and $shape.Top -lt 450)) {
+     } elseif (($n -ge 9 -and $n -le 14) -or ($n -ge 41 -and $n -le $(if($kind -eq 'monthly'){77}else{82}) -and $shape.Width -gt 500 -and $shape.Height -gt 150 -and $shape.Top -gt 50 -and $shape.Top -lt 450)) {
       # These originals embed employment charts as pictures/groups, not data sources.
       # Preserve the small underline decoration only; branding belongs to the layout.
       if ($shape.Height -gt 22 -and $shape.Top -lt 630) {$shape.Visible=0}
