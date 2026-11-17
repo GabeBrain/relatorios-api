@@ -1,5 +1,11 @@
 # Estado do handoff
 
+## 17/11/2026 — Maceió trimestral: resolver fontes exceto CAGED
+
+Codex, base `2cea2276`, main; push do mensal autorizado/concluído e remoto0/0 antes de alterar. Lucas forneceu JSON2T2026 com87slides/0disponíveis/59fontes/5critérios/23editoriais e reforçou exclusão do CAGED, em carga. Contratos compartilhados de coleta já corrigidos no mensal atendem também o trimestral; estendido INCC-DI explícito ao2T, basejunho/2026, sem alterar CAGED/job/ponte/Scheduler ou domínios paralelos.
+
+[Evidências](../../features/relatorios-institucionais/maceio/FONTES_TRIMESTRAL_2026-11-17.md):35testes focados, tipos/lint e6cenários de navegador aprovados. JSONs efetivamente baixados e parseados: com fonte completa64disponíveis+23editoriais; com CAGED ausente58disponíveis+6fontes(somente9–14)+23editoriais. Nenhuma outra fonte/critério pendente nesse cenário sintético. Preservados6municípios e comercial apenas na capital. Build final aprovado (exit0). Sem nova coleta autenticada real, token local ou controle Opera; após autorização/publicação, gerar novo JSON real2T2026 para comprovar cobertura/permissões/campos. Commit local; sem push/deploy/Monday deste lote.
+
 ## 17/11/2026 — Maceió mensal: fontes pendentes e série INCC-DI autorizada
 
 Codex, base `7b57f0ce`, main limpa/origin único0/0 após fetch. Lucas forneceu JSON real de maio/2026:0disponíveis/55fontes/5critérios/22editoriais; pediu corrigir fontes exceto CAGED e autorizou INCC-DI, explicitamente identificado. Ajustes locais: recurso temporal oficial sem cidade/UF por linha, cursor sem city com requisição reconstruída no escopo, POST v2 para histórico detalhado com parser BuildingSource existente e sem corte de fotografias, timeout60s/retry limitado e diagnóstico de falha sanitizado/HTTP. INCC-DI padrão somente mensal, base no fechamento, explícito na prévia/arte/metodologia/JSON; sem índice ou valor nominal não há preenchimento.

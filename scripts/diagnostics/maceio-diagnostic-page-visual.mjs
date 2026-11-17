@@ -7,7 +7,7 @@ const base='http://127.0.0.1:4203',folder=resolve('.local-inputs/relatorios-luca
 const server=spawn(process.execPath,[resolve('scripts/diagnostics/report-preview-server.mjs'),'4203'],{windowsHide:true,stdio:'ignore'});let browser,failurePage;const results=[],errors=[];
 try{
  let ready=false;for(let i=0;i<80&&!ready;i++){try{ready=(await fetch(base)).ok;}catch{}if(!ready)await new Promise(r=>setTimeout(r,250));}assert.ok(ready);browser=await chromium.launch({channel:'msedge',headless:true});
- for(const width of [1440,390])for(const quarterly of [false,true])for(const state of ['success','empty','error']){
+ for(const width of [1440,390])for(const quarterly of process.argv.includes('--quarterly-only')?[true]:[false,true])for(const state of ['success','empty','error']){
   console.log(JSON.stringify({checking:{width,quarterly,state}}));
   const dark=width===390,context=await browser.newContext({viewport:{width,height:1000}}),cities=['Maceió','Pilar','Marechal Deodoro','Paripueira','Rio Largo','Barra de São Miguel','Coqueiro Seco'];let fixture,caged,cagedCalls=0;
   await context.addInitScript(()=>localStorage.setItem('brain-auth',JSON.stringify({state:{token:'synthetic-only',email:'fixture@example.invalid',issuedAt:Date.now(),expiresAt:Date.now()+3600000},version:0})));
@@ -53,8 +53,8 @@ try{
   assert.equal(diagnostic.slides.length,quarterly?87:82);
   assert.equal(Object.values(diagnostic.summary).reduce((a,b)=>a+b,0),diagnostic.slides.length);
   assert.equal(diagnostic.slides.find(slide=>slide.number===58).status,'available');
-  assert.equal(diagnostic.criteria.monetaryIndex,quarterly?'unconfirmed':'INCC-DI');
-  if(!quarterly){assert.equal(diagnostic.summary['method-pending'],0);await page.getByRole('button',{name:'26',exact:true}).click();assert.equal(await page.locator('[data-maceio-pending]').count(),0);await page.getByText('Valores corrigidos pelo INCC-DI',{exact:false}).first().waitFor();}
+  assert.equal(diagnostic.criteria.monetaryIndex,'INCC-DI');
+  {assert.equal(diagnostic.summary['method-pending'],0);await page.getByRole('button',{name:'26',exact:true}).click();assert.equal(await page.locator('[data-maceio-pending]').count(),0);await page.getByText('Valores corrigidos pelo INCC-DI',{exact:false}).first().waitFor();}
   await page.getByRole('button',{name:'58',exact:true}).click();
   assert.equal(diagnostic.slides.find(slide=>slide.number===9).status,state==='success'?'available':'source-pending');
   assert.ok(!JSON.stringify(diagnostic).includes('synthetic-only'));

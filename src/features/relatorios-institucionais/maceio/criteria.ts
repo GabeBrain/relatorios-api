@@ -1,5 +1,6 @@
-import type { MaceioSelection } from './model';
+import type { MaceioSelection, Periodicity } from './model';
 import type { MonetaryPolicy } from './market-slides-data';
 
-/** Lucas explicitly selected INCC-DI for the monthly report on 17/11/2026. */
-export const maceioMonetaryPolicy = (selection: MaceioSelection): MonetaryPolicy => selection.periodicity === 'monthly' ? 'INCC-DI' : 'unconfirmed';
+/** Lucas selected INCC-DI on 17/11/2026 and extended the same treatment to quarterly. */
+const policies: Record<Periodicity, MonetaryPolicy> = { monthly: 'INCC-DI', quarterly: 'INCC-DI' };
+export const maceioMonetaryPolicy = (selection: MaceioSelection): MonetaryPolicy => policies[selection.periodicity];

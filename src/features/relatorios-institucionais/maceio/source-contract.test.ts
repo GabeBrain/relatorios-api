@@ -66,7 +66,7 @@ describe('contratos reais das fontes Maceió', () => {
     }
     expect(buildMaceioMarketSlide(26, selection, data, maceioMonetaryPolicy(selection)).issue).toBeNull();
     expect(maceioMonetaryPolicy(selection)).toBe('INCC-DI');
-    expect(maceioMonetaryPolicy({ ...selection, periodicity: 'quarterly', position: 2 })).toBe('unconfirmed');
+    expect(maceioMonetaryPolicy({ ...selection, periodicity: 'quarterly', position: 2 })).toBe('INCC-DI');
   });
   it('registra erro HTTP sanitizado no diagnóstico sem transformar falha em zero', async () => {
     const request: MaceioRequest = async () => ({ ...response({ message: 'private-provider' }, 403), text: 'private-provider' });

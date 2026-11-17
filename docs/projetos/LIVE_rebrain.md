@@ -1,5 +1,14 @@
 # Rebrain (Plataforma) — Documento Vivo
 
+## 17/11/2026 — Maceió trimestral: fontes e INCC-DI — Codex
+
+- **Pedido/evidência:** Lucas forneceu diagnóstico2T2026 com0disponíveis/59fontes/5critérios/23editoriais e pediu resolver fontes exceto CAGED, reforçado explicitamente. Mensal `2cea2276` foi enviado com autorização e remoto0/0 confirmado antes deste lote.
+- **Entrega:** contratos compartilhados já corrigidos no mensal atendem fontes verticais/horizontais/comerciais trimestrais; critério monetário estendido ao trimestral com INCC-DI explícito na prévia/arte/metodologia/JSON, basejunho/2026 no2T. Preservados6municípios, fluxo de3meses, estoque de fechamento e comercial exclusivo da capital. CAGED/job/ponte/Scheduler sem alteração.
+- **Validação:**35testes focados, tipos/lint e6cenários de navegador aprovados; JSON efetivamente baixado e seis arquivos parseados. Cenário completo:64disponíveis+23editoriais. Com CAGED indisponível:58disponíveis+6fontes(somente9–14)+23editoriais. [Contrato e evidências](../features/relatorios-institucionais/maceio/FONTES_TRIMESTRAL_2026-11-17.md). Build final de produção aprovado (exit0).
+- **Limite:** dados sintéticos no headless, sem nova geração autenticada na API real; faltam token local e controle Opera. Depois da publicação autorizada, gerar novamente2T2026 e conferir acesso/cobertura/campos no JSON real.
+- **Base/autoria:** `2cea2276`, main/origin único0/0 antes da alteração; Codex. Commit desta entrega local; sem push/deploy/Monday.
+- **Monday:** [Panorama Maceió / SINDUSCON](https://brain381753.monday.com/boards/18398638577/pulses/13149406169) — `13149406169`.
+
 ## 17/11/2026 — Maceió mensal: fontes públicas, histórico v2 e INCC-DI — Codex
 
 - **Pedido/evidência:** diagnóstico real de maio/2026 com0disponíveis/55fontes/5critérios/22editoriais; corrigir mensal, excluindo CAGED. Lucas autorizou **INCC-DI** e pediu identificação explícita da série.
@@ -1895,6 +1904,8 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 
 ## 2. Etapas
 
+- **17/11 — Maceió trimestral, fontes:** contratos corrigidos compartilhados e INCC-DI explícito aplicados;35testes e6cenários headless aprovados, apenas CAGED pendente no cenário imobiliário completo. Validação real depois da publicação ainda necessária.
+
 - **17/11 — Maceió mensal, correção de fontes:** contratos temporais/paginação e histórico POST v2 ajustados; INCC-DI autorizado por Lucas e explícito no mensal.134testes e12cenários de navegador sintético aprovados; geração autenticada real ainda não refeita.
 
 - **17/11 — Maceió, prévia/diagnóstico:** inventário/seletor técnico removidos, resumo de fontes e exportação JSON por slide implementados localmente. 129 testes, build e 12 cenários de navegador aprovados; publicação depende de autorização.
@@ -2058,6 +2069,8 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 ---
 
 ## 3. Pendências
+
+- **17/11 — Maceió trimestral, publicação/ensaio real:** autorizar envio deste lote, publicar e gerar novo JSON2T2026; conferir acesso v2/cobertura/dados monetários. CAGED segue fora do lote, carga histórica ainda independente. Não usar diagnóstico anterior ao commit2cea2276 para avaliar a correção compartilhada.
 
 - **17/11 — Maceió mensal, conferir fonte real após correção:** autorizar push, publicar frontend e gerar maio/2026 novamente; avaliar novo JSON com códigos de falha/HTTP, cobertura e valores monetários. INCC-DI do mensal já autorizado, trimestral segue separado. Não confundir ensaio sintético sem pendências com dados reais homologados. CAGED excluído deste pedido.
 
