@@ -62,9 +62,6 @@ describe('Maceió41–60 · oferta, IVV e preços',()=>{
   it('rejeita histórico duplicado',()=>{
     const data=offerPriceFixture(selection),rows=data.sources.find(s=>s.metric==='details')!.rows;rows.push(rows[0]);expect(buildOfferPriceSlide(59,selection,data,'stock-weighted').issue).toMatch(/identificação/);
   });
-  it('rejeita tipologia especial sem alterar o universo',()=>{
-    const data=offerPriceFixture(selection),row=data.sources.find(s=>s.metric==='details')!.rows[0];(row.typologies as MarketRow[])[0].type_of_typology='Cobertura';expect(buildOfferPriceSlide(59,selection,data,'stock-weighted').issue).toMatch(/universo/);
-  });
   it('mantém os demais slides quando uma fonte granular falha',()=>{
     const data=offerPriceFixture(selection);data.sources.find(s=>s.metric==='details')!.complete=false;
     expect(buildOfferPriceSlide(59,selection,data,'stock-weighted').issue).not.toBeNull();expect(buildOfferPriceSlide(42,selection,data).issue).toBeNull();expect(buildOfferPriceSlide(45,selection,data).issue).toBeNull();
@@ -75,4 +72,17 @@ describe('Maceió41–60 · oferta, IVV e preços',()=>{
     for(const source of data.sources){if(source.metric==='stock')for(const row of source.rows)row.stock=0;if(source.metric==='details')for(const building of source.rows)for(const row of building.typologies_history as MarketRow[])row.typology_stock=0;}
     expect(buildOfferPriceSlide(60,selection,data,'stock-weighted').issue).toMatch(/Nenhuma unidade/);
   });
+});
+
+for(const periodicity of ['monthly','quarterly'] as const)for(const kind of ['Garden','Cobertura'])it(`preserves all units and price weights for ${kind} / ${periodicity}`,()=>{
+ const current={...selection,periodicity,position:periodicity==='monthly'?5:2},data=offerPriceFixture(current);
+ const page=59;
+ const baseline=buildOfferPriceSlide(page,current,data,'stock-weighted');expect(baseline.issue).toBeNull();
+ for(const source of data.sources.filter(s=>s.metric==='details'))for(const building of source.rows){
+  for(const row of building.typologies as MarketRow[])row.type_of_typology=kind;
+  for(const row of building.typologies_history as MarketRow[])row.type_of_typology=kind;
+ }
+ expect(buildOfferPriceSlide(page,current,data,'stock-weighted')).toEqual(baseline);
+ (data.sources.find(s=>s.metric==='details')!.rows[0].typologies_history as MarketRow[]).at(-1)!.typology_stock=999999;
+ expect(buildOfferPriceSlide(page,current,data,'stock-weighted').issue).not.toBeNull();
 });

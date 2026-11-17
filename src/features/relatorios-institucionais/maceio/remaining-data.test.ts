@@ -95,3 +95,16 @@ describe('Maceió · todos os slides restantes',()=>{
   });
 });
 function maceioCitiesForTest(){return ['Maceió','Pilar','Marechal Deodoro','Paripueira','Rio Largo','Barra de São Miguel','Coqueiro Seco'];}
+
+for(const periodicity of ['monthly','quarterly'] as const)for(const kind of ['Garden','Cobertura'])it(`preserves all units and price weights for ${kind} / ${periodicity}`,()=>{
+ const current={...monthly,periodicity,position:periodicity==='monthly'?5:2},data=remainingFixture(current);
+ const page=periodicity==='monthly'?62:61;
+ const baseline=buildRemainingSlide(page,current,data,'stock-weighted');expect(baseline.issue).toBeNull();
+ for(const source of data.sources.filter(s=>s.metric==='details'))for(const building of source.rows){
+  for(const row of building.typologies as MarketRow[])row.type_of_typology=kind;
+  for(const row of building.typologies_history as MarketRow[])row.type_of_typology=kind;
+ }
+ expect(buildRemainingSlide(page,current,data,'stock-weighted')).toEqual(baseline);
+ (data.sources.find(s=>s.metric==='details')!.rows[0].typologies_history as MarketRow[]).at(-1)!.typology_stock=999999;
+ expect(buildRemainingSlide(page,current,data,'stock-weighted').issue).not.toBeNull();
+});

@@ -72,7 +72,6 @@ function snapshots(data: MaceioMarketSlidesData, cities: readonly string[], mont
       if (release > month) continue;
       if (!Array.isArray(building.typologies_history)) throw new Error('Histórico por tipologia ausente.');
       const history = building.typologies_history as MarketRow[], seen = new Set<string>(), established = new Set<string>();
-      const metadata = new Map((Array.isArray(building.typologies) ? building.typologies as MarketRow[] : []).map(row => [String(row.id ?? row.typology_id), row.type_of_typology]));
       let observed = false;
       for (const row of history) {
         const period = marketMonth(row.period), typology = String(row.typology_id ?? '').trim();
@@ -81,7 +80,6 @@ function snapshots(data: MaceioMarketSlidesData, cities: readonly string[], mont
         if (period !== month) continue;
         if (seen.has(typology)) throw new Error('Tipologia repetida na mesma competência.');
         seen.add(typology); observed = true;
-        if (normalizeMarketText(row.type_of_typology ?? metadata.get(typology)) !== 'padrao') throw new Error('O universo de tipologias Padrão precisa ser confirmado; não incluímos tipologias especiais silenciosamente.');
         result.push({ city, standard: String(building.standard ?? ''), bedroom: row.number_bedroom, area: row.private_area, price: row.price, stock: requiredNumber(row.typology_stock), releases: row.releases_in_period, sales: row.sold_in_period });
       }
       if (!observed || [...established].some(id => !seen.has(id))) throw new Error(`${city}: fotografia ${month} incompleta; não usamos cadastro atual ou estoque zero como substitutos.`);

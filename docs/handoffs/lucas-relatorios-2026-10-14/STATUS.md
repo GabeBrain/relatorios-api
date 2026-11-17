@@ -1,5 +1,9 @@
 # Estado do handoff
 
+## 17/11/2026 — Maceió: inclusão de Garden e Cobertura autorizada
+
+Lucas confirmou que Garden e Cobertura devem participar dos cálculos aplicáveis no mensal e no trimestral. Removida a exigência literal de `type_of_typology=Padrão` dos dois leitores granulares; nenhuma unidade é excluída pelo nome do tipo. Mantidos segmento, identidade, competência, duplicatas, fotografia completa, reconciliação municipal, preço/área e ponderação por estoque. O original não comprova exclusão desses tipos. JSON real ampliado confirma Cobertura/Garden e divergência de estoque detalhado de Maceió (4.863 contra 4.160 em maio/2026); isso continua pendente, assim como cobertura municipal e correspondências dos padrões/produtos. CAGED e SP preservados. Testes headless: 56 aprovados, incluindo ambas as edições, tipos com mesmos pesos/totais e divergência ainda bloqueada. Sem nova geração autenticada: não há token neste ambiente. Publicação e novo diagnóstico real ainda necessários; sem push.
+
 ## 17/11/2026 — Maceió real: transporte completo, validação ainda bloqueada
 
 Base `a16b482a`, main limpa, origin único0/0 após fetch. Novo JSON real de maio/2026 às18:23UTC mantém55fontes pendentes, mas49coletas verticais/14horizontais e7cadastros concluídos sem falhasHTTP.5slides disponíveis,22editoriais,0critérios. Bloqueios agora por séries vazias/cobertura, correspondência de padrões/tipologias/produtos e balanço divergente2021-03. Não afirmar que55pendências foram resolvidas.

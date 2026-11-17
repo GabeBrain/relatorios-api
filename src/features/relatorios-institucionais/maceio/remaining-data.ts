@@ -33,13 +33,11 @@ function details(data:MaceioMarketSlidesData,selection:MaceioSelection,cities:re
       projects.add(id);if(release>end)continue;
       if(!Array.isArray(building.typologies_history))throw new Error('Fotografia histórica por tipologia ausente.');
       const histories=building.typologies_history as MarketRow[],established=new Set<string>(),seen=new Set<string>();
-      const metadata=new Map((Array.isArray(building.typologies)?building.typologies as MarketRow[]:[]).map(row=>[String(row.id??row.typology_id),row.type_of_typology]));
       for(const row of histories){
         const month=marketMonth(row.period),tid=String(row.typology_id??'').trim();
         if(!month||!tid)throw new Error('Competência ou ID de tipologia inválido.');
         if(month<=end)established.add(tid);if(month!==end)continue;
         if(seen.has(tid))throw new Error('Tipologia duplicada no fechamento.');seen.add(tid);
-        if(norm(row.type_of_typology??metadata.get(tid))!=='padrao')throw new Error('O universo de tipologias Padrão precisa estar explícito na fonte.');
         result.push({id:`${city}/${id}`,city,year:Number(release.slice(0,4)),standard:String(row.pattern??building.standard??''),family:String(row.standard_family??building.standard_family??row.pattern??building.standard??''),type:String(building.building_subtype??building.subtype??building.product_type??''),bedroom:row.number_bedroom,area:row.private_area,price:row.price,stock:number(row.typology_stock),qty:row.qty,stage:row.estagio_empreendimento??row.building_status});
       }
       if(!seen.size||[...established].some(tid=>!seen.has(tid)))throw new Error(`${city}: fotografia de fechamento incompleta; ausência não é estoque zero.`);

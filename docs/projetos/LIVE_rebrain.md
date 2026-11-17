@@ -1,5 +1,12 @@
 # Rebrain (Plataforma) — Documento Vivo
 
+## 17/11/2026 — Maceió: Garden e Cobertura nos dois modelos — Codex
+
+- **Entrega:** por autorização de Lucas, retirada a exigência literal `type_of_typology=Padrão` dos leitores de preços/oferta e tabelas do mensal/trimestral. Não existe comprovação dessa exclusão no original. Preservados todos os registros, pesos e verificações de escopo, fotografia, duplicatas e estoque municipal; CAGED e SP não alterados. Base `f7a94c94`.
+- **Validação:** 56 testes headless aprovados, incluindo Garden/Cobertura nos dois modelos, mesmos resultados para mesmos valores e bloqueio de estoque divergente. Sem token para nova geração autenticada; diagnóstico real ampliado registra estoque Maceió 4.863 granular contra 4.160 municipal em maio/2026.
+- **Etapas/Pendências:** restrição de tipo corrigida; ainda conferir estoque, lacunas municipais, padrões e produtos. Não declarar resolvidos os 49 slides não CAGED. Novo diagnóstico após publicação ainda necessário. Sem push/deploy/Monday.
+- **Monday:** [Panorama Maceió / SINDUSCON](https://brain381753.monday.com/boards/18398638577/pulses/13149406169) — `13149406169`.
+
 ## 17/11/2026 — Maceió: coleta real completa, bloqueios de validação — Codex
 
 - **Evidência real:** novo JSON de maio/2026 às18:23UTC:5disponíveis/55fontes/0critérios/22editoriais, porém49fontes verticais+14horizontais e cadastro/lançamentos completos, sem falhasHTTP. Transporte corrigido observado; indicadores ainda bloqueados por dados/universo/cobertura. [Investigação](../features/relatorios-institucionais/maceio/VALIDACAO_DADOS_REAIS_2026-11-17.md).
