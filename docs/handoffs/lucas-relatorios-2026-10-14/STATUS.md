@@ -1,5 +1,13 @@
 # Estado do handoff
 
+## 17/11/2026 — CAGED/MTE integrado localmente, incluindo CAGED antigo
+
+Lucas autorizou iniciar a integração **pelo MTE** e pediu também o CAGED antigo. Base `95e6fbee`, main, origin único, árvore limpa e 1commit local de investigação desde10h22 após fetch. [Implementação e limites](../../features/relatorios-institucionais/maceio/CAGED_INTEGRACAO_2026-11-17.md), commit `50d88663`: importador MTE estatístico/ajustes2017–2019 e Novo Caged MOV/FOR/EXC, snapshots agregados e imutáveis, módulo/instalador da rota HMAC existente, Edge e prévia9–14. Sem microdados no Lovable ou secrets exportados. Source externo do proxy preservado; instalador aplicado somente numa cópia temporária, onde9testes existentes passaram.
+
+Fonte real: FTP listado, set/2026 com4.307.569MOV/91.861FOR/4.161EXC; BR121.305/construção9.468/AL11.110/construçãoAL166 conciliados ao XLSX. Legado dez/2019 com2.289.007registros estatísticos e80.023ajustes. Pilotos não são carga histórica completa.123testes Maceió,6Python,4Edge,3rota,9proxy;144cenários visuais+24revisões e12cenários da página real com API/CAGED interceptados, tipos/lint/build aprovados. Regressão ampla505aprovados/2ignorados/2falhasFIERGS já documentadas e reproduzidas isoladamente; domínio/shared sem diff. Sem atraso artificial na produção:1,6s existe apenas no script de QA. Diferença metodológica2020 na origem/documentação, sem marca adicional no gráfico original, conforme esclarecimento de Lucas.
+
+**Pendências de ativação:** definir/aplicar tabela/bucketGCP, bootstrap desde201701, publicar rota do proxy e EdgeLovable, criarScheduler e validar geração autenticada/homologação. [Procedimento operacional](../../../gcp/caged-mte/README.md). Nenhuma dessas ações remotas foi executada; backend gerenciado não presumido acessível. ExportaçãoMaceió continua separada. Sem escritaMonday, push ou deploy. Documentação/fechamento em commit próprio; publicar depende de autorização.
+
 ## 17/11/2026 — CAGED Maceió: BigQuery acessível, alternativa MTE e consumo
 
 Codex, base `e8a067fb`, main limpa na abertura, origin único 0/0 após fetch. Git da máquina `Codex Test`; frente explicitamente solicitada: Maceió. Plugin BigQuery instalado confirmou identidade da conta do setor e SELECT; schemas acessíveis. MOV/FOR/EXC retornam somente jan–mar/2026; catálogo BD anuncia setembro, compatível com a defasagem de seis meses da versão aberta. Não presumir Pro nem autorização da identidade do Cloud Run. Código da ponte Empresas/Empregados localizado no repo vizinho Sistema Quanti, sem alteração ou leitura de secrets.

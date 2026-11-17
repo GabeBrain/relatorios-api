@@ -1,5 +1,9 @@
 # Evidências — Panorama Maceió / SINDUSCON-AL
 
+## 17/11/2026 — CAGED MTE, incluindo fonte antiga
+
+[Entrega, contratos, hashes e limites](CAGED_INTEGRACAO_2026-11-17.md). Pilotos reais de setembro/2026 e dezembro/2019; quatro totais de setembro conciliados com XLSX MTE.123testes Maceió,6Python,4Edge,3rota,9regressões do proxy aplicando patch em cópia temporária.144cenários visuais+24revisões setoriais e12cenários da página real com CAGED sintético/lento. Tipos/lint/build no fechamento. Código local, sem bootstrap histórico completo, ativação remota ou geração autenticada. Sem push/Monday. Teste lento não adiciona atraso em produção; nota metodológica de 2020 permanece fora do gráfico original.
+
 ## 16/11/2026 — Continuação21–40, CAGED adiado
 
 [Entrega e contratos](SLIDES_21_40_2026-11-16.md).58testes Maceió, tipos/lint/build;320casos de lâminas e8cenários da página real com API interceptada, incluindo índice não escolhido/escolhido e falha do núcleo. Originais preservados por SHA256. Sem coleta autenticada, consulta BigQuery ou exportação nova. Informação de Lucas: BigQuery do setor já conectado ao Rebrain, integração CAGED fica para depois.

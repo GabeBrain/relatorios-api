@@ -1,5 +1,15 @@
 # Rebrain (Plataforma) — Documento Vivo
 
+## 17/11/2026 — Maceió: CAGED/MTE, antigo e novo, integrado localmente — Codex
+
+- **Ambiente/funcionalidade:** `/rebrain/relatorios-institucionais/maceio` — emprego9–14 mensal/trimestral, rota ainda oculta.
+- **O quê:** fonte MTE autorizada por Lucas; importador estatístico+ajustes2017–2019 e MOV+FOR−EXC desde2020, snapshots agregados/revisões, rota HMAC compatível com Empresas/Empregados, Edge e seis slides dinâmicos. Sem microdados no Lovable ou chaves privadas. Competência/versão preservadas, ausente não vira zero e cancelamento/retry tratados.
+- **Evidência:** pilotos reais set/2026 e dez/2019 processados; quatro totais de setembro conciliados ao XLSX MTE.123testes Maceió,6Python,4Edge,3rota,9regressões do proxy em cópia temporária;144cenários visuais+24revisões setoriais,12cenários de página com fonte sintética/lenta, tipos/lint/build aprovados. Regressões amplas reproduzem2falhas FIERGS prévias, domínio/shared sem diff. [Contratos, hashes e limites](../features/relatorios-institucionais/maceio/CAGED_INTEGRACAO_2026-11-17.md).
+- **Decisões:** preservar composição original sem marca nova de quebra2020; ressalva metodológica na origem/documentação. Atraso de1,6s só no QA local, sem espera artificial em produção. RAIS não preenche CAGED.
+- **Impacto em Etapas/Pendências:** implementação local pronta; **ativação remota pendente**: tabela/bucketGCP, bootstrap completo desde201701, montar/publicar rota e EdgeLovable, agendar atualização e geração autenticada/homologação. Pilotos não equivalem ao histórico inteiro. Exportação PPTX/PDF permanece separada.
+- **Arquivos:** módulo Maceió, `gcp/caged-mte/`, `supabase/functions/caged-report`, config, diagnósticos e documentação. **Commits:** `50d88663` (implementação); fechamento documental neste registro.
+- **Monday:** [Panorama Maceió / SINDUSCON](https://brain381753.monday.com/boards/18398638577/pulses/13149406169) — `13149406169`. Sem escrita. Sem push/deploy.
+
 ## 17/11/2026 — Maceió: acesso CAGED e estimativa mensal/trimestral — Codex
 
 - **Ambiente/funcionalidade:** `/rebrain/relatorios-institucionais/maceio` — investigação da fonte de emprego 9–14, sem mudança runtime.
@@ -1854,6 +1864,8 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 
 ## 2. Etapas
 
+- **17/11 — Maceió, CAGED/MTE local concluído:** importador antigo+NovoCaged, ponte/Edge e slides9–14 implementados e validados no commit `50d88663`.123testes Maceió e pilotos reais set/2026/dez/2019. Próximo: bootstrap completo2017+, ativação GCP/Lovable/Scheduler e geração autenticada/homologação; exportação separada. Estados anteriores de CAGED adiado/a integrar abaixo são históricos.
+
 - **17/11 — Maceió, todas as posições:** prévia82mensais/87trimestrais implementada, incluindo estado atual, horizontal, comercial trimestral, equipe/fechamento.107testes e ensaios visuais/página aprovados. Próximo confirmado pelo usuário: CAGED9–14; depois exportação e homologação real. Estados anteriores de61–80/fechamento abaixo são históricos.
 
 - **17/11 — Maceió, após60:** prévia mensal/trimestral1–60 implementada localmente, com oferta/IVV/preços e critérios explícitos;81testes,480verificações visuais e8cenários de página aprovados. Próximo61–80 e fechamento, depois exportação; fontes/métodos reais aguardam homologação. CAGED continua adiado. Estados anteriores abaixo são históricos.
@@ -2009,6 +2021,8 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 ---
 
 ## 3. Pendências
+
+- **17/11 — Maceió, ativar CAGED/MTE:** aplicar recursos GCP e executar histórico completo desde201701; montar/publicar rota do proxy e EdgeLovable; configurar atualização autenticada; validar ambos os modelos com fonte real e analista. Implementação local `50d88663` concluída, pilotos não equivalem ao bootstrap. Exportação PPTX/PDF e demais homologações seguem pendentes. [Passos operacionais](../../gcp/caged-mte/README.md).
 
 - **17/11 — Maceió, após82/87:** integrar CAGED mensal à referência escolhida, usando a infraestrutura BigQuery como ponto de investigação (RAIS anual não substitui a série); desenvolver exportação PPTX/PDF e executar geração real delimitada para comprovar campos/granularidade/universo/classificações/INCC antes de homologar com o analista. Não restam posições de slide para compor; pendências antigas61–80/fechamento abaixo foram atendidas na prévia local.
 

@@ -2,6 +2,13 @@
 
 Registro de fatos comprovados, hipóteses e decisões. Atualizado a cada entrega.
 
+## 17/11/2026 — CAGED MTE autorizado
+
+- **D12 — Fonte MTE:** Lucas autorizou a integração pelo MTE, em lugar de depender da cobertura recente BD Pro. D7 permanece como histórico do adiamento anterior. Importador estatístico/ajustes 2017–2019 e MOV/FOR/EXC desde 2020, com agregados e revisões; [contratos e evidências](CAGED_INTEGRACAO_2026-11-17.md).
+- **D13 — Comparativos reutilizáveis por versão:** conservar snapshots imutáveis de cada fonte e atualizar os períodos afetados por revisões. Não assumir que um ano encerrado é irretificável. Comparação mensal e ano parcial também no trimestral, conforme o fechamento do original.
+- **D14 — Original sem marca de quebra:** Lucas perguntou se a marca existia no original; render 9–14 não a apresenta. Manter a composição original sem nota nova de quebra no gráfico. Registrar a diferença metodológica/2020 na origem e documentação, sem afirmar equivalência metodológica homologada.
+- **D15 — Infraestrutura existente:** reaproveitar identidade/transporte/HMAC da ponte Empresas/Empregados; frontend recebe só agregados. Sem chaves privadas ou microdados no Lovable. Publicação, bootstrap completo e agendamento são etapas remotas separadas, ainda não executadas.
+
 ## 16/11/2026 — Continuação com Codex
 
 - **D7 — CAGED adiado:** Lucas informou BigQuery do setor já conectado ao Rebrain e pediu continuar a implantação, deixando CAGED para depois. Código RAIS/ponte Empresas localizado; acesso real não exercitado. Não confundir conexão informada do produto com autenticação disponível ao agente.
