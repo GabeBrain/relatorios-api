@@ -41,10 +41,10 @@ try{
   await page.getByRole('region',{name:'Carregamento do relatório Maceió'}).waitFor();assert.ok(await page.getByRole('complementary').isVisible());
   await page.getByRole('button',{name:'40',exact:true}).waitFor({timeout:60000});await page.getByRole('button',{name:'19',exact:true}).click();assert.equal(await page.locator('[data-maceio-chart]').count(),1);assert.equal(historyKeys.size,quarterly?36:42);
   await page.getByRole('button',{name:'40',exact:true}).click();assert.equal(await page.locator('[data-maceio-chart]').count(),1);
-  await page.getByRole('button',{name:'26',exact:true}).click();assert.equal(await page.locator('[data-maceio-pending]').count(),1);await page.locator('#maceio-monetary-policy').click();await page.getByRole('option',{name:'INCC-DI · usar após confirmar o critério',exact:true}).click();assert.equal(await page.locator('[data-maceio-chart]').count(),1);
+  await page.getByRole('button',{name:'26',exact:true}).click();assert.equal(await page.locator('[data-maceio-pending]').count(),1);assert.equal(await page.locator('#maceio-monetary-policy').count(),0);
   await page.getByRole('button',{name:quarterly?'72':'71',exact:true}).click();assert.equal(await page.locator('[data-maceio-chart]').count(),1);
-  await page.getByRole('button',{name:quarterly?'74':'73',exact:true}).click();assert.equal(await page.locator('[data-maceio-pending]').count(),1);
-  await page.locator('#maceio-price-policy').click();await page.getByRole('option',{name:'Ponderar pelo estoque histórico disponível',exact:true}).click();assert.equal(await page.locator('[data-maceio-chart]').count(),1);
+  await page.getByRole('button',{name:quarterly?'74':'73',exact:true}).click();assert.equal(await page.locator('[data-maceio-pending]').count(),0);
+  assert.equal(await page.locator('#maceio-price-policy').count(),0);assert.equal(await page.locator('[data-maceio-chart]').count(),1);
   if(quarterly){await page.getByRole('button',{name:'80',exact:true}).click();assert.equal(await page.locator('[data-maceio-chart]').count(),1);}
   await page.getByRole('button',{name:quarterly?'87':'82',exact:true}).click();assert.equal(await page.locator('[data-maceio-pending]').count(),0);assert.ok(await page.getByRole('button',{name:'Próximo',exact:true}).isDisabled());
   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));

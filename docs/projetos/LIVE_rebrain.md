@@ -1,5 +1,15 @@
 # Rebrain (Plataforma) — Documento Vivo
 
+## 17/11/2026 — Maceió: prévia limpa e diagnóstico JSON — Codex
+
+- **Pedido:** Lucas apontou inventário/“sem texto” e seletor de preços fora do padrão; faltavam total aguardando fonte e download JSON.
+- **Entrega:** removidos inventário e ação de conferir estrutura, seletores técnicos e aviso duplicado acima do slide. Prévia mantém navegação/arte; preços usam ponderação histórica já implementada, com critério registrado na origem/diagnóstico. INCC não é presumido; valores corrigidos aguardam definição. Blueprint interno preservado.
+- **Padrão reutilizado:** diagnóstico Fortaleza em worker, BrainLoadingState, cancelar/retry e download JSON. Resumo real por slide: disponível, aguardando fonte, revisão editorial e aguardando critério. Campos permitidos de seleção, agregados e cobertura, sem chave de sessão/token ou históricos individuais no arquivo. [Contrato e evidências](../features/relatorios-institucionais/maceio/INTERFACE_DIAGNOSTICO_2026-11-17.md).
+- **Validação:** 126 testes do módulo + 3 testes da exportação; typecheck/lint/build aprovados. 12 cenários da página real em navegador headless, APIs sintéticas paginadas/lentas, mensal/trimestral, desktop/mobile, claro/escuro, fonte sucesso/vazia/erro; arquivo JSON efetivamente baixado e conteúdo validado. Sem geração autenticada real ou deploy. Captura desktop revisada.
+- **Etapas/Pendências:** correção de interface pronta localmente; aguarda autorização de push. Homologação do critério de preços/INCC e demais fontes continuam pendentes. Carga CAGED `fm8vj` passou maio e chegou a junho/2017, segundo logs do usuário; não concluída. Não altera job/ponte/Scheduler.
+- **Base/autoria:** `ab8201eb`, main, origin único 0/0 após fetch; Codex. Commit desta entrega. Sem push ou escrita Monday.
+- **Monday:** [Panorama Maceió / SINDUSCON](https://brain381753.monday.com/boards/18398638577/pulses/13149406169) — `13149406169`.
+
 ## 17/11/2026 — Maceió: correção da anomalia CAGED maio/2017 — Codex
 
 - **Ambiente/funcionalidade:** importador MTE dos slides de emprego Maceió; base `c6069dc5`, main, origin único 0/0 após fetch.
@@ -1875,6 +1885,8 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 
 ## 2. Etapas
 
+- **17/11 — Maceió, prévia/diagnóstico:** inventário/seletor técnico removidos, resumo de fontes e exportação JSON por slide implementados localmente. 129 testes, build e 12 cenários de navegador aprovados; publicação depende de autorização.
+
 - **17/11 — CAGED em ativação:** recursos GCP/job v1 criados pelo usuário; carga falhou no subsetor inválido de maio/2017. Correção local estrita com 7 testes; ainda sem nova imagem ou snapshot remoto.
 
 - **17/11 — Maceió, CAGED/MTE local concluído:** importador antigo+NovoCaged, ponte/Edge e slides9–14 implementados e validados no commit `50d88663`.123testes Maceió e pilotos reais set/2026/dez/2019. Próximo: bootstrap completo2017+, ativação GCP/Lovable/Scheduler e geração autenticada/homologação; exportação separada. Estados anteriores de CAGED adiado/a integrar abaixo são históricos.
@@ -2034,6 +2046,8 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 ---
 
 ## 3. Pendências
+
+- **17/11 — Maceió, publicar interface:** autorizar push da limpeza de prévia e diagnóstico JSON. Conferir geração autenticada e homologar critérios; carga CAGED remota ainda em execução, rota/Scheduler pendentes. Arquivo JSON não substitui exportação PPTX/PDF.
 
 - **17/11 — CAGED, retomada após falha:** autorizar envio da correção, ensaiar maio real e atualizar imagem do job; concluir histórico, publicar rota no proxy e Scheduler, conferir geração e homologar tratamento do registro em outros. Recursos GCP/Edge já criados/publicados pelo usuário; pendências anteriores sobre sua criação estão superadas por esta evidência.
 

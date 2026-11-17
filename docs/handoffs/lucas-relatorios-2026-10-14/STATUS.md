@@ -1,5 +1,11 @@
 # Estado do handoff
 
+## 17/11/2026 — Maceió: padrão de prévia e diagnóstico JSON
+
+Codex, base `ab8201eb`, main, origin único 0/0 após fetch. Usuário rejeitou inventário editorial e seletor de fórmula na prévia e pediu total aguardando fonte/exportação JSON. Removidos inventário/ação de conferir estrutura e seletores técnicos; preço usa ponderação histórica já implementada e registrada na origem/diagnóstico, sem exigir escolha por geração. INCC continua sem série presumida e valores corrigidos permanecem pendentes.
+
+Diagnóstico reutiliza Fortaleza: worker automático ao concluir, BrainLoadingState, cancelamento/retry, totais por slide e download real. JSON com agregados, fontes e cobertura/versão CAGED, sem chave/token/históricos individuais. [Contrato e validação](../../features/relatorios-institucionais/maceio/INTERFACE_DIAGNOSTICO_2026-11-17.md): 129 testes, typecheck/lint/build e12cenários de navegador sintético aprovados (mensal/trimestral, desktop/mobile, claro/escuro, sucesso/vazio/erro, demora apenas no QA, download parseado). Sem geração autenticada, push ou deploy desta interface. Próximo: autorização de envio e homologação dos critérios. Logs fornecidos pelo usuário mostram carga CAGED corrigida `fm8vj` até junho/2017 com ajustes às14h06BRT; histórico completo/rota/Scheduler ainda pendentes.
+
 ## 17/11/2026 — Ativação CAGED: falha real e correção local estrita
 
 Codex, base `c6069dc5`, main limpa antes da alteração; origin único 0/0 após fetch. Usuário executou comandos no Cloud Shell: dataset US `rebrain_caged`, tabela `caged_mte_snapshots`, bucket privado, conta dedicada e job Cloud Run em us-central1 criados; imagem v1 construída. Execução `caged-mte-loader-mxl8t` falhou com exit1 às 15:58 UTC após abril/2017. Diagnóstico do usuário encontrou exatamente um `{ñ` em IBGE Subsetor entre 2.450.613 registros de maio/2017, UF42/saldo -1/classes CNAE 000-1/subclasse 5812302; ajustes 141.264 sem anomalia. Nenhum snapshot completo comprovado. Edge publicada pelo usuário, 401 sem credencial anteriormente observado; rota/proxy e Scheduler ainda pendentes. Controle do Opera bloqueado pela ferramenta; nenhuma alteração remota pelo agente.
