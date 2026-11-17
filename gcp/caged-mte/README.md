@@ -71,4 +71,12 @@ Confirmar uma geração autenticada em Maceió e conferir: publicação/competê
 
 ## Consumo
 
+### Correção de ativação — 17/11/2026
+
+A execução `caged-mte-loader-mxl8t` falhou com `invalid_legacy_subsector`, após abril/2017. Diagnóstico executado pelo operador no Cloud Shell: `CAGEDEST_052017.7z`, 2.450.613 registros, exatamente um subsetor não numérico `{ñ`; ajustes de maio, 141.264 registros sem esse problema. Registro: competência 201705, UF 42, saldo -1, classes CNAE 1.0/2.0 `000-1`, subclasse `5812302`. Não há evidência de uma correspondência oficial desse valor inválido a um subsetor IBGE.
+
+O parser aceita somente essa combinação exata e no máximo uma ocorrência por arquivo. Preserva -1 em SC/BR e `other`, sem imputar um dos cinco setores exibidos nem eliminar o movimento. Demais anomalias continuam interrompendo a publicação. A contagem fica em `anomalies` nos componentes, logs e manifesto do snapshot. Homologação metodológica permanece pendente. `parserRevision` invalida checkpoints de versões anteriores e participa da identidade do snapshot, mantendo o contrato online `mte-caged-v1`.
+
+Correção testada localmente com fixture derivada dos campos informados pelo operador: 7 testes Python. Ainda não executada contra o arquivo real nem implantada no Cloud Run. Na retomada: obter o commit autorizado; ensaiar maio/2017 sem `--publish` e sem `CAGED_STATE_BUCKET`; construir imagem com tag nova; atualizar **somente o job**, preservando env/SA/args; confirmar nenhuma execução ativa e iniciar uma vez. A revisão do parser reprocessa os componentes antigos (jan–abr), sem duplicar seus saldos. Uma exceção Python comum passa pelo `finally` do lock; não excluir `update.lock` preventivamente. Rota do proxy, Scheduler e geração autenticada continuam pendentes.
+
 Geração online: uma consulta consolidada sobre agregados; o mínimo de 10 MB por consulta/tabela do BigQuery é a referência inicial, não uma medição de produção. Metadados/cargas, checagem de idempotência, armazenamento de snapshots, Cloud Run, GCS e Scheduler são consumos adicionais. A carga batch padrão usa o pool compartilhado do BigQuery. Não prometer custo total zero nem multiplicar automaticamente a estimativa por três para o trimestral.

@@ -1,5 +1,16 @@
 # Rebrain (Plataforma) — Documento Vivo
 
+## 17/11/2026 — Maceió: correção da anomalia CAGED maio/2017 — Codex
+
+- **Ambiente/funcionalidade:** importador MTE dos slides de emprego Maceió; base `c6069dc5`, main, origin único 0/0 após fetch.
+- **Evidência remota fornecida pelo usuário:** dataset/tabela/bucket/conta e job criados; imagem v1 construída. Execução `caged-mte-loader-mxl8t` falhou às 15:58 UTC em maio/2017, sem snapshot completo publicado. Um registro de 2.450.613 tem subsetor `{ñ`, classes `000-1`, subclasse `5812302`, UF42 e saldo -1; ajustes sem anomalia. Edge publicada pelo usuário; 401 sem credencial observado anteriormente. Proxy identificado em us-central1, sem mudança da ponte existente.
+- **Correção local:** exceção estrita por competência/kind/UF/saldo/subsetor/classes/subclasse, no máximo uma ocorrência; preserva saldo em SC/BR e outros, sem inferir setor antigo pela CNAE nova. Contagem auditável nos logs/componentes/manifesto; revisão do parser invalida checkpoints e identidade de snapshot. Demais valores inesperados continuam bloqueados.
+- **Validação/limites:** 7 testes Python aprovados, incluindo conservação dos saldos, proveniência e rejeição de variantes/duplicata. Arquivo real completo e novo job ainda não ensaiados. Browser Opera bloqueado pela ferramenta, sem controle remoto; comandos executados pelo usuário são a evidência GCP. [Procedimento e diagnóstico](../../gcp/caged-mte/README.md).
+- **Etapas/Pendências:** recursos GCP e job v1 existem; bootstrap falhou. Próximo: publicar correção mediante autorização, ensaio real de maio sem escrita e nova imagem/job; depois carga integral, rota do proxy, Scheduler e homologação dos dois modelos. Tratamento conservador em outros requer homologação do analista.
+- **Autoria/commits:** Codex; commit desta entrega local. Sem push/deploy ou escrita Monday nesta correção.
+- **Monday:** [Panorama Maceió / SINDUSCON](https://brain381753.monday.com/boards/18398638577/pulses/13149406169) — `13149406169`.
+
+
 ## 17/11/2026 — Maceió: CAGED/MTE, antigo e novo, integrado localmente — Codex
 
 - **Ambiente/funcionalidade:** `/rebrain/relatorios-institucionais/maceio` — emprego9–14 mensal/trimestral, rota ainda oculta.
@@ -1864,6 +1875,8 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 
 ## 2. Etapas
 
+- **17/11 — CAGED em ativação:** recursos GCP/job v1 criados pelo usuário; carga falhou no subsetor inválido de maio/2017. Correção local estrita com 7 testes; ainda sem nova imagem ou snapshot remoto.
+
 - **17/11 — Maceió, CAGED/MTE local concluído:** importador antigo+NovoCaged, ponte/Edge e slides9–14 implementados e validados no commit `50d88663`.123testes Maceió e pilotos reais set/2026/dez/2019. Próximo: bootstrap completo2017+, ativação GCP/Lovable/Scheduler e geração autenticada/homologação; exportação separada. Estados anteriores de CAGED adiado/a integrar abaixo são históricos.
 
 - **17/11 — Maceió, todas as posições:** prévia82mensais/87trimestrais implementada, incluindo estado atual, horizontal, comercial trimestral, equipe/fechamento.107testes e ensaios visuais/página aprovados. Próximo confirmado pelo usuário: CAGED9–14; depois exportação e homologação real. Estados anteriores de61–80/fechamento abaixo são históricos.
@@ -2021,6 +2034,8 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 ---
 
 ## 3. Pendências
+
+- **17/11 — CAGED, retomada após falha:** autorizar envio da correção, ensaiar maio real e atualizar imagem do job; concluir histórico, publicar rota no proxy e Scheduler, conferir geração e homologar tratamento do registro em outros. Recursos GCP/Edge já criados/publicados pelo usuário; pendências anteriores sobre sua criação estão superadas por esta evidência.
 
 - **17/11 — Maceió, ativar CAGED/MTE:** aplicar recursos GCP e executar histórico completo desde201701; montar/publicar rota do proxy e EdgeLovable; configurar atualização autenticada; validar ambos os modelos com fonte real e analista. Implementação local `50d88663` concluída, pilotos não equivalem ao bootstrap. Exportação PPTX/PDF e demais homologações seguem pendentes. [Passos operacionais](../../gcp/caged-mte/README.md).
 

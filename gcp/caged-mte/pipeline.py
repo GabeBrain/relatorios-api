@@ -19,6 +19,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 VERSION = "mte-caged-v1"
+PARSER_REVISION = "legacy-anomaly-201705-v1"
 ROOT = "/pdet/microdados/NOVO CAGED"
 UF = dict(zip([11,12,13,14,15,16,17,21,22,23,24,25,26,27,28,29,31,32,33,35,41,42,43,50,51,52,53],
               "RO AC AM RR PA AP TO MA PI CE RN PB PE AL SE BA MG ES RJ SP PR SC RS MS MT GO DF".split()))
@@ -112,7 +113,7 @@ def official_files(publication):
 
 def legacy_sector(value):
     # Official IBGE subsectors used by the old CAGED, deliberately not CNAE sections.
-    if not value.strip().isdigit(): raise ValueError("invalid_legacy_subsector")
+    if not value.strip().isdigit(): raise ValueError(f"invalid_legacy_subsector:{value!r}")
     code = int(value)
     if 1 <= code <= 13: return "manufacturing"
     if code == 15: return "construction"
@@ -131,6 +132,7 @@ def aggregate_legacy(stream, kind, publication, require_full_scope=False):
     if any(key not in keys for key in (competence_key, "competenciadeclarada", "uf", "ibgesubsetor", "saldomov")):
         raise ValueError("unexpected_legacy_layout")
     totals, observed, count = defaultdict(int), set(), 0
+    anomalies = defaultdict(int)
     for row in reader:
         competence = month(row[keys[competence_key]].strip())
         if row[keys['competenciadeclarada']].strip() != publication or competence > publication or kind == "LEGACY" and competence != publication:
@@ -143,7 +145,24 @@ def aggregate_legacy(stream, kind, publication, require_full_scope=False):
         if not uf:
             if int(uf_code) not in (0,99): raise ValueError("unknown_legacy_uf")
             uf = "NI"
-        group = legacy_sector(row[keys["ibgesubsetor"]])
+        subsector = row[keys["ibgesubsetor"]]
+        # Exact source anomaly verified by the operator in the May/2017 MTE file.
+        # Preserve the movement as unclassified; never infer an old IBGE sector
+        # from the newer CNAE subclass or silently discard the movement.
+        known_anomaly = (
+            kind == "LEGACY" and publication == "201705" and uf_code == "42"
+            and sign == "-1" and subsector == "{\u00f1"
+            and row.get(keys.get("cnae10classe")) == "000-1"
+            and row.get(keys.get("cnae20classe")) == "000-1"
+            and row.get(keys.get("cnae20subclas")) == "5812302"
+        )
+        if known_anomaly:
+            group = "other"
+            anomalies["invalid_ibge_subsector_201705_sc"] += 1
+            if anomalies["invalid_ibge_subsector_201705_sc"] > 1:
+                raise ValueError("legacy_anomaly_count_changed")
+        else:
+            group = legacy_sector(subsector)
         observed.add(uf)
         for scope in (uf,"BR"):
             totals[(competence,scope,group)] += int(sign)
@@ -151,7 +170,7 @@ def aggregate_legacy(stream, kind, publication, require_full_scope=False):
         count += 1
     if kind == "LEGACY" and (not count or require_full_scope and set(UF.values())-observed):
         raise ValueError("incomplete_legacy_scope")
-    return {"records":count,"rows":[{"month":m,"uf":u,"sector":s,"balance":n} for (m,u,s),n in sorted(totals.items())]}
+    return {"records":count,"anomalies":dict(anomalies),"rows":[{"month":m,"uf":u,"sector":s,"balance":n} for (m,u,s),n in sorted(totals.items())]}
 
 
 def snapshot(components, start, end):
@@ -162,6 +181,8 @@ def snapshot(components, start, end):
     for name in sorted(expected):
         item = components[name]
         manifest.append({key: item[key] for key in ("name", "sha256", "size", "modified")})
+        if item.get("anomalies"):
+            manifest[-1]["anomalies"] = item["anomalies"]
         for row in item["rows"]:
             if start <= row["month"] <= end:
                 totals[(row["month"], row["uf"], row["sector"])] += row["balance"]
@@ -177,7 +198,7 @@ def snapshot(components, start, end):
         for u in UF_NAMES:
             if totals[(m, u, "total")] != sum(totals[(m, u, s)] for s in SECTORS if s != "total"):
                 raise ValueError("sector_reconciliation_failed")
-    version = hashlib.sha256(json.dumps([VERSION, start, end, manifest], sort_keys=True).encode()).hexdigest()
+    version = hashlib.sha256(json.dumps([VERSION, PARSER_REVISION, start, end, manifest], sort_keys=True).encode()).hexdigest()
     return {"queryVersion": VERSION, "snapshotVersion": version, "start": start, "through": end,
             "files": manifest, "rows": rows}
 
@@ -218,7 +239,7 @@ def update(start, end, state, on_component=None):
                 if not size or size > 250_000_000: raise ValueError("unexpected_archive_size")
                 path = state / f"{name}.json"
                 cached = json.loads(path.read_text(encoding="utf-8")) if path.exists() else None
-                if cached and cached.get("size") == size and cached.get("modified") == modified and cached.get("queryVersion") == VERSION and cached.get("aggregateSha256") == aggregate_digest(cached.get("rows")):
+                if cached and cached.get("size") == size and cached.get("modified") == modified and cached.get("queryVersion") == VERSION and cached.get("parserRevision") == PARSER_REVISION and cached.get("aggregateSha256") == aggregate_digest(cached.get("rows")):
                     components[name] = cached
                     continue
                 with tempfile.TemporaryDirectory() as work:
@@ -232,11 +253,11 @@ def update(start, end, state, on_component=None):
                     with raw.open(encoding="latin1" if kind in ("LEGACY","ADJUST") else "utf-8-sig", newline="") as source:
                         parser = aggregate_legacy if kind in ("LEGACY","ADJUST") else aggregate
                         result = parser(source, kind, publication, require_full_scope=True)
-                item = {**result, "name": name, "sha256": digest, "aggregateSha256": aggregate_digest(result['rows']), "size": size, "modified": modified, "queryVersion": VERSION}
+                item = {**result, "name": name, "sha256": digest, "aggregateSha256": aggregate_digest(result['rows']), "size": size, "modified": modified, "queryVersion": VERSION, "parserRevision": PARSER_REVISION}
                 write_json(path, item)
                 if on_component: on_component(path)
                 components[name] = item
-                print(json.dumps({"file": name, "records": item["records"], "aggregateRows": len(item["rows"])}), flush=True)
+                print(json.dumps({"file": name, "records": item["records"], "aggregateRows": len(item["rows"]), "anomalies": item.get("anomalies", {})}), flush=True)
     result = snapshot(components, start, end)
     write_json(state / "snapshot.json", result)
     return result

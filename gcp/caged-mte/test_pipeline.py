@@ -62,5 +62,31 @@ class CagedTests(unittest.TestCase):
             with self.assertRaises(ValueError):legacy_sector(value)
         with self.assertRaises(ValueError):aggregate_legacy(io.StringIO(base),'LEGACY','201911')
 
+    def test_known_may_2017_anomaly_preserves_total_and_provenance(self):
+        header = "Competência Declarada;IBGE Subsetor;Saldo Mov;UF;CNAE 1.0 Classe;CNAE 2.0 Classe;CNAE 2.0 Subclas\n"
+        row = "201705;{ñ;-1;42;000-1;000-1;5812302\n"
+        data = aggregate_legacy(io.StringIO(header + row), "LEGACY", "201705")
+        self.assertEqual(data["records"], 1)
+        self.assertEqual(data["anomalies"], {"invalid_ibge_subsector_201705_sc": 1})
+        values = {(r["uf"], r["sector"]): r["balance"] for r in data["rows"]}
+        self.assertEqual(values, {("BR", "other"): -1, ("BR", "total"): -1,
+                                  ("SC", "other"): -1, ("SC", "total"): -1})
+        components = {}
+        for kind, _, name in official_files("201705"):
+            components[name] = {"name": name, "sha256": kind, "size": 1, "modified": "v1",
+                                "rows": data["rows"] if kind == "LEGACY" else [],
+                                "anomalies": data["anomalies"] if kind == "LEGACY" else {}}
+        result = snapshot(components, "201705", "201705")
+        self.assertEqual(next(f["anomalies"] for f in result["files"] if "anomalies" in f), data["anomalies"])
+        for bad in [row.replace("42", "27"), row.replace("5812302", "4120400"),
+                    row.replace("{ñ", "?"), row.replace(";-1;42", ";01;42"),
+                    row.replace("000-1", "58123", 1), row + row]:
+            with self.assertRaises(ValueError):
+                aggregate_legacy(io.StringIO(header + bad), "LEGACY", "201705")
+        with self.assertRaises(ValueError):
+            aggregate_legacy(io.StringIO(header + row.replace("201705", "201706")), "LEGACY", "201706")
+        with self.assertRaises(ValueError):
+            legacy_sector("{ñ")
+
 
 if __name__ == "__main__": unittest.main()

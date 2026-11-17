@@ -1,5 +1,12 @@
 # Estado do handoff
 
+## 17/11/2026 — Ativação CAGED: falha real e correção local estrita
+
+Codex, base `c6069dc5`, main limpa antes da alteração; origin único 0/0 após fetch. Usuário executou comandos no Cloud Shell: dataset US `rebrain_caged`, tabela `caged_mte_snapshots`, bucket privado, conta dedicada e job Cloud Run em us-central1 criados; imagem v1 construída. Execução `caged-mte-loader-mxl8t` falhou com exit1 às 15:58 UTC após abril/2017. Diagnóstico do usuário encontrou exatamente um `{ñ` em IBGE Subsetor entre 2.450.613 registros de maio/2017, UF42/saldo -1/classes CNAE 000-1/subclasse 5812302; ajustes 141.264 sem anomalia. Nenhum snapshot completo comprovado. Edge publicada pelo usuário, 401 sem credencial anteriormente observado; rota/proxy e Scheduler ainda pendentes. Controle do Opera bloqueado pela ferramenta; nenhuma alteração remota pelo agente.
+
+Correção local: combinação exata no máximo uma vez, conserva movimento em SC/BR e outros sem imputação setorial; proveniência em logs/manifesto, revisão de parser invalida checkpoints antigos. 7 testes Python aprovados com fixture derivada da evidência; não prova execução do arquivo real. [Detalhes e retomada](../../../gcp/caged-mte/README.md). Próximo: autorização de push, ensaio de maio sem escrita, nova imagem/job e bootstrap, depois rota/Scheduler/geração autenticada e homologação. Sem push/deploy/Monday nesta correção; aprovação anterior de push não foi reutilizada.
+
+
 ## 17/11/2026 — CAGED/MTE integrado localmente, incluindo CAGED antigo
 
 Lucas autorizou iniciar a integração **pelo MTE** e pediu também o CAGED antigo. Base `95e6fbee`, main, origin único, árvore limpa e 1commit local de investigação desde10h22 após fetch. [Implementação e limites](../../features/relatorios-institucionais/maceio/CAGED_INTEGRACAO_2026-11-17.md), commit `50d88663`: importador MTE estatístico/ajustes2017–2019 e Novo Caged MOV/FOR/EXC, snapshots agregados e imutáveis, módulo/instalador da rota HMAC existente, Edge e prévia9–14. Sem microdados no Lovable ou secrets exportados. Source externo do proxy preservado; instalador aplicado somente numa cópia temporária, onde9testes existentes passaram.
