@@ -1,11 +1,12 @@
 import { maceioCities, maceioPeriod, maceioReference, type MaceioSelection } from './model';
 import type { MaceioGenerationState } from './useMaceioMarket';
 import { buildMaceioLaunchSeries, buildMaceioPattern } from './intro-data';
-import { buildMaceioMarketSlide, type SlideSource } from './market-slides-data';
+import { buildMaceioMarketSlide, maceioSourceMonths, type SlideSource } from './market-slides-data';
 import { buildOfferPriceSlide } from './offer-price-data';
 import { buildRemainingSlide } from './remaining-data';
 import { buildCagedSlide } from './caged';
 import { maceioMonetaryPolicy } from './criteria';
+import { auditMaceioSource } from './source-audit';
 
 export type DiagnosticGeneration = Pick<MaceioGenerationState, 'phase' | 'startedAt' | 'finishedAt' | 'blueprint' | 'report' | 'intro'>;
 type Status = 'available' | 'source-pending' | 'method-pending' | 'editorial-review' | 'not-implemented';
@@ -40,9 +41,14 @@ export function buildMaceioDiagnostic(selection: MaceioSelection, state: Diagnos
   });
   const statuses: Status[] = ['available', 'source-pending', 'method-pending', 'editorial-review', 'not-implemented'];
   const sources = intro?.slides;
-  const metadata = (items: SlideSource[] | undefined) => (items ?? []).map(source => ({
+  const collectionStatus = (items: SlideSource[] | undefined) => ({ requested: items?.length ?? 0,
+    completed: items?.filter(source => source.complete).length ?? 0,
+    failed: items?.filter(source => !source.complete).length ?? 0,
+    emptyCompleted: items?.filter(source => source.complete && !source.rows.length).length ?? 0 });
+  const metadata = (items: SlideSource[] | undefined, closingOnly = false) => (items ?? []).map(source => ({
     city: source.city, metric: source.metric, group: source.group, complete: source.complete,
     rows: source.rows.length, issue: source.issue, failure: source.failure ?? null, endpoint: source.endpoint ?? null,
+    audit: auditMaceioSource(source, closingOnly ? [maceioPeriod(selection).end.slice(0, 7)] : maceioSourceMonths(selection)),
   }));
   return {
     schema: 'maceio-diagnostic-v1', generatedAt: state.finishedAt ?? new Date(state.startedAt).toISOString(),
@@ -51,11 +57,13 @@ export function buildMaceioDiagnostic(selection: MaceioSelection, state: Diagnos
     period: maceioPeriod(selection), cities: [...maceioCities(selection.periodicity)],
     reference: { file: reference.file, sourceId: reference.sourceId, slideCount: reference.slideCount },
     homologated: false,
+    auditVersion: 'maceio-source-audit-v1',
+    collection: { vertical: collectionStatus(sources?.sources), horizontal: collectionStatus(sources?.horizontal), commercial: collectionStatus(sources?.commercial) },
     criteria: { prices: 'stock-weighted', monetaryIndex: maceioMonetaryPolicy(selection), monetaryBase: maceioPeriod(selection).end.slice(0, 7) },
     summary: Object.fromEntries(statuses.map(status => [status, slides.filter(slide => slide.status === status).length])) as Record<Status, number>,
     slides,
     sources: {
-      vertical: metadata(sources?.sources), horizontal: metadata(sources?.horizontal), commercial: metadata(sources?.commercial),
+      vertical: metadata(sources?.sources), horizontal: metadata(sources?.horizontal, true), commercial: metadata(sources?.commercial, true),
       launches: intro?.cities.map(city => ({ city: city.city, unitsComplete: city.unitsComplete, buildingsComplete: city.buildingsComplete, issues: city.issues, failures: city.failures ?? [] })) ?? [],
       caged: intro?.caged?.report ? { snapshotVersion: intro.caged.report.snapshotVersion, publishedThrough: intro.caged.report.publishedThrough, coverageStart: intro.caged.report.coverageStart } : null,
     },

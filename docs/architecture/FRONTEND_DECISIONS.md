@@ -1,3 +1,9 @@
+## 17/11/2026 — Relatórios: diagnóstico JSON com cobertura e validação explícitas
+
+**Autor/origem:** Codex, pedido de Lucas. [Convenção](./REPORT_DIAGNOSTIC_STANDARD.md) definida a partir de um diagnóstico real Maceió:55slides pendentes apesar de todas as fontes imobiliárias coletadas. Padrão inclui seleção/schema/versão, transporte separado de validação, cobertura por competência, categorias/contagens reais, somas e ausências, critérios e limitações. Campos permitidos explicitamente, sem credenciais, IDs/nomes/endereços ou históricos individuais. Aplicado aos dois modelos Maceió, referência ao criar/evoluir os demais diagnósticos, sem migração automática de todos os motores ou compartilhamento de regras de negócio.
+
+Mantidos worker, BrainLoadingState, cancelamento/retry e descarte de resultado antigo. Não há nova consulta nem persistência no backend. Rótulos detalhados ficam no arquivo; a interface mantém resumo e download. Fonte transportada não vira indicador aprovado automaticamente. A classificação real de tipologias/padrões de Maceió segue pendente até obter os rótulos por essa auditoria.
+
 ## 12/11/2026 — Relatórios: exportador DrawingML compartilhado
 
 SP e Fortaleza mensal/trimestral reutilizam `shared/native-pptx.ts`: DOM visível → objetos nativos, com tabelas reais para listas, geometrias livres para SVG, gradientes e imagens individuais. Primitives, rota lazy e BrainLoadingState existentes mantidos; sem dependência nova. PDF visual segue separado. Não há rasterização silenciosa de um gráfico sem suporte. Fotos podem ser recortadas em PNG individual para preservar a moldura, continuando objetos de imagem independentes no PPTX. Edição de célula respeita cor/alinhamento e auditoria do ajuste. Consultoria Fortaleza16pessoas usa o mesmo editor de equipe. [Contrato, limites e provas](../features/relatorios-institucionais/PREVIA_EDITAVEL_2026-11-12.md).

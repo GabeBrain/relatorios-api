@@ -1,5 +1,15 @@
 # Estado do handoff
 
+## 17/11/2026 — Maceió real: transporte completo, validação ainda bloqueada
+
+Base `a16b482a`, main limpa, origin único0/0 após fetch. Novo JSON real de maio/2026 às18:23UTC mantém55fontes pendentes, mas49coletas verticais/14horizontais e7cadastros concluídos sem falhasHTTP.5slides disponíveis,22editoriais,0critérios. Bloqueios agora por séries vazias/cobertura, correspondência de padrões/tipologias/produtos e balanço divergente2021-03. Não afirmar que55pendências foram resolvidas.
+
+Lucas pediu definir “tipologia diferente”; não aprovou nova regra de universo. Explicada exigência literal type_of_typology=Padrão, sem valores reais no JSON anterior. Auditoria agregada local passa a listar rótulos/contagens de tipos/padrões/produtos e cobertura/somas mensais/ausências, sem registros individuais ou consulta adicional. [Evidência e limites](../../features/relatorios-institucionais/maceio/VALIDACAO_DADOS_REAIS_2026-11-17.md). Próximo: autorizar publicação da auditoria e conferir novo JSON real antes de classificar/preencher; sem tokenGeobrain/controleOpera nesta máquina. CAGED e demais domínios preservados; sem push/deploy/Monday.
+
+Lucas pediu JSON detalhado como padrão: automatizado para ambos os modelos Maceió e documentada [convenção para evolução dos outros relatórios](../../architecture/REPORT_DIAGNOSTIC_STANDARD.md), com collection separado dos bloqueios dos slides e auditoria versionada. Sem migrar motores paralelos ou modificar suas políticas.
+
+Fechamento local:10testes de auditoria/diagnóstico/exportação, tipos/lint e build final aprovados. Novo arquivo real ampliado ainda depende de publicação autorizada e geração na sessão do usuário. Nenhuma regra de tipologia ou preenchimento alterada;55pendências continuam em investigação.
+
 ## 17/11/2026 — Maceió trimestral: resolver fontes exceto CAGED
 
 Codex, base `2cea2276`, main; push do mensal autorizado/concluído e remoto0/0 antes de alterar. Lucas forneceu JSON2T2026 com87slides/0disponíveis/59fontes/5critérios/23editoriais e reforçou exclusão do CAGED, em carga. Contratos compartilhados de coleta já corrigidos no mensal atendem também o trimestral; estendido INCC-DI explícito ao2T, basejunho/2026, sem alterar CAGED/job/ponte/Scheduler ou domínios paralelos.

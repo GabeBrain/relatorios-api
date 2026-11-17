@@ -1,5 +1,17 @@
 # Rebrain (Plataforma) — Documento Vivo
 
+## 17/11/2026 — Maceió: coleta real completa, bloqueios de validação — Codex
+
+- **Evidência real:** novo JSON de maio/2026 às18:23UTC:5disponíveis/55fontes/0critérios/22editoriais, porém49fontes verticais+14horizontais e cadastro/lançamentos completos, sem falhasHTTP. Transporte corrigido observado; indicadores ainda bloqueados por dados/universo/cobertura. [Investigação](../features/relatorios-institucionais/maceio/VALIDACAO_DADOS_REAIS_2026-11-17.md).
+- **Achados:** séries vazias emPilar/Coqueiro/RioLargo; padrões sem correspondência; exigência literal de tipologiaPadrão; grupo inválido; balanço2021-03 divergente; produto horizontal ausente. JSON anterior não traz rótulos concretos/cobertura suficiente.
+- **Ação local:** diagnóstico agrega grupos/meses/somas/ausências e tipos reais de tipologia/padrão/produto, sem IDs, nomes ou cadastros individuais e sem nova coleta. Mês ausente continua null; zero explícito preservado. Não altera números, classificação ou universo.
+- **Padrão solicitado por Lucas:** JSON detalhado passa a ser padrão automático no mensal/trimestral Maceió, com resumo de transporte separado de validação e auditVersion. [Convenção para criação/evolução dos demais relatórios](../architecture/REPORT_DIAGNOSTIC_STANDARD.md), ligada às guidelines/decisões frontend; não migra motores paralelos neste lote.
+- **Validação:**10testes de auditoria/diagnóstico/exportação, tipos/lint e build final aprovados. Sem download autenticado real do novo arquivo; fluxo existente de worker/BrainLoadingState/cancelamento/retry preservado. Auditoria não altera os critérios nem elimina as55pendências.
+- **Esclarecimento:** Lucas pediu definir “tipologia diferente”; não autorizou inclusão/exclusão. Explicado que o campo type_of_typology não é dormitórios nem padrão de preço e que “especial” não estava comprovado. Decisão de universo continua aberta até ver valores reais.
+- **Etapas/Pendências:** fonte imobiliária real coletada, validação ainda pendente; publicar auditoria mediante autorização e obter evidência real para resolver classificações/lacunas. Não considerar55pendências corrigidas. Sem token/controleOpera para ensaio autenticado pelo agente. CAGED não alterado.
+- **Base/autoria:** `a16b482a`, main limpa/origin único0/0 após fetch; Codex. Commit local deste lote; sem push/deploy/Monday.
+- **Monday:** [Panorama Maceió / SINDUSCON](https://brain381753.monday.com/boards/18398638577/pulses/13149406169) — `13149406169`.
+
 ## 17/11/2026 — Maceió trimestral: fontes e INCC-DI — Codex
 
 - **Pedido/evidência:** Lucas forneceu diagnóstico2T2026 com0disponíveis/59fontes/5critérios/23editoriais e pediu resolver fontes exceto CAGED, reforçado explicitamente. Mensal `2cea2276` foi enviado com autorização e remoto0/0 confirmado antes deste lote.
@@ -1904,6 +1916,8 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 
 ## 2. Etapas
 
+- **17/11 — Maceió, runtime após publicação:** fontes coletadas no JSON real;55indicadores ainda bloqueados por validação, não por HTTP. Diagnóstico agregado de categorias/cobertura preparado localmente; conclusão das fontes não comprovada.
+
 - **17/11 — Maceió trimestral, fontes:** contratos corrigidos compartilhados e INCC-DI explícito aplicados;35testes e6cenários headless aprovados, apenas CAGED pendente no cenário imobiliário completo. Validação real depois da publicação ainda necessária.
 
 - **17/11 — Maceió mensal, correção de fontes:** contratos temporais/paginação e histórico POST v2 ajustados; INCC-DI autorizado por Lucas e explícito no mensal.134testes e12cenários de navegador sintético aprovados; geração autenticada real ainda não refeita.
@@ -2069,6 +2083,8 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 ---
 
 ## 3. Pendências
+
+- **17/11 — Maceió, dados reais:** obter rótulos reais de tipologia/padrão/produto e cobertura mensal por diagnóstico agregado; confirmar universo antes de alterar guardas. Corrigir classificações e lacunas com evidência, preservando ausência e divergências. Série vazia em cidade não equivale automaticamente a zero. CAGED excluído.
 
 - **17/11 — Maceió trimestral, publicação/ensaio real:** autorizar envio deste lote, publicar e gerar novo JSON2T2026; conferir acesso v2/cobertura/dados monetários. CAGED segue fora do lote, carga histórica ainda independente. Não usar diagnóstico anterior ao commit2cea2276 para avaliar a correção compartilhada.
 
