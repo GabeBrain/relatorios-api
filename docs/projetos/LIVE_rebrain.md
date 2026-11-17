@@ -666,6 +666,8 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+- **17/11/2026 · Gabriel (Claude Code):** CLAUDE.md da equipe enxugado para só importar o `AGENTS.md` (menos contexto por sessão). Regras que existiam só no CLAUDE.md foram movidas para o fim do AGENTS.md; nada removido. Aviso aos devs no topo do CLAUDE.md até 01/12/2026.
+
 ### 2026-11-16 — Maceió: fechamento para retomada em17/11 — Lucas/Codex
 
 - **Estado:** implementação1–40publicada em `41ca0f53`/`6f380d8c`;58testes,320verificações de lâminas e8de página, tipos/lint/build aprovados. Sem geração autenticada/homologação/deploy confirmado.
