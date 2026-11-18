@@ -712,6 +712,16 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-11-18 — Maceió: contingência CAGED com agregados reais — Lucas / Codex
+
+- **Ambiente/funcionalidade:** `/rebrain/relatorios-institucionais/maceio` — fontes dos slides de emprego9–14, mensal/trimestral.
+- **Fonte/evidência:** BigQuery confirmou carga2017-01a2026-09,23.751agregados/117meses, versão`8866c027…506dc`. Todas as gradesUF×setor reconciliadas, maio/junho conferidos porSELECTindependente; sem microdados, credenciais ou escrita remota.
+- **Entrega:** online prioritário; em transporte/5xx/404 usa cópia real verificada importada sob demanda, identificada na interface/JSON e fora da arte. Não contorna401/403/429ou resposta200inválida, não inventa meses. EtapaCAGED em atenção/retry disponíveis. Origem/falha sanitizada no diagnóstico; serviço backend não declarado reparado.
+- **Commits:** `e67ac127`(código); documentação neste fechamento. Preservados os dois commits anteriores locais`f537eab9`/`3178df90`.
+- **Validação:**186testesMaceió/17arquivos,4Edge/3ponteHMAC, lint/tipos/build aprovados;12cenários Edge e4capturas comCAGEDreal/APIimobiliária sintética, downloadJSON e saldos conferidos. Padrões existentes deBrainLoadingState, cancelamento/retry, origem eworker preservados. [Proveniência, decisão e limites](../features/relatorios-institucionais/maceio/CAGED_CONTINGENCIA_2026-11-18.md).
+- **Impacto em Etapas/Pendências:** seisCAGED calculáveis localmente com fonte real. Os21outros bloqueios do últimoJSONnão foram declarados resolvidos:11estoqueMarechal,4fluxos e6tipologias. Lucas aguarda o analista para10`Fechado`e consultará fonte dos lançamentos por tipologia. NovoJSONv2e conferência imobiliária real ainda necessários; navegador pessoal/token indisponíveis. Sem push/deploy/Monday nesta continuação.
+- **Monday:** [Panorama Maceió / SINDUSCON](https://brain381753.monday.com/boards/18398638577/pulses/13149406169) — `13149406169`.
+
 ### 2026-11-18 — Maceió: rankings e causas dos slides pendentes — Lucas / Codex
 
 - **Ambiente/funcionalidade:** `/rebrain/relatorios-institucionais/maceio` — mensal/trimestral, rankings e diagnóstico.
@@ -1982,6 +1992,8 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 
 ## 2. Etapas
 
+- **18/11 — Maceió, CAGED:** carga BigQuery2017–set/2026observada e seis modelosCAGED calculados com agregados reais(`e67ac127`), contingência identificada e online prioritário. Publicação e prova autenticada do aplicativo pendentes; ponte online ainda sem reparo observado. Não homologa os21bloqueios imobiliários do últimoJSON.
+
 - **18/11 — Maceió, JSON33/27/22:** recorte dos rankings e auditoria v2 implementados localmente(`f537eab9`),175testes/build e4cenários com fonte sintética aprovados. Nova geração autenticada necessária para medir liberação; não altera classificação dos10`Fechado`.
 
 - **18/11 — Maceió, confirmação do analista:** exclusão de chácaras em todos os quadros horizontais e CSV identificado de `Fechado` implementados (`38700781`); INCC-DI confirmado nas duas edições. Push autorizado por Lucas, nova geração real e homologação pendentes.
@@ -2153,6 +2165,8 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 ---
 
 ## 3. Pendências
+
+- **18/11 — Maceió, fontes apósCAGED:** autorizar envio do lote local e gerarJSONv2. CAGED dispõe de contingência real identificada atéset/2026; reparar acesso online continua separado. InvestigarMarechal283×192pela auditoria v2, aguardar fonte dos lançamentos por tipologia e classificação dos10`Fechado`pelo analista. Lucas confirmou que fará essas consultas. Não usar a disponibilidade dos seisCAGED para concluir todos27bloqueios resolvidos.
 
 - **18/11 — Maceió, continuação local:** autorizar envio do recorte dos rankings/auditoria v2 e gerar novo JSON. Investigar estoque de Marechal283×192pelas partições de estoque e fluxos por campo/mês;10`Fechado`continuam com o analista. Os27bloqueios do JSON anterior não foram declarados resolvidos. CAGED continua frente separada.
 

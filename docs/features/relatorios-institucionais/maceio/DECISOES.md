@@ -2,6 +2,11 @@
 
 Registro de fatos comprovados, hipóteses e decisões. Atualizado a cada entrega.
 
+## 18/11/2026 — Continuidade das fontes e CAGED verificado
+
+- **D19 — Contingência identificada CAGED:** escolha técnica do Codex dentro do pedido de Lucas para corrigir as fontes pendentes. BigQuery confirmou117meses/23.751agregados reais; consulta online permanece prioritária e, em falha de transporte/5xx/404, usa cópia agregada verificada, importada sob demanda. Origem/versão/data e falha online visíveis na interface/JSON, fora da arte. Não contorna401/403/429ou resposta200inválida; não substitui competência ausente. Não representa nova homologação metodológica pelo analista. [Proveniência, contrato e provas](CAGED_CONTINGENCIA_2026-11-18.md), implementação`e67ac127`.
+- **D20 — Dependências de dados/analista:** Lucas confirmou que os10`Fechado`ainda aguardam o analista. Para lançamentos por tipologia ausentes, respondeu que consultará o analista sobre a fonte. Não derivar lançamentos de capacidade/estoque nem adotar de-para presumido. Marechal283×192precisa de conferência peloJSONv2. Pedido amplo de corrigir fontes não autoriza inventar esses valores.
+
 ## 18/11/2026 — Universo horizontal e INCC confirmados pelo analista
 
 - **D16 — Chácaras excluídas:** Lucas confirmou com o analista que Condomínio de Chácara/Chácaras não participa das análises nem aparece no relatório. Aplicado ao mensal/trimestral, capital/RM, oferta/capacidade/contagem, distribuição anual e médias. A reconciliação entre fonte granular e municipal continua sobre o universo bruto antes da exclusão; divergências não são apagadas. A auditoria agregada pode conservar os rótulos recebidos como evidência da fonte.

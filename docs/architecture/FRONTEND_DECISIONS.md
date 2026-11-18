@@ -1,3 +1,9 @@
+## 18/11/2026 — Maceió: contingência CAGED identificada por versão
+
+Pedido de Lucas para corrigir fontes pendentes. Consulta CAGED online permanece prioritária; em transporte/5xx/404, cópia de agregados reais verificada noBigQuery entra sob demanda, com versão/data/cobertura explícitas. Autorização/limites não são contornados;200inválido e competência sem cobertura permanecem indisponíveis. Asset não se atualiza automaticamente nem elimina a necessidade de reparar a ponte online. [Contrato/proveniência/limites](../features/relatorios-institucionais/maceio/CAGED_CONTINGENCIA_2026-11-18.md).
+
+Mantidos BrainLoadingState/etapaCAGED, cancelamento/troca de geração, retry e primitives existentes. Aviso de contingência fica na interface/origem eJSON, fora da arte do estudo. Falhas porallowlist, sem corpos privados/credenciais. Divisão anual/mensal conserva método do original, sem transformar ausência emzero. Validação comCAGEDreal eAPIimobiliária sintética, sucesso/vazio/erro, desktop/mobile e claro/escuro. Sem novo primitive/token/rota. Implementação`e67ac127`.
+
 ## 17/11/2026 — Relatórios: diagnóstico JSON com cobertura e validação explícitas
 
 **Autor/origem:** Codex, pedido de Lucas. [Convenção](./REPORT_DIAGNOSTIC_STANDARD.md) definida a partir de um diagnóstico real Maceió:55slides pendentes apesar de todas as fontes imobiliárias coletadas. Padrão inclui seleção/schema/versão, transporte separado de validação, cobertura por competência, categorias/contagens reais, somas e ausências, critérios e limitações. Campos permitidos explicitamente, sem credenciais, IDs/nomes/endereços ou históricos individuais. Aplicado aos dois modelos Maceió, referência ao criar/evoluir os demais diagnósticos, sem migração automática de todos os motores ou compartilhamento de regras de negócio.

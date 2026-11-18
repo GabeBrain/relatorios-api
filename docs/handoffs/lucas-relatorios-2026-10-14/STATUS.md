@@ -1,5 +1,13 @@
 # Estado do handoff
 
+## 18/11/2026 — Maceió: fonte real CAGED recuperada localmente
+
+Lucas pediu corrigir todos os slides de fonte. Abertura: main limpa, origin único, fetch concluído,2commits locais desde15h47(`f537eab9`/`3178df90`), sem alterações remotas novas. Skill de computador lida e tentada; tanto ela quantoCUA reportaram nativepipe indisponível. Token Geobrain pessoal continua ausente, sem extração de sessão. BigQuery conectado confirmou a carga completa2017-01a2026-09:23.751agregados/117meses, versão`8866c027…506dc`, sem escrita remota.
+
+Implementação`e67ac127`: consultaCAGEDonline prioritária, cópia agregada real/verificada sob demanda em transporte/5xx/404, origem visível fora da arte e noJSON, sem contornar401/403/429ou inventar cobertura. Seis slides9–14calculados com a fonte real em teste; etapa/retry sinalizam que o serviço online permanece degradado.186testesMaceió,4Edge,3ponteHMAC, lint/tipos/build e12cenários de navegador+4capturas reais aprovados. [Proveniência, saldos independentes e limites](../../features/relatorios-institucionais/maceio/CAGED_CONTINGENCIA_2026-11-18.md).
+
+Não concluir que todos27bloqueios reais foram eliminados:21outros permanecem sem comprovação de correção. Lucas respondeu que os10`Fechado`aguardam o analista e que consultará o analista sobre a fonte dos fluxos de lançamento por tipologia. EstoqueMarechal283×192precisa do próximoJSONv2para investigar. Sem geração imobiliária autenticada, deploy, push ou escritaMonday. Próximo: enviar lote mediante autorização e conferirJSONv2da geração real.
+
 ## 18/11/2026 — Maceió: retomada após JSON33/27/22
 
 Lucas pediu continuar os slides aguardando fonte e confirmou que os10produtos`Fechado`ainda aguardam o analista. Main inicialmente limpa,4commits atrás do origin único; fetch e pull--ff-only trouxeram Estimativas/Validação do Fechamento até`3db99200`, sem diff Maceió. Código desta continuação:`f537eab9`.
