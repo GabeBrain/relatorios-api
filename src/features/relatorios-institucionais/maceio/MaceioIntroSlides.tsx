@@ -28,6 +28,7 @@ export default function MaceioIntroSlides({selection,data,initialMonetaryPolicy=
   {market?.money && monetaryPolicy === 'INCC-DI' && <p className="text-sm text-muted-foreground">Valores corrigidos pelo INCC-DI · base {maceioPeriod(selection).label}.</p>}
   {[...(advanced?.warnings??[]),...(remaining?.warnings??[])].map(warning=><p key={warning} role="status" className="text-sm text-muted-foreground">{warning}</p>)}
   {caged?.warning&&<p role="status" className="text-sm text-muted-foreground">{caged.warning}</p>}
+  {caged?.sourceNotice&&<p role="status" className="text-sm text-muted-foreground">{caged.sourceNotice}</p>}
 
   {page===7&&<p className="text-xs text-muted-foreground">Mapa do recorte da referência. Percentuais de população e consumo foram retirados até atualização das fontes.</p>}
   {!expanded&&slide}

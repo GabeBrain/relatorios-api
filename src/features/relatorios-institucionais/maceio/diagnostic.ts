@@ -76,7 +76,9 @@ export function buildMaceioDiagnostic(selection: MaceioSelection, state: Diagnos
     sources: {
       vertical: metadata(sources?.sources), horizontal: metadata(sources?.horizontal, true), commercial: metadata(sources?.commercial, true),
       launches: intro?.cities.map(city => ({ city: city.city, unitsComplete: city.unitsComplete, buildingsComplete: city.buildingsComplete, issues: city.issues, failures: city.failures ?? [] })) ?? [],
-      caged: intro?.caged?.report ? { snapshotVersion: intro.caged.report.snapshotVersion, publishedThrough: intro.caged.report.publishedThrough, coverageStart: intro.caged.report.coverageStart } : null,
+      caged: intro?.caged ? { snapshotVersion: intro.caged.report?.snapshotVersion??null, publishedThrough: intro.caged.report?.publishedThrough??null, coverageStart: intro.caged.report?.coverageStart??null,
+        delivery: intro.caged.delivery?.kind??(intro.caged.report?'online':null), verifiedAt: intro.caged.delivery?.verifiedAt??null,
+        failure: intro.caged.failure?{code:intro.caged.failure.code,httpStatus:intro.caged.failure.httpStatus}:null } : null,
     },
     limits: ['Diagnóstico de conferência; não equivale à homologação.', 'Preços ponderados pelo estoque histórico; critério registrado para revisão do analista.', maceioMonetaryPolicy(selection) === 'INCC-DI' ? 'VGL/VGV corrigidos pelo INCC-DI até o mês de fechamento; série autorizada por Lucas em 17/11/2026.' : 'Valores corrigidos pelo INCC permanecem indisponíveis até a definição da série.'],
   };

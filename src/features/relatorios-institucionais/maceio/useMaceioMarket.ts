@@ -78,6 +78,7 @@ export function useMaceioMarket(selection: MaceioSelection, authorizedCities: st
       intro.caged=await collectMaceioCaged(selection,authorizedCities,{token,signal:controller.signal});
       if(controller.signal.aborted)return;
       const cagedFailed=Boolean(cagedIssue(selection,intro.caged));
+      const cagedBackup=intro.caged.delivery?.kind==='verified-snapshot';
       const introFailed=intro.cities.some(city=>!city.unitsComplete||!city.buildingsComplete)||[...intro.slides.sources,...intro.slides.horizontal??[],...intro.slides.commercial??[]].some(source=>!source.complete);
       activate('reconciliation');
       activate('structure');
@@ -85,11 +86,11 @@ export function useMaceioMarket(selection: MaceioSelection, authorizedCities: st
         if (!controller.signal.aborted) setState(current => current?.key === key ? { ...current, message: `${completed} de ${total} posições organizadas` } : current);
       } });
       if (controller.signal.aborted) return;
-      const finishedSteps: MaceioGenerationState['steps'] = MACEIO_GENERATION_STEPS.map(step => ({ ...step, status: step.id === 'validation' ? 'done' : step.id === 'caged' ? cagedFailed?'attention':'done' : step.id === 'sources' ? report.metrics&&!introFailed ? 'done' : 'attention' : step.id === 'reconciliation' ? report.metrics && !report.issues.length ? 'done' : 'attention' : blueprint ? 'done' : 'waiting' }));
+      const finishedSteps: MaceioGenerationState['steps'] = MACEIO_GENERATION_STEPS.map(step => ({ ...step, status: step.id === 'validation' ? 'done' : step.id === 'caged' ? cagedFailed||cagedBackup?'attention':'done' : step.id === 'sources' ? report.metrics&&!introFailed ? 'done' : 'attention' : step.id === 'reconciliation' ? report.metrics && !report.issues.length ? 'done' : 'attention' : blueprint ? 'done' : 'waiting' }));
       setState({
         key, phase: 'done', startedAt, finishedAt: new Date().toISOString(),
-        message: !report.metrics || report.issues.length || introFailed || cagedFailed ? 'Prévia organizada; confira os balanços e as fontes pendentes.' : 'Fontes imobiliárias e CAGED consultados; confira os slides e as pendências de conteúdo.',
-        report, intro, hasFailedCities: cagedFailed || introFailed || result.collection.failedCities.length > 0 || report.cities.some(city => city.status === 'incomplete'), blueprint, steps: finishedSteps,
+        message: cagedBackup ? 'Prévia organizada. CAGED usa cópia verificada da fonte MTE; serviço online indisponível. Confira os balanços e as demais fontes.' : !report.metrics || report.issues.length || introFailed || cagedFailed ? 'Prévia organizada; confira os balanços e as fontes pendentes.' : 'Fontes imobiliárias e CAGED consultados; confira os slides e as pendências de conteúdo.',
+        report, intro, hasFailedCities: cagedFailed || cagedBackup || introFailed || result.collection.failedCities.length > 0 || report.cities.some(city => city.status === 'incomplete'), blueprint, steps: finishedSteps,
       });
     } catch {
       if (!controller.signal.aborted) setState(current => ({ key, phase: 'error', startedAt, message: 'Não foi possível concluir a consulta. Confira sua autenticação e tente novamente.', report: null, hasFailedCities: false, blueprint: null, steps: (current?.steps ?? steps).map(step => ({ ...step, status: step.status === 'running' ? 'failed' : step.status })) }));

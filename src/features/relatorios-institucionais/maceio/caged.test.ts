@@ -40,7 +40,7 @@ describe('CAGED MTE · contrato e comparativos',()=>{
    const request=vi.fn<typeof fetch>().mockResolvedValue(new Response(JSON.stringify({report:cagedFixture()}),{status:200}));
    const result=await collectMaceioCaged(selection,[...MACEIO_CITIES_MONTHLY],{token:'private-token',request});expect(result.report?.end).toBe('2026-05');expect(JSON.stringify(result)).not.toContain('private-token');
    expect(JSON.parse(String(request.mock.calls[0][1]?.body))).toEqual({periodicity:'monthly',year:2026,position:5});
-   request.mockResolvedValue(new Response('private provider details',{status:502}));expect((await collectMaceioCaged(selection,[...MACEIO_CITIES_MONTHLY],{token:'x',request})).issue).not.toMatch(/private/);
+   request.mockResolvedValue(new Response('private provider details',{status:502}));const backup=await collectMaceioCaged(selection,[...MACEIO_CITIES_MONTHLY],{token:'x',request});expect(backup.issue).toBeNull();expect(backup.delivery?.kind).toBe('verified-snapshot');expect(JSON.stringify(backup)).not.toMatch(/private/);
    const controller=new AbortController();controller.abort();await expect(collectMaceioCaged(selection,[...MACEIO_CITIES_MONTHLY],{token:'x',signal:controller.signal,request})).rejects.toMatchObject({name:'AbortError'});
    await expect(collectMaceioCaged(selection,['Maceió'],{token:'x',request})).rejects.toThrow(/recorte/);
   }finally{vi.unstubAllEnvs();}
