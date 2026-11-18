@@ -62,6 +62,7 @@ export function buildMaceioDiagnostic(selection: MaceioSelection, state: Diagnos
     auditVersion: 'maceio-source-audit-v1',
     collection: { vertical: collectionStatus(sources?.sources), horizontal: collectionStatus(sources?.horizontal), commercial: collectionStatus(sources?.commercial) },
     criteria: { prices: 'stock-weighted', monetaryIndex: maceioMonetaryPolicy(selection), monetaryBase: maceioPeriod(selection).end.slice(0, 7),
+      horizontalUniverse: { excluded: ['Condomínio de Chácaras'], confirmedBy: 'Lucas, com confirmação do analista em 18/11/2026', reconciliation: 'full-source-before-exclusion', ambiguousClosed: 'pending-analyst-review' },
       emptyPeriods: 'completed-scoped-scan-as-zero; failed scans and missing numeric fields remain unavailable',
       patternGrouping: { Compacto:'Compactos', Econômico:'MCMV', Standard:'Médio Padrão', Médio:'Médio Padrão', 'Médio-Alto':'Médio Padrão', Alto:'Luxo', Luxo:'Luxo' } },
     summary: Object.fromEntries(statuses.map(status => [status, slides.filter(slide => slide.status === status).length])) as Record<Status, number>,
