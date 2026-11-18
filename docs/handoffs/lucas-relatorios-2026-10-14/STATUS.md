@@ -1,5 +1,11 @@
 # Estado do handoff
 
+## 18/11/2026 — Maceió: retomada após JSON33/27/22
+
+Lucas pediu continuar os slides aguardando fonte e confirmou que os10produtos`Fechado`ainda aguardam o analista. Main inicialmente limpa,4commits atrás do origin único; fetch e pull--ff-only trouxeram Estimativas/Validação do Fechamento até`3db99200`, sem diff Maceió. Código desta continuação:`f537eab9`.
+
+Corrigido recorte pré-lançamento dos rankings, preservando fluxos explícitos e reconciliação; erros passam a identificar município/mês/campo/totais/delta. Auditoria v2 agrega estoque bruto/elegível e categorias, distingue nulo/ausente/inválido/zero e conserva privacidade.175testes Maceió, lint/build/tipos e4cenários Edge com fonte sintética aprovados. Padrão de geração/BrainLoadingState/worker/cancelamento existente preservado, sem mudança React ou coleta adicional. Fonte real não reconsultada por ausência de token/payload individual; não afirmar27slides liberados nem atribuir91unidades aGarden. [Evidências e próximos passos](../../features/relatorios-institucionais/maceio/VALIDACAO_DADOS_REAIS_2026-11-17.md). Próximo: envio autorizado e novo JSONv2. Sem push/deploy ou escrita Monday nesta continuação.
+
 ## 18/11/2026 — Maceió: exclusão de chácaras, INCC-DI e lista Fechado
 
 Máquina de Lucas, Codex; abertura na `main` limpa, origin único, `git fetch --all` e comparação 0/0 na base `bd994c2c`. Fetch precisou de execução aprovada fora do sandbox para escrever FETCH_HEAD. Node24.19.0/dependências disponíveis; preflight offline rodado, cujo subprocesso Git não conseguiu ler o repo no sandbox (checagens Git diretas passaram). Sem token Geobrain exposto nas variáveis; Drive/Lovable/API real não testados nesta sessão.

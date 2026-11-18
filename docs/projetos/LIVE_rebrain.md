@@ -712,6 +712,16 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-11-18 — Maceió: rankings e causas dos slides pendentes — Lucas / Codex
+
+- **Ambiente/funcionalidade:** `/rebrain/relatorios-institucionais/maceio` — mensal/trimestral, rankings e diagnóstico.
+- **Evidência:** JSON real33disponíveis/27fontes/22editoriais,63fontes imobiliárias concluídas; Marechal Deodoro283estoque detalhado×192municipal.10produtos`Fechado`ainda aguardam confirmação do analista, segundo Lucas nesta sessão.
+- **Entrega:** rankings respeitam a data explícita de lançamento ao exigir fluxos, bloqueando valores contraditórios pré-lançamento; ausências em meses válidos continuam bloqueadas. Erros de estoque/IVV/ranking identificam campo/mês/totais/delta. Auditoria v2 separa estoque bruto/elegível e categorias para localizar diferenças, e propriedade ausente/nulo/inválido/zero. Sem inferir fluxos de capacidade ou relaxar reconciliação.
+- **Commits:** `f537eab9` (código); fechamento documental no commit desta entrada. Base`3db99200`após fetch e fast-forward de4commits remotos.
+- **Validação:**175testes Maceió/16arquivos, lint/tipos/build e4cenários Edge com fonte sintética aprovados, com download JSONv2 conferido. [Evidências e limites](../features/relatorios-institucionais/maceio/VALIDACAO_DADOS_REAIS_2026-11-17.md). Motor/carregamento/worker existentes preservados; shared/CAGED/outros relatórios sem diff.
+- **Impacto em Etapas/Pendências:** correção local e diagnóstico prontos; sem token/payload individual para reexecutar dados reais. Não afirmar liberação dos27slides. Após envio autorizado, obter JSONv2; classificação dos10`Fechado`, estoque Marechal, fluxos ausentes e CAGED permanecem pendentes. Sem push/deploy/Monday nesta continuação.
+- **Monday:** [Panorama Maceió / SINDUSCON](https://brain381753.monday.com/boards/18398638577/pulses/13149406169) — `13149406169`.
+
 ### 2026-11-18 — Validação do Fechamento: estoque nas comparações Garden e Cobertura — Edgar / Codex
 
 - **Mudança:** as divergências de ticket Garden e Cobertura são verificadas somente quando a respectiva tipologia tem estoque positivo no último histórico validado. Comparação e ticket Padrão permanecem inalterados.
@@ -1972,6 +1982,8 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 
 ## 2. Etapas
 
+- **18/11 — Maceió, JSON33/27/22:** recorte dos rankings e auditoria v2 implementados localmente(`f537eab9`),175testes/build e4cenários com fonte sintética aprovados. Nova geração autenticada necessária para medir liberação; não altera classificação dos10`Fechado`.
+
 - **18/11 — Maceió, confirmação do analista:** exclusão de chácaras em todos os quadros horizontais e CSV identificado de `Fechado` implementados (`38700781`); INCC-DI confirmado nas duas edições. Push autorizado por Lucas, nova geração real e homologação pendentes.
 
 - **17/11 — Maceió, runtime após publicação:** fontes coletadas no JSON real;55indicadores ainda bloqueados por validação, não por HTTP. Diagnóstico agregado de categorias/cobertura preparado localmente; conclusão das fontes não comprovada.
@@ -2141,6 +2153,8 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 ---
 
 ## 3. Pendências
+
+- **18/11 — Maceió, continuação local:** autorizar envio do recorte dos rankings/auditoria v2 e gerar novo JSON. Investigar estoque de Marechal283×192pelas partições de estoque e fluxos por campo/mês;10`Fechado`continuam com o analista. Os27bloqueios do JSON anterior não foram declarados resolvidos. CAGED continua frente separada.
 
 - **18/11 — Maceió, próxima evidência:** após atualização do ambiente, Lucas gerará relatório e enviará JSON e CSV `Fechado` pareados. Conferir exclusão de chácaras/totais e os empreendimentos ambíguos com o analista; não converter `Fechado` em loteamento automaticamente. INCC-DI está confirmado. Registros anteriores de chácaras como categoria do estudo são históricos e substituídos por esta decisão; auditoria bruta continua preservada.
 
