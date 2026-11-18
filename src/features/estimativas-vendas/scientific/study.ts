@@ -1,7 +1,7 @@
 import { buildingId, buildingName, finite, type Building } from '../source';
 import { normalizeOrigin, periodValid, monthIndex, shiftMonth, type Origin, type Provenance } from '../expanded/contract';
 import { forecast, type ForecastResult } from '../expanded/models';
-import { prepareReferenceModels } from '../expanded/referenceModels';
+import { prepareReferenceModels, REFERENCE_TRAINED_THROUGH } from '../expanded/referenceModels';
 import { quantile } from '../expanded/evaluation';
 
 export const STUDIES = [
@@ -227,11 +227,13 @@ export async function runStudy(dataset: StudyDataset, protocol: StudyProtocol, s
         for (const method of protocol.methods) {
           const prediction = c.methods[method], p = prediction.forecast?.points.find(p => p.offset === horizon);
           const predicted = p && item.origin ? protocol.target === 'stock' ? p.stock : p.predicted === null ? null : p.predicted - item.origin.sold : null;
-          const error = predicted !== null && label.actual !== null ? predicted - label.actual : null;
+          // Mês usado na calibração da referência: o informado não mede precisão do modelo.
+          const calibrated = method === 'finotti-reference' && targetMonth <= REFERENCE_TRAINED_THROUGH;
+          const error = predicted !== null && label.actual !== null && !calibrated ? predicted - label.actual : null;
           result.trials.push({ key: `${item.id}|${cutoff}|${horizon}|${protocol.target}`, id: item.id, name: item.name, type: item.type, cutoff, targetMonth, horizon, method,
             modelVersion: prediction.forecast?.version ?? METHODS.find(m => m.id === method)!.version, target: protocol.target,
             units: item.units, initialStock: item.stock, age: item.age, predicted, actual: label.actual, error, provenance: label.provenance,
-            reason: predicted === null ? prediction.reason : label.reason, matched: false });
+            reason: predicted === null ? prediction.reason : calibrated ? 'Mês usado na calibração da referência (até setembro/2026); comparação não mede precisão.' : label.reason, matched: false });
         }
       }
     }

@@ -28,7 +28,7 @@ export function retrospective(buildings: Building[], cutoffs: string[], models: 
             for (const model of models) {
                 const normalized = normalizeOrigin(b, cutoff, measurement, provenance);
                 const artifact = artifacts.find(a => a.model === model && a.segment === normalized.origin?.segment && a.trainedThrough <= cutoff && !a.trainingIds.includes(buildingId(b)));
-                const futureReference = ['finotti', 'finotti-extra'].includes(model) && cutoff < '2026-09';
+                const futureReference = ['finotti', 'finotti-extra', 'finotti-reference'].includes(model) && cutoff < '2026-09';
                 const result = futureReference ? {forecast: null, reason: 'Coeficientes da referência posterior ao corte; retrospectiva independente indisponível.'} : normalized.origin ? forecast(normalized.origin, model, Math.max(...horizons), artifact) : null;
                 for (const horizon of horizons) {
                     const target = shiftMonth(cutoff, horizon);

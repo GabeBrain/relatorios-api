@@ -2,7 +2,7 @@ import { buildingId, type Building } from '../source';
 import { monthIndex, periodValid, shiftMonth, type Provenance } from '../expanded/contract';
 import { classify } from '../operational/workbench';
 import { defaultProtocol, describeBuilding, METHODS, predictCase, runStudy, type InventoryRow, type StudyDataset, type StudyMethod, type StudyResult, type StudyTrial } from '../scientific/study';
-import { prepareReferenceModels } from '../expanded/referenceModels';
+import { prepareReferenceModels, REFERENCE_EARLIEST_START } from '../expanded/referenceModels';
 
 export type Area = { city: string; uf: string };
 export function resolveAreas(catalog: Record<string, string[]>, regionUfs: string[], states: string[], cities: Area[]): Area[] {
@@ -141,7 +141,7 @@ export function summarizeInventory(buildings: Building[], cutoff: string) {
   return buildings.map(b => ({ ...describeBuilding(b, cutoff === 'latest' ? latestPeriod(b) : cutoff), origin: null }));
 }
 export async function capabilities(dataset: StudyDataset, ids: string[], cutoff: string) {
-  if (cutoff === 'latest' || cutoff >= '2026-09') await prepareReferenceModels();
+  if (cutoff === 'latest' || cutoff >= REFERENCE_EARLIEST_START) await prepareReferenceModels();
   return Object.fromEntries(ids.map(id => {
     const b = dataset.buildings.find(b => buildingId(b) === id);
     if (!b) throw new Error('Cadastro ausente da classificação.');

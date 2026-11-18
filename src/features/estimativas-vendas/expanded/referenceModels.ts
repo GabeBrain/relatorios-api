@@ -4,20 +4,25 @@ import horizontalParameters from './reference/horizontal-parameters.json';
 import { shiftMonth, type Origin } from './contract';
 import type { ForecastResult, ForecastPoint } from './models';
 
+/** Parâmetros calibrados com dados até este mês. */
+export const REFERENCE_TRAINED_THROUGH = '2026-09';
+/** Início mais antigo aceito (pedido de Diego em 18/11/2026). Entre ele e o treino, meses já informados não medem precisão. */
+export const REFERENCE_EARLIEST_START = '2026-01';
 let cohorts: unknown;
 export async function prepareReferenceModels() {
     cohorts ??= (await import('./reference/vertical-cohorts.json')).default;
 }
 export function referenceForecast(o: Origin, horizon: number): ForecastResult {
     const fail = (reason: string): ForecastResult => ({id: o.id, name: o.name, forecast: null, reason});
-    if (o.cutoff < '2026-09') return fail('Referência treinada até setembro/2026: use um modelo independente para retrospectivas anteriores.');
+    if (o.cutoff < REFERENCE_EARLIEST_START) return fail('Referência disponível para inícios a partir de janeiro/2026: use um modelo independente para retrospectivas anteriores.');
     if (o.age === null || o.age < 1) return fail('Lançamento ausente: histórico disponível, previsão sem idade de origem.');
     const vertical = o.segment === 'vertical';
     const maxAge = vertical ? 36 : 60;
     if (o.age > maxAge) return fail(`Método Finoti ${vertical ? 'vertical' : 'horizontal'} disponível até o mês ${maxAge}. Histórico preservado.`);
     const points: ForecastPoint[] = [{period: o.cutoff, offset: 0, age: o.age, predicted: o.sold, stock: o.stock, boundary: false}];
     const warnings = [...o.warnings, 'Referência Finoti treinada até setembro/2026; não comprova precisão fora dessa base.'];
-    const parameters: Record<string, string | number> = {trainedThrough: '2026-09', pattern: o.pattern ?? 'Não informado'};
+    if (o.cutoff < REFERENCE_TRAINED_THROUGH) warnings.push('Início dentro do período de calibração (até setembro/2026): meses já informados até lá não medem precisão.');
+    const parameters: Record<string, string | number> = {trainedThrough: REFERENCE_TRAINED_THROUGH, pattern: o.pattern ?? 'Não informado'};
     if (!o.stock) {
         for (let h = 1; h <= horizon; h++) points.push({period: shiftMonth(o.cutoff, h), offset: h, age: o.age + h, predicted: o.units, stock: 0, boundary: false});
     } else if (vertical) {

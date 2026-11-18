@@ -11,6 +11,7 @@ import { InventoryGallery } from './InventoryGallery';
 import type { AnalysisRuntime } from './runtime';
 import type { Universe } from './domain';
 import { useExportPlan } from './useExportPlan';
+import { REFERENCE_TRAINED_THROUGH } from '../expanded/referenceModels';
 import './export-preview.css';
 import './delivery.css';
 
@@ -60,7 +61,7 @@ export function ForecastDelivery({ universe, runtime, active, blocked, onBusy, o
       <Choice label="Tipo" value={filters.type} onChange={type => change({ ...filters, type })} items={['all', 'Horizontal', 'Vertical'].map(value => ({ value, label: value === 'all' ? 'Todos os tipos' : value }))} disabled={busy || blocked} />
       <Choice label="Começar a previsão em" value={filters.start} onChange={start => change({ ...filters, start })} items={[{ value: 'latest', label: 'Último dado de cada empreendimento' }, ...starts.map(value => ({ value, label: monthLabel(value) }))]} disabled={busy || blocked} />
       <Choice label="Prever por" value={String(filters.duration)} onChange={duration => change({ ...filters, duration: Number(duration) })} items={[1, 3, 6, 12, 24, 36].map(n => ({ value: String(n), label: `${n} ${n === 1 ? 'mês' : 'meses'}` }))} disabled={busy || blocked} />
-    </div><p className="evd-hint">Os filtros definem o arquivo abaixo. Inícios a partir de {monthLabel(REFERENCE_FIRST_START)}, quando a referência aprovada foi treinada.{filters.start !== 'latest' && ' Empreendimentos sem registro nesse mês ficam em “Sem referência”; meses já informados aparecem no arquivo como comparação histórica.'}</p>
+    </div><p className="evd-hint">Os filtros definem o arquivo abaixo. Inícios a partir de {monthLabel(REFERENCE_FIRST_START)}.{filters.start !== 'latest' && ' Empreendimentos sem registro nesse mês ficam em “Sem referência”; meses já informados aparecem no arquivo como comparação histórica.'}{filters.start !== 'latest' && filters.start < REFERENCE_TRAINED_THROUGH && ` A referência foi calibrada com dados até ${monthLabel(REFERENCE_TRAINED_THROUGH)}: a comparação com os meses informados até lá não mede precisão.`}</p>
     <header className="evd-heading"><div><h2>Prévia das previsões</h2>{plan && <p>{plan.manifest.included} empreendimentos · {plan.forecasts.length} linhas · {plan.manifest.spec.cutoff === 'latest' ? `${plan.manifest.spec.duration} meses após o último dado de cada empreendimento` : `${plan.manifest.spec.duration} meses a partir de ${monthLabel(plan.manifest.spec.cutoff)}`}</p>}</div>
       {ready && <div className="evx-actions"><Button variant="ghost" disabled={busy || blocked} onClick={() => setGallery('others')}>Sem referência ({scope.others.length})</Button><Button variant="ghost" disabled={busy || blocked} onClick={() => setGallery('sold')}>Esgotados ({scope.sold.length})</Button></div>}
     </header>

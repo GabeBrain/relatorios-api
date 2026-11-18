@@ -1,5 +1,14 @@
 # Rebrain (Plataforma) — Documento Vivo
 
+## 18/11/2026 — Estimativas de vendas: início da previsão a partir de 01/2026 — Diego / Claude
+
+- **Pedido:** Diego pediu liberar inícios a partir de 01/2026 no filtro "Começar a previsão em" (entrada anterior limitava a 09/2026, fim da calibração Finotti).
+- **Entrega:** `REFERENCE_EARLIEST_START = '2026-01'` e `REFERENCE_TRAINED_THROUGH = '2026-09'` em `expanded/referenceModels.ts`. A referência agora projeta de inícios ≥ 01/2026 (antes ≥ 09/2026) e, entre 01 e 08/2026, inclui aviso de que o início está dentro da calibração. Isso vale também para Análise detalhada, mapa e comparação, que usam o mesmo motor.
+- **Proteção mantida:** comparações da referência com meses ≤ 09/2026 deixam de contar como erro/precisão (`error` nulo, motivo "Mês usado na calibração") em `scientific/study.ts`; a retrospectiva independente da bancada (`expanded/evaluation.ts`) continua bloqueando a referência antes de 09/2026. A tela da entrega avisa que a comparação com meses informados até 09/2026 não mede precisão.
+- **Decisão alterada:** a regra "bloquear Finotti congelado para datas anteriores ao treinamento" do [plano do fluxo essencial](../features/estimativas-vendas/PLANO_FLUXO_ESSENCIAL_V1_2026-10-28.md) passa a valer só para medição de precisão; a projeção aceita 01/2026. Gabriel, responsável pela feature, deve ser informado.
+- **Validação:** 131 testes de `estimativas-vendas` (quatro testes da trava antiga reescritos para a nova fronteira, um novo de início na calibração), typecheck e ESLint aprovados. `ExperiencePage.test.tsx` exigiu `--testTimeout=60000` nesta máquina (lentidão, passa sem alteração). Sem token Geobrain: tela não verificada no navegador.
+- **Monday:** [Cálculo das estimativas da cidade pelo IVV](https://brain381753.monday.com/boards/18398428946/pulses/13096757074) — `13096757074` (referência, sem escrita).
+
 ## 18/11/2026 — Estimativas de vendas: filtro de mês de início da previsão — Diego / Claude
 
 - **Pedido:** Diego pediu um filtro para o usuário escolher a partir de qual período a estimativa é feita. Confirmado: controla o mês de início da previsão (não lançamento nem janela de histórico).

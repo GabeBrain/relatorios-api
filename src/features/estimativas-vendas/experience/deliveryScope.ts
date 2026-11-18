@@ -2,11 +2,12 @@ import type { InventoryRow, StudyMethod } from '../scientific/study';
 import { buildingSpec, specKey, type AnalysisSpec, type CaseAnalysis, type Universe } from './domain';
 import { buildExportPlan } from './export';
 import { periodValid } from '../expanded/contract';
+import { REFERENCE_EARLIEST_START } from '../expanded/referenceModels';
 
 export type DeliveryFilters = { city: string; type: string; search: string; duration: number; start: string };
 export const DEFAULT_DELIVERY_FILTERS: DeliveryFilters = { city: 'all', type: 'all', search: '', duration: 12, start: 'latest' };
-/** A referência aprovada foi treinada até 09/2026; inícios anteriores vazariam o treino (ver expanded/referenceModels.ts). */
-export const REFERENCE_FIRST_START = '2026-09';
+/** Início mais antigo da entrega; entre 01/2026 e 09/2026 o início fica dentro da calibração da referência (ver expanded/referenceModels.ts). */
+export const REFERENCE_FIRST_START = REFERENCE_EARLIEST_START;
 /** Meses de início oferecidos na entrega: somente períodos com dados e permitidos pela referência, do mais recente ao mais antigo. */
 export function deliveryStarts(periods: string[]) { return [...new Set(periods)].filter(p => periodValid(p) && p >= REFERENCE_FIRST_START).sort().reverse(); }
 const allowedStart = (start: string) => start === 'latest' || (periodValid(start) && start >= REFERENCE_FIRST_START);

@@ -36,7 +36,7 @@ describe('contrato de entrega principal', () => {
     expect(() => buildDeliveryPlan(u, ['002'], [{ ...analyses[1], stock: { ...analyses[1].stock, cases: [{ ...analyses[1].stock.cases[0], methods: { ...analyses[1].stock.cases[0].methods, 'finotti-reference': { ...analyses[1].stock.cases[0].methods['finotti-reference'], forecast: null } } }] } }], spec)).toThrow(/nenhum arquivo parcial/);
   });
   it('mês de início escolhido: só períodos com dados desde o treino, mesmo início para todos e comparação histórica nos meses já informados', async () => {
-    expect(deliveryStarts(['2026-06', '2026-10', '2026-08', '2026-09', '2026-10', 'x'])).toEqual(['2026-10', '2026-09']);
+    expect(deliveryStarts(['2025-12', '2026-01', '2026-10', '2026-08', '2026-09', '2026-10', 'x'])).toEqual(['2026-10', '2026-09', '2026-08', '2026-01']);
     const u = deliveryFixture(), spec = deliverySpec(3, '2026-09');
     u.buildings[0].typologies_history.push({ ...u.buildings[0].typologies_history[0], period: '2026-10', typology_stock: 140 });
     const analysis = await analyzeCase(u, '001', buildingSpec(u, '001', spec));
@@ -47,8 +47,21 @@ describe('contrato de entrega principal', () => {
     // 002 não tem registro em 09/2026: fica sem referência, com motivo, em vez de usar outro mês.
     const missing = await analyzeCase(u, '002', buildingSpec(u, '002', spec));
     expect(missing.stock.cases[0].methods['finotti-reference'].forecast).toBeNull();
-    const early = deliverySpec(3, '2026-08');
+    const early = deliverySpec(3, '2025-12');
     expect(() => buildDeliveryPlan(u, ['001'], [{ ...analysis, spec: early }], early)).toThrow(/somente a referência aprovada/);
     expect(exportRequestKey(u, ['001'], spec)).not.toBe(exportRequestKey(u, ['001'], deliverySpec(3)));
+  });
+  it('início entre 01/2026 e o treino gera previsão, avisa e não conta meses calibrados como precisão', async () => {
+    const u = deliveryFixture(), spec = deliverySpec(4, '2026-06');
+    const analysis = await analyzeCase(u, '001', buildingSpec(u, '001', spec));
+    const forecast = analysis.stock.cases[0].methods['finotti-reference'].forecast!;
+    expect(forecast).not.toBeNull();
+    expect(forecast.warnings.some(w => /calibração/.test(w))).toBe(true);
+    const plan = buildDeliveryPlan(u, ['001'], [analysis], spec);
+    expect(plan.forecasts.map(r => [r.mes, r.finalidade])).toEqual([['2026-07', 'comparacao_historica'], ['2026-08', 'comparacao_historica'], ['2026-09', 'comparacao_historica'], ['2026-10', 'projecao']]);
+    const finotti = analysis.stock.trials.filter(t => t.method === 'finotti-reference');
+    expect(finotti.filter(t => t.targetMonth <= '2026-09').every(t => t.error === null && /calibração/.test(t.reason))).toBe(true);
+    const before = await analyzeCase(u, '001', buildingSpec(u, '001', deliverySpec(4, '2025-12')));
+    expect(before.stock.cases[0].methods['finotti-reference'].forecast).toBeNull();
   });
 });
