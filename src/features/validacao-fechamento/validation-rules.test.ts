@@ -8,6 +8,19 @@ function building(id: string, overrides: Partial<ValidationHistory> = {}, metada
 }
 
 describe('Farol 20261021', () => {
+  it.each(['Garden', 'Cobertura'])('compara ticket %s somente quando a tipologia tem estoque positivo', (type) => {
+    const original = building('1', { price: 100000, typology_stock: 16 });
+    const reference = original.typologies[0].history[0];
+    const candidate = { ...reference, type_of_typology: type, price: type === 'Garden' ? 120000 : 80000 };
+    const rule = type === 'Garden' ? 'Ticket Garden ≥ Ticket Padrão' : 'Ticket Cobertura ≤ Ticket Padrão';
+    original.typologies.push({ ...original.typologies[0], typology_id: 'special', history: [{ ...candidate, typology_stock: 0 }] });
+    expect(validateBuildings([original]).some((r) => r.error === rule)).toBe(false);
+    original.typologies[1].history[0].typology_stock = 1;
+    expect(validateBuildings([original]).some((r) => r.error === rule)).toBe(true);
+    original.typologies[1].history[0].typology_stock = -1;
+    expect(validateBuildings([original]).some((r) => r.error === rule)).toBe(false);
+  });
+
   it('loteamentos usam faixa de área no lugar de dormitórios, sem período no cluster, e apenas o último registro', () => {
     const a = building('1', { private_area: 200, number_bedroom: 0 }, { standard: 'Loteamento Aberto', building_type: 'Horizontal' });
     const b = building('2', { period: '2026-08-01', private_area: 200, number_bedroom: 4, price: 200000 }, { standard: 'Loteamento Aberto', building_type: 'Horizontal' });

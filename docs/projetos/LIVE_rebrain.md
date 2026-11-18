@@ -694,6 +694,13 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-11-18 — Validação do Fechamento: estoque nas comparações Garden e Cobertura — Edgar / Codex
+
+- **Mudança:** as divergências de ticket Garden e Cobertura são verificadas somente quando a respectiva tipologia tem estoque positivo no último histórico validado. Comparação e ticket Padrão permanecem inalterados.
+- **Validação:** testes direcionados cobrem estoque zero, positivo e negativo para ambas as tipologias; sem consulta autenticada à API.
+- **Etapas/Pendências:** ajuste local; conferência com dados reais e publicação pendentes.
+- **Monday:** —
+
 ### 2026-11-18 — Valor da parcela por tipologia no AELO — Edgar / Codex
 - **Ambiente/funcionalidade:** Relatório AELO — tabela e exportação Excel.
 - **O quê:** `Valor da parcela` passa a usar `typologies_history[].installment_value_typology` do último registro disponível da tipologia no período.
