@@ -694,6 +694,11 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-11-18 — Valor da parcela por tipologia no AELO — Edgar / Codex
+- **Ambiente/funcionalidade:** Relatório AELO — tabela e exportação Excel.
+- **O quê:** `Valor da parcela` passa a usar `typologies_history[].installment_value_typology` do último registro disponível da tipologia no período.
+- **Arquivos:** `src/pages/RelatorioAelo.tsx`.
+
 - **17/11/2026 · Gabriel (Claude Code):** CLAUDE.md da equipe enxugado para só importar o `AGENTS.md` (menos contexto por sessão). Regras que existiam só no CLAUDE.md foram movidas para o fim do AGENTS.md; nada removido. Aviso aos devs no topo do CLAUDE.md até 01/12/2026.
 
 ### 2026-11-16 — Maceió: fechamento para retomada em17/11 — Lucas/Codex
