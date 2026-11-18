@@ -36,7 +36,13 @@ export function auditMaceioSource(source: SlideSource, expectedMonths: string[])
     return { month, observations: rows.length, stock: totals(detailed ? 'typology_stock' : 'stock'),
       sales: totals(detailed ? 'sold_in_period' : 'liquid_sales'), launches: totals('releases_in_period'),
       ...(detailed ? { capacity: totals('qty'), missingPrice: rows.filter(row => numeric(row.price) === null).length,
-        missingArea: rows.filter(row => numeric(row.private_area) === null).length } : {}) };
+        missingArea: rows.filter(row => numeric(row.private_area) === null).length,
+        fieldAvailability: Object.fromEntries(['typology_stock', 'qty', 'sold_in_period', 'releases_in_period', 'private_area', 'price'].map(field => [field, {
+          absent: rows.filter(row => !Object.prototype.hasOwnProperty.call(row, field)).length,
+          nullOrBlank: rows.filter(row => Object.prototype.hasOwnProperty.call(row, field) && (row[field] == null || typeof row[field] === 'string' && !String(row[field]).trim())).length,
+          invalid: rows.filter(row => row[field] != null && String(row[field]).trim() && numeric(row[field]) === null).length,
+          zero: rows.filter(row => numeric(row[field]) === 0).length,
+        }])) } : {}) };
   });
   return {
     observedGroups: detailed ? [] : countLabels(source.rows.map(row => row.group)),

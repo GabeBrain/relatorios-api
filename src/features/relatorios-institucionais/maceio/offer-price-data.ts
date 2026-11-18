@@ -84,7 +84,8 @@ function snapshots(data: MaceioMarketSlidesData, cities: readonly string[], mont
       }
       if (!observed || [...established].some(id => !seen.has(id))) throw new Error(`${city}: fotografia ${month} incompleta; não usamos cadastro atual ou estoque zero como substitutos.`);
     }
-    if (total(result.filter(row => row.city === city).map(row => row.stock)) !== quantity(data, city, 'stock', month)) throw new Error(`${city}: estoque granular diverge do estoque municipal em ${month}.`);
+    const actual = total(result.filter(row => row.city === city).map(row => row.stock)), expected = quantity(data, city, 'stock', month);
+    if (actual !== expected) throw new Error(`${city}: estoque granular diverge do estoque municipal em ${month} (${actual} versus ${expected}, diferença ${actual-expected}).`);
   }
   return result;
 }
@@ -158,7 +159,12 @@ export function buildOfferPriceSlide(page: number, selection: MaceioSelection, d
     } else if (logical === 47 || logical === 48) {
       const months = Array.from({length:logical===48?12:1},(_,i)=>shiftMonth(end,i-(logical===48?11:0))), opening = shiftMonth(months[0],-1);
       const before = snapshots(data,['Maceió'],opening), after=snapshots(data,['Maceió'],end), flow=months.flatMap(month=>snapshots(data,['Maceió'],month));
-      for (const [metric,field] of [['sales','sales'],['releases','releases']] as const) for (const month of months) if(total(snapshots(data,['Maceió'],month).map(row=>requiredNumber(row[field],metric==='sales'))) !== quantity(data,'Maceió',metric,month)) throw new Error('Fluxos granulares por área divergem dos totais municipais.');
+      for (const [metric,field] of [['sales','sales'],['releases','releases']] as const) for (const month of months) {
+        const observations=snapshots(data,['Maceió'],month),apiField=field==='sales'?'sold_in_period':'releases_in_period',missing=observations.filter(row=>readNumber(row[field],metric==='sales')===null).length;
+        if(missing)throw new Error(`Maceió: ${apiField} ausente ou inválido em ${missing} observação(ões) de ${month}; IVV por área indisponível.`);
+        const actual=total(observations.map(row=>requiredNumber(row[field],metric==='sales'))),expected=quantity(data,'Maceió',metric,month);
+        if(actual!==expected)throw new Error(`Maceió: fluxos granulares por área divergem dos totais municipais em ${month} (${apiField}: ${actual} versus ${expected}, diferença ${actual-expected}).`);
+      }
       const band=(row:Snapshot)=>{const area=requiredNumber(row.area,false,true);if(area<=0)throw new Error('Área útil histórica inválida.');const i=[35,40,50,60,70,80,85].findIndex(limit=>area<=limit);return i<0?7:i;};
       [...before,...after,...flow].forEach(band);
       result.kind='table';result.columns=[`Oferta ${labelMonth(opening)}`,`Oferta ${labelMonth(end)}`,'% oferta','Lançamentos','% lanç.','Vendas líq.','% vendas','IVV (%)'];

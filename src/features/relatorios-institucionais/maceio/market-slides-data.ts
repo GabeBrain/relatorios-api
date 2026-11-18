@@ -155,17 +155,21 @@ function buildRanking(result:MaceioChartData,selection:MaceioSelection,data:Mace
   if(normalizeMarketText(city)!=='maceio')continue;
   const source=data.sources.find(source=>source.city===city&&source.metric==='details');if(!source?.complete)return {...result,issue:source?.issue??'Histórico por empreendimento indisponível para o ranking de bairros.'};
   let actual=0;const ids=new Set<string>();
-  for(const building of source.rows){const id=String(building.building_id??building.id??''),neighborhood=typeof building.neighborhood==='string'?building.neighborhood.trim():'';
+  for(const building of source.rows){const id=String(building.building_id??building.id??''),neighborhood=typeof building.neighborhood==='string'?building.neighborhood.trim():'',release=marketMonth(building.release_date);
    if(!id||ids.has(id))return {...result,issue:'Empreendimento sem ID ou duplicado no ranking.'};ids.add(id);
    if(!Array.isArray(building.typologies_history))return {...result,issue:'Histórico de tipologias ausente no ranking.'};
    const seen=new Set<string>();
    for(const row of building.typologies_history as MarketRow[]){const month=marketMonth(row.period);if(!month)return {...result,issue:'Competência inválida no histórico de bairros.'};if(!period.months.includes(month))continue;
     const typology=String(row.typology_id??''),key=`${month}/${typology}`;if(!typology||seen.has(key))return {...result,issue:'Tipologia sem ID ou repetida no ranking.'};seen.add(key);
-    const value=readNumber(row[metric==='releases'?'releases_in_period':'sold_in_period'],metric==='sales');if(value===null)return {...result,issue:'O histórico não forneceu fluxo explícito por tipologia para o ranking. Não usamos capacidade ou estoque como substituto.'};
+    const field=metric==='releases'?'releases_in_period':'sold_in_period',value=readNumber(row[field],metric==='sales');
+    // A photograph before the explicit launch is outside the ranking's universe.
+    // Conflicting positive/negative flows still block instead of being discarded.
+    if(release&&month<release){if(value!==null&&value!==0)return {...result,issue:`${city}: fluxo ${field} anterior ao lançamento em ${month}; confira a origem.`};continue;}
+    if(value===null)return {...result,issue:`${city}: o histórico não forneceu fluxo explícito por tipologia para o ranking (${field}, ${month}). Não usamos capacidade ou estoque como substituto.`};
     if(value!==0&&!neighborhood)return {...result,issue:'Há fluxo sem bairro identificado.'};actual+=value;map.set(neighborhood,(map.get(neighborhood)??0)+value);
    }
   }
-  if(actual!==expected)return {...result,issue:'A soma dos bairros diverge do total municipal; o ranking permanece em conferência.'};
+  if(actual!==expected)return {...result,issue:`${city}: a soma dos bairros diverge do total municipal (${actual} versus ${expected}, diferença ${actual-expected}); o ranking permanece em conferência.`};
  }
  result.ranking=[...map].map(([label,value])=>({label,value})).filter(row=>row.value!==0).sort((a,b)=>b.value-a.value||a.label.localeCompare(b.label,'pt-BR'));
  result.cities=includeCities?cityValues.sort((a,b)=>b.value-a.value||a.label.localeCompare(b.label,'pt-BR')):[];

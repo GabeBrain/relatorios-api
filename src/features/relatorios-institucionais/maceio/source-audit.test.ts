@@ -34,6 +34,6 @@ describe('evidência agregada de bloqueios das fontes', () => {
     });
     expect(diagnostic.collection.vertical).toEqual({ requested: 1, completed: 1, failed: 0, emptyCompleted: 1 });
     expect(diagnostic.summary['source-pending']).toBeGreaterThan(0);
-    expect(diagnostic.auditVersion).toBe('maceio-source-audit-v1');
+    expect(diagnostic.auditVersion).toBe('maceio-source-audit-v2');
   });
 });

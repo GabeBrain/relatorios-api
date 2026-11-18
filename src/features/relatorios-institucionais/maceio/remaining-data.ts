@@ -47,7 +47,8 @@ function details(data:MaceioMarketSlidesData,selection:MaceioSelection,cities:re
     if(municipal.length!==1||!municipal[0].complete)throw new Error(`${city}: estoque municipal ${segment} indisponível para reconciliação.`);
     const rows=municipal[0].rows.filter(row=>marketMonth(row.period)===end),groups=new Set<string>();
     const expected=sum(rows.map(row=>{const group=norm(row.group);if(norm(row.city)!==norm(city)||row.state!=='AL'||norm(row.building_type)!==norm(segment)||!group||/^(total|subtotal)(\b|$)/.test(group)||groups.has(group))throw new Error('Estoque municipal duplicado ou fora do universo.');groups.add(group);return number(row.stock);}));
-    if(expected!==sum(result.filter(row=>row.city===city).map(row=>row.stock)))throw new Error(`${city}: estoque granular diverge do total municipal ${segment}.`);
+    const actual=sum(result.filter(row=>row.city===city).map(row=>row.stock));
+    if(expected!==actual)throw new Error(`${city}: estoque granular diverge do total municipal ${segment} em ${end} (${actual} versus ${expected}, diferença ${actual-expected}).`);
   }
   // Reconcile the full source above before applying the analyst's report universe.
   const eligible=result.filter(row=>segment!=='Horizontal'||row.type!=='Condomínio de Chácaras');

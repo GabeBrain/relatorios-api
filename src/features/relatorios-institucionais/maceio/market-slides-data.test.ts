@@ -7,6 +7,17 @@ import type {MaceioRequest} from './api';
 import incc from '../fortaleza/incc-di.json';
 const selection:MaceioSelection={uf:'AL',city:'Maceió',territory:'capital-rm',periodicity:'monthly',year:2026,position:5};
 describe('Maceió · contratos dos slides21–40',()=>{
+ for(const periodicity of ['monthly','quarterly'] as const)it(`ranking ignora fotografias pré-lançamento sem transformar fluxo válido ausente em zero / ${periodicity}`,()=>{
+  const current={...selection,periodicity,position:periodicity==='monthly'?5:2},data=marketSlidesFixture(current),source=data.sources.find(item=>item.city==='Maceió'&&item.metric==='details')!;
+  const baseline=buildMaceioMarketSlide(36,current,data);expect(baseline.issue).toBeNull();
+  source.rows.push({building_id:'synthetic/future',release_date:'2027-01-01',typologies_history:[{typology_id:1,period:`${data.end}-01`,sold_in_period:null}]});
+  expect(buildMaceioMarketSlide(36,current,data)).toEqual(baseline);
+  (source.rows.at(-1)!.typologies_history as Record<string,unknown>[])[0].sold_in_period=1;
+  expect(buildMaceioMarketSlide(36,current,data).issue).toMatch(/anterior ao lançamento/);
+  source.rows.pop();
+  (source.rows[0].typologies_history as Record<string,unknown>[]).at(-1)!.sold_in_period=null;
+  expect(buildMaceioMarketSlide(36,current,data).issue).toContain(`sold_in_period, ${data.end}`);
+ });
  it('mantém o recorte MCMV dos slides22/33 separado do total vertical',()=>{
   const data=marketSlidesFixture(selection),all=buildMaceioMarketSlide(30,selection,data),mcmv=buildMaceioMarketSlide(33,selection,data);
   expect(mcmv.issue).toBeNull();expect(mcmv.series.capital.at(-1)).toBeLessThan(all.series.capital.at(-1)!);

@@ -7,6 +7,7 @@ import { buildRemainingSlide } from './remaining-data';
 import { buildCagedSlide } from './caged';
 import { maceioMonetaryPolicy } from './criteria';
 import { auditMaceioSource } from './source-audit';
+import { auditMaceioStock } from './stock-audit';
 
 export type DiagnosticGeneration = Pick<MaceioGenerationState, 'phase' | 'startedAt' | 'finishedAt' | 'blueprint' | 'report' | 'intro'>;
 type Status = 'available' | 'source-pending' | 'method-pending' | 'editorial-review' | 'not-implemented';
@@ -59,7 +60,7 @@ export function buildMaceioDiagnostic(selection: MaceioSelection, state: Diagnos
     period: maceioPeriod(selection), cities: [...maceioCities(selection.periodicity)],
     reference: { file: reference.file, sourceId: reference.sourceId, slideCount: reference.slideCount },
     homologated: false,
-    auditVersion: 'maceio-source-audit-v1',
+    auditVersion: 'maceio-source-audit-v2',
     collection: { vertical: collectionStatus(sources?.sources), horizontal: collectionStatus(sources?.horizontal), commercial: collectionStatus(sources?.commercial) },
     criteria: { prices: 'stock-weighted', monetaryIndex: maceioMonetaryPolicy(selection), monetaryBase: maceioPeriod(selection).end.slice(0, 7),
       horizontalUniverse: { excluded: ['Condomínio de Chácaras'], confirmedBy: 'Lucas, com confirmação do analista em 18/11/2026', reconciliation: 'full-source-before-exclusion', ambiguousClosed: 'pending-analyst-review' },
@@ -67,6 +68,11 @@ export function buildMaceioDiagnostic(selection: MaceioSelection, state: Diagnos
       patternGrouping: { Compacto:'Compactos', Econômico:'MCMV', Standard:'Médio Padrão', Médio:'Médio Padrão', 'Médio-Alto':'Médio Padrão', Alto:'Luxo', Luxo:'Luxo' } },
     summary: Object.fromEntries(statuses.map(status => [status, slides.filter(slide => slide.status === status).length])) as Record<Status, number>,
     slides,
+    stockReconciliation: {
+      vertical: auditMaceioStock(sources?.sources, maceioCities(selection.periodicity), maceioPeriod(selection).end.slice(0, 7)),
+      horizontal: auditMaceioStock(sources?.horizontal, maceioCities(selection.periodicity), maceioPeriod(selection).end.slice(0, 7)),
+      commercial: selection.periodicity === 'quarterly' ? auditMaceioStock(sources?.commercial, ['Maceió'], maceioPeriod(selection).end.slice(0, 7)) : [],
+    },
     sources: {
       vertical: metadata(sources?.sources), horizontal: metadata(sources?.horizontal, true), commercial: metadata(sources?.commercial, true),
       launches: intro?.cities.map(city => ({ city: city.city, unitsComplete: city.unitsComplete, buildingsComplete: city.buildingsComplete, issues: city.issues, failures: city.failures ?? [] })) ?? [],
