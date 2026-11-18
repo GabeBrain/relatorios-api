@@ -1,9 +1,15 @@
 import type { InventoryRow, StudyMethod } from '../scientific/study';
 import { buildingSpec, specKey, type AnalysisSpec, type CaseAnalysis, type Universe } from './domain';
 import { buildExportPlan } from './export';
+import { periodValid } from '../expanded/contract';
 
-export type DeliveryFilters = { city: string; type: string; search: string; duration: number };
-export const DEFAULT_DELIVERY_FILTERS: DeliveryFilters = { city: 'all', type: 'all', search: '', duration: 12 };
+export type DeliveryFilters = { city: string; type: string; search: string; duration: number; start: string };
+export const DEFAULT_DELIVERY_FILTERS: DeliveryFilters = { city: 'all', type: 'all', search: '', duration: 12, start: 'latest' };
+/** A referência aprovada foi treinada até 09/2026; inícios anteriores vazariam o treino (ver expanded/referenceModels.ts). */
+export const REFERENCE_FIRST_START = '2026-09';
+/** Meses de início oferecidos na entrega: somente períodos com dados e permitidos pela referência, do mais recente ao mais antigo. */
+export function deliveryStarts(periods: string[]) { return [...new Set(periods)].filter(p => periodValid(p) && p >= REFERENCE_FIRST_START).sort().reverse(); }
+const allowedStart = (start: string) => start === 'latest' || (periodValid(start) && start >= REFERENCE_FIRST_START);
 export const locationKey = (area: { city: string; uf: string }) => JSON.stringify([area.uf, area.city]);
 export function deliveryScope(universe: Universe, inventory: InventoryRow[], capabilities: Record<string, StudyMethod[]>, filters: DeliveryFilters) {
   const search = filters.search.trim().toLocaleLowerCase('pt-BR');
@@ -14,12 +20,12 @@ export function deliveryScope(universe: Universe, inventory: InventoryRow[], cap
   const ids = matched.filter(row => row.stock !== 0 && capabilities[row.id]?.includes('finotti-reference')).map(row => row.id).sort();
   return { ids, sold, others, matched: matched.length };
 }
-export const deliverySpec = (duration: number): AnalysisSpec => ({ cutoff: 'latest', duration, methods: ['finotti-reference'] });
+export const deliverySpec = (duration: number, start = 'latest'): AnalysisSpec => ({ cutoff: start, duration, methods: ['finotti-reference'] });
 export function exportRequestKey(universe: Universe, ids: string[], spec: AnalysisSpec) {
   return JSON.stringify([universe.hash, universe.fetchedAt, ids.map(id => [id, specKey(universe.hash, id, buildingSpec(universe, id, spec))])]);
 }
 export function buildDeliveryPlan(universe: Universe, ids: string[], analyses: CaseAnalysis[], spec: AnalysisSpec) {
-  if (spec.cutoff !== 'latest' || spec.methods.length !== 1 || spec.methods[0] !== 'finotti-reference') throw new Error('O arquivo principal usa somente a referência aprovada e o último dado de cada empreendimento.');
+  if (!allowedStart(spec.cutoff) || spec.methods.length !== 1 || spec.methods[0] !== 'finotti-reference') throw new Error(`O arquivo principal usa somente a referência aprovada, a partir do último dado de cada empreendimento ou de um mês desde ${REFERENCE_FIRST_START.slice(5)}/${REFERENCE_FIRST_START.slice(0, 4)}.`);
   for (const id of ids) {
     const analysis = analyses.find(a => a.id === id);
     const item = analysis?.stock.cases[0];

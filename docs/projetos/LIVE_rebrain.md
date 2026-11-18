@@ -1,5 +1,14 @@
 # Rebrain (Plataforma) — Documento Vivo
 
+## 18/11/2026 — Estimativas de vendas: filtro de mês de início da previsão — Diego / Claude
+
+- **Pedido:** Diego pediu um filtro para o usuário escolher a partir de qual período a estimativa é feita. Confirmado: controla o mês de início da previsão (não lançamento nem janela de histórico).
+- **Entrega:** aba Previsões ganha "Começar a previsão em": "Último dado de cada empreendimento" (padrão, comportamento anterior) ou um mês com dados no universo carregado, somente a partir de 09/2026 (`REFERENCE_FIRST_START`), porque a referência Finotti foi treinada até essa data e já bloqueia inícios anteriores. Mês fixo vale para todos: sem registro nesse mês, o empreendimento vai para "Sem referência" com motivo, sem trocar de mês. Meses já informados saem no arquivo como `comparacao_historica` e sem linha candidata, regra de exportação já existente. Trocar o início reclassifica o universo localmente, sem nova consulta à API; a Análise detalhada abre no mesmo início. `buildDeliveryPlan` aceita `latest` ou mês ≥ 09/2026.
+- **Decisão alterada:** o [plano do fluxo essencial](../features/estimativas-vendas/PLANO_FLUXO_ESSENCIAL_V1_2026-10-28.md) fixava a entrega no último período de cada empreendimento; agora isso é o padrão, não a única opção. Nenhum parâmetro temporal antes da carga continua valendo. Gabriel, responsável pela feature, deve ser informado.
+- **Validação:** 40 testes de `estimativas-vendas/experience` (novo caso de início fixo, comparação histórica, ausência no mês e bloqueio < 09/2026), typecheck e ESLint aprovados. Sem token Geobrain nesta sessão: carregamento real e troca de mês na tela não foram verificados no navegador.
+- **Etapas/Pendências:** conferir após publicação numa cidade real, inclusive cadência trimestral. Inícios anteriores a 09/2026 dependem de modelo independente do treino Finotti. Sem Monday nesta entrega.
+- **Monday:** [Cálculo das estimativas da cidade pelo IVV](https://brain381753.monday.com/boards/18398428946/pulses/13096757074) — `13096757074` (referência, sem escrita).
+
 ## 17/11/2026 — Maceió: classificações, varreduras vazias e IVV histórico — Codex
 
 - **Pedido/evidência:** diagnóstico mensal(3) com12disponíveis/48fontes/22editoriais;63consultas imobiliárias completas. Lucas pediu corrigir os42bloqueios imobiliários, mantendo6CAGED fora. Base `1c63413f`, main/origin0/0após fetch.
