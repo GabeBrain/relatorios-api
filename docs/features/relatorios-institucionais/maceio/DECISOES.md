@@ -2,6 +2,13 @@
 
 Registro de fatos comprovados, hipóteses e decisões. Atualizado a cada entrega.
 
+## 18/11/2026 — Universo horizontal e INCC confirmados pelo analista
+
+- **D16 — Chácaras excluídas:** Lucas confirmou com o analista que Condomínio de Chácara/Chácaras não participa das análises nem aparece no relatório. Aplicado ao mensal/trimestral, capital/RM, oferta/capacidade/contagem, distribuição anual e médias. A reconciliação entre fonte granular e municipal continua sobre o universo bruto antes da exclusão; divergências não são apagadas. A auditoria agregada pode conservar os rótulos recebidos como evidência da fonte.
+- **D17 — Série monetária:** INCC-DI confirmado pelo analista, comunicado por Lucas em 18/11. Mantida a configuração existente para as duas edições e o mês-base de fechamento; isso não homologa automaticamente outros métodos ou campos nominais.
+- **D18 — Fechado exige conferência:** o analista quer os empreendimentos classificados somente como `Fechado`. Não autoriza converter para Loteamento Fechado. A lista CSV separada, solicitada expressamente por Lucas, contém referência, completude, município, ID, nome, campos com o rótulo e lançamento. Usa a geração em memória, sem nova API/persistência; exclui chácaras e produtos explicitamente identificados. Inclui registros esgotados, pois o pedido é cadastral, sem presumir estoque ativo; lançamentos posteriores ao fechamento ficam fora. Ausência de nome/data é sinalizada; coleta incompleta identifica lista parcial. O diagnóstico JSON permanece agregado e não recebe nomes/IDs individuais.
+- **Evidência:** implementação `38700781`; [validação desta sessão](VALIDACAO_DADOS_REAIS_2026-11-17.md). Lucas autorizou o push para gerar novo relatório e encaminhar o JSON. Geração real/publicação Lovable ainda não observadas pelo agente.
+
 ## 17/11/2026 — CAGED MTE autorizado
 
 - **D12 — Fonte MTE:** Lucas autorizou a integração pelo MTE, em lugar de depender da cobertura recente BD Pro. D7 permanece como histórico do adiamento anterior. Importador estatístico/ajustes 2017–2019 e MOV/FOR/EXC desde 2020, com agregados e revisões; [contratos e evidências](CAGED_INTEGRACAO_2026-11-17.md).

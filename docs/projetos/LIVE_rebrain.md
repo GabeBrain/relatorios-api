@@ -700,6 +700,14 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 - **Validação:** testes direcionados cobrem estoque zero, positivo e negativo para ambas as tipologias; sem consulta autenticada à API.
 - **Etapas/Pendências:** ajuste local; conferência com dados reais e publicação pendentes.
 - **Monday:** —
+### 2026-11-18 — Maceió: chácaras excluídas e lista Fechado — Lucas / Codex
+
+- **Ambiente/funcionalidade:** `/rebrain/relatorios-institucionais/maceio` — mensal/trimestral, horizontal e conferência cadastral.
+- **O quê/decisão:** Lucas confirmou com o analista exclusão de Condomínio de Chácara/Chácaras e uso de INCC-DI. Chácaras deixam os valores e rótulos de todos os quadros horizontais, incluindo preços/anos; reconciliação do estoque bruto preservada. INCC-DI já estava configurado para ambas as edições. Lista CSV dos empreendimentos só como `Fechado`, com nome/ID/município/campos, separada do diagnóstico JSON agregado; classificação não alterada. Usa a geração carregada, com indicação de parcial/vazio e descarte ao trocar geração.
+- **Commits:** `38700781` (implementação); fechamento documental no commit desta entrada. Base `bd994c2c`, main/origin0/0 após fetch.
+- **Validação:** 165 testes Maceió +2 casos adicionais de interface, 106 regressões Secovi/FIERGS, lint/tipos/build aprovados. 12 cenários Edge com fonte sintética e resposta lenta, desktop/claro e mobile/escuro; JSON/CSV baixados/reabertos. [Decisões, evidências e limites](../features/relatorios-institucionais/maceio/VALIDACAO_DADOS_REAIS_2026-11-17.md).
+- **Impacto em Etapas/Pendências:** regra de exclusão e lista implementadas; INCC-DI confirmado. Lucas autorizou push e fará nova geração autenticada para enviar JSON/CSV. Fonte real/deploy/homologação ainda não observados pelo agente; demais divergências/CAGED/exportação continuam separados. Sem escrita Monday.
+- **Monday:** [Panorama Maceió / SINDUSCON](https://brain381753.monday.com/boards/18398638577/pulses/13149406169) — `13149406169`.
 
 ### 2026-11-18 — Valor da parcela por tipologia no AELO — Edgar / Codex
 - **Ambiente/funcionalidade:** Relatório AELO — tabela e exportação Excel.
@@ -1946,6 +1954,8 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 
 ## 2. Etapas
 
+- **18/11 — Maceió, confirmação do analista:** exclusão de chácaras em todos os quadros horizontais e CSV identificado de `Fechado` implementados (`38700781`); INCC-DI confirmado nas duas edições. Push autorizado por Lucas, nova geração real e homologação pendentes.
+
 - **17/11 — Maceió, runtime após publicação:** fontes coletadas no JSON real;55indicadores ainda bloqueados por validação, não por HTTP. Diagnóstico agregado de categorias/cobertura preparado localmente; conclusão das fontes não comprovada.
 
 - **17/11 — Maceió trimestral, fontes:** contratos corrigidos compartilhados e INCC-DI explícito aplicados;35testes e6cenários headless aprovados, apenas CAGED pendente no cenário imobiliário completo. Validação real depois da publicação ainda necessária.
@@ -2113,6 +2123,8 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 ---
 
 ## 3. Pendências
+
+- **18/11 — Maceió, próxima evidência:** após atualização do ambiente, Lucas gerará relatório e enviará JSON e CSV `Fechado` pareados. Conferir exclusão de chácaras/totais e os empreendimentos ambíguos com o analista; não converter `Fechado` em loteamento automaticamente. INCC-DI está confirmado. Registros anteriores de chácaras como categoria do estudo são históricos e substituídos por esta decisão; auditoria bruta continua preservada.
 
 - **17/11 — Maceió, dados reais:** obter rótulos reais de tipologia/padrão/produto e cobertura mensal por diagnóstico agregado; confirmar universo antes de alterar guardas. Corrigir classificações e lacunas com evidência, preservando ausência e divergências. Série vazia em cidade não equivale automaticamente a zero. CAGED excluído.
 
