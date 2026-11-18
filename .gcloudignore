@@ -1,0 +1,13 @@
+# Fonte enviada ao Cloud Build (gcloud builds submit). O gcloud só lê o .gitignore da raiz:
+# os .gitignore aninhados precisam ser repetidos aqui.
+.gcloudignore
+.git
+.gitignore
+#!include:.gitignore
+
+# Slide Maker: os ativos de marca vêm SOMENTE do bucket privado (DEPLOY_GCP.md B1/C1).
+# Uma .marca/ local de testes misturaria arquivos antigos e mascararia ativo ausente no bucket.
+gcp/slide-maker-agent/.marca/
+gcp/slide-maker-agent/dist/
+gcp/slide-maker-agent/node_modules/
+**/__pycache__/

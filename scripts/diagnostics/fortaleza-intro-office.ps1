@@ -1,3 +1,5 @@
+﻿. (Join-Path $PSScriptRoot 'fortaleza-static-text.ps1')
+$staticText = @{}
 $ErrorActionPreference = 'Stop'
 $fortIntroRoot = (Resolve-Path '.local-inputs/relatorios-lucas/fortaleza').Path
 $fortIntroAssets = Join-Path (Get-Location) 'src/features/relatorios-institucionais/fortaleza/assets/intro'
@@ -44,10 +46,9 @@ try {
         foreach ($slot in $page.slots) {
           $dynamicShape = @($slide.Shapes | Where-Object { $_.Id -eq $slot.id })[0]
           if ($slot.slot -eq 'chart') { $dynamicShape.Delete() }
-          elseif ($slot.slot -eq 'table') {
-            for($r=1;$r -le $dynamicShape.Table.Rows.Count;$r++) { for($c=1;$c -le $dynamicShape.Table.Columns.Count;$c++) { $dynamicShape.Table.Cell($r,$c).Shape.TextFrame2.TextRange.Font.Fill.Transparency = 1 } }
-          } else { $dynamicShape.TextFrame2.TextRange.Font.Fill.Transparency = 1 }
+          elseif ($slot.slot -eq 'table') { $dynamicShape.Delete() } else { $dynamicShape.TextFrame2.TextRange.Font.Fill.Transparency = 1 }
         }
+        $staticText["$model-$($page.number)"] = Get-FortalezaStaticText $slide
         $slide.Export((Join-Path $fortIntroAssets "$model-$($page.number).png"), 'PNG', 1280, 720)
       }
     } finally { $deck.Close() }
@@ -56,3 +57,5 @@ try {
 } finally { $fortOffice.Quit() }
 $fortLayouts | ConvertTo-Json -Depth 15 | Set-Content -LiteralPath (Join-Path $fortIntroRoot 'intro-layout-original.json') -Encoding UTF8
 Write-Output '20 original slides rendered; exact native artwork and dynamic element positions extracted.'
+
+$staticText | ConvertTo-Json -Depth 10 | Set-Content -LiteralPath (Join-Path $fortIntroAssets 'static-text.json') -Encoding UTF8

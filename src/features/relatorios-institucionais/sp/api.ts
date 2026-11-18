@@ -9,6 +9,7 @@ import { priorYearQuarter, type SpHistoryBatchInput } from './history-batch';
 import { spHistoryWindows } from './periods';
 import { SpReadError } from './read-errors';
 import type { SpWorkProgress } from './work-progress';
+import { buildSpMunicipalPrices, spPricePeriods, type SpPriceSource, type SpPriceMetric, type SpPriceGrouping } from './municipal-prices';
 
 const BASE = 'https://geobrain.com.br/public-api';
 interface Envelope { data?: SpTemporalRow[]; meta?: { current_page?: number; last_page?: number; total?: number }; links?: { next?: string | null } }
@@ -55,7 +56,7 @@ async function readSpSample(read: ReturnType<typeof createSpRead>, options: SpRe
   return { rootPeriod: building.period, total: sample.meta!.total! };
 }
 
-async function readSpSeries(read: ReturnType<typeof createSpRead>, metric: 'sales' | 'releases' | 'stock', query: Record<string, unknown>, maxPages = 2, onPage?: (page: number) => void, maxRows?:number): Promise<SpTemporalRow[]> {
+async function readSpSeries(read: ReturnType<typeof createSpRead>, metric: 'sales' | 'releases' | 'stock' | SpPriceMetric, query: Record<string, unknown>, maxPages = 2, onPage?: (page: number) => void, maxRows?:number): Promise<SpTemporalRow[]> {
   const rows: SpTemporalRow[] = [];
   let expectedTotal: number | null = null;
   let expectedLast: number | null = null;
@@ -78,6 +79,43 @@ async function readSpSeries(read: ReturnType<typeof createSpRead>, metric: 'sale
     // Preserve original filters; never follow a provider URL that can drop scope.
   }
   throw new SpReadError('A consulta curta não foi concluída.');
+}
+
+/** Native prices are independent observations, not aggregates of pattern means. */
+export async function fetchSpMunicipalPrices(report: SpPreview, options: SpReadOptions = {}) {
+  if (!isSpMunicipalPreview(report) || !report.throughMonth) throw new SpReadError('Confira o período municipal antes dos preços.');
+  const read = createSpRead(options, 40_000), sources: SpPriceSource[] = [];
+  const start = spPricePeriods(report)[0].month, end = report.throughMonth;
+  let completed = 0;
+  const tasks = (['medium-prices-meter', 'medium-prices'] as const).flatMap(metric => (['overall', 'Padrão', 'Tipologia'] as const).map(grouping => ({ metric, grouping })));
+  const windows = (metric: SpPriceMetric) => {
+    if (metric === 'medium-prices') return [{ start: end, end }];
+    const result: { start: string; end: string }[] = [];
+    for (let year = Number(start.slice(0, 4)); year <= Number(end.slice(0, 4)); year++) result.push({ start: year === Number(start.slice(0, 4)) ? start : `${year}-01`, end: year === Number(end.slice(0, 4)) ? end : `${year}-12` });
+    return result;
+  };
+  const total = tasks.reduce((sum, task) => sum + windows(task.metric).length, 0);
+  for (const task of tasks) {
+    const rows: SpTemporalRow[] = [];
+    try {
+      for (const window of windows(task.metric)) {
+        options.onProgress?.(`Conferindo preços ${task.grouping === 'overall' ? 'gerais' : `por ${task.grouping.toLowerCase()}`}: ${window.start} a ${window.end}…`);
+        options.onWorkProgress?.({ completed, total, unit: 'janelas' });
+        const count = Number(window.end.slice(5)) - Number(window.start.slice(5)) + 1, maxRows = count * 16;
+        const batch = await readSpSeries(read, task.metric, { city: 'São Paulo', uf: 'SP', 'type[]': ['Vertical'],
+          ...(task.grouping === 'overall' ? {} : { group_by: task.grouping as SpPriceGrouping }),
+          start_period: `${window.start}-01`, end_period: monthEnd(window.end) }, Math.ceil(maxRows / 100), undefined, maxRows);
+        if (batch.some(row => typeof row.period !== 'string' || row.period.slice(0, 7) < window.start || row.period.slice(0, 7) > window.end)) throw new SpReadError('Preços fora da janela solicitada.');
+        rows.push(...batch); completed++;
+        options.onWorkProgress?.({ completed, total, unit: 'janelas' });
+      }
+      sources.push({ ...task, rows });
+    } catch (error) {
+      if (options.signal?.aborted || error instanceof DOMException && error.name === 'AbortError') throw error;
+      sources.push({ ...task, rows: [], issue: error instanceof SpReadError ? error.message : 'A fonte municipal de preços não foi concluída.' });
+    }
+  }
+  return buildSpMunicipalPrices(sources, report);
 }
 
 /** One bounded municipal releases series; no building histories or other metrics. */

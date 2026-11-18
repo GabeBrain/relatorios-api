@@ -176,7 +176,7 @@ export default function RelatorioApiExcel() {
     <header className="border-b border-border bg-card px-5 py-4 sm:px-6">
       <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Relatórios Automatizados</p>
       <h1 className="text-2xl font-semibold tracking-tight">Relatório API Excel</h1>
-      <p className="mt-1 text-sm text-muted-foreground">Carregue os dados GeoBrain e configure a visão e as colunas da planilha.</p>
+      <p className="mt-1 text-sm text-muted-foreground">Carregue os dados Geobrain e configure a visão e as colunas da planilha.</p>
     </header>
     <div className="min-w-0 space-y-5 p-4 sm:p-6">
       <section className="space-y-3 rounded-xl border border-border bg-card p-4" aria-label="Coleta da API">

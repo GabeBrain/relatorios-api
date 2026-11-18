@@ -2,7 +2,7 @@ import { httpRequest, type HttpResponse, type RequestOptions } from '@/lib/http-
 import { requestWithRetry } from '@/features/panorama-secovi-fiergs/lib/request-with-retry';
 import { collectByCity, type CollectionResult } from '@/features/panorama-secovi-fiergs/domain/collection';
 import { fortalezaPeriod, fortalezaScope, type FortalezaSelection } from './model';
-import { buildFortalezaMarket, marketMonth, normalizeMarketText, type CityMarketInput, type MarketMetric, type MarketRow } from './market';
+import { buildCityMarket, buildFortalezaMarket, marketMonth, normalizeMarketText, type CityMarketInput, type MarketMetric, type MarketRow } from './market';
 
 const BASE = 'https://geobrain.com.br/public-api';
 export interface FortalezaEnvelope {
@@ -32,7 +32,7 @@ export async function collectFortalezaMarket(selection: FortalezaSelection, auth
   checkAbort(options.signal);
   const scopeKey = JSON.stringify({ cities: scope.cities, start: period.start, end: period.end, segment: 'Vertical' });
   options.onStage?.('sources');
-  const reusable = previous?.scopeKey === scopeKey ? previous.collection.outcomes.filter(city => city.status === 'completed') : [];
+  const reusable = previous?.scopeKey === scopeKey ? previous.collection.outcomes.filter(city => city.status === 'completed' && city.value && buildCityMarket(city.value,selection).status === 'complete') : [];
   const collection = await collectByCity(scope.cities, async city => {
     const cached = reusable.find(value => value.city === city)?.value;
     if (cached) { options.onProgress?.(`${city} · fontes já concluídas nesta tentativa preservadas`); return cached; }

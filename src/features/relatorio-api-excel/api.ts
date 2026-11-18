@@ -1,4 +1,4 @@
-// Contrato de consulta copiado do Dashboard GeoBrain; conserva os registros brutos.
+// Contrato de consulta copiado do Dashboard Geobrain; conserva os registros brutos.
 // Preserva campos originais e nulos, sem a normalização dos KPIs do Dashboard.
 export type RawBuilding = Record<string, unknown>;
 const BASE_URL = 'https://app.geobrain.com.br/public-api/v2';

@@ -1,5 +1,50 @@
 # Fortaleza / SINDUSCON-CE — plano inicial
 
+## 12/11/2026 — Fortaleza mensal: diagnóstico agosto versus outubro e bloqueios confirmados
+
+**Autor/origem:** Codex, a pedido de Lucas. Agosto recebido após a hipótese de outubro sem fechamento. Agosto tem15disponíveis/33pendentes/12editoriais; outubro14/34/12. Não é somente fechamento: cadastro falha na primeira resposta pelo limite de5páginas; séries municipais rejeitadas por padrões/meses/categorias persistem nos dois arquivos. Em agosto37está disponível e52–55bloqueiam por bairro ausente no empreendimento23980; em outubro37/52–55acusam fotografia2026-10ausente do85529. Evidências do usuário, não chamadas autenticadas feitas pelo agente.
+
+**Correções locais:** cadastro agora percorre até40páginas/4.000IDs por cidade/segmento, conservando totais estáveis, deduplicação, escopo e cancelamento. Regressão reproduz577verticais em6páginas sem truncamento; os577constam na coleta detalhada real. Capa1, sumário8 e divisória9deixam de receber erro de cálculo no JSON e seguem revisão editorial. Tabelas por bairro conservam registros sem bairro em “Bairro não informado”, com aviso e totais integrais; não inventam bairro nem alteram preço, quantidade ou fotografia. Produtos horizontais desconhecidos continuam bloqueados.
+
+**Séries ainda em investigação:** no diagnóstico antigo, a validação descartava as linhas municipais antes de exportar, impedindo identificar quais grupos/meses foram omitidos ou qual classificação comercial chegou. Nova cobertura é capturada após paginação estável, antes desse descarte: grupos/tipos observados, meses, padrões ausentes, células faltantes e quantidades/VGV agregados. Runtime ainda não publica fonte inválida; dados ausentes não viram zero. Não há token, cabeçalhos ou histórico individual nessa cobertura; não acrescenta chamadas GeoBrain. Necessária nova geração/JSON após publicação para corrigir a semântica específica da resposta real.
+
+**Ambiente/Etapas:** sessão começou em main limpa, origin único; fetch mostrou11commits atrás. FF até`4f2b0bf3` incorporou Slide Maker, guia GeoBrain e filtro de divergências; nenhuma mudança Fortaleza. Alterações desta rodada locais, distintas dos commits trimestrais publicados`4ec89c0a`/`431b64f4`. Prévia mensal60e trimestral89preservadas; não declarar todos os slides liberados nem homologados. Carregamento Brain, seleção autorizada e renderizadores de tabela existentes reutilizados.
+
+**Validação:** suíte Fortaleza251testes/23arquivos, tipos e lint aprovados; testes adicionais confirmam estados editoriais e cobertura preservada com fonte rejeitada. Build aprovado;12cenários Edge com bairro válido/ausente e fotografia ausente em1440/390claro/escuro aprovados, sem erros ou overflow. Captura de bairro não informado inspecionada.20testes focados repetidos após acrescentar asserções de estados e cobertura. Geração real do novo código e próximos números/estados ainda não observados.
+
+**Retomada:** completar verificações, commit isolado e perguntar pelo push. Após envio autorizado, gerar agosto novamente e ler `sources.municipal[].coverage`. Resolver categorias esparsas/comercial com evidência; não relaxar guardas globais para “zerar” o status. Histórico23980pode ter outros problemas além do bairro: a nova geração determina os bloqueios seguintes. Nenhuma escrita Monday, mudança SP, Slide Maker ou outros motores.
+
+**Monday:** [Estudo Fortaleza](https://brain381753.monday.com/boards/18398638577/pulses/13149406420) — `13149406420`, referência apenas.
+
+
+## 12/11/2026 — Fortaleza trimestral: continuação 21–89 local, conferência final pendente
+
+**Autor/origem:** Codex, retomada solicitada por Lucas. Base publicada `bca69e66`; bloco 11–20 no commit local `4ec89c0a` (12/11, 13:03 -03:00), ainda não enviado. Continuação 21–89 permanece em arquivos locais, sem commit final. Main estava 0 atrás/1 à frente de origin; nenhum outro remoto configurado. Não houve push, geração autenticada GeoBrain ou escrita no Monday.
+
+**Implementação:** prévia e diagnóstico cobrem as 89 posições originais. Janela de 27 meses para nove trimestres de fluxos e fotografias; INCC-DI aplicado mês a mês antes de agregar VGV; estoques são fechamentos trimestrais. 26/28 preservam 13 janelas mensais móveis de 12 meses. 16/19/31/32 e bairros/municípios preservam o mês de fechamento do original. 54/72 preservam 25 IVVs MENSAIS (confirmados nos caches e renders originais); média aritmética das taxas mensais. Preços históricos 42/43 têm nove fechamentos trimestrais; 45–48 comparam cidades no fechamento. Tabelas 59–84 usam qty/estoque/preço/área históricos de empreendimentos ativos, sem substituir ausências pelo cadastro atual. Faixas de idade ≤6/7–42/>42 meses vêm da data de lançamento. Equipe 86/87 editável e quadro88 substituível. Exportador estendido a89 páginas, mantendo mensal60 e auditoria pareada.
+
+**Diferenças explícitas:** localização49–53/71 é representação esquemática de coordenadas da API;50–53separam quadrantes do mesmo conjunto, não reproduzem os mapas/cartografia/zoom antigos. Padrões são os nomes da API, sem inventar equivalência entre Médio-Alto/Super Luxo nem faixas editoriais de preço. Universo ativo/capacidade/ponderação/idade/classificação ainda candidato; amostra histórica continua sem fonte própria. Sem homologação do material ou dos indicadores. Totais municipais de16/19/31/32somam os três segmentos, corrigindo o original que repetia só horizontal/comercial.
+
+**Evidência e limites da sessão:** suíte Fortaleza, build e testes de estrutura dos pacotes PPTX/PDF89 passaram antes dos ajustes finais. Edge offline executou324asserções de estrutura/estado (79 lâminas ×1440/390×claro/escuro, mais fonte vazia/incompleta). Inspeção visual dos originais versus saída detectou captura antes do carregamento da imagem: a espera de decode/paint foi reforçada e precisa repetir. A mesma inspeção identificou IVV54/72mensal (corrigido após a suíte) e motivou restaurar gráfico+quadro68/83 e comparação de dois anos42. Tipos e lint finais passaram; esses últimos ajustes ainda precisam de regressão/build/captura completos. Os testes de exportação usam capturas simuladas: não substituem um download real de89lâminas capturadas no navegador.
+
+**Bloqueio externo:** a revisão automática de aprovação recusou iniciar o ensaio adicional de download no navegador porque o workspace está sem créditos (falha da revisão, não juízo de ação insegura). Comando não executado. Usuário autorizou continuar; isso não repõe os créditos. Consultas/edições permitidas sem escalonamento continuaram; não contornar o mecanismo com ferramenta/rota alternativa. Novos ensaios elevados e commit final aguardam revisão disponível. Não declarar conclusão validada/publicada.
+
+**Próxima ação concreta:** após reposição de créditos pelo responsável do workspace, executar suíte Fortaleza completa, build e `fortaleza-quarterly-visual.mjs` com a espera de imagens; inspecionar novamente54/65/68/72/75/83/84 e os mapas. Fazer download real PPTX/PDF89 e testar cancelamento/erro/retry Brain. Conferir manifesto/hash das artes e `npm.cmd run check:live-docs -- origin/main HEAD`; registrar commit isolado com caminhos explícitos. Só então pedir autorização de push do lote Fortaleza. SP não foi alterado.
+
+**Monday:** [Estudo Fortaleza](https://brain381753.monday.com/boards/18398638577/pulses/13149406420) — `13149406420`, referência apenas.
+
+
+## 12/11/2026 — Fortaleza trimestral: slides 11–20
+
+Retomada autorizada por Lucas, base `bca69e66`, main/origin 0–0 após fetch. Office abriu original trimestral em leitura (hash do catálogo conferido); arte 11–20 sem tabelas/gráficos/percentuais anteriores. Nove trimestres completos a partir de 27 meses; lançamentos em unidades, cadastro distinto e VGV corrigido mês a mês pelo INCC-DI. Tabelas 16/19 preservam mês de fechamento do original e somam vertical/horizontal/comercial; original exibia total repetindo somente horizontal. Prévia e JSON agora reconhecem 20/89 posições, sem exportação trimestral prematura. Carregamento Brain, escopo autorizado, retry e cancelamento reutilizados. Mensal 60/60 e SP preservados.
+
+Validação: 235 testes Fortaleza/21 arquivos, build/tipos e lint dirigidos aprovados; 48 cenários Edge com rede externa bloqueada (1440/390, claro/escuro, dez slides e fontes incompletas/vazias); comparação visual com os dez originais revisada, títulos das tabelas restaurados após inspeção. Dados sintéticos; sem geração autenticada ou homologação. Próximo: 21–40, depois preços, mapas, tabelas e fechamento. Sem publicação ou escrita Monday.
+
+
+## 11/11/2026 — revisão mensal e exportação
+
+[Entrega, evidências e retomada](MENSAL_EXPORTACAO_2026-11-11.md). A revisão encontrou a exportação ainda ausente: PDF e dois modos PPTX de conferência agora implementados para as60posições, com diagnóstico da mesma geração, captura da equipe editada, cancelamento e guardas de acesso/competência/excesso de lançamentos. Corrigido subtítulo sobreposto em11/13/15. Fontes reais/metodologia/amostra/equipe continuam pendentes; nenhum valor novo foi inventado ou homologado. Trimestral permanece10/89; próxima fatia11–20, com janela e referências próprias. Nova fatia local; sem push, coleta real ou Monday. Registros anteriores abaixo descrevem o histórico.
+
 ## 10/11/2026 — mensal1–60 e diagnóstico JSON
 
 [Entrega e contrato](MENSAL_SLIDES_56_60_DIAGNOSTICO_2026-11-10.md): cinco posições finais implementadas; mensal original termina no60. Equipes57/58editáveis e quadro59substituível como imagem, sem presumir equipe atual. Diagnóstico JSON preparado automaticamente ao terminar a geração, download disponível para enviar ao Codex; sem credenciais/fotos/históricos brutos.214testes Fortaleza +31regressões/contratos, build/lint e Edge sintético conferidos no fechamento. Basefbe9742porFF limpo; nova fatia local. Restam revisão real/fontes/homologação/exportação, não outros slides mensais. Trimestral89segue com dez iniciais. SP estética/diagnóstico é a próxima frente indicada pelo usuário, sem alteração nesta fatia. Estados abaixo são históricos.

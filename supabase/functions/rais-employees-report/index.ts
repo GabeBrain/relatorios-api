@@ -1,4 +1,4 @@
-// Empregados V1: GeoBrain Bearer -> snapshot RAIS agregado -> Supabase.
+// Empregados V1: Geobrain Bearer -> snapshot RAIS agregado -> Supabase.
 // Empresas não tem endpoint, tabela ou caminho de execução nesta função.
 import { createClient } from 'jsr:@supabase/supabase-js@2';
 
@@ -127,9 +127,9 @@ async function authenticateGeoBrain(req: Request): Promise<{ id: string; email: 
   let response: Response;
   try {
     response = await fetch(validationUrl, { headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' } });
-  } catch { throw new HttpError('Não foi possível validar a sessão GeoBrain.', 502, 'AUTH_UPSTREAM'); }
-  if (response.status === 401 || response.status === 403) throw new HttpError('Token GeoBrain inválido ou expirado.', response.status, 'UNAUTHORIZED');
-  if (!response.ok) throw new HttpError('O serviço GeoBrain não confirmou a sessão.', 502, 'AUTH_UPSTREAM');
+  } catch { throw new HttpError('Não foi possível validar a sessão Geobrain.', 502, 'AUTH_UPSTREAM'); }
+  if (response.status === 401 || response.status === 403) throw new HttpError('Token Geobrain inválido ou expirado.', response.status, 'UNAUTHORIZED');
+  if (!response.ok) throw new HttpError('O serviço Geobrain não confirmou a sessão.', 502, 'AUTH_UPSTREAM');
   const claims = tokenClaims(token);
   const tokenHash = await sha256(token);
   const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? 'unknown';

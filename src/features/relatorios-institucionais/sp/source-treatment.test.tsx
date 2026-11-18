@@ -35,15 +35,33 @@ describe('SP — tratamento explícito dos dados fornecidos, sem alterar a fonte
     const svg=renderToStaticMarkup(<SpDetailSlide report={preview} slide={53}/>);
     expect(svg).toContain('Amostra observada com cobertura parcial');expect(svg).toContain('fill="#ffcf00"');
   });
-  it('não transforma estoque ausente, conflito ou divergência municipal completa em parcial numérica',()=>{
-    for(const kind of ['null','conflict','mismatch']){
+  it('não transforma estoque ausente ou conflito em parcial numérica',()=>{
+    for(const kind of ['null','conflict']){
       const {report,buildings}=setup(),rows=histories(buildings[0]),row=rows.find(row=>row.period==='2023-09-01')!;
       if(kind==='null')row.typology_stock=null;
       if(kind==='conflict')rows.push({...row,price:1});
-      if(kind==='mismatch')row.typology_stock=Number(row.typology_stock)+1;
       const point=buildSpGranularDetails(buildings,report).prices.series[53].find(row=>row.month==='2023-09')!;
       expect(point.value,kind).toBeNull();expect(point.partial).toBeUndefined();
     }
+  });
+  it.each([-24,24])('preserva a média histórica observada com diferença de estoque %s, sem comparar parciais',delta=>{
+    const {report,buildings}=setup(),rows=histories(buildings[0]);
+    const row=rows.find(row=>row.period==='2023-09-01')!;
+    row.typology_stock=Number(row.typology_stock)+delta;
+    const data=buildSpGranularDetails(buildings,report);
+    for(const slide of [53,55,57]){
+      const points=data.prices.series[slide],index=points.findIndex(point=>point.month==='2023-09');
+      expect(points[index].value).not.toBeNull();expect(points[index].partial).toBe(true);
+      expect(points[index].issue).toContain('Estoque em 2023-09');
+      expect(points[index].variation).toBeNull();expect(points[index+1].variation).toBeNull();
+    }
+    expect(data.prices.series[53].filter(point=>point.value!==null)).toHaveLength(13);
+  });
+  it('a mesma divergência no fechamento continua bloqueando a média geral e os quadros',()=>{
+    const {report,buildings}=setup(),row=histories(buildings[0]).find(row=>row.period==='2026-08-01')!;
+    row.typology_stock=Number(row.typology_stock)+24;
+    const data=buildSpGranularDetails(buildings,report);
+    expect(data.prices.overall.meter).toBeNull();expect(data.market!.status).toBe('blocked');
   });
   it('deriva vendido somente de capacidade e oferta válidas, sem tocar vendas mensais ou sold original',()=>{
     const {report,buildings}=setup(),row=histories(buildings[0]).find(row=>row.period==='2026-08-01')!,flow=row.sold_in_period;

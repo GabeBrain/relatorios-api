@@ -1,0 +1,121 @@
+import { describe, expect, it, vi } from 'vitest';
+import { collectMaceioMarket } from './api';
+import { MACEIO_CITIES_MONTHLY } from './model';
+import { fixtureRequest, marketFixture, monthlySelection, response } from './__tests__/market-fixture';
+import type { MarketMetric } from './market';
+
+const token = 'synthetic-private-token';
+describe('Maceió — leitura curta autenticada', () => {
+  it('consulta só o recorte e a janela escolhidos, com abertura de estoque, sem histórico granular', async () => {
+    const request = vi.fn(fixtureRequest());
+    const { report } = await collectMaceioMarket(monthlySelection, [...MACEIO_CITIES_MONTHLY], { token, request });
+    expect(report.metrics).toEqual({ launches: 10, sales: 14, stock: 146 });
+    expect(request).toHaveBeenCalledTimes(4);
+    const options = request.mock.calls.map(call => call[0]);
+    expect(options.every(value => value.query.city === 'Maceió' && value.query.uf === 'AL' && value.headers.Authorization === `Bearer ${token}`)).toBe(true);
+    expect(options.find(value => value.url.endsWith('/stock')).query.start_period).toBe('2026-04-01');
+    expect(options.find(value => value.url.endsWith('/sales')).query.start_period).toBe('2026-05-01');
+    expect(options.filter(value => !value.url.endsWith('/building-with-history')).every(value => value.query.end_period === '2026-05-31')).toBe(true);
+    expect(JSON.stringify(report)).not.toContain(token);
+  });
+  it('não faz requisição sem autenticação ou autorização de todas as cidades', async () => {
+    const request = vi.fn(fixtureRequest());
+    await expect(collectMaceioMarket(monthlySelection, ['Maceió'], { token: '', request })).rejects.toThrow();
+    await expect(collectMaceioMarket({ ...monthlySelection, territory: 'capital-rm' }, ['Maceió'], { token, request })).rejects.toThrow();
+    expect(request).not.toHaveBeenCalled();
+  });
+  it('o conjunto completo mensal exige os sete municípios, incluindo Coqueiro Seco', async () => {
+    const request = vi.fn(fixtureRequest());
+    const selection = { ...monthlySelection, territory: 'capital-rm' as const };
+    await expect(collectMaceioMarket(selection, [...MACEIO_CITIES_MONTHLY].filter(city => city !== 'Coqueiro Seco'), { token, request })).rejects.toThrow();
+    expect(request).not.toHaveBeenCalled();
+    const { report } = await collectMaceioMarket(selection, [...MACEIO_CITIES_MONTHLY], { token, request });
+    expect(report.status).toBe('complete');
+    expect(report.cities.map(city => city.city)).toEqual([...MACEIO_CITIES_MONTHLY]);
+    expect(report.metrics).toEqual({ launches: 70, sales: 98, stock: 1022 });
+  });
+  it('pagina mantendo filtros e rejeita links que tentariam mudar host/escopo', async () => {
+    const fallback = fixtureRequest();
+    const request = vi.fn(async options => {
+      if (options.url.endsWith('/building-with-history')) return fallback(options);
+      const metric = options.url.split('/').at(-1) as MarketMetric;
+      const data = marketFixture()[metric], page = Number(options.query.page), half = data.length / 2;
+      return response({ data: data.slice((page - 1) * half, page * half), meta: { current_page: page, last_page: 2, total: data.length }, links: { next: page === 1 ? 'https://untrusted.invalid/?private=1' : null } });
+    });
+    const { report } = await collectMaceioMarket(monthlySelection, ['Maceió'], { token, request });
+    expect(report.status).toBe('complete');
+    expect(request).toHaveBeenCalledTimes(7);
+    expect(request.mock.calls.every(([options]) => options.url.startsWith('https://geobrain.com.br/public-api/') && options.query.city === 'Maceió')).toBe(true);
+  });
+  it.each(['too-many-pages', 'changed-total', 'wrong-month', 'bad-meta', 'foreign-sample'])('não publica cobertura com %s', async mode => {
+    const fallback = fixtureRequest();
+    const request = vi.fn(async options => {
+      const payload = await fallback(options);
+      if (options.url.endsWith('/building-with-history')) {
+        if (mode === 'foreign-sample') payload.data.data[0].city = 'São Paulo';
+        return payload;
+      }
+      if (mode === 'too-many-pages') payload.data.meta.last_page = 3;
+      if (mode === 'changed-total') payload.data.meta.total += 1;
+      if (mode === 'wrong-month') payload.data.data[0].period = '2026-07-01';
+      if (mode === 'bad-meta') delete payload.data.links;
+      return payload;
+    });
+    const { report } = await collectMaceioMarket(monthlySelection, ['Maceió'], { token, request });
+    expect(report.metrics).toBeNull();
+    expect(report.status).toBe('incomplete');
+    expect(request.mock.calls.length).toBeLessThanOrEqual(2);
+  });
+  it('401 não repete credenciais e não vaza corpo/erro da fonte', async () => {
+    const request = vi.fn(async () => ({ ...response({}, 401), text: 'private-provider-body', error: 'private-provider-error' }));
+    const { report } = await collectMaceioMarket(monthlySelection, ['Maceió'], { token, request });
+    expect(request).toHaveBeenCalledTimes(1);
+    expect(report.issues.join(' ')).toContain('acesso');
+    expect(JSON.stringify(report)).not.toMatch(/private-provider|synthetic-private/);
+  });
+  it('429 respeita Retry-After e faz apenas uma tentativa adicional', async () => {
+    const fallback = fixtureRequest(), sleep = vi.fn<(ms: number, signal?: AbortSignal) => Promise<void>>().mockResolvedValue(undefined);
+    const request = vi.fn().mockResolvedValueOnce({ ...response({}, 429), retryAfterMs: 800 }).mockImplementation(fallback);
+    const { report } = await collectMaceioMarket(monthlySelection, ['Maceió'], { token, request, sleep });
+    expect(report.status).toBe('complete');
+    expect(request).toHaveBeenCalledTimes(5);
+    expect(sleep.mock.calls[0][0]).toBe(800);
+  });
+  it('retry das cidades faltantes preserva sucessos no mesmo recorte', async () => {
+    const selection = { ...monthlySelection, territory: 'capital-rm' as const }, fallback = fixtureRequest(selection);
+    let fail = true;
+    const request = vi.fn(async options => options.query.city === 'Pilar' && options.url.endsWith('/stock') && fail ? response({}, 422) : fallback(options));
+    const first = await collectMaceioMarket(selection, [...MACEIO_CITIES_MONTHLY], { token, request });
+    expect(first.report.metrics).toBeNull();
+    expect(first.result.collection.completedCities).toHaveLength(6);
+    fail = false;
+    const second = await collectMaceioMarket(selection, [...MACEIO_CITIES_MONTHLY], { token, request }, first.result);
+    expect(second.report.status).toBe('complete');
+    expect(second.report.metrics).toEqual({ launches: 70, sales: 98, stock: 1022 });
+    expect(request.mock.calls.filter(([options]) => options.query.city === 'Maceió')).toHaveLength(4);
+    expect(request.mock.calls.filter(([options]) => options.query.city === 'Pilar')).toHaveLength(8);
+  });
+  it('retry consulta novamente fonte recebida mas reprovada na validação', async () => {
+    const selection = { ...monthlySelection, territory: 'capital-rm' as const }, fallback = fixtureRequest(selection);
+    let invalid = true;
+    const request = vi.fn(async options => {
+      const result = await fallback(options);
+      if (invalid && options.query.city === 'Pilar' && options.url.endsWith('/sales')) result.data.data[0].liquid_sales = null;
+      return result;
+    });
+    const first = await collectMaceioMarket(selection, [...MACEIO_CITIES_MONTHLY], { token, request });
+    expect(first.result.collection.failedCities).toHaveLength(0);
+    expect(first.report.metrics).toBeNull();
+    invalid = false;
+    const second = await collectMaceioMarket(selection, [...MACEIO_CITIES_MONTHLY], { token, request }, first.result);
+    expect(second.report.status).toBe('complete');
+    expect(request.mock.calls.filter(([options]) => options.query.city === 'Pilar')).toHaveLength(8);
+    expect(request.mock.calls.filter(([options]) => options.query.city === 'Maceió')).toHaveLength(4);
+  });
+  it('cancelamento interrompe antes das próximas fontes e não retorna resultado parcial', async () => {
+    const controller = new AbortController();
+    const request = vi.fn(async options => { controller.abort(); return fixtureRequest()(options); });
+    await expect(collectMaceioMarket(monthlySelection, ['Maceió'], { token, request, signal: controller.signal })).rejects.toThrow();
+    expect(request).toHaveBeenCalledTimes(1);
+  });
+});

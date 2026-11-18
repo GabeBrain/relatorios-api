@@ -72,6 +72,7 @@ export interface SpPreview {
   stockSeries?: SpStockSeries;
   salesNeighborhoods?: SpLaunchNeighborhoods;
   granularDetails?: SpGranularDetails;
+  municipalPrices?: import('./municipal-prices').SpMunicipalPrices;
   launchHistory?: SpLaunchHistory;
   historyBatch?: SpHistoryBatch;
 }

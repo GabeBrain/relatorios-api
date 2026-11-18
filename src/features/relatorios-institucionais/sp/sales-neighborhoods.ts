@@ -72,10 +72,14 @@ export function buildSpSalesNeighborhoods(buildings: Record<string, unknown>[], 
   for (const row of report.monthly) compare(differences, `Mês ${row.month}`, monthly.get(row.month) ?? 0, row.sales);
   for (const row of report.patterns.rows) compare(patternDifferences, `Padrão ${row.group}`, patterns.get(row.group) ?? 0, row.sales);
   if (differences.length) return block(`As vendas por bairro não coincidem com os totais municipais. ${[...differences,...patternDifferences].join('. ')}. Comparação de sold_in_period dos históricos com liquid_sales municipal, no período selecionado. O ranking aguarda reconciliação; nenhuma diferença foi atribuída automaticamente a distratos.`);
-  const shares = cityTotal > 0 && all.every(row => row.units >= 0);
+  // Net sales can be negative in an individual neighborhood. A positive,
+  // reconciled city total still supplies a valid signed denominator; keep
+  // negative contributions and totals above 100% instead of hiding them.
+  const shares = cityTotal > 0;
   const rows = all.sort((a,b) => b.units - a.units || a.neighborhood.localeCompare(b.neighborhood, 'pt-BR')).slice(0,10).map(row => ({ ...row, share: shares ? row.units / cityTotal * 100 : null }));
   const topTotal = rows.reduce((sum,row) => sum + row.units, 0);
   // Pattern classification is not a dimension of this neighborhood ranking.
   const warnings = patternDifferences.length ? [`A distribuição por padrão difere entre os históricos dos empreendimentos e a série municipal. ${patternDifferences.join('. ')}. O ranking por bairro usa os históricos identificados, com total do trimestre e de cada mês reconciliados; a causa da diferença de classificação não foi confirmada.`] : [];
+  if (all.some(row => row.units < 0)) warnings.push('Há bairros com vendas líquidas negativas. Os valores são preservados no total municipal; com base positiva, as participações usam o saldo líquido e podem ser negativas ou superar 100%.');
   return { status: 'ready', issues: [], warnings, rows, cityTotal, topTotal, topShare: shares ? topTotal / cityTotal * 100 : null,verifiedZeroWithoutNeighborhood };
 }

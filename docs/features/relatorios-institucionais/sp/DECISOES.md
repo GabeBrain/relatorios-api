@@ -1,5 +1,23 @@
 # Decisões e pontos abertos — SP
 
+## 12/11/2026 — amostra histórica observada e manchetes
+
+Permitir média da amostra histórica com divergência de estoque, inclusive sobrecontagem, desde que os registros usados tenham campos válidos e não haja conflito de identidade. Identificar parcial em amarelo, preservar o motivo e omitir variações envolvendo parcial. Estoques negativos sem projeção comprovada, dados inválidos e fechamento mantêm bloqueios. Nenhum valor antigo vira dado novo. Isso substitui a exigência de soma observada menor ou igual à municipal para apresentar amostra histórica, sem alterar reconciliação de área/IVV/fechamento. Objetivo de reproduzir13períodos completos e método do analista continua aberto; a parcial não significa homologação. Manchetes destacam fatos do recorte, com liderança somente acima de50% e verbos de avanço/recuo conforme sinal observado, sem alegar recordes.
+
+## 12/11/2026 — preços: fonte disponível por recorte e método identificado
+
+[Diagnóstico real e contrato](DIAGNOSTICO_PRECOS_2026-11-12.md). JSON do usuário comprova sete linhas anônimas na consulta geral e categorias 1/2/3/4 na Tipologia. Sem média municipal única, recuperar a série geral granular inteira e a linha geral conferida, identificando o método e preservando lacunas; barras por padrão continuam municipais e são identificadas separadamente. Não recompor total por médias dos padrões ou interpolar pontos. Grupo 4 significa quatro, somente 4+ explícito significa quatro ou mais. Quadros 63/64 usam o cálculo granular completo, mantendo mesmo universo para total/MCMV/MAP. Esta decisão substitui o apagamento dos cartões e a exclusividade da média municipal descritos em 11/11; não homologa a equivalência com o relatório manual.
+
+## 11/11/2026 — fonte municipal dos preços
+
+[Contrato e limites](CORRECAO_FONTE_PRECOS_2026-11-11.md). Nova geração usa observações `medium-prices`/`medium-prices-meter` por competência/grupo, separadas do cálculo por estoque. Total geral exige observação explícita, sem média dos padrões; resposta sem agrupamento ainda não validada autenticada. Série municipal não depende de conciliação granular. Séries sem MCMV conservam método granular candidato; MCMV/MAP nos cards municipais fica indisponível até comprovar o cruzamento equivalente, preservando o granular na auditoria. Esta decisão substitui a exclusividade do cálculo granular descrita nas entradas antigas; não homologa pesos/metodologia da API nem seus valores reais. Escoamento preservado até retorno do analista.
+
+## 11/11/2026 — correções do analista
+
+Aplicar o MD pelo conteúdo, pois a numeração diverge do PPTX anotado. [Entrega e limites](CORRECOES_ANALISTA_2026-11-11.md). Com saldo municipal positivo e reconciliado, a participação líquida por bairro é válida mesmo com bairros negativos: conservar sinais e eventuais percentuais acima de100%. Base não positiva segue sem percentual; total/mês continuam impeditivos em divergência. Esta decisão substitui a guarda anterior que suprimia todas as participações quando qualquer bairro era negativo.
+
+Tahoma deve alcançar texto antes incorporado às artes, mantendo logos/QR/screenshots ilustrativos. Sumário40px corresponde a30pt no exportador. Retratos usam bytes originais e densidade efetiva, sem alegar HD onde a referência não fornece detalhe. Escoamento permanece em meses e adiado pelo usuário. Preço geral do manual não é reproduzido pela ponderação unitária de seus agregados por padrão; confirmar método/universo antes de alterar a fórmula ou preencher histórico sem cobertura.
+
 ## 04/11/2026 — fechamento dos bloqueios do checklist (4)
 
 Usuário pediu corrigir todos os slides pendentes. O checklist real de03/11 registra51 bloqueado por124044×124045 em março/2026,78 por preço ausente54845/73369/junho e53–59 parciais. Aplicar [política atualizada](TRATAMENTO_FONTE_2026-11-03.md): tentar soma assinada e, apenas com conciliação municipal exata, projetar oferta não negativa no modelo derivado; manter valores originais auditáveis. Em78, capacidade/oferta válidas permitem contagens; preço ausente torna somente valores monetários dependentes e seus totais indisponíveis, com checklist parcial. Não preencher preço zero nem usar total monetário subestimado. Jun2023/64094 continua lacuna real; artes institucionais continuam referências editoriais. Implementação local validada, não aceite da fonte ou publicação observada.

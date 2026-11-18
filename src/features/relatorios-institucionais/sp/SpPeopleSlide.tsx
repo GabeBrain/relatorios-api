@@ -1,5 +1,6 @@
 import { SP_INSTITUTIONAL_ASSETS } from './institutional-assets';
 import { createSpPeople,SP_PEOPLE_RECTS,type SpPeople } from './people';
+import { SP_CONSULTING_PHOTOS, SP_TEAM_PHOTOS, SP_FABIO_CROP } from './people-assets';
 const p=(value:number)=>value*4/3;
 function lines(value:string,width:number):string[] {
   return value.split('\n').flatMap(line=>{const result=[''];for(const word of line.split(/\s+/)){if(result.at(-1)!.length+word.length+1>width&&result.at(-1))result.push('');result[result.length-1]+=(result.at(-1)?' ':'')+word;}return result;});
@@ -13,8 +14,9 @@ export function SpPeopleSlide({page,people=createSpPeople()}:{page:82|83;people?
     </svg>
     {people[group].map((person,index)=>{
       const [x,y,w,h]=rects[index];if(!person.visible)return null;
+      const crop=SP_FABIO_CROP;
       return <div key={index} aria-hidden="true" data-sp-editable-photo={person.name} className="absolute overflow-hidden rounded-xl bg-muted" style={{left:`${x/9.6}%`,top:`${y/5.4}%`,width:`${w/9.6}%`,height:`${h/5.4}%`}}>
-        {person.photo===null?<svg viewBox="0 0 100 100" className="h-full w-full"><rect width="100" height="100" fill="#e4e8df"/><circle cx="50" cy="34" r="17" fill="#8b9b75"/><path d="M15 96V82a35 35 0 0 1 70 0v14Z" fill="#8b9b75"/></svg>:person.photo?<img src={person.photo} alt={`Foto de ${person.name}`} className="h-full w-full object-cover"/>:<img src={SP_INSTITUTIONAL_ASSETS[page]} alt={`Foto de referência de ${person.name}`} style={{position:'absolute',maxWidth:'none',width:`${960/w*100}%`,height:`${540/h*100}%`,left:`${-x/w*100}%`,top:`${-y/h*100}%`}}/>}
+        {person.photo===null?<svg viewBox="0 0 100 100" className="h-full w-full"><rect width="100" height="100" fill="#e4e8df"/><circle cx="50" cy="34" r="17" fill="#8b9b75"/><path d="M15 96V82a35 35 0 0 1 70 0v14Z" fill="#8b9b75"/></svg>:person.photo?<img src={person.photo} alt={`Foto de ${person.name}`} className="h-full w-full object-cover"/>:page===82?<img src={SP_TEAM_PHOTOS[index]} alt={`Foto de referência de ${person.name}`} className="h-full w-full object-cover" style={index===0?{position:'absolute',maxWidth:'none',width:`${100/(1-crop.left-crop.right)}%`,height:`${100/(1-crop.top-crop.bottom)}%`,left:`${-crop.left/(1-crop.left-crop.right)*100}%`,top:`${-crop.top/(1-crop.top-crop.bottom)*100}%`}:undefined}/>:<img src={SP_CONSULTING_PHOTOS} alt={`Foto de referência de ${person.name}`} style={{position:'absolute',maxWidth:'none',width:`${960/w*100}%`,height:`${540/h*100}%`,left:`${-x/w*100}%`,top:`${-y/h*100}%`}}/>}
       </div>;
     })}
     <svg role="img" aria-label={page===82?'Equipe técnica personalizada':'Consultoria personalizada'} viewBox="0 0 1280 720" className="pointer-events-none absolute inset-0 h-full w-full" style={{fontFamily:'Tahoma, sans-serif'}}>

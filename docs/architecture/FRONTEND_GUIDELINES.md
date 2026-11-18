@@ -122,6 +122,8 @@ consequência e os módulos afetados.
 
 ## 8. Checklist de pronto
 
+Para diagnósticos JSON de relatórios, seguir o [padrão de diagnóstico](./REPORT_DIAGNOSTIC_STANDARD.md): coleta separada de validação, cobertura/categorias e critérios explícitos, dados agregados permitidos e sem credenciais ou cadastros individuais. Aplicar ao criar ou evoluir a exportação, preservando as regras de cada motor.
+
 - [ ] Reutilizei primitives/tokens existentes ou documentei a exceção.
 - [ ] Cobri carregando, vazio, erro e escopo inválido quando aplicável.
 - [ ] Usei `Select` ou combobox Brain; não há `<select>` nativo na tela de produto.

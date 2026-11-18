@@ -1,5 +1,9 @@
 # Fortaleza — evidências da abertura
 
+## 11/11/2026 — mensal: arquivos e revisão
+
+[Escopo, evidências reproduzíveis e retomada](MENSAL_EXPORTACAO_2026-11-11.md).225casos Fortaleza distintos e7regressões SP; tipos/build/lint. Browser com rede externa bloqueada:60prévias, três arquivos reais da fixture sintética com60páginas, controles1440/390claro/escuro, cancelamento sem download, falha de imagem e nova tentativa. Office: dois PPTX em leitura,16renders e hashes preservados. PDF:60páginas renderizadas em contatos,8amostras maiores e JSON anexado. Auditoria confere ordem, fonte/hash, resolução e ausência de campos privados. Corrigido subtítulo duplicado11/13/15. Não houve geração/autenticação GeoBrain real, homologação de mercado ou publicação nesta entrega.
+
 ## 10/11/2026 — mensal1–60 e diagnóstico JSON
 
 [Entrega e contrato](MENSAL_SLIDES_56_60_DIAGNOSTICO_2026-11-10.md): cinco posições finais implementadas; mensal original termina no60. Equipes57/58editáveis e quadro59substituível como imagem, sem presumir equipe atual. Diagnóstico JSON preparado automaticamente ao terminar a geração, download disponível para enviar ao Codex; sem credenciais/fotos/históricos brutos.214testes Fortaleza +31regressões/contratos, build/lint e Edge sintético conferidos no fechamento. Basefbe9742porFF limpo; nova fatia local. Restam revisão real/fontes/homologação/exportação, não outros slides mensais. Trimestral89segue com dez iniciais. SP estética/diagnóstico é a próxima frente indicada pelo usuário, sem alteração nesta fatia. Estados abaixo são históricos.

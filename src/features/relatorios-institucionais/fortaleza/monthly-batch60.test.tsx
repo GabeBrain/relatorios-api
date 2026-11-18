@@ -25,8 +25,14 @@ describe('Fortaleza mensal56–60 e diagnóstico',()=>{
   it('edita nome/cargo, preserva ao navegar e permite restaurar a pessoa',()=>{
     render(<FortalezaIntroSlides selection={selection} cities={cities} data={null}/>);fireEvent.click(screen.getByRole('button',{name:'57'}));fireEvent.click(screen.getByText('Personalizar equipe e fotos'));fireEvent.change(screen.getByLabelText('Nome'),{target:{value:'Analista da edição'}});fireEvent.change(screen.getByLabelText('Cargo'),{target:{value:'Pesquisa de mercado'}});expect(screen.getByRole('img',{name:'Fortaleza · slide 57'}).textContent).toContain('Analista da edição');fireEvent.click(screen.getByRole('button',{name:'58'}));fireEvent.click(screen.getByRole('button',{name:'57'}));expect(screen.getByLabelText('Nome')).toHaveProperty('value','Analista da edição');fireEvent.click(screen.getByRole('button',{name:'Restaurar referência'}));expect(screen.getByLabelText('Nome')).toHaveProperty('value','Fábio Tadeu Araújo');
   });
-  it('59aceita substituir a imagem institucional completa',()=>{
-    const editorial=createFortalezaEditorial();editorial.board='data:image/png;base64,fixture';const {container}=render(<FortalezaClosingSlide page={59} selection={selection} editorial={editorial}/>);expect(container.querySelector('image')?.getAttribute('href')).toBe(editorial.board);
+  it('59tem16retratos e textos separados',()=>{
+    const editorial=createFortalezaEditorial();editorial.consulting[0].name='Consultor editado';const {container}=render(<FortalezaClosingSlide page={59} selection={selection} editorial={editorial}/>);expect(container.querySelectorAll('[data-fortaleza-editable-photo]')).toHaveLength(16);expect(container).toHaveTextContent('Consultor editado');
+  });
+  it.each([{periodicity:'monthly' as const,page:59,other:57},{periodicity:'quarterly' as const,page:88,other:86}])('consultoria$page edita, preserva e restaura integrante individual',({periodicity,page,other})=>{
+    const selected={...selection,periodicity,position:periodicity==='quarterly'?2:selection.position};render(<FortalezaIntroSlides selection={selected} cities={cities} data={null}/>);
+    fireEvent.click(screen.getByRole('button',{name:String(page)}));fireEvent.click(screen.getByText('Personalizar equipe e fotos'));fireEvent.change(screen.getByLabelText('Nome'),{target:{value:'Consultor desta edição'}});
+    expect(screen.getByRole('img',{name:`Fortaleza · slide ${page}`})).toHaveTextContent('Consultor desta edição');fireEvent.click(screen.getByRole('button',{name:String(other)}));fireEvent.click(screen.getByRole('button',{name:String(page)}));expect(screen.getByLabelText('Nome')).toHaveProperty('value','Consultor desta edição');
+    fireEvent.click(screen.getByRole('button',{name:'Ocultar integrante'}));expect(document.querySelectorAll('[data-fortaleza-editable-photo]')).toHaveLength(15);fireEvent.click(screen.getByRole('button',{name:'Restaurar referência'}));expect(screen.getByLabelText('Nome')).toHaveProperty('value','Marcos Kahtalian');expect(document.querySelectorAll('[data-fortaleza-editable-photo]')).toHaveLength(16);
   });
   it('quebras longas respeitam os limites de linhas sem descartar palavras',()=>{
     const text='Nome muito longo de integrante para conferência';const lines=closingLines(text,12,2);expect(lines).toHaveLength(2);expect(lines.join(' ')).toBe(text);
@@ -39,8 +45,9 @@ describe('Fortaleza mensal56–60 e diagnóstico',()=>{
   });
   it('diagnóstico cobre60slides, conta estados e usa o horário do fechamento',async()=>{
     const state=await generation(),snapshot=buildFortalezaDiagnostic(selection,state);
-    expect(snapshot.slides.map(slide=>slide.number)).toEqual(Array.from({length:60},(_,index)=>index+1));expect(Object.values(snapshot.summary).reduce((sum,count)=>sum+count,0)).toBe(60);expect(snapshot.summary['not-implemented']).toBe(0);expect(snapshot.generatedAt).toBe(state.finishedAt);expect(snapshot.homologated).toBe(false);expect(snapshot.slides[1].status).toBe('source-pending');expect(snapshot.slides[56].status).toBe('editorial-review');
+    expect(snapshot.slides.map(slide=>slide.number)).toEqual(Array.from({length:60},(_,index)=>index+1));expect(Object.values(snapshot.summary).reduce((sum,count)=>sum+count,0)).toBe(60);expect(snapshot.summary['not-implemented']).toBe(0);expect(snapshot.generatedAt).toBe(state.finishedAt);expect(snapshot.homologated).toBe(false);expect(snapshot.slides[1].status).toBe('available');expect(snapshot.slides[56].status).toBe('editorial-review');
     expect(snapshot.slides[21].values).toEqual(buildMonthlySlide(22,state.monthlyLaunches!.market!,selection,cities));
+    for(const number of [1,8,9])expect(snapshot.slides[number-1]).toMatchObject({status:'editorial-review',values:null});
   });
   it('fonte ausente muda os slides dependentes e preserva os independentes',async()=>{
     const state=await generation();state.monthlyLaunches!.market!.sources.find(source=>source.city==='Aquiraz'&&source.segment==='Vertical'&&source.metric==='sales')!.complete=false;
@@ -50,7 +57,7 @@ describe('Fortaleza mensal56–60 e diagnóstico',()=>{
     const state=await generation();state.monthlyLaunches!.prices={scopeKey:'private-token',months:[],issues:[],sources:[{city:'Fortaleza',segment:'Vertical',complete:true,records:[{Authorization:'Bearer private-token',photo:'data:image/png;base64,private',typologies_history:[{secret:'individual'}]}],frames:{},issue:null,requests:1,startedAt:'',finishedAt:''}]};
     const value=JSON.stringify(buildFortalezaDiagnostic(selection,state));for(const forbidden of ['private-token','Authorization','data:image','typologies_history','individual'])expect(value).not.toContain(forbidden);
   });
-  it('trimestral tem89posições e não apresenta a continuação como implementada',async()=>{
-    const state=await generation(),quarter={...selection,periodicity:'quarterly' as const,position:2};state.blueprint=await prepareFortalezaBlueprint(quarter,cities,{yieldControl:async()=>{}});state.monthlyLaunches=null;const snapshot=buildFortalezaDiagnostic(quarter,state);expect(snapshot.slides).toHaveLength(89);expect(snapshot.summary['not-implemented']).toBe(79);
+  it('trimestral tem89posições e preserva pendência de fonte quando não há dados',async()=>{
+    const state=await generation(),quarter={...selection,periodicity:'quarterly' as const,position:2};state.blueprint=await prepareFortalezaBlueprint(quarter,cities,{yieldControl:async()=>{}});state.monthlyLaunches=null;const snapshot=buildFortalezaDiagnostic(quarter,state);expect(snapshot.slides).toHaveLength(89);expect(snapshot.summary['not-implemented']).toBe(0);
   });
 });

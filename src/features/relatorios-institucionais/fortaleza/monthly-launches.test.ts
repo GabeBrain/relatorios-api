@@ -21,7 +21,7 @@ describe('Fortaleza mensal — lançamentos por padrão', () => {
   });
   it.each(['missing', 'duplicate', 'negative', 'unknown', 'foreign', 'invalid', 'type', 'coverage'])('não publica parcial com %s', mode => {
     const data = monthlyLaunchFixture(), rows = data.sources[0].rows;
-    if (mode === 'missing') rows.pop();
+    if (mode === 'missing') data.sources[0].rows=rows.filter(row=>String(row.period).slice(0,7)!=='2026-07');
     if (mode === 'duplicate') rows.push({ ...rows[0] });
     if (mode === 'negative') rows[0].releases_in_period = -1;
     if (mode === 'unknown') rows[0].group = 'Outro';

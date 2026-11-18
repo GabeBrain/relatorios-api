@@ -1,0 +1,112 @@
+{
+  "date": "2026-11-13",
+  "project": "brain-rebrain-slide-maker",
+  "account": "inovacao.grupo.brain@gmail.com",
+  "source_base": "653d3de4170eb61da7f5a5d399092d1c4b242b5a",
+  "overlay": [
+    "src/app.ts: /health alias",
+    "src/isolamento.ts: --as-pid-1"
+  ],
+  "builds": [
+    "1e3f12a1-7017-451b-b300-1197dafe632b",
+    "8f750c79-0225-489a-a0c1-418bfe7b9233"
+  ],
+  "revision": "slide-maker-diagnostico-00002-fbc",
+  "private_service": true,
+  "anthropic_secret_mounted": false,
+  "paid_model_calls": 0,
+  "synthetic_bucket_object": "gs://brain-rebrain-slide-maker-slide-maker-marca/diagnosticos/2026-11-13/diagnostico.png",
+  "permissions": {
+    "account": "inovacao.grupo.brain@gmail.com",
+    "project": "brain-rebrain-slide-maker",
+    "role_observed": "roles/owner",
+    "service_accounts": {
+      "slide-maker-build": {
+        "permissions": [
+          "iam.serviceAccounts.actAs",
+          "iam.serviceAccounts.get"
+        ]
+      },
+      "slide-maker-runtime": {
+        "permissions": [
+          "iam.serviceAccounts.actAs",
+          "iam.serviceAccounts.get"
+        ]
+      },
+      "slide-maker-tasks": {
+        "permissions": [
+          "iam.serviceAccounts.actAs",
+          "iam.serviceAccounts.get"
+        ]
+      }
+    }
+  },
+  "isolation_comparison": {
+    "original": {
+      "aprovado": false,
+      "bwrap": "ok",
+      "semEscritaFora": true,
+      "semLeituraDoApp": true,
+      "semRede": true,
+      "semSegredosNoAmbiente": false,
+      "workspaceGravavel": true
+    },
+    "pid1": {
+      "aprovado": true,
+      "bwrap": "ok",
+      "semEscritaFora": true,
+      "semLeituraDoApp": true,
+      "semRede": true,
+      "semSegredosNoAmbiente": true,
+      "workspaceGravavel": true
+    }
+  },
+  "smoke": {
+    "ok": true,
+    "service": "https://slide-maker-diagnostico-475189392075.southamerica-east1.run.app",
+    "steps": [
+      "health_simulado",
+      "isolamento_aprovado",
+      "internal_sem_oidc_recusado",
+      "job_criado",
+      "upload_imagem_enfileirado",
+      "F1_fila_oidc_real",
+      "respostas_enfileiradas",
+      "F2_fila_real",
+      "narrativa_aprovada",
+      "F3_entrega_v1",
+      "ajuste_enfileirado",
+      "F4_entrega_v2",
+      "historico_v2",
+      "url_privada_v1",
+      "download_v1",
+      "url_privada_v2",
+      "download_v2",
+      "sem_token_recusado",
+      "dados_internos_ocultos"
+    ],
+    "agent": "simulado",
+    "health": {
+      "ok": true,
+      "agente": "simulado",
+      "isolamento": {
+        "bwrap": "ok",
+        "semRede": true,
+        "semSegredosNoAmbiente": true,
+        "semLeituraDoApp": true,
+        "semEscritaFora": true,
+        "workspaceGravavel": true,
+        "aprovado": true
+      }
+    },
+    "job_id": "4f2083bf-92f7-4749-a954-bde797a54654",
+    "checked_at": "2026-11-13T13:58:41.070838+00:00"
+  },
+  "limits": [
+    "No official brand assets; no visual QA or actual deck rendering",
+    "Private IAM service; public browser/CORS flow not verified",
+    "Diego machine login not verified",
+    "Original failed synthetic job retained for audit: 164ecad0-35d0-4875-bd6f-19f00f120d22",
+    "Google infrastructure can incur cost; no paid model calls"
+  ]
+}

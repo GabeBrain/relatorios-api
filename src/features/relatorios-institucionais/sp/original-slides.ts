@@ -18,7 +18,7 @@ export const SP_ORIGINAL_SLIDES = [
   },
   {
     "number": 5,
-    "title": "GeoBrain, plataforma e números de cobertura"
+    "title": "Geobrain, plataforma e números de cobertura"
   },
   {
     "number": 6,

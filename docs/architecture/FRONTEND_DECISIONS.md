@@ -1,3 +1,25 @@
+## 17/11/2026 — Relatórios: diagnóstico JSON com cobertura e validação explícitas
+
+**Autor/origem:** Codex, pedido de Lucas. [Convenção](./REPORT_DIAGNOSTIC_STANDARD.md) definida a partir de um diagnóstico real Maceió:55slides pendentes apesar de todas as fontes imobiliárias coletadas. Padrão inclui seleção/schema/versão, transporte separado de validação, cobertura por competência, categorias/contagens reais, somas e ausências, critérios e limitações. Campos permitidos explicitamente, sem credenciais, IDs/nomes/endereços ou históricos individuais. Aplicado aos dois modelos Maceió, referência ao criar/evoluir os demais diagnósticos, sem migração automática de todos os motores ou compartilhamento de regras de negócio.
+
+Mantidos worker, BrainLoadingState, cancelamento/retry e descarte de resultado antigo. Não há nova consulta nem persistência no backend. Rótulos detalhados ficam no arquivo; a interface mantém resumo e download. Fonte transportada não vira indicador aprovado automaticamente. A classificação real de tipologias/padrões de Maceió segue pendente até obter os rótulos por essa auditoria.
+
+## 12/11/2026 — Relatórios: exportador DrawingML compartilhado
+
+SP e Fortaleza mensal/trimestral reutilizam `shared/native-pptx.ts`: DOM visível → objetos nativos, com tabelas reais para listas, geometrias livres para SVG, gradientes e imagens individuais. Primitives, rota lazy e BrainLoadingState existentes mantidos; sem dependência nova. PDF visual segue separado. Não há rasterização silenciosa de um gráfico sem suporte. Fotos podem ser recortadas em PNG individual para preservar a moldura, continuando objetos de imagem independentes no PPTX. Edição de célula respeita cor/alinhamento e auditoria do ajuste. Consultoria Fortaleza16pessoas usa o mesmo editor de equipe. [Contrato, limites e provas](../features/relatorios-institucionais/PREVIA_EDITAVEL_2026-11-12.md).
+
+## 12/11/2026 — Edição na prévia de Fortaleza e SP
+
+**Autor/origem:** Codex, pedido de Lucas. Editor compartilhado usa os primitives existentes (Details, Select, Input, Textarea, Checkbox e Button): seleção no slide/lista, texto, cor, tamanho em pt, posição, negrito, ocultar, adicionar e restaurar. Estado por posição original durante a sessão; troca de geração/competência restaura a composição automática. Ajustes não são persistidos no servidor e não recalculam indicadores. PDF/PPTX recebem a mesma camada visual; auditoria de exportação inclui texto original e ajuste manual. Seleção não aparece no arquivo. Dados da API preservados. Não há chamada adicional à API.
+
+Fortaleza: textos estáticos das artes agora são SVG nativo Tahoma, extraídos no PowerPoint original aberto somente em leitura; títulos principais de pelo menos30pt. Retratos substituídos pelos arquivos embutidos de maior resolução disponível, sem ampliação artificial, e separados em imagens individuais no PPTX editável. SP mantém retratos individuais editáveis e controles de upload existentes; a camada compartilhada usa Tahoma e promove os títulos principais da prévia a30pt. O quadro institucional composto continua substituível inteiro; a qualidade máxima dos retratos que só existem nesse composto depende do original ou de upload.
+
+**Validação:** testes de estado/isolamento/restauração, integração dos dois relatórios e Edge com edição de texto existente, navegação, restauração e extração nativa para exportação. Não equivale a homologação de cálculo ou execução autenticada GeoBrain. Testes e capturas locais usam dados sintéticos onde não há histórico individual no JSON. Publicação ainda depende de autorização.
+
+## 11/11/2026 — SP: tipografia editorial nativa e densidade dos retratos
+
+Mantidos rota lazy, SpSlideContent e exportador existentes. Textos editoriais antes rasterizados recebem camadasSVG Tahoma nas medidas da arte, com fundos locais medidos da referência; logos/QR/screenshots permanecem ilustrações. Sumário40px equivale a30pt noPPTX. Retratos separados preservam arquivos/crop originais e densidade efetiva até4×; sem novo primitive, fonte instalada, biblioteca ou token global. Tema da plataforma preservado; [contrato e verificação](../features/relatorios-institucionais/sp/CORRECOES_ANALISTA_2026-11-11.md).
+
 ## 10/11/2026 — Fortaleza: diagnóstico local e editorial final
 
 Ao concluir a geração, worker de módulo prepara o JSON de situação/valores agregados dos slides; snapshot disponível por Button, sem nova consulta. Chave de sessão excluída do payload do worker; credenciais/fotos/históricos brutos fora do JSON. BrainLoadingState de campo com tempo e botão irmão de cancelamento, worker encerrado em cancelamento/troca/desmontagem; não muda o primitive compartilhado. Editor final usa Input/Textarea/Select/Button e fotos em memória, guardas contra conclusões tardias. Quadro59é substituído inteiro por ser imagem no original. Rota e slides continuam lazy, sem dependência/biblioteca global nova. [Contrato e limites](../features/relatorios-institucionais/fortaleza/MENSAL_SLIDES_56_60_DIAGNOSTICO_2026-11-10.md).

@@ -2,16 +2,17 @@ import { httpRequest, type HttpResponse, type RequestOptions } from '@/lib/http-
 import { requestWithRetry } from '@/features/panorama-secovi-fiergs/lib/request-with-retry';
 import { insertBuilding, readBuildingPage } from '@/features/panorama-secovi-fiergs/domain/building-source';
 import { fortalezaPeriod, fortalezaScope, type FortalezaSelection } from './model';
+import { monthlyProduct } from './classifications';
 import { marketMonth, normalizeMarketText } from './market';
 
 export interface IntroProject { id: string; name: string; date: string; developer: string; city: string; neighborhood: string; type: string; standard: string; chartEligible: boolean | null }
 export interface IntroData { status: 'ready' | 'blocked'; projects: IntroProject[]; issues: string[]; requests: number; startedAt: string; finishedAt: string }
-export interface IntroBin { label: string; capital: number; rm: number; total: number }
+export interface IntroBin { label: string; capital: number; rm: number; total: number; unknownCapital?:number;unknownRm?:number }
 export function buildIntroProject(raw: Record<string, unknown>): IntroProject {
   const type = String(raw.building_type ?? '');
   const subtype = [raw.rawSubtype, raw.rawType, raw.building_subtype, raw.standard, raw.product_type].map(normalizeMarketText).join(' ');
   const horizontal = normalizeMarketText(type) === 'horizontal';
-  const chartEligible = !horizontal ? true : /loteamento|chacara/.test(subtype) ? false : /condominio (de )?(casas|sobrados)|casas em condominio/.test(subtype) ? true : null;
+  const chartEligible = !horizontal ? true : /loteamento|chacara/.test(subtype) ? false : /condominio (de )?(casas|sobrados)|casas em condominio/.test(subtype)||monthlyProduct('Horizontal',raw.standard)==='houses' ? true : null;
   const incorporators = Array.isArray(raw.incorporators) ? raw.incorporators.map(value => value && typeof value === 'object' ? String((value as Record<string, unknown>).name ?? '') : '').filter(Boolean) : [];
   const date = String(raw.release_date ?? '').slice(0, 10);
   if (!marketMonth(date)) throw new Error('Há empreendimento sem data de lançamento válida.');
@@ -31,13 +32,13 @@ export async function fetchFortalezaIntro(selection: FortalezaSelection, authori
   try {
     for (const city of scope.cities) for (const type of ['Vertical', 'Horizontal', 'Comercial']) {
       const distinct = new Map<string, Record<string, unknown>>(); let total: number | null = null, last: number | null = null, received = 0;
-      for (let page = 1; page <= 5; page++) {
+      for (let page = 1; page <= 40; page++) {
         check(); options.onProgress?.(`${city} · cadastro ${type.toLowerCase()} · página ${page}`);
         const response = await requestWithRetry(async () => { check(); output.requests++; return request({ url: 'https://geobrain.com.br/public-api/building', query: { city, uf: 'CE', type, page, per_page: 100 }, headers: { Authorization: `Bearer ${options.token}` }, includeAuth: false, signal: options.signal, timeoutMs: 20_000, cache: 'no-store' }); }, { attempts: 2, signal: options.signal, sleep: options.sleep });
         check();
         if (!response.ok || !response.data) throw new Error('O cadastro não respondeu ou não autorizou a consulta.');
         const payload = readBuildingPage(response.data, { city, uf: 'CE' }, page, 'fortaleza-building');
-        if (payload.total === null || payload.lastPage > 5 || payload.buildings.length > 100 || (last !== null && (last !== payload.lastPage || total !== payload.total))) throw new Error('O cadastro não confirmou cobertura estável dentro do limite curto de cinco páginas.');
+        if (payload.total === null || payload.total > 4000 || payload.lastPage > 40 || payload.buildings.length > 100 || (last !== null && (last !== payload.lastPage || total !== payload.total))) throw new Error('O cadastro não confirmou cobertura estável dentro do limite de 40 páginas e 4.000 empreendimentos por cidade/segmento.');
         total ??= payload.total; last ??= payload.lastPage;
         if (page < last && !payload.buildings.length) throw new Error('Há página intermediária vazia no cadastro.');
         for (const building of payload.buildings) {
@@ -58,7 +59,7 @@ export async function fetchFortalezaIntro(selection: FortalezaSelection, authori
     }
     output.projects = [...all.values()].map(buildIntroProject).sort((a, b) => a.date.localeCompare(b.date) || a.name.localeCompare(b.name, 'pt-BR') || a.id.localeCompare(b.id));
     output.status = 'ready';
-    if (output.projects.some(project => project.chartEligible === null)) output.issues.push('Há horizontais sem identificação explícita de casas/sobrados ou loteamentos; o gráfico de empreendimentos permanece indisponível.');
+    if (output.projects.some(project => project.chartEligible === null)) output.issues.push('Há horizontais sem identificação explícita de casas/sobrados ou loteamentos; o gráfico indica a faixa mínima–máxima quando eles entram no período, sem presumir o produto.');
     output.issues.push('O cadastro é a fotografia atual; amostra histórica e empresas pesquisadas não são deduzidas desse total.');
     output.issues.push('Listas e séries são prévias do cadastro atual: datas de início de vendas, fases e exclusões históricas ainda precisam de conferência. Zero no catálogo não comprova ausência de lançamento no passado.');
   } catch (error) {
@@ -74,12 +75,13 @@ export function introLaunchLists(data: IntroData | null, selection: FortalezaSel
   return { capital: projects.filter(project => normalizeMarketText(project.city) === 'fortaleza'), rm: projects.filter(project => normalizeMarketText(project.city) !== 'fortaleza') };
 }
 export function introBins(data: IntroData | null, selection: FortalezaSelection): { history: IntroBin[]; accumulated: IntroBin[] } | null {
-  if (data?.status !== 'ready' || selection.territory !== 'capital-rm' || data.projects.some(project => project.chartEligible === null)) return null;
+  if (data?.status !== 'ready' || selection.territory !== 'capital-rm') return null;
   const endMonth = selection.periodicity === 'monthly' ? selection.position : selection.position * 3;
   const count = (start: string, end: string, label: string): IntroBin => {
     const values = data.projects.filter(project => project.chartEligible && project.date >= start && project.date <= end);
     const capital = values.filter(project => normalizeMarketText(project.city) === 'fortaleza').length;
-    return { label, capital, rm: values.length - capital, total: values.length };
+    const unknown=data.projects.filter(project=>project.chartEligible===null&&project.date>=start&&project.date<=end),unknownCapital=unknown.filter(project=>normalizeMarketText(project.city)==='fortaleza').length;
+    return { label, capital, rm: values.length - capital, total: values.length,...(unknown.length?{unknownCapital,unknownRm:unknown.length-unknownCapital}:{}) };
   };
   const history: IntroBin[] = [];
   const window = (year: number, position: number) => {

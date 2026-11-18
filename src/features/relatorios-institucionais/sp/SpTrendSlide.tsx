@@ -29,9 +29,9 @@ export function SpTrendSlide({ report, number }: { report: SpPreview; number: nu
   return <svg role="img" aria-label={`${metric} · ${subtitle}`} viewBox="0 0 1280 720" className="absolute inset-0 h-full w-full">
     <rect x="40" y="10" width="1000" height="140" fill="#f8f8f8" />
     <text x="62" y="62" fontSize="32" fontWeight="bold">{metric}</text>
-    <text x="62" y="100" fontSize="27" fontWeight="bold" fill={rolling ? '#c79f00' : '#5b7638'}>{subtitle}</text>
+    <text x="62" y="100" fontSize="27" fontWeight="bold" fill={rolling ? '#c79f00' : '#5b7638'}>{subtitle} · {report.quarter.slice(0,2)} {report.quarter.slice(2)}</text>
     <rect x="62" y="116" width="85" height="9" rx="4" fill="#ffcf00" />
-    <text x="62" y="157" fontSize="17">{spSlidePeriod(report)}</text>
+    {report.status !== 'quarter-closed' && <text x="62" y="157" fontSize="17">{spSlidePeriod(report)}</text>}
     {!ready ? <><text x="640" y="335" textAnchor="middle" fontSize="28" fontWeight="bold">Dados em conferência</text>{wrap(message, 88).map((line, i) => <text key={i} x="640" y={380 + i * 28} textAnchor="middle" fontSize="19">{line}</text>)}</> : annual ? <AnnualChart rows={source!.breakdown!.annual!} throughMonth={report.throughMonth!} format={format} /> : <>
       <text x="90" y="202" fontSize="16">{rolling ? 'Acumulado nos últimos 12 meses' : `${sales ? 'Vendas líquidas' : vgv ? 'VGV vendido corrigido' : monetary ? 'VGL corrigido' : 'Lançamentos'} no trimestre selecionado`}</text>
       <text x="90" y="240" fontSize="32" fontWeight="bold" fill="#5b7638">{format(points.at(-1)!.value)}{!rolling && points.at(-1)!.partial ? '*' : ''}</text>

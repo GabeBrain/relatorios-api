@@ -6,6 +6,7 @@ import {
   Building2,
   Database,
   FolderSearch,
+  Presentation,
   TrendingUp,
 } from 'lucide-react';
 import {
@@ -33,9 +34,11 @@ const PAGES: Destination[] = [
   { label: 'Relatórios Automatizados — Relatório API Excel', path: '/rebrain/relatorio-api-excel', icon: <Building2 className="h-4 w-4" />, keywords: 'rebrain api excel mercado relatorio mensal trimestral tabular' },
   { label: 'Relatórios Automatizados — Panorama de Mercado', path: '/rebrain/panorama-secovi-fiergs', icon: <BarChart2 className="h-4 w-4" />, keywords: 'rebrain panorama secovi fiergs piracicaba jundiai lancamentos pdf comparacao' },
   { label: 'Relatórios Automatizados — SP Institucional', path: '/rebrain/relatorios-institucionais/sp', icon: <BarChart2 className="h-4 w-4" />, keywords: 'rebrain sao paulo capital institucional trimestre panorama powerpoint pptx' },
+  { label: 'Relatórios Automatizados — Sinduscon Fortaleza', path: '/rebrain/relatorios-institucionais/fortaleza', icon: <BarChart2 className="h-4 w-4" />, keywords: 'rebrain ceara ce região metropolitana mensal trimestral powerpoint pptx' },
   { label: 'Rebrain — Assistente de Projetos', path: '/auditoria', icon: <ClipboardList className="h-4 w-4" />, keywords: 'assistente de projetos corretor vocacional slides auditoria' },
   { label: 'Rebrain — Empresas e Empregados', path: '/rebrain/empresas-empregados', icon: <Building2 className="h-4 w-4" />, keywords: 'rais empregados emprego formal empresas cnpj municipio cbo' },
   { label: 'Rebrain — Atualizador VGV', path: '/atualizador-vgv', icon: <TrendingUp className="h-4 w-4" />, keywords: 'vgv empreendimento excel incc ipca igp-di mapa' },
+  { label: 'Rebrain — Slide Maker', path: '/slide-maker', icon: <Presentation className="h-4 w-4" />, keywords: 'slide maker apresentacao apresentação deck pptx powerpoint palestra narrativa' },
   { label: 'Dashboard Geobrain', path: '/dash-geobrain', icon: <BarChart2 className="h-4 w-4" />, keywords: 'dash geobrain dashboard' },
   { label: 'Banco Quanti', path: '/quanti', icon: <Database className="h-4 w-4" />, keywords: 'area quanti quantitativo base dashboard' },
 ];

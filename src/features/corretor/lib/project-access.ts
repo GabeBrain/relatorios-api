@@ -2,7 +2,7 @@ import { supabase } from '@/integrations/supabase/client';
 export class CorretorAccessUnavailable extends Error {
   constructor() { super('O acesso aos materiais ainda depende da publicação no Lovable.'); }
 }
-/** Mesmo e-mail/senha GeoBrain; função server-side troca a prova válida por sessão do app. */
+/** Mesmo e-mail/senha Geobrain; função server-side troca a prova válida por sessão do app. */
 export async function loginCorretor(email: string, password: string): Promise<string> {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 30000);

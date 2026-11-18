@@ -24,13 +24,13 @@ export function buildOfferTable(page:number,market:MonthlyMarketData|null,prices
         const matches=market?.sources.filter(source=>normalizeMarketText(source.city)===normalizeMarketText(city)&&source.segment===(page===47?'Vertical':'Horizontal')&&source.metric===metric)??[];
         if(matches.length!==1)throw new Error(`${city}/${metric}: fonte municipal ausente.`);
         const source=matches[0],issue=monthlyMarketSourceIssue(source,monthlyMarketMonths(selection));if(issue)throw new Error(`${city}/${metric}: ${issue}`);
-        const observed=new Set<string>();
+
         for(const raw of source.rows){const period=marketMonth(raw.period);if(period!==closing&&!(metric==='stock'&&period===opening))continue;
-          const label=page===47?city:productLabel(raw.group);if(!label)continue;observed.add(label);
+          const label=page===47?city:productLabel(raw.group);if(!label)continue;
           const row=rows.find(row=>row.label===label)!,field=metric==='stock'?(period===opening?'opening':'stock'):metric==='releases'?'launches':'sales';
           const value=readMonthlyNumber(raw[metric==='stock'?'stock':metric==='releases'?'releases_in_period':'liquid_sales'],metric==='sales',true);if(value===null)throw new Error('Quantidade municipal inválida.');row[field]+=value;
         }
-        if(page!==47&&horizontal.some(label=>!observed.has(label)))throw new Error(`${city}: faltam produtos horizontais explícitos, inclusive os zeros.`);
+
       }
     } else {
       const grouped=new Map<string,OfferRow>();const capacityPage=page===50||page===51;
@@ -43,8 +43,9 @@ export function buildOfferTable(page:number,market:MonthlyMarketData|null,prices
           if(!id||seen.has(id)||normalizeMarketText(building.city)!==normalizeMarketText(city)||normalizeMarketText(building.state??building.uf)!=='ce'||normalizeMarketText(building.building_type)!==normalizeMarketText(capacityPage?'Horizontal':'Vertical'))throw new Error('Identidade duplicada ou empreendimento fora do recorte.');seen.add(id);
           const release=marketMonth(building.release_date);if(!release)throw new Error('Empreendimento sem data de lançamento válida.');if(release>closing)continue;
           const product=productOf(building);if(capacityPage&&!product){if([building.standard,building.subtype,building.building_subtype].map(normalizeMarketText).some(label=>['condominio de chacaras','terreno','loteamento comercial'].includes(label)))continue;throw new Error('Produto horizontal não identificado.');}
-          const label=capacityPage?product==='houses'?horizontal[2]:product==='open-lots'?horizontal[0]:product==='closed-lots'?horizontal[1]:null:typeof building.neighborhood==='string'?building.neighborhood.trim():null;
-          if(!label||['-','—','nao informado','sem bairro'].includes(normalizeMarketText(label)))throw new Error(`Empreendimento ${building.building_id}: bairro ou produto ausente.`);
+          let label=capacityPage?product==='houses'?horizontal[2]:product==='open-lots'?horizontal[0]:product==='closed-lots'?horizontal[1]:null:typeof building.neighborhood==='string'?building.neighborhood.trim():null;
+          if(!label||['-','—','nao informado','sem bairro'].includes(normalizeMarketText(label))){if(capacityPage)throw new Error(`Empreendimento ${building.building_id}: produto ausente.`);label='Bairro não informado';}
+          const missingNeighborhood=!capacityPage&&label==='Bairro não informado';
           const raw=building.typologies_history;if(!Array.isArray(raw))throw new Error(`Empreendimento ${building.building_id}: histórico ausente.`);
           const identities=new Map<string,{signature:string;row:Record<string,unknown>}>();
           for(const item of raw){if(!item||typeof item!=='object'||Array.isArray(item))throw new Error('Linha histórica inválida.');const value=item as Record<string,unknown>,period=marketMonth(value.period);if(!period)throw new Error('Competência histórica inválida.');if(period>closing||period<release)continue;const id=String(value.typology_id??'').trim();if(!id)throw new Error('Tipologia sem identidade.');const key=`${period}/${id}`,signature=historyFingerprint(value),previous=identities.get(key);if(previous&&previous.signature!==signature)throw new Error('Tipologia/mês conflitante.');identities.set(key,{signature,row:value});}
@@ -61,6 +62,7 @@ export function buildOfferTable(page:number,market:MonthlyMarketData|null,prices
           for(const item of before)project.opening+=quantity(item.typology_stock);
           if(!capacityPage&&release===closing)project.launches=project.capacity;
           if(!capacityPage&&project.opening===0&&project.stock===0&&project.launches===0&&project.sales===0)continue;
+          if(missingNeighborhood)warnings.push(`Empreendimento ${building.building_id}: bairro não informado; valores preservados no grupo Bairro não informado.`);
           project.projects=1;const key=normalizeMarketText(label),aggregate=grouped.get(key)??blank(label);for(const field of keys)aggregate[field]+=project[field];grouped.set(key,aggregate);
         }
       }

@@ -23,7 +23,8 @@ vi.mock('./api', async () => {
   const { syntheticTypologyInput, syntheticPreviousTypology } = await import('./__tests__/typology');
   const { syntheticHistoryBatch } = await import('./__tests__/history-batch');
   const { syntheticLaunchSeries, syntheticSalesSeries, syntheticVglInput, syntheticStockSeries } = await import('./__tests__/launch-series');
-  return { fetchSpTemporalInput: async (_quarter: string, options: { signal: AbortSignal; groupBy?: 'Padrão' | 'Tipologia' }) => {
+  const { buildSpMunicipalPrices } = await import('./municipal-prices');
+  return { fetchSpMunicipalPrices: async (report: import('./model').SpPreview) => buildSpMunicipalPrices([], report), fetchSpTemporalInput: async (_quarter: string, options: { signal: AbortSignal; groupBy?: 'Padrão' | 'Tipologia' }) => {
     if (access.apiMode === 'error') throw new Error('private API diagnostic');
     if (access.apiMode === 'pending') return new Promise((_resolve, reject) => { options.signal.addEventListener('abort', () => { access.aborted = true; reject(new DOMException('cancelled', 'AbortError')); }); });
     if (options.groupBy === 'Tipologia') {
@@ -71,7 +72,9 @@ afterEach(()=>{cleanup();vi.useRealTimers();});
 
 describe('Geração automática SP institucional', () => {
   const generate=()=>{fireEvent.click(screen.getByText('Escolher capital'));fireEvent.click(screen.getByRole('button',{name:'Gerar relatório'}));};
-  const finished=()=>screen.findByRole('heading',{name:/Relatório gerado/});
+  // The shared history processor yields between batches. Wait for its actual
+  // completion instead of the default one-second DOM lookup deadline.
+  const finished=()=>screen.findByRole('heading',{name:/Relatório gerado/},{timeout:4000});
   it('executa todas as etapas com um clique e compartilha históricos',async()=>{
     render(<SpInstitutionalPage/>);generate();await finished();
     expect(access.neighborhoodCalls).toBe(1);

@@ -39,6 +39,6 @@ Deno.serve(async (req) => {
   } catch (error) {
     const code = error instanceof Error ? error.message : 'INTERNAL_ERROR';
     const status = code === 'UNAUTHORIZED' ? 401 : 500;
-    return json({ error: status === 401 ? 'Sessão GeoBrain não autorizada.' : 'Não foi possível consultar Empresas.', code }, status, headers);
+    return json({ error: status === 401 ? 'Sessão Geobrain não autorizada.' : 'Não foi possível consultar Empresas.', code }, status, headers);
   }
 });

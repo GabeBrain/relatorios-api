@@ -1,5 +1,307 @@
 # Rebrain (Plataforma) — Documento Vivo
 
+## 17/11/2026 — Maceió: classificações, varreduras vazias e IVV histórico — Codex
+
+- **Pedido/evidência:** diagnóstico mensal(3) com12disponíveis/48fontes/22editoriais;63consultas imobiliárias completas. Lucas pediu corrigir os42bloqueios imobiliários, mantendo6CAGED fora. Base `1c63413f`, main/origin0/0após fetch.
+- **Decisões:** Lucas confirmou Compacto→Compactos, Econômico→MCMV, Standard/Médio/Médio-Alto→Médio Padrão, Alto/Luxo→Luxo. Também autorizou zero para competências sem registros em consulta completa no mercado pesquisado; falhas e campos inválidos permanecem indisponíveis. Critérios/meses derivados registrados no JSON, sem alterar auditoria bruta.
+- **Entrega:** agrupamentos compartilhados entre mensal/trimestral; produtos explícitos em `work`; dormitórios numéricos; Médio-Alto preservado no escoamento; tabela histórica do IVV mantém meses válidos e sinaliza os divergentes, sem ajustar quantidades. [Evidências e limites](../features/relatorios-institucionais/maceio/VALIDACAO_DADOS_REAIS_2026-11-17.md).
+- **Validação:**156testes/14arquivos, tipos, lint e build aprovados. Sem token/acesso Opera para geração autenticada; validação real depende de publicação e novo JSON. Padrão visual existente preservado, sem alteração de coleta/carregamento. CAGED e SP intocados.
+- **Etapas/Pendências:** correções implementadas; conferir novos primeiros bloqueios e dados reais. Fluxos granulares ausentes, produtos ambíguos e divergências de estoque continuam bloqueados. Não considerar42slides resolvidos por plausibilidade. Sem push/deploy/Monday neste lote.
+- **Monday:** [Panorama Maceió / SINDUSCON](https://brain381753.monday.com/boards/18398638577/pulses/13149406169) — `13149406169`.
+
+## 17/11/2026 — Maceió: Garden e Cobertura nos dois modelos — Codex
+
+- **Entrega:** por autorização de Lucas, retirada a exigência literal `type_of_typology=Padrão` dos leitores de preços/oferta e tabelas do mensal/trimestral. Não existe comprovação dessa exclusão no original. Preservados todos os registros, pesos e verificações de escopo, fotografia, duplicatas e estoque municipal; CAGED e SP não alterados. Base `f7a94c94`.
+- **Validação:** 56 testes headless aprovados, incluindo Garden/Cobertura nos dois modelos, mesmos resultados para mesmos valores e bloqueio de estoque divergente. Sem token para nova geração autenticada; diagnóstico real ampliado registra estoque Maceió 4.863 granular contra 4.160 municipal em maio/2026.
+- **Etapas/Pendências:** restrição de tipo corrigida; ainda conferir estoque, lacunas municipais, padrões e produtos. Não declarar resolvidos os 49 slides não CAGED. Novo diagnóstico após publicação ainda necessário. Sem push/deploy/Monday.
+- **Monday:** [Panorama Maceió / SINDUSCON](https://brain381753.monday.com/boards/18398638577/pulses/13149406169) — `13149406169`.
+
+## 17/11/2026 — Maceió: coleta real completa, bloqueios de validação — Codex
+
+- **Evidência real:** novo JSON de maio/2026 às18:23UTC:5disponíveis/55fontes/0critérios/22editoriais, porém49fontes verticais+14horizontais e cadastro/lançamentos completos, sem falhasHTTP. Transporte corrigido observado; indicadores ainda bloqueados por dados/universo/cobertura. [Investigação](../features/relatorios-institucionais/maceio/VALIDACAO_DADOS_REAIS_2026-11-17.md).
+- **Achados:** séries vazias emPilar/Coqueiro/RioLargo; padrões sem correspondência; exigência literal de tipologiaPadrão; grupo inválido; balanço2021-03 divergente; produto horizontal ausente. JSON anterior não traz rótulos concretos/cobertura suficiente.
+- **Ação local:** diagnóstico agrega grupos/meses/somas/ausências e tipos reais de tipologia/padrão/produto, sem IDs, nomes ou cadastros individuais e sem nova coleta. Mês ausente continua null; zero explícito preservado. Não altera números, classificação ou universo.
+- **Padrão solicitado por Lucas:** JSON detalhado passa a ser padrão automático no mensal/trimestral Maceió, com resumo de transporte separado de validação e auditVersion. [Convenção para criação/evolução dos demais relatórios](../architecture/REPORT_DIAGNOSTIC_STANDARD.md), ligada às guidelines/decisões frontend; não migra motores paralelos neste lote.
+- **Validação:**10testes de auditoria/diagnóstico/exportação, tipos/lint e build final aprovados. Sem download autenticado real do novo arquivo; fluxo existente de worker/BrainLoadingState/cancelamento/retry preservado. Auditoria não altera os critérios nem elimina as55pendências.
+- **Esclarecimento:** Lucas pediu definir “tipologia diferente”; não autorizou inclusão/exclusão. Explicado que o campo type_of_typology não é dormitórios nem padrão de preço e que “especial” não estava comprovado. Decisão de universo continua aberta até ver valores reais.
+- **Etapas/Pendências:** fonte imobiliária real coletada, validação ainda pendente; publicar auditoria mediante autorização e obter evidência real para resolver classificações/lacunas. Não considerar55pendências corrigidas. Sem token/controleOpera para ensaio autenticado pelo agente. CAGED não alterado.
+- **Base/autoria:** `a16b482a`, main limpa/origin único0/0 após fetch; Codex. Commit local deste lote; sem push/deploy/Monday.
+- **Monday:** [Panorama Maceió / SINDUSCON](https://brain381753.monday.com/boards/18398638577/pulses/13149406169) — `13149406169`.
+
+## 17/11/2026 — Maceió trimestral: fontes e INCC-DI — Codex
+
+- **Pedido/evidência:** Lucas forneceu diagnóstico2T2026 com0disponíveis/59fontes/5critérios/23editoriais e pediu resolver fontes exceto CAGED, reforçado explicitamente. Mensal `2cea2276` foi enviado com autorização e remoto0/0 confirmado antes deste lote.
+- **Entrega:** contratos compartilhados já corrigidos no mensal atendem fontes verticais/horizontais/comerciais trimestrais; critério monetário estendido ao trimestral com INCC-DI explícito na prévia/arte/metodologia/JSON, basejunho/2026 no2T. Preservados6municípios, fluxo de3meses, estoque de fechamento e comercial exclusivo da capital. CAGED/job/ponte/Scheduler sem alteração.
+- **Validação:**35testes focados, tipos/lint e6cenários de navegador aprovados; JSON efetivamente baixado e seis arquivos parseados. Cenário completo:64disponíveis+23editoriais. Com CAGED indisponível:58disponíveis+6fontes(somente9–14)+23editoriais. [Contrato e evidências](../features/relatorios-institucionais/maceio/FONTES_TRIMESTRAL_2026-11-17.md). Build final de produção aprovado (exit0).
+- **Limite:** dados sintéticos no headless, sem nova geração autenticada na API real; faltam token local e controle Opera. Depois da publicação autorizada, gerar novamente2T2026 e conferir acesso/cobertura/campos no JSON real.
+- **Base/autoria:** `2cea2276`, main/origin único0/0 antes da alteração; Codex. Commit desta entrega local; sem push/deploy/Monday.
+- **Monday:** [Panorama Maceió / SINDUSCON](https://brain381753.monday.com/boards/18398638577/pulses/13149406169) — `13149406169`.
+
+## 17/11/2026 — Maceió mensal: fontes públicas, histórico v2 e INCC-DI — Codex
+
+- **Pedido/evidência:** diagnóstico real de maio/2026 com0disponíveis/55fontes/5critérios/22editoriais; corrigir mensal, excluindo CAGED. Lucas autorizou **INCC-DI** e pediu identificação explícita da série.
+- **Correção:** recursos temporais não exigem mais cidade/UF por linha, conforme OpenAPI; identidade vem da query autorizada e conflitos explícitos são rejeitados. Cursores podem omitir filtros, com próxima chamada reconstruída no escopo original e totais/contagem estáveis. Histórico detalhado usa POST v2 já adotado no projeto, parser compartilhado de BuildingSource, sem cortar fotografias por período. Timeout60s/retry limitado; falhas sanitizadas categorizadas e HTTP no JSON.
+- **INCC-DI:** no mensal, VGL/VGV26–28/37–38 corrigidos até o fechamento; série/base identificadas na prévia, arte, metodologia e JSON. Trimestral não recebe série presumida. Ausência de índice/nominal continua pendente. [Contrato e limites](../features/relatorios-institucionais/maceio/FONTES_MENSAL_2026-11-17.md).
+- **Validação:**134testes do módulo, tipos/lint e build final de produção aprovados.12cenários finais de navegador aprovados sem erros de página; mensal/trimestral, desktop/mobile, claro/escuro e fonte sucesso/vazia/erro; download real do JSON e indicação INCC-DI verificados. Mensal sintético:60disponíveis+22editoriais; com CAGED indisponível,54disponíveis+6fontes (somente9–14)+22editoriais. Captura desktop revisada; sem coleta autenticada nova.
+- **Limite/pendências:** não há token Geobrain configurado nem controle da sessão Opera; não foi refeita coleta autenticada de maio/2026. Após publicação autorizada, gerar novo JSON real e conferir permissões v2/cobertura/campos nominais/categorias. CAGED/job/rota/Scheduler permanecem fora deste lote.
+- **Base/autoria:** `7b57f0ce`, main limpa, origin único0/0 após fetch; Codex. Commit desta entrega local. Sem push/deploy/Monday.
+- **Monday:** [Panorama Maceió / SINDUSCON](https://brain381753.monday.com/boards/18398638577/pulses/13149406169) — `13149406169`.
+
+## 17/11/2026 — Maceió: prévia limpa e diagnóstico JSON — Codex
+
+- **Pedido:** Lucas apontou inventário/“sem texto” e seletor de preços fora do padrão; faltavam total aguardando fonte e download JSON.
+- **Entrega:** removidos inventário e ação de conferir estrutura, seletores técnicos e aviso duplicado acima do slide. Prévia mantém navegação/arte; preços usam ponderação histórica já implementada, com critério registrado na origem/diagnóstico. INCC não é presumido; valores corrigidos aguardam definição. Blueprint interno preservado.
+- **Padrão reutilizado:** diagnóstico Fortaleza em worker, BrainLoadingState, cancelar/retry e download JSON. Resumo real por slide: disponível, aguardando fonte, revisão editorial e aguardando critério. Campos permitidos de seleção, agregados e cobertura, sem chave de sessão/token ou históricos individuais no arquivo. [Contrato e evidências](../features/relatorios-institucionais/maceio/INTERFACE_DIAGNOSTICO_2026-11-17.md).
+- **Validação:** 126 testes do módulo + 3 testes da exportação; typecheck/lint/build aprovados. 12 cenários da página real em navegador headless, APIs sintéticas paginadas/lentas, mensal/trimestral, desktop/mobile, claro/escuro, fonte sucesso/vazia/erro; arquivo JSON efetivamente baixado e conteúdo validado. Sem geração autenticada real ou deploy. Captura desktop revisada.
+- **Etapas/Pendências:** correção de interface pronta localmente; aguarda autorização de push. Homologação do critério de preços/INCC e demais fontes continuam pendentes. Carga CAGED `fm8vj` passou maio e chegou a junho/2017, segundo logs do usuário; não concluída. Não altera job/ponte/Scheduler.
+- **Base/autoria:** `ab8201eb`, main, origin único 0/0 após fetch; Codex. Commit desta entrega. Sem push ou escrita Monday.
+- **Monday:** [Panorama Maceió / SINDUSCON](https://brain381753.monday.com/boards/18398638577/pulses/13149406169) — `13149406169`.
+
+## 17/11/2026 — Maceió: correção da anomalia CAGED maio/2017 — Codex
+
+- **Ambiente/funcionalidade:** importador MTE dos slides de emprego Maceió; base `c6069dc5`, main, origin único 0/0 após fetch.
+- **Evidência remota fornecida pelo usuário:** dataset/tabela/bucket/conta e job criados; imagem v1 construída. Execução `caged-mte-loader-mxl8t` falhou às 15:58 UTC em maio/2017, sem snapshot completo publicado. Um registro de 2.450.613 tem subsetor `{ñ`, classes `000-1`, subclasse `5812302`, UF42 e saldo -1; ajustes sem anomalia. Edge publicada pelo usuário; 401 sem credencial observado anteriormente. Proxy identificado em us-central1, sem mudança da ponte existente.
+- **Correção local:** exceção estrita por competência/kind/UF/saldo/subsetor/classes/subclasse, no máximo uma ocorrência; preserva saldo em SC/BR e outros, sem inferir setor antigo pela CNAE nova. Contagem auditável nos logs/componentes/manifesto; revisão do parser invalida checkpoints e identidade de snapshot. Demais valores inesperados continuam bloqueados.
+- **Validação/limites:** 7 testes Python aprovados, incluindo conservação dos saldos, proveniência e rejeição de variantes/duplicata. Arquivo real completo e novo job ainda não ensaiados. Browser Opera bloqueado pela ferramenta, sem controle remoto; comandos executados pelo usuário são a evidência GCP. [Procedimento e diagnóstico](../../gcp/caged-mte/README.md).
+- **Etapas/Pendências:** recursos GCP e job v1 existem; bootstrap falhou. Próximo: publicar correção mediante autorização, ensaio real de maio sem escrita e nova imagem/job; depois carga integral, rota do proxy, Scheduler e homologação dos dois modelos. Tratamento conservador em outros requer homologação do analista.
+- **Autoria/commits:** Codex; commit desta entrega local. Sem push/deploy ou escrita Monday nesta correção.
+- **Monday:** [Panorama Maceió / SINDUSCON](https://brain381753.monday.com/boards/18398638577/pulses/13149406169) — `13149406169`.
+
+
+## 17/11/2026 — Maceió: CAGED/MTE, antigo e novo, integrado localmente — Codex
+
+- **Ambiente/funcionalidade:** `/rebrain/relatorios-institucionais/maceio` — emprego9–14 mensal/trimestral, rota ainda oculta.
+- **O quê:** fonte MTE autorizada por Lucas; importador estatístico+ajustes2017–2019 e MOV+FOR−EXC desde2020, snapshots agregados/revisões, rota HMAC compatível com Empresas/Empregados, Edge e seis slides dinâmicos. Sem microdados no Lovable ou chaves privadas. Competência/versão preservadas, ausente não vira zero e cancelamento/retry tratados.
+- **Evidência:** pilotos reais set/2026 e dez/2019 processados; quatro totais de setembro conciliados ao XLSX MTE.123testes Maceió,6Python,4Edge,3rota,9regressões do proxy em cópia temporária;144cenários visuais+24revisões setoriais,12cenários de página com fonte sintética/lenta, tipos/lint/build aprovados. Regressões amplas reproduzem2falhas FIERGS prévias, domínio/shared sem diff. [Contratos, hashes e limites](../features/relatorios-institucionais/maceio/CAGED_INTEGRACAO_2026-11-17.md).
+- **Decisões:** preservar composição original sem marca nova de quebra2020; ressalva metodológica na origem/documentação. Atraso de1,6s só no QA local, sem espera artificial em produção. RAIS não preenche CAGED.
+- **Impacto em Etapas/Pendências:** implementação local pronta; **ativação remota pendente**: tabela/bucketGCP, bootstrap completo desde201701, montar/publicar rota e EdgeLovable, agendar atualização e geração autenticada/homologação. Pilotos não equivalem ao histórico inteiro. Exportação PPTX/PDF permanece separada.
+- **Arquivos:** módulo Maceió, `gcp/caged-mte/`, `supabase/functions/caged-report`, config, diagnósticos e documentação. **Commits:** `50d88663` (implementação); fechamento documental neste registro.
+- **Monday:** [Panorama Maceió / SINDUSCON](https://brain381753.monday.com/boards/18398638577/pulses/13149406169) — `13149406169`. Sem escrita. Sem push/deploy.
+
+## 17/11/2026 — Maceió: acesso CAGED e estimativa mensal/trimestral — Codex
+
+- **Ambiente/funcionalidade:** `/rebrain/relatorios-institucionais/maceio` — investigação da fonte de emprego 9–14, sem mudança runtime.
+- **O quê:** plugin BigQuery confirmou leitura da conta do setor; MOV/FOR/EXC acessíveis somente até março/2026. Fonte MTE setembro baixada (45,1 MB), cabeçalhos/valores conferidos e limites históricos identificados. Ponte HMAC Empresas/Empregados localizada. [Evidências, projeção de consumo e pendências](../features/relatorios-institucionais/maceio/CAGED_ACESSO_E_CONSUMO_2026-11-17.md).
+- **Consumo:** arquitetura proposta de agregados, uma query/uma tabela: ~10 MB por mensal ou trimestral sem cache, ~160 MB/ano em 12+4 edições. Dry run não retornou bytes devido à segurança por linha; não é medição runtime nem custo total da infraestrutura.
+- **Impacto em Etapas/Pendências:** acesso do agente ao BigQuery comprovado; decisão MTE/Pro, histórico ajustado UF × setor/2017–2019, integração da ponte e atualização automática permanecem pendentes. Nenhuma geração autenticada pela ponte, deploy ou agendador criado.
+- **Arquivos:** documento CAGED de investigação, PLAN Maceió e STATUS do handoff. **Commits:** base `e8a067fb`; investigação no commit desta entrada.
+- **Monday:** [Panorama Maceió / SINDUSCON](https://brain381753.monday.com/boards/18398638577/pulses/13149406169) — `13149406169`. Sem escrita. Sem push.
+
+## 17/11/2026 — Maceió/SINDUSCON-AL: todos os restantes, prévia82/87 — Codex
+
+- **Ambiente/funcionalidade:** `/rebrain/relatorios-institucionais/maceio` — mensal61–82 e trimestral61–87, rota ainda oculta.
+- **Feito:** estado atual (ano/padrão/dormitórios/área/preços/estágio/VGV), horizontal capital/RM, comercial exclusivo trimestral e equipe/fechamento. Tabelas SVG dinâmicas pela referência, sem fotografia de números antigos; fotos/artes editoriais preservadas por edição. Fontes horizontal/comercial separadas do vertical, paginadas, canceláveis e reconciliadas com estoque municipal. Critérios de universo/capacidade/classificação/preços explicitados para conferência. Seletores preservados.
+- **Validação:**107testes Maceió aprovados;676verificações visuais das posições82/87,196de revisão dos restantes e16cenários da página real com API sintética paginada/lenta, núcleo válido/reprovado e horizontal/comercial. Lint/tipos/build aprovados;34regressões de cálculo/referência do handoff aprovadas, sem alterar outros motores. [Composição, critérios e evidências](../features/relatorios-institucionais/maceio/SLIDES_RESTANTES_2026-11-17.md).
+- **Pendências/próximo:** usuário confirmou **CAGED9–14 dinâmico pela referência** como próxima frente. RAIS anual não substitui CAGED; nenhuma integração BigQuery foi feita nesta etapa. Exportação PPTX/PDF, fontes reais e homologação de métodos/INCC continuam pendentes. Todas as posições na prévia não significam relatório homologado ou exportador pronto. Sem geração autenticada/deploy observado.
+- **Base Git:** `dcd81c89`, main limpa, origin único0/0 após fetch. Os commits anteriores41–60 já foram enviados com autorização; este novo lote fica local até decisão de publicação.
+- **Commits:** `97b369cd` (implementação, fontes, artes e testes); documentação neste fechamento. Revisão final de24capturas67–69 e typecheck aprovados após o último ajuste de rótulos.
+- **Monday:** [Panorama Maceió / SINDUSCON](https://brain381753.monday.com/boards/18398638577/pulses/13149406169) — `13149406169`. Sem escrita.
+
+## 17/11/2026 — Maceió/SINDUSCON-AL: prévia até60, oferta/IVV/preços — Codex
+
+- **Ambiente/funcionalidade:** `/rebrain/relatorios-institucionais/maceio` — prévia mensal e trimestral, acesso somente pela rota.
+- **Feito:** navegação/ampliação1–60 com arte original; escoamento somente no mensal; oferta por tipologia/padrão; IVV mensal, histórico anual e por área/mês/12meses; evolução de preços e comparação por padrão/tipologia. Preços exigem escolha explícita de ponderação para conferência. Estoque usa fechamento; histórico atual não preenche fotografias antigas; fluxos/estoques granulares reconciliados com municipais. Acrescentada fonte independente stock/Tipologia, sem mudar os outros motores. Seleção e nomes mensal/trimestral preservados a pedido do usuário. CAGED permanece adiado.
+- **Validação:**81testes Maceió,480verificações de slides e8cenários da página real no Edge com API sintética/resposta lenta aprovados; lint e build de produção aprovados. Regressão ampla565aprovados/2ignorados/2falhas em seleção FIERGS, reproduzidas isoladamente; domínio e dependências compartilhadas sem diff, fora deste lote. [Contratos/evidências/limites](../features/relatorios-institucionais/maceio/SLIDES_41_60_2026-11-17.md).
+- **Pendências:**61–80 e fechamento, exportação, disponibilidade real dos campos granulares/stock por Tipologia e homologação de IVV/escoamento/preços/INCC pelo analista. Tabela IVV anterior à janela ano−5 mostra ausência, não história inventada. Sem geração autenticada Geobrain, BigQuery ou deploy confirmado nesta sessão.
+- **Base Git:** `bce4228a`, main limpa e origin único0/0 após fetch na abertura. Código e documentação commitados localmente; envio exige autorização.
+- **Commits:** `017fe79e` (implementação, artes e testes); documentação neste registro de fechamento.
+- **Monday:** [Panorama Maceió / SINDUSCON](https://brain381753.monday.com/boards/18398638577/pulses/13149406169) — `13149406169`. Sem escrita.
+
+## 16/11/2026 — Maceió/SINDUSCON-AL: núcleo municipal vertical integrado (bloco 3) — Lucas (Inovação), com Claude
+
+- **Feito:** coleta autenticada por município (`api.ts`) das fontes `temporal-analysis-city/releases|sales|stock` com amostra de recorte, paginação curta validada e guardas de competência/universo; reconciliação do balanço por padrão e total (`market.ts`) preservando vendas negativas e sem transformar ausência em zero; hook `useMaceioMarket` com etapas, cancelamento, invalidação por token/escopo/período e retry que reconsulta fontes reprovadas (sem congelar erro em cache); painéis de etapas e de balanço ligados à página, com botão "Gerar prévia vertical". O conjunto mensal exige os 7 municípios (com Coqueiro Seco); o trimestral, 6.
+- **Decisão D6:** o núcleo nasce no módulo Maceió, sem extração transversal de Fortaleza nesta sessão, para não arriscar os 672 testes existentes; extração fica para quando o contrato estiver comprovado em runtime pelos dois consumidores.
+- **Validação:** 42 testes do módulo (API com request injetado: 401/429, paginação hostil, retry preservando sucessos, cancelamento, token nunca serializado); tipos/lint/build limpos (chunk lazy 51,87 kB). Regressão relatórios + Secovi/FIERGS 1181/1186: as 3 falhas são timeouts de 5s pré-existentes nesta máquina (SP passa isolado; FIERGS falha também na base, pasta sem nenhum diff).
+- **Pendências:** geração autenticada real do recorte AL; fontes complementares (CAGED, VGL/VGV+INCC, preços, IVV) e composições por bloco; diagnóstico exportável; exportação PPTX/PDF; homologação do analista.
+- **Monday:** [Panorama Maceió / SINDUSCON](https://brain381753.monday.com/boards/18398638577/pulses/13149406169) — `13149406169`
+
+## 16/11/2026 — Maceió/SINDUSCON-AL: estrutura e rota oculta (Etapa 2) — Lucas (Inovação), com Claude
+
+- **Feito:** domínio `src/features/relatorios-institucionais/maceio/` com `references.json` gerado do inventário real (82 posições mensais / 87 trimestrais, hashes e drive ids), `model.ts` (recorte por edição — mensal 7 municípios com Coqueiro Seco, trimestral 6 —, validação integral contra o catálogo autorizado, período, blueprint local nas posições originais com progresso/cancelamento) e `MaceioInstitutionalPage.tsx` (seletor de periodicidade/período, GeoApiScopeEngine sem fallback IBGE, `BrainLoadingState`, abas Estrutura/Referências/Metodologia). Rota lazy `/rebrain/relatorios-institucionais/maceio` registrada só em `App.tsx` — **sem item em menu, busca ou início**, por decisão de Lucas.
+- **Validação:** 16 testes novos do modelo aprovados; regressão de `relatorios-institucionais` com 671/672 (única falha: timeout pré-existente de `sp/market-details.test.tsx` sob carga, passa isolado); `tsc`, `eslint` e `npm run build` limpos, página em chunk lazy próprio (31,97 kB). Runtime no navegador não verificado (sem sessão autenticada); asserções headless no vitest.
+- **Etapas:** Etapas 1 e 2 concluídas. Próximo bloco: contrato de fontes por indicador (coleta independente por fonte, lição das 64 pendências de Fortaleza), depois composições mensais na ordem original.
+- **Pendências:** endpoints por indicador a confirmar; fórmulas (IVV, escoamento, ponderação de preços) e INCC/CAGED em comprovação; render dos slides achatados; geração autenticada e homologação do analista.
+- **Monday:** [Panorama Maceió / SINDUSCON](https://brain381753.monday.com/boards/18398638577/pulses/13149406169) — `13149406169`
+
+## 16/11/2026 — Maceió/SINDUSCON-AL: inventário comprovado dos originais (Etapa 1) — Lucas (Inovação), com Claude
+
+- **Feito:** extração OOXML dos dois PPTX de referência na ordem real de `presentation.xml`, com hashes conferidos contra o manifesto. **Periodicidade comprovada:** maio/2026 é a edição mensal (82 slides, séries de 25 meses) e junho/2026 é a trimestral 2T2026 (87 slides, séries de 17 trimestres, acumulado semestral, rankings 2T, bloco comercial exclusivo). Recorte por edição: mensal com 7 municípios (inclui Coqueiro Seco), trimestral com 6.
+- **Documentos:** `docs/features/relatorios-institucionais/maceio/` ganhou `PLAN.md`, `MAPA_SLIDES.md` (169 posições mapeadas com bloco, composição, janela e fonte candidata), `MATRIZ_INDICADORES.csv` (contrato inicial, todas as linhas "Não executado"), `DECISOES.md` (D1–D5 e 5 perguntas ao analista) e `EVIDENCIAS.md`.
+- **Decisões de Lucas na sessão:** acesso somente por rota, sem menu/busca/início; ordem dos slides e padrão visual idênticos ao original; base nos sistemas FIERGS/Secovi, SP institucional e Fortaleza.
+- **Limites:** nenhuma fonte consultada, nenhum endpoint confirmado, slides achatados como imagem pendem de render; sem homologação.
+- **Etapas:** Etapa 1 concluída; Etapa 2 (estrutura e rota) em andamento na mesma sessão.
+- **Monday:** [Panorama Maceió / SINDUSCON](https://brain381753.monday.com/boards/18398638577/pulses/13149406169) — `13149406169`
+
+## 13/11/2026 — Assistente de Projetos: Sugestão de análise falhava em estudos com vários lotes — Diego Cabrero, com Claude
+
+- **Causa (confirmada por SQL de leitura):** no Sabel (403 slides), o Luna devolveu memos de lote com 9,5 e 10,5 KB, contra o teto fixo de 8 KB herdado do perfil mini. As duas tentativas falharam pagando um lote cada e não chegaram à compilação. A tela mostrava só "Não foi possível concluir esta etapa".
+- **Correção:** perfil `luna-high-2026-11-13`, com o prompt de lote pedindo até 5.000 caracteres e o teto calculado pela janela da compilação (24 KB até 3 lotes, 9,2 KB com 10). A falha passa a mostrar o motivo salvo, sem dado financeiro. Perfis antigos ficaram intactos. Regras na Versão 0.76 de `LIVE_regras_corretor_vocacionais.md`.
+- **Validação:** 397 testes do Corretor e TypeScript/lint aprovados; sem IA real e sem Deno local.
+- **Pendências:** publicar `corretor-execution` e `analyze-consulting-suggestion` e o frontend no Lovable; reteste real do Sabel com uma tentativa só. Sem migration.
+- **Monday:** —
+
+## 13/11/2026 — Slide Maker: T8 aceita "déficit" e "superávit" (prompt 1.2) — Diego Cabrero, com Claude
+
+- **Causa:** o dicionário `hunspell-pt-br` do Debian não traz "déficit", grafia do VOLP; no dourado 1 era o único alerta T8, falso positivo.
+- **Correção (DET):** glossário do `lib/lint_pptx.py` com `déficit(s)` e `superávit(s)`. T8 continua ALERTA. `VERSAO_PROMPT` 1.2 em `LIVE_regras_slide_maker.md`.
+- **Validação:** build `c602ae0a` com 50 testes da `lib/`, nenhum pulado (hunspell real na imagem), incluindo o novo teste sobre a referência; 89 testes do serviço. Revisão `slide-maker-agent-00009-m4x` (`sha256:9b925818…`), agente real e isolamento aprovado.
+- **Pendências:** Diego remove os diagnósticos `6b6b2f64…` e `d7296bae…` no SQL editor do Lovable; decidir o ajuste F4 do dourado; aceite com o ponto focal.
+- **Monday:** —
+
+## 13/11/2026 — Slide Maker: decimal pt-BR no render (prompt 1.1) — Diego Cabrero, com Claude
+
+- **Causa:** os rótulos de gráfico são números com código de formato; o separador vem do idioma de quem renderiza. O PowerPoint da equipe (pt-BR) mostra vírgula, mas o LibreOffice da imagem, em `C.UTF-8`, mostrava `3.31`, tanto nas miniaturas do QA quanto na revisão visual do próprio agente em F3/F4.
+- **Correção (DET):** `lib/render.py` grava `ooSetupSystemLocale = pt-BR` no perfil temporário do LibreOffice. `VERSAO_PROMPT` 1.1 registrado em `LIVE_regras_slide_maker.md`.
+- **Validação:** referência renderizada na imagem publicada antes/depois: slide 9 com `8.8` → só `8,8`. Teste obrigatório no build (`9,2` presente, `9.2` ausente) e perfil com pt-BR; build com 49 testes da `lib/`; 89 testes do serviço. Revisão `slide-maker-agent-00008-fkb` (`sha256:c8b29fcf…`), agente real e isolamento aprovado.
+- **Não muda:** o PPTX entregue. Office configurado em inglês segue o idioma de quem abre.
+- **Pendências:** Diego remove os diagnósticos `6b6b2f64…` e `d7296bae…` (SQL com contagem 2); calibrar T8 ("déficit"); decidir o ajuste F4 do dourado.
+- **Monday:** —
+
+## 13/11/2026 — Slide Maker: QA do deck dourado 1 (v1) — Diego Cabrero, com Claude
+
+- **Verificação:** o PPTX baixado por Diego passou pela imagem publicada (`sha256:54a8557c…`): render dos 17 slides sem erro e lint com **0 falhas 🔒 e 11 alertas**; miniaturas conferidas por hash e inspecionadas. Identidade correta: logo, paleta, Neo Sans/Montserrat, slide final oficial do Fábio e fontes nos rodapés. Cópia temporária em `diagnosticos/` do bucket de marca removida após o QA.
+- **Achados:** (1) rótulos de gráfico com ponto decimal (`3.31`, `+87.0%`) enquanto o texto usa vírgula: vem da brain-deck, o deck de referência tem o mesmo padrão e o lint não cobre; (2) T3, densidade de 66 a 101 palavras em 6 slides (referência ~40); (3) T8 marca "déficit" como erro, falso positivo do dicionário; (4) slide 16 com metade inferior vazia; (5) capa sem nome, cidade e data do evento, como o próprio agente avisou.
+- **Não verificado:** exatidão dos números e fontes (cabe a Diego e ao ponto focal); custo do trabalho (console da Anthropic).
+- **Pendências:** decidir o ajuste F4 (dados do evento) dentro de US$ 23; corrigir o decimal pt-BR nos gráficos da brain-deck e calibrar T8 ("déficit") — mudança de ferramenta exige subir `VERSAO_PROMPT` e registrar em `LIVE_regras_slide_maker.md`; remover os diagnósticos `6b6b2f64…` e `d7296bae…`.
+- **Monday:** —
+
+## 13/11/2026 — Slide Maker: dourado 1 entregue (v1) e envio de 190 MB comprovado — Diego Cabrero, com Claude
+
+- **Dourado 1 (`0c232f3e…`), agente real:** F1 em 82 s, F2 em 3,5 min, F3 em 9,7 min (18h42–18h53 UTC). Deck v1 com 17 slides (~14 min), tese em 4 blocos, dados atualizados até 2026 e slide final do Fábio. O próprio agente sinalizou que faltam nome, cidade e data do evento (capa e slide da cidade). Custo a conferir no console da Anthropic (o log não registra custo, §11).
+- **Correção de interface:** o card da entrega chega ao chat antes de a fase fechar; nesse intervalo mostrava "Substituído pela v0". Entrega com versão ≥ `versao_atual` passa a ser tratada como vigente (teste novo em `HistoricoVersoes.test.tsx`; 93 testes da feature).
+- **Envio grande:** com `slide-maker-entrada` em 200 MB (SQL de Diego), PUT direto de 60 MB (39 s) e 190 MB (96 s) aceitos; a conclusão leu e recusou o tipo trocado de propósito, apagando o objeto, sem iniciar fase.
+- **Chave:** versão 1 do segredo destruída no Secret Manager; a revogação da chave antiga no console da Anthropic fica com Diego.
+- **Pendências:** revisão do deck v1 por Diego/ponto focal e decisão sobre um ajuste F4 (nome, cidade e data do evento) dentro do limite de US$ 23; remover os trabalhos de diagnóstico `6b6b2f64…` e `d7296bae…`; aceite.
+- **Monday:** —
+
+## 13/11/2026 — Slide Maker: causa do erro do C5 (segredo Anthropic corrompido) e correção — Diego Cabrero, com Claude
+
+- **Causa:** a versão 1 de `slide-maker-anthropic-api-key` tinha 644 caracteres, com 8 `DEL` (U+007F), rastro de chave colada num terminal e "corrigida" com Backspace. O Node recusa o valor como cabeçalho, e a CLI do agente recebia `API Error: 400 status code (no body)`. Diagnóstico por um job pontual do Cloud Run (removido), que só imprimiu o formato, sem o valor.
+- **Correção:** Diego criou a versão 2 pelo console. Formato válido (108 caracteres) e chamada mínima ao `claude-opus-5-5` com 200 "ok". Serviço apontado para `:2`; versão 1 desativada (preservada). Nova regra DET: com `AGENTE=claude`, chave fora de `^sk-ant-[A-Za-z0-9_-]+$` impede a revisão de subir, sem expor o valor (teste em `unidades.test.ts`).
+- **Resultado:** o dourado 1 (`0c232f3e…`) concluiu a F1 com o agente real em 82 s e aguarda as respostas de Diego. Revisão `slide-maker-agent-00007-669` (imagem `sha256:54a8557c…`, 48 testes da `lib/`; 89 testes do serviço).
+- **Pendências:** revogar a chave antiga no console da Anthropic; subir `slide-maker-entrada` para 200 MB (o limite global do Storage já é 3 GB, mas o do bucket prevalece: 60 MB ainda recusado às 18h30); concluir F2–F4 do dourado dentro de US$ 23; remover o trabalho de diagnóstico `6b6b2f64…`.
+- **Monday:** —
+
+## 13/11/2026 — Slide Maker: arquivos de até 200 MB por envio direto e diagnóstico do C5 — Diego Cabrero, com Claude
+
+- **Mudança:** upload passa a ir do navegador direto ao Storage por URL assinada (`POST /jobs/:id/envios` → PUT → `POST /jobs/:id/envios/concluir`), com progresso real no `BrainLoadingState`. Limites: 200 MB por arquivo, 500 MB por trabalho (decisão de Diego). Motivo: o Cloud Run recusa corpo acima de 32 MiB, então até os 50 MB anunciados falhariam. A conclusão confere tamanho e assinatura binária lendo só o início do objeto (Range) e remove o que não foi confirmado, porque o workspace baixa todo o prefixo. Ponte do Lovable sem mudança. A rota multipart continua para compatibilidade.
+- **C5:** agente real ligado com o limite de **um** trabalho dourado (≤ US$ 23) aprovado por Diego. O dourado 1 (`0c232f3e…`) falhou na F1: a API da Anthropic recusou a primeira chamada (1 turno, 3 s, `erro_api`), com custo desprezível. O serviço agora registra o status e a mensagem da API (sem custo nem conteúdo, preservando §11/§12).
+- **Validação:** 88 testes do serviço (6 novos de envio e 1 de erro de API), 92 da interface, typecheck/ESLint, E2E local 2/2 pelo envio direto e build com 48 testes da `lib/`. No serviço publicado, sem iniciar F1: PUT do navegador a partir de `geobrain-relatorios.lovable.app` = 200; 201 MB recusado pelo serviço; conclusão leu o objeto via ponte e recusou tipo trocado. [Evidência](../features/slide-maker/evidencias/2026-11-13_envio_direto_e_c5.json).
+- **Não verificado:** envio real acima de 50 MB, que o Storage recusou (`EntityTooLarge`) até o limite subir no Lovable.
+- **Pendências:** Diego sobe o limite de `slide-maker-entrada` (e o global do Storage, se menor) para 200 MB; motivo exato da recusa da API e nova tentativa do dourado 1; trabalhos de teste incluídos no SQL de limpeza.
+- **Monday:** —
+
+## 13/11/2026 — Slide Maker: ativos oficiais, build final, QA visual e publicação do serviço — Diego Cabrero, com Claude
+
+- **Estado:** serviço final `slide-maker-agent` publicado (público, revisão `slide-maker-agent-00002-cx5`) com **agente simulado**; distinto do `slide-maker-diagnostico`, que segue privado e intocado. Interface conectada via `VITE_SLIDE_MAKER_AGENT_URL` no `.env` (vale no Lovable após push).
+- **Feito:** 20 ativos oficiais enviados a `marca/` no bucket privado, MD5 idênticos aos originais. gcloud instalado e autenticado na máquina de Diego com `inovacao.grupo.brain@gmail.com`. Build C1 com 48 testes da `lib/` aprovados, nenhum pulado. C2 com bridge secret, sem chave Anthropic montada. C3: `/health` com isolamento `aprovado:true`, `/internal/fase` sem OIDC → 403, F1–F4 em 19 etapas (`testar-infra.py`), CORS aceita `*.lovable.app` e recusa outras origens.
+- **Correções (DET, sem mudança de prompt):** `test_brain_deck.py` avaliava `SERVICO.parents[1]` mesmo com `SLIDE_MAKER_REFERENCIA` definida e quebrava na imagem (`/app`); `lib/render.sh` chegava sem bit de execução quando o build é enviado do Windows, e o prompt manda o agente chamá-lo direto (o build agora aplica `chmod` e falha sem ele); novo `.gcloudignore` exclui `.marca/` local, que o gcloud enviaria por não ler `.gitignore` aninhado.
+- **Validação visual:** a imagem final gerou o deck de referência com a marca oficial, 18 PNGs conferidos um a um (miniaturas com hash), lint com 0 falhas 🔒 e 8 alertas. E2E `tests/slide-maker.spec.ts` no Edge, Vite local contra o serviço publicado: 2/2.
+- **Não verificado:** interface publicada pelo Lovable (depende do push); se a atualização veio por Realtime Broadcast ou pela consulta de 5 s.
+- **Evidência:** [JSON sanitizado](../features/slide-maker/evidencias/2026-11-13_publicacao_final.json); [roteiro](../features/slide-maker/DEPLOY_GCP.md).
+- **Pendências:** C5 com limite aprovado por Diego de **um** trabalho dourado (≤ US$ 23), confirmado com ele antes de executar; limpar/ocultar trabalhos de teste e diagnóstico que aparecem em "Todos os trabalhos" antes do aceite; push (decisão de Diego); aceite de Diego com o ponto focal e as partes envolvidas (sem aprovação obrigatória de Gabriel); remover o segredo obsoleto `slide-maker-supabase-service-role-key`, que nenhuma revisão usa.
+- **Monday:** —
+
+## 13/11/2026 — Slide Maker: infraestrutura testada no Google com imagem sintética — Gabriel / Codex
+
+- **Estado:** diagnóstico privado publicado e fluxo simulado verificado no Cloud Run; não é publicação do serviço final.
+- **Validação:** build real, upload/leitura byte a byte da imagem sintética no bucket privado, Artifact Registry, Cloud Run gen2, fila real com OIDC, ponte Lovable/banco/Storage, F1–F4, versões v1/v2 e downloads privados. `/internal/fase` sem OIDC e trabalho sem token recusados. `/health` final com todas as verificações de isolamento aprovadas. Sem chave Anthropic montada ou chamadas pagas ao modelo.
+- **Correções comprovadas:** leitura do bucket de fontes concedida somente à conta de build; máquina padrão após cota recusar E2_HIGHCPU_8; `/health` porque Cloud Run intercepta `/healthz`; `--as-pid-1` impede ambiente original no processo auxiliar bwrap em `/proc/1/environ`. Diagnóstico com sentinela confirmou reprovação antes e aprovação depois, sem retirar verificações.
+- **Permissões:** conta profissional `inovacao.grupo.brain@gmail.com` Owner e `actAs` nas três contas confirmados. Build/deploy reais feitos com ela; login na máquina de Diego ainda precisa ser conferido lá.
+- **Evidências e procedimento:** [JSON sanitizado](../features/slide-maker/evidencias/2026-11-13_infra.json), [roteiro atualizado](../features/slide-maker/DEPLOY_GCP.md), `scripts/slide-maker/testar-infra.py`. Revisão privada `slide-maker-diagnostico-00002-fbc`; 80 testes locais aprovados e 2 testes Linux pulados no Windows, complementados pelo ensaio remoto.
+- **Pendências:** 20 ativos oficiais; build final com fontes/renderização/lint obrigatórios; publicação final e interface/CORS; agente real/trabalhos dourados após autorização de custo. Não repetir migrations/segredos e nunca exportar service_role. Diagnóstico e PNG ficam fora dos nomes/destinos produtivos.
+- **Monday:** —
+
+
+## 12/11/2026 — Slide Maker: banco aplicado no Lovable Cloud (DEPLOY_GCP Parte A) — Diego Cabrero, com Lovable
+
+- **Mudança:** a migration `supabase/migrations/20261112160000_slide_maker.sql` foi aplicada pelo Lovable no banco do Rebrain. Os buckets foram criados pela ferramenta de Storage do Lovable, porque ela não aceita `INSERT` em `storage.buckets` numa migration; nomes, privacidade e limites são os do arquivo. Nenhum arquivo do frontend nem de `supabase/functions/` foi alterado.
+- **Validação (consultas no SQL Editor, 12/11/2026 17h23):**
+  - as 6 tabelas `slide_maker_*` existem;
+  - os buckets `slide-maker-entrada`, `slide-maker-saida` e `slide-maker-trabalho` estão com `public = false`;
+  - **nenhuma** policy em `pg_policies` para as tabelas `slide_maker_*` nem para esses buckets.
+- **Achados do verificador de segurança do Lovable:** nenhum dos 5 é do Slide Maker. São dívidas já registradas em `docs/architecture/SECURITY_NOTES.md`: RLS do Corretor aberta a `anon` (§1), a edge function `analyze-slide` (§2), policies de Storage sem dono, atualização paga de dados de empresas e prévias de estudos. **Não usar "Fix all"**: ele pode criar policies ou mudar acessos de outras ferramentas sem revisão.
+- **Pendências:** Gabriel segue da Parte B do `docs/features/slide-maker/DEPLOY_GCP.md`. A chave `service_role` do banco do Lovable Cloud precisa ir para o Secret Manager (B3); confirmar como obtê-la. A `CLAUDE_API_KEY` dos Secrets do Lovable não chega ao Cloud Run.
+- **Monday:** —
+
+## 12/11/2026 — Slide Maker: Fase 8 (documentação) — Claude (sessão de Diego Cabrero)
+
+- **Mudança:**
+  - A documentação mudou de pasta com `git mv`: de `docs/features/apresentacoes/` para `docs/features/slide-maker/`. Atualizei as referências no Dockerfile, nos testes, no README do serviço, no `SECURITY_NOTES.md` e na especificação. A migration ficou intocada, e as entradas antigas deste documento citam o caminho antigo.
+  - Novo `docs/features/slide-maker/LIVE_regras_slide_maker.md`, no modelo do Corretor: versão 1.0 do prompt, como o prompt é montado, regras DET (orquestrador, ferramentas `brain`, isolamento e lint), regras IA/LLM e calibrações pendentes (D2, T3).
+  - `VERSAO_PROMPT` em `src/prompt.ts`, que entra no log de cada fase (`prompt=1.0`).
+  - README do serviço com o resumo da publicação (A → C5).
+- **Arquivos compartilhados:**
+  - `scripts/check-live-docs.mjs`: mudanças em `src/features/slide-maker/` ou `gcp/slide-maker-agent/` passam a exigir este documento. Mudanças no prompt, nas ferramentas, no lint ou na base de conhecimento passam a exigir também o `LIVE_regras_slide_maker.md`.
+  - `AGENTS.md`: nova seção "Slide Maker", no mesmo formato da do Corretor.
+- **Validação:**
+  - 71 testes do serviço, inclusive a versão do prompt no log; o snapshot do prompt não mudou.
+  - 48 testes da `lib/` com a referência no caminho novo; 3 seguem pulados por falta do LibreOffice local.
+  - Typecheck e ESLint limpos.
+  - A checagem de documentação acusa a falta do documento de regras no commit da Fase 4, que mudou o prompt sem ele.
+  - Sem verificação: o `docker build` com os novos caminhos do `COPY`.
+- **Pendências:** Fase 7 (trabalhos dourados 2 e 3) depois do deploy (`DEPLOY_GCP.md` C1–C5); `VITE_SLIDE_MAKER_AGENT_URL` no `.env` depois do C2; limpeza de 180 dias.
+- **Monday:** —
+
+## 12/11/2026 — Slide Maker: Fase 6 (histórico de versões e relatório ao analista) — Claude (sessão de Diego Cabrero)
+
+- **Mudança:**
+  - **Histórico no chat:** as entregas anteriores continuam na conversa, marcadas "Substituído pela vN", e ainda podem ser baixadas. "Versões anteriores" abre a lista de todas as versões, da mais recente à mais antiga, com o que mudou em cada uma.
+  - **Relatório ao analista:** passa a ser gravado também no Storage, em `slide-maker-saida/<jobId>/v<N>/relatorio.md`, além da tabela `slide_maker_relatorios`. Ele não aparece em nenhuma rota do colaborador nem na lista de arquivos.
+  - **Consulta pela equipe:** a consulta SQL está no README do serviço. Não há tela na v1, e nada mudou no banco.
+- **Validação:**
+  - Testes do serviço (71): o relatório de v1 e de v2 fica na tabela e no Storage, e não aparece no detalhe, nos arquivos nem no download.
+  - Testes de componente do histórico no chat e do diálogo de versões. Typecheck e ESLint limpos.
+  - E2E Playwright com o serviço simulado (2 passando), agora conferindo também a v1 marcada como substituída e baixável.
+- **Pendências:** Fase 7 (trabalhos dourados 2 e 3), que depende do deploy e da chave no Secret Manager (`DEPLOY_GCP.md` C1–C5).
+- **Monday:** —
+
+## 12/11/2026 — Slide Maker: Fase 5 (frontend) — Claude (sessão de Diego Cabrero)
+
+- **Mudança:** nova ferramenta no menu, **Slide Maker** (`/slide-maker`), item próprio no grupo Rebrain logo depois do Atualizador VGV, com o ícone `Presentation`; também na busca Ctrl+K e na jornada "Gerar um relatório de mercado" da Home. Páginas lazy em `src/features/slide-maker/`: lista com identificação por e-mail @brain.srv.br (sem login GeoBrain), "Nova apresentação" (nome, contexto, upload validado), "Meus trabalhos" (tokens deste navegador) e "Todos os trabalhos" (só metadados); chat do trabalho com cards de perguntas (opções, "(Recomendado)", "Outro", múltipla escolha), narrativa (aprovar ou pedir ajuste), progresso com `BrainLoadingState`, etapa real e tempo decorrido, entrega com download, histórico de versões, ajuste pelo chat e "Tentar novamente". Atualização por Realtime Broadcast e consulta a cada 5 s durante as fases; ações registradas na `activity_log`. Arquivos compartilhados alterados: `App.tsx` (2 rotas), `AppLayout.tsx` (item e recolhimento do menu no celular), `AppLayout.test.tsx`, `CommandPalette.tsx` e `Home.tsx`. Risco aceito das rotas públicas registrado em `docs/architecture/SECURITY_NOTES.md` §8.
+- **Validação:** 96 testes (feature e layout); typecheck, ESLint e build de produção limpos (páginas em pacotes próprios). **E2E Playwright** (`playwright.slide-maker.config.ts`) com a interface real contra o serviço real com agente simulado (`gcp/slide-maker-agent/src/dev-local.ts`, tudo em memória): identificação → arquivo recusado → upload → perguntas → narrativa → ajuste de narrativa → aprovação → download do PPTX → ajuste pelo chat → v2 → histórico de versões → listas; capturas conferidas em claro, escuro e celular (390 px). Rodado no Edge instalado (`PW_CHANNEL=msedge`), porque o Chromium da versão do Playwright do projeto não está baixado nesta máquina. **Não verificado:** a interface contra o serviço publicado (o `.env` ainda não tem `VITE_SLIDE_MAKER_AGENT_URL`; até lá a página explica que a ferramenta não está disponível) e o Realtime Broadcast real.
+- **Pendências:** depois do deploy (DEPLOY_GCP.md C2), incluir `VITE_SLIDE_MAKER_AGENT_URL` no `.env`; agente real e trabalho dourado 1 (C5). Próximo: Fase 6 (histórico de versões e relatório ao analista).
+- **Monday:** —
+
+## 12/11/2026 — Slide Maker: Fase 4 (agente real com o Claude Agent SDK) — Claude (sessão de Diego Cabrero)
+
+- **Mudança:** agente real em `gcp/slide-maker-agent/src/agent/claude.ts` (`@anthropic-ai/claude-agent-sdk` 0.3.322): `claude-opus-5-5`, effort `medium`, `maxBudgetUsd` por fase (F1 2, F2 6, F3 10, F4 5), `settingSources: []`, sessão não persistida, ferramentas por fase sem pedir aprovação (`dontAsk`), MCP em processo `brain` com as ferramentas da §5.1 e subagente `revisor` (rubrica do doc 05) em F3/F4. System prompt montado da base de conhecimento e do manual da `lib/`, com a parte fixa cacheável (`src/prompt.ts`). Isolamento: o `Bash` embutido é desviado para `mcp__brain__executar`, que roda cada comando sob `bwrap` sem rede, sem variáveis do serviço e só com o workspace gravável (a mesma configuração que o diagnóstico de subida testa); hook `PreToolUse` limita Read/Write/Edit/Glob/Grep ao trabalho e às pastas de apoio, resolvendo links simbólicos. `entregar_deck` roda o `lint_pptx.py` de novo e recusa falhas 🔒; `registrar_fonte` passa a gravar `trabalho/fontes.json`. Com `AGENTE=claude`, isolamento reprovado deixa o `/healthz` em 503 e nenhuma fase roda. Decisões em `INSTRUCOES_DESENVOLVIMENTO.md` §15.1 item 12; ativação em `DEPLOY_GCP.md` Parte C5.
+- **Validação:** 71 testes do serviço (opções do `query()` por fase, ferramentas MCP, resultado/orçamento/abort, guarda de caminhos com link simbólico, configuração do sandbox e diagnóstico, validador do lint, prompt com snapshot); typecheck e ESLint limpos. A CLI real do SDK subiu nesta máquina com uma chave **inválida** (sem custo): modelo, modo de permissão, ferramentas sem Bash, MCP `brain` conectado e subagente `revisor` confirmados na mensagem de início; isso revelou dois ajustes (resultado preservado quando a CLI termina com exceção; subagente listado como `Task`). Servidor compilado com `AGENTE=claude` sem `bwrap` respondeu 503 no `/healthz`. **Não verificado:** sandbox `bwrap` real (2 testes só rodam em Linux; no Cloud Run, o diagnóstico de subida faz a prova), execução com chave válida e o **trabalho dourado 1**: a chave está nos Secrets do Lovable (funções do Supabase), inacessível ao Cloud Run e a esta sessão, e não há Linux/Docker aqui para o sandbox.
+- **Pendências:** Gabriel publica (`DEPLOY_GCP.md` C1–C3), grava a chave no Secret Manager e ativa o agente (C5); depois, trabalho dourado 1. Próximo: Fase 5 (frontend).
+- **Monday:** —
+
+## 12/11/2026 — Slide Maker: Fase 3 (ferramentas do agente em `lib/`) — Claude (sessão de Diego Cabrero)
+
+- **Mudança:** `gcp/slide-maker-agent/lib/` com as ferramentas que o agente usará: `brain-deck` (PptxGenJS 4.0.1; constrói o deck a partir de `trabalho/deck_spec.json` validado com Zod, extraída do build aprovado de `referencia/`), `apply_theme.js` (paleta e fontes da marca no tema do PPTX), `extract/extrair.py` (pptx, xlsx, pdf, docx e imagens → inventário, com limites contra bomba de compressão), `render.py`/`render.sh` (LibreOffice → PDF → PNG via pypdfium2), `lint_pptx.py` (doc 05 §1 completo, com D2 como ALERTA) e `preparar_marca.py` (logos recortadas no build). O Dockerfile passa a instalar o `hunspell` e a rodar os testes da `lib/` sem nada pulado no lugar do teste de fumaça da Fase 2. Nenhum arquivo compartilhado alterado.
+- **Decisões:** interpretações das regras do lint registradas em `gcp/slide-maker-agent/lib/README.md` (E3 compara pixels, não bytes, porque o deck aprovado traz a mesma imagem do slide final regravada; T1 estimado com as métricas reais das fontes; M7 por família de cor; listas de termos [calibrar]).
+- **Validação:** a brain-deck reproduz o build original da referência (18 slides; textos, gráficos, tabelas e notas idênticos, posições a até 0,1″); o lint dá **zero falhas 🔒** na referência e também no deck aprovado da pasta do Diego; 48 testes Python (cada regra 🔒 reprova a sua fixture; extração com arquivos reais e malformados; render em 18 PNGs com o LibreOffice local), rodados com marca sintética e com a marca real; 6 defeitos injetados no lint, todos detectados; 38 testes do serviço e typecheck sem regressão. **Não verificado:** render com Neo Sans e Montserrat (as fontes não estão instaladas no Windows; o LibreOffice local substituiu por Arial Black e DejaVu, e o modo obrigatório do teste acusou isso, como deve); T8 (sem `hunspell` nesta máquina); build Docker (sem Docker). Testado localmente com Python 3.14, Pillow 13 e PyYAML 6.0.3; a imagem usa Python 3.12 e as versões fixadas em `requirements.txt`.
+- **Pendências:** o `ValidadorDeck` do `entregar_deck` passa a chamar o `lint_pptx.py` na Fase 4, junto do agente real; push segue bloqueado (conta sem escrita em `GabeBrain/relatorios-api`). Próximo: Fase 4 (agente real, prompt e MCP `brain`).
+- **Monday:** —
+
+## 12/11/2026 — Slide Maker: Fase 2 (serviço com agente simulado) — Claude (sessão de Diego Cabrero)
+
+- **Mudança:** novo serviço `gcp/slide-maker-agent/` (Node 22, Fastify) com todas as rotas da §8, token por trabalho (só o hash no banco), lista "Todos os trabalhos" só com metadados, upload validado por extensão e assinatura binária, limites por e-mail e IP, fases enfileiradas no Cloud Tasks e executadas dentro de `POST /internal/fase` (OIDC), corte de 25 min, cancelamento e retomada. Ferramentas `brain` (§5.1) com validação, prontas para o SDK na Fase 4. Agente **simulado** (sem modelo, sem custo). Dockerfile (Python 3.12, LibreOffice, poppler, bubblewrap, fontes do bucket privado) com teste de fumaça que exige Neo Sans e Montserrat embutidas no PDF; `cloudbuild.yaml`; diagnóstico de isolamento com `bwrap` exposto no `/healthz` (spike do Cloud Run). Nenhum arquivo compartilhado alterado.
+- **Contrato:** ajustes registrados em `INSTRUCOES_DESENVOLVIMENTO.md` §15.1 item 11 (`titulo` obrigatório na criação, `concluir_intake`, `informar_etapa`, `responsavel` na narrativa, relatório antes da entrega, cancelar após entrega volta à versão vigente). `DEPLOY_GCP.md` Parte C com build, deploy e verificações.
+- **Validação:** 38 testes do serviço (fluxo F1→F4 completo, falhas, orçamento, tempo, cancelamento, retomada, idempotência, OIDC, acesso por token, limites, upload, ferramentas, ambiente do agente sem segredos, diagnóstico de isolamento, cópia da máquina de estados idêntica à do frontend); 4 defeitos injetados de propósito foram todos detectados. Typecheck e ESLint da raiz limpos. Servidor compilado subiu localmente com configuração fictícia (`/healthz` ok, `/internal/fase` sem OIDC → 403, chave fora do log). **Não verificado:** build Docker e teste de fumaça (sem Docker nesta máquina), integração real com Supabase, Cloud Tasks, OIDC e Broadcast (sem projeto GCP), e o isolamento no Cloud Run.
+- **Pendências:** Gabriel executa `DEPLOY_GCP.md` (A, B, C) e envia o JSON do `/healthz` (decide o isolamento da Fase 4); push bloqueado: a conta `diegocabrero` não tem escrita em `GabeBrain/relatorios-api`. Próximo: Fase 3 (`lib/` do agente).
+- **Monday:** —
+
+## 12/11/2026 — Slide Maker: Fase 1 (fundação de dados) — Claude (sessão de Diego Cabrero)
+
+- **Mudança:** nova ferramenta Slide Maker (rota futura `/slide-maker`). Migration `20261112160000_slide_maker.sql` com 6 tabelas `slide_maker_*` (inclui `slide_maker_fases`: uma fase ativa por trabalho, rate limit e idempotência com o Cloud Tasks) e 3 buckets privados, **sem nenhuma policy** e com `revoke` para `anon`/`authenticated`. Tipos em `src/features/slide-maker/types.ts` e máquina de estados pura em `src/features/slide-maker/lib/state-machine.ts`. Nenhum arquivo compartilhado alterado; nada aparece no menu ainda.
+- **Decisões:** respostas do Diego registradas em `docs/features/apresentacoes/INSTRUCOES_DESENVOLVIMENTO.md` §15.1 (repo público → ativos de marca em bucket privado; `southamerica-east1`; lista "Todos os trabalhos" visível a todos, só com metadados; corte de fase em 25 min pelo limite de 30 min do Cloud Tasks, com Cloud Run Job como alternativa registrada; retenção de 180 dias). Roteiro de infraestrutura para o Gabriel em `docs/features/apresentacoes/DEPLOY_GCP.md`.
+- **Validação:** 78 testes da feature (todas as 1.430 combinações estado × evento × contexto da máquina de estados; leitura estática da migration cruzando os domínios do SQL com os tipos); typecheck e lint sem erros. Migration executada num Postgres 18.6 local (PGlite, fora do repo) com os grants padrão do Supabase simulados: 46/46 verificações de restrição e de acesso. **Não aplicada no Supabase real.**
+- **Pendências:** Gabriel aplica a migration (Parte A) e prepara o GCP (Parte B) conforme `DEPLOY_GCP.md`; Fase 2 (serviço `gcp/slide-maker-agent` com agente simulado) em seguida.
+- **Monday:** —
+
+## 12/11/2026 — Validação do Fechamento: merge da main local divergente — Claude (sessão de Diego Cabrero)
+
+- **Mudança:** merge de `origin/main` (565 commits) na `main` local, que tinha divergido com 2 commits não publicados. O fix local `02b69c51` (15/10, filtros da sidebar na guia Divergências) foi substituído pelo fix equivalente e mais completo `75ef905a` (Edgar, 15/10, que também casa tipologia e período). Os três conflitos ficaram com a versão do remoto, e `aggregate.ts` voltou à versão do remoto. O guia `docs/INTEGRACAO_API_GEOBRAIN.md` (commit local `d567641b`) entra sem alteração.
+- **Doc vivo:** a entrada de 15/10 do fix local foi movida sem edição para `historico/LIVE_rebrain_ate_2026-10-19.md`, junto das demais entradas daquela data. A entrada de 17/09 do Sinduscon já estava no histórico e não foi duplicada.
+- **Validação:** código resultante idêntico ao `origin/main`; typecheck sem erros; 50 testes da Validação do Fechamento aprovados. A suíte completa tem 18 falhas que já existem no `origin/main` (Panorama, SP/Fortaleza institucional, Sinduscon, Estimativas, Relatório API Excel), parte por timeout de 5 s nesta máquina e parte real, como `free-scopes-selection.test.tsx`. Nenhuma foi corrigida aqui.
+- **Pendência herdada do remoto:** `package.json` e `package-lock.json` estão dessincronizados (`@lovable.dev/vite-plugin-dev-server-bridge` e `@lovable.dev/vite-plugin-hmr-gate` ausentes do lock), e `npm ci` falha.
+- **Monday:** —
+
 ## 10/11/2026 — Relatório São Paulo: correções editoriais — Lovable
 
 - **Mudança:** Tahoma nos slides/textos de exportação, sumário simplificado, remoção da casinha nas divisórias, período consolidado compacto e identificação preservada para parciais. Linhas suavizadas, rótulos sem caixas escuras, valores monetários em milhões inteiros e fonte FGV. Manchete de lançamentos deriva do volume da janela de 12 meses, sem alegar recorde histórico sem prova.
@@ -391,6 +693,273 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 ---
 
 ## 1. Desenvolvimentos
+
+- **17/11/2026 · Gabriel (Claude Code):** CLAUDE.md da equipe enxugado para só importar o `AGENTS.md` (menos contexto por sessão). Regras que existiam só no CLAUDE.md foram movidas para o fim do AGENTS.md; nada removido. Aviso aos devs no topo do CLAUDE.md até 01/12/2026.
+
+### 2026-11-16 — Maceió: fechamento para retomada em17/11 — Lucas/Codex
+
+- **Estado:** implementação1–40publicada em `41ca0f53`/`6f380d8c`;58testes,320verificações de lâminas e8de página, tipos/lint/build aprovados. Sem geração autenticada/homologação/deploy confirmado.
+- **Documentação:** incorporado sem reescrita o [ARTE.md](../features/relatorios-institucionais/maceio/ARTE.md), autoria original Claude; renders locais82/87e hashes originais conferidos. Handoff atualizado a pedido de Lucas, sem alteração de produto nesta entrega.
+- **Retomada:**41–60na ordem e identidade visual originais. CAGED segue adiado; RAIS de Empregados fornece estrutura BigQuery reutilizável, mas os indicadores mensais precisam de fonte CAGED própria. Acesso direto do agente ainda não configurado. Exportação posterior; revisão metodológica/INCC com o analista.
+- **Monday:** [Panorama Maceió / SINDUSCON](https://brain381753.monday.com/boards/18398638577/pulses/13149406169) — `13149406169`. Sem escrita.
+
+### 2026-11-16 — Maceió: slides21–40 e CAGED adiado — Lucas/Codex
+
+- **Pedido/entrega:** Lucas informou BigQuery do setor já conectado ao Rebrain, adiou CAGED e pediu continuidade. Prévia mensal/trimestral agora navega1–40na ordem/arte dos originais; lançamentos por padrão/tipologia/bairro, MCMV22/33, VGL/VGV, vendas e oferta final. [Contrato e limites](../features/relatorios-institucionais/maceio/SLIDES_21_40_2026-11-16.md).
+- **Fontes/regras:**42fontes no mensal/36no trimestral, por município, padrão/tipologia/histórico; lançamentos já concluídos reaproveitados quando cobrem a janela longa. Tipologias/bairros exigem soma compatível com o municipal; capacidade/estoque não substituem fluxos. Negativos preservados, oferta só no fechamento. VGL/VGVaguardam índice por padrão; INCC-DI somente após escolha explícita, com origem/base e sem fallback de competência.
+- **Validação:**58testes Maceió, tipos/lint/build;320verificações de lâminas em1440/390claro/escuro e8cenários de página com API interceptada e resposta lenta, núcleo válido/reprovado e escolha de índice. Sem coleta autenticada, BigQuery real, exportação nova ou homologação. Reutilizados Select/Tabs/Dialog/Button/BrainLoadingState e navegação do lote anterior. Hashes originais preservados.
+- **Base/limite:** `41ca0f53`, main, origin0/0 na abertura; `ARTE.md` anterior fora do staging. Nenhuma alteração nos outros motores ou na integração RAIS/ponte BigQuery. Próximo41–60; CAGED adiado por decisão de Lucas.
+- **Monday:** [Panorama Maceió / SINDUSCON](https://brain381753.monday.com/boards/18398638577/pulses/13149406169) — `13149406169`. Sem escrita.
+
+### 2026-11-16 — Maceió: prévia1–20 na arte original — Lucas/Codex
+
+- **Pedido/entrega:** após a grade estrutural do Claude, Lucas pediu padrão visual Fortaleza e implantação1–20 na ordem original. Mensal/trimestral agora têm navegação, ampliação, textos nativos e arte Maceió; inventário recolhido, consulta/balanços preservados. [Detalhes e limites](../features/relatorios-institucionais/maceio/SLIDES_01_20_2026-11-16.md).
+- **Fontes:** cadastro vertical e histórico municipal61meses consultados independentemente do balanço; séries25meses/17trimestres e acumulados12meses, por capital/RM. Padrões locais não são convertidos automaticamente. CAGED9–14permanece pendente, sem cifras antigas. Rota continua oculta, sem menu novo.
+- **Validação:**51testes (47Maceió+4layout), tipos/lint/build;160verificações de lâminas em1440/390claro/escuro, mais8cenários na página real com API interceptada e resposta lenta. Sem coleta autenticada, PPTX/PDF novo ou homologação. SHA256 dos originais preservados. Componente/estados reutilizam Select/Tabs/Dialog/Button, navegação Fortaleza e BrainLoadingState local; mobile do shell segue o padrão Fortaleza.
+- **Base/pendências:** `f519b5dc`, origin único0/0 na abertura, `ARTE.md` anterior não versionado preservado. Próximo: fontes CAGED, conciliação do cadastro/padrões/janelas e21–40, exportação posteriormente.
+- **Monday:** [Panorama Maceió / SINDUSCON](https://brain381753.monday.com/boards/18398638577/pulses/13149406169) — `13149406169`. Sem escrita.
+
+### 2026-11-16 — Maceió: pacote de implantação para Claude — Lucas/Codex
+
+- **Pedido:** preparar MD e pasta de referências na Área de Trabalho para implantação pelo Claude, próximo modelo após Fortaleza.
+- **Entrega:** [plano](../features/relatorios-institucionais/maceio/IMPLANTACAO_CLAUDE.md), [manifesto](../features/relatorios-institucionais/maceio/REFERENCIAS.json), índices e handoff atualizados. Dois originais Drive baixados, tamanhos e SHA256 conferidos; ZIPs íntegros com82slides emmaio e87emjunho. Sem revisão visual/metodológica nesta preparação.
+- **Contrato:** inventário e matriz antes de ampliar indicadores, fontes independentes, GeoApiScopeEngine, BrainLoadingState, exportação nativa e diagnóstico; diferenças Coqueiro Seco/CAGED/INCC explícitas. Homologação com analista, não Lucas.
+- **Ambiente:** base `0317ff32`, main limpa, origin único atualizado0/0 na abertura; nenhuma implementação Maceió ou alteração dos motores existentes.
+- **Monday:** [Panorama Maceió / SINDUSCON](https://brain381753.monday.com/boards/18398638577/pulses/13149406169) — `13149406169`. Sem escrita neste card.
+
+### 2026-11-16 — Fortaleza: acesso pelos menus e início — Lucas/Codex
+
+- **Pedido/alteração:** liberar acesso ao relatório já existente. Entrada `Sinduscon — Fortaleza` em Rebrain → Relatórios Automatizados, busca rápida (Ctrl+K) e card na jornada de relatórios da página inicial; mesma rota mensal/trimestral, sem alterar autenticação ou regras de geração.
+- **Padrão/validação:** reutilizados NavLink, CommandItem e ToolCard existentes. Sete testes de layout/autenticação, TypeScript e ESLint aprovados; Edge headless confirmou card, clique no menu, pesquisa e destino em1440/390px, claro/escuro, sem erros de página. Estado sem token preservado; não houve geração autenticada ou confirmação do deploy.
+- **Base:** `49d1b593`, origin único atualizado0/0, main limpa na abertura. Liberação solicitada por Lucas nesta sessão; publicação segue a autorização de push já concedida.
+- **Monday:** [Estudo Fortaleza](https://brain381753.monday.com/boards/18398638577/pulses/13149406420) — `13149406420`. Sem escrita Monday.
+
+### 2026-11-16 — Fortaleza mensal: cabeçalhos de loteamentos e conferência do IVV — Lucas/Codex
+
+- **Correção:** slide30 e blocos relacionados19/20/31 reutilizam `FortalezaAnalysisHeading`, separando título/recorte da régua verde e preservando a tag roxa. Sem alteração de dados ou fórmulas. Slides45/46 já corrigidos na base `fe4ea18d`, reconferidos nesta rodada.
+- **Validação:** 301 testes/24 arquivos, 240 verificações visuais mensais sem erros e download PPTX/PDF com60páginas. Slides30/45/46 do novo PPTX renderizados e inspecionados no PowerPoint; ensaio com agregados de replay e cadastro/históricos detalhados sintéticos, sem coleta autenticada.
+- **Etapa/pendência:** correção visual concluída no gerador; atualizar a página e exportar novamente para aplicar ao arquivo. Conciliação metodológica segue com o analista. Anexos de Lucas preservados.
+- **Monday:** [Estudo Fortaleza](https://brain381753.monday.com/boards/18398638577/pulses/13149406420) — `13149406420`. Sem escrita Monday.
+
+### 2026-11-16 — Fortaleza: comparação dos PPTX reais e cabeçalhos sem sobreposição — Lucas/Codex
+
+- **Ambiente/funcionalidade:** Rebrain, relatórios Fortaleza mensal e trimestral; Lucas conduz implementação pela Inovação, homologação com o analista.
+- **Comparação:** quatro PPTX extraídos e abertos em leitura no PowerPoint. Mensal agosto confrontado com julho no período comum: lançamentos2.231iguais; VGV ajustado à mesma base INCC coincide. Preço/m² de julho12.099versus9.360,90, estoque e padrões divergem. No trimestral, lançamentos4.128versus4.715, preço/m²11.977versus9.295,30e casas393versus69; causas/métodos ainda a conciliar. [Evidência detalhada](../features/relatorios-institucionais/fortaleza/COMPARACAO_REFERENCIAS_2026-11-16.md).
+- **Correção visual:** título dos mapas49–53/71 e IVV54/72, também mensal45/46, dividido em duas linhas; régua verde antiga coberta abaixo da tag roxa. Área da marca preservada. Mesmo cabeçalho na prévia/PPTX/PDF, sem alterar dados ou regravar os anexos.
+- **Validação:** 297 testes/24 arquivos, tipos/lint/build,364cenários trimestrais e240mensais; asserções de geometria e inspeção das capturas. Exportação de teste89emPPTX/PDF e renders49/54/72noPowerPoint conferidos; dados desse teste sintéticos.
+- **Arquivos:** `FortalezaAnalysisHeading.tsx`, renderizadores de análise/mapas, testes e diagnósticos visuais.
+- **Commits:** base `60413d5c`, entrega identificada por `fix(fortaleza): keep analysis titles clear of reference branding`.
+- **Monday:** [Estudo Fortaleza](https://brain381753.monday.com/boards/18398638577/pulses/13149406420) — `13149406420`.
+- **Impacto em Etapas/Pendências:** correção de sobreposição validada; nova exportação deve usar o gerador atualizado. Dados reais disponíveis não significam equivalência aos originais; preço/universos/classificação seguem para o analista. Sem escrita Monday.
+
+### 2026-11-16 — Fortaleza: 64 pendências causadas por históricos não consultados — Lucas/Codex
+
+- **Ambiente/funcionalidade:** Rebrain, trimestral Fortaleza/SINDUSCON 2T2026; hook compartilhado com mensal.
+- **Evidência:** diagnóstico real de Lucas, 09h04, SHA `d8f5ef6b…`: 8 disponíveis/64 pendentes/17 editoriais, cadastro concluído, cinco núcleos consultados e zero históricos municipais/detalhados. Aquiraz, Caucaia e Maracanaú reprovados por diferença de padrões.
+- **Correção:** retirar a dependência global de `report.metrics` para consultar cadastro/históricos e organizar páginas. Guardas de cada fonte e avisos do núcleo preservados; JSON registra fontes esperadas, consultadas e concluídas. Não preenche lacunas nem aprova os totais reprovados.
+- **Validação:** 289 testes/24 arquivos; reprodução exata das 64 pendências e caso com fonte realmente ausente. Página real com rede interceptada: 45+10 fontes trimestrais coletadas e avisos mantidos; mensal40+10, carregamento Brain, seis cenários de coleta/recuperação aprovados. Zero pendências somente nas fixtures completas.
+- **Arquivos/evidências:** `useFortalezaMarket.ts`, diagnóstico, fixture sanitizada e [investigação completa](../features/relatorios-institucionais/fortaleza/COLETA_TRIMESTRAL_64_SLIDES_2026-11-16.md).
+- **Commits:** base `36981733`, entrega identificada por `fix(fortaleza): collect histories independently of core balance`.
+- **Monday:** [Estudo Fortaleza](https://brain381753.monday.com/boards/18398638577/pulses/13149406420) — `13149406420`.
+- **Impacto em Etapas/Pendências:** corrigido o bloqueio de coleta identificado no diagnóstico; precisa nova geração real 2T2026 para observar as 55 respostas antes puladas. Navegador conectado indisponível nesta sessão; geração autenticada/deploy/homologação não confirmados. Sem escrita Monday.
+
+### 2026-11-13 — Fortaleza mensal/trimestral: recuperação, IVV e conferência dos arquivos — Lucas/Codex
+
+- **Ambiente/funcionalidade:** Rebrain, relatórios Fortaleza/SINDUSCON mensal60 e trimestral89.
+- **O quê/por quê:** recuperação descarta cache do núcleo reprovado, preserva cidades válidas e oferece nova tentativa para cadastro inicial indisponível. Cabeçalhos mensais corrigidos pelo padrão trimestral compartilhado, IVV negativo abaixo da linha zero e guardas do total geral/negativo reforçadas.
+- **Validação:** 287 testes/24 arquivos, tipos, lint e build aprovados; 604 cenários visuais Edge e quatro cenários de recuperação com carregamento Brain lento, erro/sucesso, desktop/celular e claro/escuro. Downloads PPTX/PDF60/89 conferidos; textos nativos/Tahoma/listas e auditoria preservados. API interceptada; dados sintéticos ou replay municipal identificado, sem nova geração autenticada/homologação.
+- **Arquivos/evidências:** módulos Fortaleza, scripts de diagnóstico; [revisão e limites](../features/relatorios-institucionais/fortaleza/REVISAO_TRIMESTRAL_2026-11-13.md).
+- **Commits:** primeira revisão `44febf82` enviada pelo merge `b203bee9`; rodada adicional identificada por `fix(fortaleza): improve monthly and quarterly recovery and layout`.
+- **Monday:** [Estudo Fortaleza](https://brain381753.monday.com/boards/18398638577/pulses/13149406420) — `13149406420`.
+- **Impacto em Etapas/Pendências:** implementação e verificações locais concluídas, envio autorizado por Lucas nesta sessão. Fonte da amostra histórica, metodologias, equipe, geração autenticada e deploy confirmado continuam pendentes; nenhuma escrita Monday.
+
+### 2026-11-13 — Fortaleza/SINDUSCON trimestral: cobertura de fontes e revisão geral — Lucas/Codex
+
+- **Ambiente/funcionalidade:** Rebrain, relatório trimestral Fortaleza/SINDUSCON, 89 posições.
+- **O quê/por quê:** bloqueio de fotografia parcial por tipologia, preço explícito inválido sem substituição silenciosa, fontes/avisos nas tabelas e cobertura histórica detalhada no JSON. Corrigidos escopos do diagnóstico e painel trimestral; cabeçalhos recompostos para evitar sobreposição e notas fixas de junho.
+- **Arquivos/evidências:** [revisão e limites](../features/relatorios-institucionais/fortaleza/REVISAO_TRIMESTRAL_2026-11-13.md); módulos Fortaleza e diagnóstico visual. 270 testes/24 arquivos aprovados. Sem consulta autenticada ou homologação real.
+- **Commits:** entrega isolada sobre `a3d2f4f3`, identificada por `fix(fortaleza): audit quarterly sources and historical coverage`.
+- **Monday:** [Estudo Fortaleza](https://brain381753.monday.com/boards/18398638577/pulses/13149406420) — `13149406420`.
+- **Impacto em Etapas/Pendências:** correções locais para revisão; publicação aguarda autorização. Fonte da amostra histórica, metodologias candidatas, equipe e ensaio real continuam abertos. Sem escrita Monday.
+
+
+### 12/11/2026 — Slide Maker: integração final da ponte com Fase8 e base Lovable — Gabriel / Codex
+
+- **Integração autorizada:** preservadas a ponte local `e1a69879` e as entregas remotas até `fc3dda87`, inclusive a renomeação de documentação, branding e registros do Lovable. Conflitos resolvidos mantendo `docs/features/slide-maker/` como fonte. Todas as linhas não vazias do LIVE remoto foram conferidas como preservadas; mudanças locais paralelas continuam em backup/stash para reaplicação após o merge.
+- **Estado operacional:** base de seis tabelas e três buckets privados aplicada/conferida segundo Diego/Lovable em17h23, conforme entrada dele acima. Esta sessão não verificou o banco diretamente. Não reaplicar a base; conferir o preflight e aplicar somente o complemento `20261112200554_slide_maker_bridge.sql` se ausente. Buckets são administrados pela ferramenta Storage do Lovable, sem INSERT direto nesse schema.
+- **Fonte atual:** [DEPLOY_GCP.md](../features/slide-maker/DEPLOY_GCP.md) e [regras live](../features/slide-maker/LIVE_regras_slide_maker.md). Substituída a premissa de exportar service role por credencial da ponte. Nenhum prompt ou regra de conteúdo alterado; versão1.0 preservada.
+- **Validação:** serviço integrado com78testes aprovados/2condicionaisLinuxpulados, tipos e build; documentação/manual ajustados. Build do Rebrain e regressões frontend reexecutados no fechamento. Publicação da ponte, complementoSQL, segredo de integração e validação remota permanecem pendentes; sem push, deploy ou consumoAnthropic nesta integração.
+
+### 12/11/2026 — Slide Maker: infraestrutura Google e ponte Lovable Cloud — Gabriel / Codex
+
+- **Problema/resultado:** o Rebrain usa Lovable Cloud, sem service role exportável. Cloud Run agora usa `slide-maker-bridge` para dados, autorização de Storage e Broadcast; credencial gerenciada permanece na Edge. Arquivos grandes são transferidos diretamente por URLs assinadas restritas. API pública por token do trabalho preservada.
+- **Implementação:** HMAC/versionamento/prazo/nonce, lista fechada de operações, erros sanitizados, idempotência transacional e reserva CAS+fase com limites serializados no banco. Migration complementar `20261112200554_slide_maker_bridge.sql`: duas tabelas privadas e duas RPCs invoker, sem execução pública. Recuperação da credencial via script pessoal com clipboard, sem chat, arquivo ou argumento de processo contendo segredo.
+- **Infraestrutura preparada antes desta fatia:** projeto `brain-rebrain-slide-maker`, número `475189392075`, São Paulo, mesma organização/cobrança profissional do BigQuery; bucket privado, contas runtime/tasks/build, repositório e fila (1 tentativa/4 concorrentes). Anthropic1enabled conforme capturaGabriel. Nenhum deploy. Bucket vazio na última conferência; 20 ativos com Diego. Segredo antigo de service role vazio e sem uso no novo deploy.
+- **Validação local:** 78 testes do serviço aprovados, 2 condicionais Linux/bwrap pulados; fluxo API→HMAC→handler→PostgreSQL/PGlite→F1–F4/v1/v2, incluindo resposta perdida após commit sem duplicação. 31 verificações SQL de permissões/CAS/idempotência/limites/rollback. 92 regressões da feature frontend, 3 testes do cadastro seguro, tipos Node/Deno, lint dirigido, builds do serviço/Rebrain aprovados. Storage/fila/Broadcast são simulados no teste integrado; concorrência multi-conexão e isolamento Cloud Run ainda precisam ensaio real. Nenhuma chamada paga.
+- **Entrega/manual:** [roteiro de deploy](../features/slide-maker/DEPLOY_GCP.md), [plano e estado](../features/slide-maker/PLANO_LOVABLE_CLOUD_2026-11-12.md), [SQL de conferência](../features/slide-maker/VERIFICAR_LOVABLE_CLOUD_2026-11-12.sql). Gabriel aplica migrations e publica função manualmente no Lovable, cadastra `SLIDE_MAKER_BRIDGE_SECRET` com o valor gerado por `scripts/slide-maker/cadastrar-bridge.py`; Google usa `slide-maker-bridge-secret`. Depois validar simulado/isolamento e URLfrontend; agente real só com autorização de consumo. Estado **validado localmente**, sem migration remota, push ou publicação.
+- **Preservação:** main atualizada por fast-forward até06a179ee com autorização; nove arquivos locais salvos e reaplicados sem conflito, untracked preservados. Backup/stash mantidos. Alterações paralelas de FIERGS/estimativas/segurança ficam fora deste commit.
+### 12/11/2026 — Grafia Geobrain em páginas e relatórios — Codex/Lucas
+
+**Commit/evidência:** `1611347d` (12/11/2026), local.46testes existentes em6arquivos e build de produção aprovados; busca estática confirma a grafia corrigida, mantendo apenas o contraexemplo negativo no teste. Sem publicação nesta entrega.
+
+- **Mudança:** grafia oficial Geobrain nos textos de Home, API Explorer, relatório Excel, validação de fechamento, Empresas/Empregados, SP e Fortaleza (prévia/exportação), mensagens de autenticação e títulos/metadados de slides. Diretriz registrada no Design System; seletores dos diagnósticos e expectativas dos testes atualizados.
+- **Escopo:** ajuste editorial, sem mudança de dados, cálculo, permissão ou fluxo. Identificadores técnicos e evidências históricas permanecem intactos; o teste negativo mantém a grafia incorreta para verificar regressões. Mensagens das funções Supabase entram no próximo deploy dessas funções.
+- **Etapas/Pendências:** implementação local; publicar após autorização. Preservados componentes, estados e layouts existentes; sem escrita Monday.
+
+
+
+### 12/11/2026 — Relatórios: tabelas nativas e objetos editáveis nos PPTX — Codex/Lucas
+
+- **Commit:** `cd473deb` (12/11/2026), local; documentação de fechamento em commit separado.
+
+- **Mudança:** exportador compartilhado de objetos DrawingML para SP85 e Fortaleza60/89; listas3–7 como tabelas reais, textos e gráficos em elementos vetoriais, imagens separadas. Modo de PPTX em lâmina única retirado de Fortaleza. Contraste/alinhamento/centro das listas corrigidos; SP2 refeito com textos/cartões nativos. Fortaleza59/88 reconstruído em16retratos/nomes/cargos com editor individual; SP mantém suas15imagens de consultoria. Capas e divisórias entram no mesmo caminho.
+- **Limites:** gráficos em formas vetoriais, sem planilha Excel “Editar Dados”; demais tabelas SVG como objetos de texto/células. Imagens/logotipos e bases cartográficas selecionáveis/substituíveis. Qualidade máxima dos recortes é a disponível na referência, com upload individual para melhoria. Não modifica cálculo nem homologa indicadores.
+- **Validação:**276testes, build/tipos/lint;240casos mensais/324trimestrais no Edge. Três downloads reais e abertura/render no PowerPoint (60/89/85), tabelas `HasTable`, ajuste de célula preservado e fotos separadas. Dados de QA sintéticos/fixtures, sem API autenticada. [Contrato e evidência](../features/relatorios-institucionais/PREVIA_EDITAVEL_2026-11-12.md).
+- **Monday:** [Fortaleza](https://brain381753.monday.com/boards/18398428946/pulses/13149406420) — `13149406420`
+- **Etapas/Pendências:** correção local pronta para revisão/publicação autorizada. Depois, gerar os materiais reais novamente e homologar com o analista; persistência da edição continua apenas na sessão. Sem escrita Monday.
+
+
+### 12/11/2026 — Relatórios Fortaleza: fontes observadas; Fortaleza e SP: prévia editável — Codex/Lucas
+
+- **Commit/validação:** `a6b537af`;266testes, build/tipos/lint;240casos mensais e324trimestrais no Edge, edição/navegação/restauração em ambos e PPTX/PDF reais60conferidos. Nove retratos em objetos editáveis. Novo download realSP85não executado; extração e integração testadas.
+
+- **Mudança:** validação das40fontes municipais pelo conjunto observado e meses completos; respostas comerciais realmente vazias confirmadas; classificação horizontal conhecida, intervalo para desconhecidos no cadastro; listas iniciais completas nas posições originais. Slide2 identifica base cadastral, não amostra histórica. Editor compartilhado de textos na prévia, auditoria dos ajustes manuais e exportação pareada; Tahoma/títulos principais30pt, artes Fortaleza com texto nativo e retratos de maior resolução disponível separados no PPTX.
+- **Evidência/limites:** [disponibilidade e método](../features/relatorios-institucionais/fortaleza/DIAGNOSTICO_MENSAL_2026-11-12.md), [editor e visual](../features/relatorios-institucionais/PREVIA_EDITAVEL_2026-11-12.md). Agregados reais do JSON de agosto; cadastro/históricos individuais sintéticos no ensaio. Sem nova geração autenticada, homologação ou escrita Monday. Alterações locais nesta entrega.
+- **Monday:** [Fortaleza](https://brain381753.monday.com/boards/18398428946/pulses/13149406420) — `13149406420`
+- **Etapas/Pendências:** implementação local e validações de prévia/exportação; publicar após autorização e gerar mensal real para confrontar disponibilidade/valores. Edição permanece na sessão, sem persistência no servidor; métodos de preços e mapas esquemáticos trimestrais seguem pendentes de homologação.
+
+
+## 12/11/2026 — Fortaleza mensal: diagnóstico agosto versus outubro e bloqueios confirmados
+
+**Autor/origem:** Codex, a pedido de Lucas. Agosto recebido após a hipótese de outubro sem fechamento. Agosto tem15disponíveis/33pendentes/12editoriais; outubro14/34/12. Não é somente fechamento: cadastro falha na primeira resposta pelo limite de5páginas; séries municipais rejeitadas por padrões/meses/categorias persistem nos dois arquivos. Em agosto37está disponível e52–55bloqueiam por bairro ausente no empreendimento23980; em outubro37/52–55acusam fotografia2026-10ausente do85529. Evidências do usuário, não chamadas autenticadas feitas pelo agente.
+
+**Correções locais:** cadastro agora percorre até40páginas/4.000IDs por cidade/segmento, conservando totais estáveis, deduplicação, escopo e cancelamento. Regressão reproduz577verticais em6páginas sem truncamento; os577constam na coleta detalhada real. Capa1, sumário8 e divisória9deixam de receber erro de cálculo no JSON e seguem revisão editorial. Tabelas por bairro conservam registros sem bairro em “Bairro não informado”, com aviso e totais integrais; não inventam bairro nem alteram preço, quantidade ou fotografia. Produtos horizontais desconhecidos continuam bloqueados.
+
+**Séries ainda em investigação:** no diagnóstico antigo, a validação descartava as linhas municipais antes de exportar, impedindo identificar quais grupos/meses foram omitidos ou qual classificação comercial chegou. Nova cobertura é capturada após paginação estável, antes desse descarte: grupos/tipos observados, meses, padrões ausentes, células faltantes e quantidades/VGV agregados. Runtime ainda não publica fonte inválida; dados ausentes não viram zero. Não há token, cabeçalhos ou histórico individual nessa cobertura; não acrescenta chamadas GeoBrain. Necessária nova geração/JSON após publicação para corrigir a semântica específica da resposta real.
+
+**Ambiente/Etapas:** sessão começou em main limpa, origin único; fetch mostrou11commits atrás. FF até`4f2b0bf3` incorporou Slide Maker, guia GeoBrain e filtro de divergências; nenhuma mudança Fortaleza. Alterações desta rodada locais, distintas dos commits trimestrais publicados`4ec89c0a`/`431b64f4`. Prévia mensal60e trimestral89preservadas; não declarar todos os slides liberados nem homologados. Carregamento Brain, seleção autorizada e renderizadores de tabela existentes reutilizados.
+
+**Validação:** suíte Fortaleza251testes/23arquivos, tipos e lint aprovados; testes adicionais confirmam estados editoriais e cobertura preservada com fonte rejeitada. Build aprovado;12cenários Edge com bairro válido/ausente e fotografia ausente em1440/390claro/escuro aprovados, sem erros ou overflow. Captura de bairro não informado inspecionada.20testes focados repetidos após acrescentar asserções de estados e cobertura. Geração real do novo código e próximos números/estados ainda não observados.
+
+**Retomada:** completar verificações, commit isolado e perguntar pelo push. Após envio autorizado, gerar agosto novamente e ler `sources.municipal[].coverage`. Resolver categorias esparsas/comercial com evidência; não relaxar guardas globais para “zerar” o status. Histórico23980pode ter outros problemas além do bairro: a nova geração determina os bloqueios seguintes. Nenhuma escrita Monday, mudança SP, Slide Maker ou outros motores.
+
+**Monday:** [Estudo Fortaleza](https://brain381753.monday.com/boards/18398638577/pulses/13149406420) — `13149406420`, referência apenas.
+
+
+
+## 12/11/2026 — autorização de publicação do trimestral
+
+Lucas autorizou expressamente o push após explicação de que89posições estão implementadas e a validação real permanece pendente. A revisão automática voltou a permitir fetch e regressões nesta retomada; não atribuir a isso comprovação de reposição de créditos. Tipos/lint e documentação aprovados; nova suíte completa247testes/22arquivos e build aprovados antes do envio. Usuário pediu aguardar JSON de agosto/setembro para o mensal; nenhuma correção mensal adicional foi incluída neste push. Mantidos os limites de localização esquemática, classificação da API, metodologia candidata e download real89pendente. Mensal outubro recebeu JSON com34fontes pendentes: investigação separada, sem atribuir esses defeitos ao novo trimestral ou homologar o mensal. Referência: commit local11–20`4ec89c0a`; restante21–89em commit isolado desta entrega. Sem escrita Monday.
+
+**Monday:** [Estudo Fortaleza](https://brain381753.monday.com/boards/18398638577/pulses/13149406420) — `13149406420`, referência apenas.
+
+
+## 12/11/2026 — Fortaleza trimestral: continuação 21–89 local, conferência final pendente
+
+**Autor/origem:** Codex, retomada solicitada por Lucas. Base publicada `bca69e66`; bloco 11–20 no commit local `4ec89c0a` (12/11, 13:03 -03:00), ainda não enviado. Continuação 21–89 permanece em arquivos locais, sem commit final. Main estava 0 atrás/1 à frente de origin; nenhum outro remoto configurado. Não houve push, geração autenticada GeoBrain ou escrita no Monday.
+
+**Implementação:** prévia e diagnóstico cobrem as 89 posições originais. Janela de 27 meses para nove trimestres de fluxos e fotografias; INCC-DI aplicado mês a mês antes de agregar VGV; estoques são fechamentos trimestrais. 26/28 preservam 13 janelas mensais móveis de 12 meses. 16/19/31/32 e bairros/municípios preservam o mês de fechamento do original. 54/72 preservam 25 IVVs MENSAIS (confirmados nos caches e renders originais); média aritmética das taxas mensais. Preços históricos 42/43 têm nove fechamentos trimestrais; 45–48 comparam cidades no fechamento. Tabelas 59–84 usam qty/estoque/preço/área históricos de empreendimentos ativos, sem substituir ausências pelo cadastro atual. Faixas de idade ≤6/7–42/>42 meses vêm da data de lançamento. Equipe 86/87 editável e quadro88 substituível. Exportador estendido a89 páginas, mantendo mensal60 e auditoria pareada.
+
+**Diferenças explícitas:** localização49–53/71 é representação esquemática de coordenadas da API;50–53separam quadrantes do mesmo conjunto, não reproduzem os mapas/cartografia/zoom antigos. Padrões são os nomes da API, sem inventar equivalência entre Médio-Alto/Super Luxo nem faixas editoriais de preço. Universo ativo/capacidade/ponderação/idade/classificação ainda candidato; amostra histórica continua sem fonte própria. Sem homologação do material ou dos indicadores. Totais municipais de16/19/31/32somam os três segmentos, corrigindo o original que repetia só horizontal/comercial.
+
+**Evidência e limites da sessão:** suíte Fortaleza, build e testes de estrutura dos pacotes PPTX/PDF89 passaram antes dos ajustes finais. Edge offline executou324asserções de estrutura/estado (79 lâminas ×1440/390×claro/escuro, mais fonte vazia/incompleta). Inspeção visual dos originais versus saída detectou captura antes do carregamento da imagem: a espera de decode/paint foi reforçada e precisa repetir. A mesma inspeção identificou IVV54/72mensal (corrigido após a suíte) e motivou restaurar gráfico+quadro68/83 e comparação de dois anos42. Tipos e lint finais passaram; esses últimos ajustes ainda precisam de regressão/build/captura completos. Os testes de exportação usam capturas simuladas: não substituem um download real de89lâminas capturadas no navegador.
+
+**Bloqueio externo:** a revisão automática de aprovação recusou iniciar o ensaio adicional de download no navegador porque o workspace está sem créditos (falha da revisão, não juízo de ação insegura). Comando não executado. Usuário autorizou continuar; isso não repõe os créditos. Consultas/edições permitidas sem escalonamento continuaram; não contornar o mecanismo com ferramenta/rota alternativa. Novos ensaios elevados e commit final aguardam revisão disponível. Não declarar conclusão validada/publicada.
+
+**Próxima ação concreta:** após reposição de créditos pelo responsável do workspace, executar suíte Fortaleza completa, build e `fortaleza-quarterly-visual.mjs` com a espera de imagens; inspecionar novamente54/65/68/72/75/83/84 e os mapas. Fazer download real PPTX/PDF89 e testar cancelamento/erro/retry Brain. Conferir manifesto/hash das artes e `npm.cmd run check:live-docs -- origin/main HEAD`; registrar commit isolado com caminhos explícitos. Só então pedir autorização de push do lote Fortaleza. SP não foi alterado.
+
+**Monday:** [Estudo Fortaleza](https://brain381753.monday.com/boards/18398638577/pulses/13149406420) — `13149406420`, referência apenas.
+
+
+
+## 12/11/2026 — Fortaleza trimestral: slides 11–20
+
+Retomada autorizada por Lucas, base `bca69e66`, main/origin 0–0 após fetch. Office abriu original trimestral em leitura (hash do catálogo conferido); arte 11–20 sem tabelas/gráficos/percentuais anteriores. Nove trimestres completos a partir de 27 meses; lançamentos em unidades, cadastro distinto e VGV corrigido mês a mês pelo INCC-DI. Tabelas 16/19 preservam mês de fechamento do original e somam vertical/horizontal/comercial; original exibia total repetindo somente horizontal. Prévia e JSON agora reconhecem 20/89 posições, sem exportação trimestral prematura. Carregamento Brain, escopo autorizado, retry e cancelamento reutilizados. Mensal 60/60 e SP preservados.
+
+Validação: 235 testes Fortaleza/21 arquivos, build/tipos e lint dirigidos aprovados; 48 cenários Edge com rede externa bloqueada (1440/390, claro/escuro, dez slides e fontes incompletas/vazias); comparação visual com os dez originais revisada, títulos das tabelas restaurados após inspeção. Dados sintéticos; sem geração autenticada ou homologação. Próximo: 21–40, depois preços, mapas, tabelas e fechamento. Sem publicação ou escrita Monday.
+
+**Monday:** [Estudo Fortaleza](https://brain381753.monday.com/boards/18398638577/pulses/13149406420) — `13149406420`, referência apenas.
+
+
+## 12/11/2026 — SP: preços históricos observados sem barras vazias
+
+Novo diagnóstico do usuário (SHA-256 `504aa4d5fd114879fb8ff4af4719655b0ea94af64e2086a9da20f006f4ae27fd`) confirma médias por estoque positivo nos 13 períodos de cada slide 53/55/57. A guarda de estoque negativo em uma tipologia bloqueava as amostras históricas, inclusive o recorte de dois dormitórios sem negativo próprio. Agora permite exibir a média observada com cobertura parcial; negativos não ponderam preços e permanecem na auditoria. Não reconcilia estoque/população, não altera o fechamento nem calcula variações envolvendo parciais. Validação: 351 testes SP em 39 arquivos, tipos e lint dirigidos aprovados. Teste novo confere 13 pontos em 53/55/57 e preserva bloqueio de fechamento inválido. Sem nova observação em navegador autenticado; verificação headless do cálculo, com dados sintéticos. Métodos com esgotadas continuam indisponíveis por preços ausentes (99 tipologias no geral, 25 em um dormitório e 24 em dois no fechamento); não comprovam equivalência ao analista. Sem novas consultas API ou mudança de coleta. Fortaleza preservado.
+
+- **Autor/origem:** Codex, diagnóstico fornecido pelo usuário; base `1d3b88ac`.
+- **Etapas/pendências:** correção local para exibir 13 observações; cobertura completa e média do analista continuam pendentes. Conferir geração real após publicação.
+- **Monday:** [DESAFIO — Estudos Entidades e Institucionais](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`, referência apenas.
+
+
+### 12/11/2026 — SP: comparar pesos de preço incluindo tipologias esgotadas — Codex
+
+- **Ambiente/funcionalidade:** SP institucional, diagnóstico e Insights do analista / Memória de cálculo.
+- **Pedido/mudança:** usuário propôs incluir tipologias sem estoque positivo para investigar a diferença de preço geral. Comparação exploratória por competência e slides53/55/57: estoque positivo, qty da fotografia incluindo esgotadas e média simples de todas as tipologias do recorte. Exporta contagens de estoques positivo/zero/negativo/desconhecido, denominadores, medições inválidas e ressalva de cobertura. Sem novas chamadasAPI; reaproveita os históricos em memória. Não altera médias dos slides nem escolhe automaticamente o resultado mais próximo do original.
+- **Validação:**26testes focados/4arquivos, tipos/build/lint aprovados.4cenáriosEdgeoffline1440/390claro/escuro, tabela de3recortes aberta, zero erros/overflow; captura desktop inspecionada. PadrãoTable/details existente reutilizado, carregamento e cancelamento intactos.
+- **Limite/Etapas/Pendências:** não há históricos completos persistidos nesta máquina; JSON recebido traz médias finais, insuficientes para recalcular os pesos. Resultado real da hipótese ainda NÃO medido. Após envio autorizado, usuário gera novamente e envia JSON; comparar os13períodos e a referência antes de mudar método. qty pode representar capacidade na fotografia, não necessariamente quantidade original de lançamento. Fortaleza permanece pausado.
+- **Commits:** commit desta entrada; base `1c7a4a84`.
+- **Monday:** [DESAFIO — Estudos Entidades e Institucionais](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`, referência apenas.
+
+
+### 12/11/2026 — SP: médias históricas observadas e manchetes — Codex
+
+- **Ambiente/funcionalidade:** SP institucional, séries53/55/57e destaques9–11; regra aplicada a todos os períodos.
+- **Mudança:** divergência do total municipal deixa de ocultar automaticamente a média histórica da amostra observada quando estoques/preços são válidos. Pontos parciais ficam amarelos, com motivo na auditoria e sem variação envolvendo parcial. Fechamento, dados inválidos/conflitantes e estoques negativos sem projeção conciliada continuam bloqueados. Nenhum preço é copiado do original ou interpolado. Manchetes dinâmicas enfatizam liderança, avanço/recuo/estabilidade e lançamentos em12meses conforme dados reais do recorte.
+- **Referência:** revisadas51planilhas embutidas no original de hash1350f82cb1d9386487ca1a9aee110fb19cf3d6ea7cb40d4a0205025802d9939b; sem conexões externas.53/55/57têm13valores colados, com últimos15.896/18.713/13.673. Não revelam o cálculo das médias. Concordância de55/57com cartõesMAP64é evidência de consistência interna, não prova da fórmula.
+- **Validação:**346testesSP/38arquivos aprovados; build/tipos/lint.24cenáriosEdgeoffline1440/390claro/escuro,13pontos observados nos históricos sintéticos e manchetes9–11; capturas53/9inspecionadas. Na primeira rodada, regressão de estoque negativo identificou guarda que precisava ser preservada; corrigida antes da rodada final. Sem nova consultaGeoBrain ou geração real. Padrões de gráficos/feedback preservados, sem mudar carregamento.
+- **Etapas/Pendências:** usuário autorizou publicação. Isto amplia exibição da amostra válida; não comprova cobertura completa ou preço equivalente ao analista. Fonte/cálculo geral e cruzamento dormitório×MCMV continuam em investigação. Após publicação, gerar novamente e conferir o JSON. Fortaleza permanece pausado e fora do commit.
+- **Commits:** commit desta entrada; base `57e24837`.
+- **Monday:** [DESAFIO — Estudos Entidades e Institucionais](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`, referência apenas.
+
+
+### 12/11/2026 — SP: recuperar preços e cartões com método explícito — Codex
+
+- **Ambiente/funcionalidade:** SP institucional, slides53/55–59/61–64, revisão e diagnóstico em todos os períodos.
+- **Evidência/mudança:** JSON2T2026do usuário comprovou sete preços anônimos na consulta geral, grupo4ignorado e adaptador apagando MCMV/MAP calculados. Série53recupera método granular inteiro com lacunas; linha61/62recupera média granular conferida, separada das barras municipais;59aceita4sem chamá-lo4+;63/64mantêm quadro granular completo. Métodos e avisos na prévia/JSON/insights, sem média dos padrões ou mistura de fontes por ponto. [Contrato, hash e limites](../features/relatorios-institucionais/sp/DIAGNOSTICO_PRECOS_2026-11-12.md).
+- **Etapas/Pendências:** correção local;53passa a parcial com oito competências ausentes/divergentes;55/57continuam parciais,56já estava disponível no arquivo. Média geral calculada não é equivalência homologada com o manual. Falta publicar com autorização e conferir nova geração/JSON, incluindo preços do grupo4que não vieram numericamente no diagnóstico recebido. Fortaleza pausado, sem alteração runtime.
+- **Validação:** regressões com agregados reais e fontes sintéticas;50casosEdge1440/390sem rede externa, erro ou overflow. Build/tipos e lint aprovados;342testes/38arquivosSPaprovados, com concorrência limitada após timeout na primeira rodada. Reutilizados gráficos/quadros e feedback existentes; consultas, BrainLoadingState e cancelamento preservados. Sem API nova/geração real/push/Monday.
+- **Commits:** commit desta entrada; base `a4ea3a25`.
+- **Monday:** [DESAFIO — Estudos Entidades e Institucionais](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`.
+
+
+### 12/11/2026 ? SP: diagn?stico JSON vis?vel para investigar pre?os ? Codex
+
+- **Ambiente/funcionalidade:** SP institucional, resultado da gera??o e diagn?stico dos 85 slides.
+- **Pedido:** usu?rio pausou Fortaleza trimestral e pediu investigar 53/59 indispon?veis e 55/56/61?64 com lacunas, em todos os per?odos. Solicitou primeiro o bot?o JSON, depois pausa para gerar e enviar o arquivo.
+- **Mudan?a:** bot?o ?Baixar diagn?stico JSON? no topo do resultado ao encerrar a gera??o, reutilizando `spReviewSnapshot` e Button Brain. Exporta per?odo efetivo, situa??o/motivo por slide, pre?os municipais e baseline granular j? existentes. Fontes de pre?os passam a registrar grupos observados e contagem de medi??es v?lidas por m?s, sem payload bruto, autentica??o ou hist?ricos individuais. Checklist anterior preservado.
+- **Valida??o:** 26 testes focados; tipos/build e lint dirigido aprovados; download real no Edge headless com dados sint?ticos, 1440/390 e claro/escuro, 85 posi??es no JSON, zero erros/overflow. Rede externa bloqueada. Sem ensaio autenticado ou gera??o real.
+- **Etapas/Pend?ncias:** diagn?stico preparado; corre??o dos indicadores deliberadamente pausada at? usu?rio enviar JSON da gera??o atual, come?ando por 2T2026. Nenhuma regra de pre?o, status, m?dia ou fallback foi alterada. Fortaleza permanece pausado em 10/89; somente script preparat?rio n?o commitado, sem altera??o runtime.
+- **Monday:** ?
+- **Commits:** commit desta entrada; base `3d3b1024`. Sem push/publica??o ou escrita Monday.
+
+
+### 11/11/2026 — Fortaleza mensal: PDF/PPTX de conferência e revisão — Lucas / Codex
+
+- **Mudança:** revisão mensal encontrou exportação ausente. Implementados PDF e PPTX fiel/editável com60páginas, diagnóstico da mesma geração, equipe da prévia, cancelamento/recuperação e guardas de acesso/competência/excesso de lançamentos. Mesmo componente nas prévias e nos arquivos; removido subtítulo duplicado11/13/15. [Contrato e retomada](../features/relatorios-institucionais/fortaleza/MENSAL_EXPORTACAO_2026-11-11.md).
+- **Validação:**225casos Fortaleza distintos +7regressões SP; tipos/build/lint, Edge1440/390claro/escuro/cancelamento/erro/retry, três arquivos de60páginas e auditoria sem credenciais. Office em leitura gerou16renders; PDF renderizado/inspecionado. Dados sintéticos, sem comprovação de valores reais.
+- **Etapas/pendências:** mensal60+exportação implementados para conferência, não homologados; revisar fonte/amostra/capacidade/preços/IVV/INCC/equipe com geração real/analista. Trimestral continua10/89; próximo11–20. Basee23c6692, nova fatia local. SP apenas reutiliza rotina de auditoria extraída sem mudar namespace/parte; fórmulas e demais motores preservados. Sem publicação/coleta real/Monday.
+- **Monday:** [Desafio relatórios automatizados](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`; somente referência.
+
+### 11/11/2026 — SP: fonte municipal de preços e recuperação do histórico — Lucas / Codex
+
+- **Mudança:** observações de preço municipal integradas à geração, independentes da reconciliação granular, com auditoria/insights distinguindo preço informado e cálculo por estoque. Média geral exige total explícito; sem média de padrões. [Contrato e retomada](../features/relatorios-institucionais/sp/CORRECAO_FONTE_PRECOS_2026-11-11.md). Preservados recortes sem MCMV/MAP candidatos, escoamento e demais motores.
+- **Validação:** suíte SP/tipos/build/lint e Edge offline:40casos de slides mais sete cenários de geração lenta/cancelamento/recuperação/vazio/erro, sem erros de página. Fontes simuladas, nenhuma nova medição de mercado.
+- **Etapas/pendências:** implementação local para ensaio; autenticação real, retorno geral sem agrupamento, valores2T2026 e metodologia integral ainda pendentes. Não declarar o preço corrigido/homologado antes do retorno real. Nova fatia local sobre f0d5b408; sem push, publicação ou escrita Monday.
+- **Monday:** [Desafio relatórios automatizados](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`; somente referência.
+
+### 11/11/2026 — SP: origem dos meses de escoamento — Lucas / Codex
+
+- **Diagnóstico:** leitura do original no Drive,51planilhas embutidas, caches e auditoria do gerado. [Contas, fontes e limites](../features/relatorios-institucionais/sp/INVESTIGACAO_ESCOAMENTO_2026-11-11.md). Econômico, Compacto, Standard e mercado reproduzem média móvel de12meses; Alto reproduz com históricos originais e158vendas atuais do gerado. Sistema usa média do trimestre, explicando41,87contra14,177meses no Alto. Original contém bases de apoio diferentes dos totais finais, além de arredondamento diferente.
+- **Validação/estado:** script offline compara Excel/cache, totais trimestrais/móveis e reproduções numéricas, com hashes/JSON. Nenhuma fórmula de produção alterada ou nova coleta. Etapa de conciliação em andamento; pendem memória nominal e diferenças individuais de classificação/atualização. Não homologado, não publicado; trabalho anterior7685cd57preservado.
+- **Monday:** [Desafio relatórios automatizados](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`; somente referência.
+
+### 11/11/2026 — SP Institucional: revisão do analista, Top10 e nitidez do PPTX — Lucas / Codex
+
+- **Ambiente/funcionalidade:** Rebrain — `/rebrain/relatorios-institucionais/sp`. Base608009b7recebida porFF limpo de49commits; correções Lovable e entregas paralelas preservadas.
+- **Entrega:** complemento Tahoma em textos antes incorporados às artes, divisórias e rodapés; sumário30pt, trimestre no subtítulo e notas condicionais. Top10 agora calcula participação sobre saldo municipal positivo mesmo com bairros negativos, preservando sinais e reconciliação mensal. Cinco fotos originais e referência1920×1080 da consultoria; exportador mede densidade sem inventar detalhe. [Contrato, fontes e retomada](../features/relatorios-institucionais/sp/CORRECOES_ANALISTA_2026-11-11.md).
+- **Dados/decisão:** escoamento adiado explicitamente por Lucas, sem mudança de fórmula ou unidade e sem bloquear demais páginas. Preços/histórico em diagnóstico separado; comparação dos artefatos mostra diferenças de universo/método a confirmar. Não impor14meses ou15mil/m² nem preencher ausência por zero. Nenhuma alteração de coletores ou política Secovi/FIERGS.
+- **Validação:**308testesSP/35arquivos, tipos/lint/build e86casosEdge locais; PPTX sintético85slides, textos nativos Tahoma/sumário30pt,20retratos e13rendersOffice. Geometria/cores de mapas verificadas, sem cartografia externa real. Não é geração autenticada ou homologação de indicadores. Sem publicação/envio de email/Monday.
+- **Arquivos/commits:** componentes/exportador/testes/artes SP, diagnósticos e docs específicos; commit isolado `fix(sp): complete analyst presentation corrections`, hash no fechamento. Próximo: revisão/publicação autorizada; dados de preço/histórico e escoamento permanecem separados.
+- **Monday:** [Relatório SP Institucional](https://brain381753.monday.com/boards/18398428946/pulses/13452140276) — `13452140276`; referência, sem escrita.
 
 ### 10/11/2026 — Integração autorizada: Relatório API Excel e atualizações upstream — Edgar / Codex
 
@@ -1365,6 +1934,63 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 
 ## 2. Etapas
 
+- **17/11 — Maceió, runtime após publicação:** fontes coletadas no JSON real;55indicadores ainda bloqueados por validação, não por HTTP. Diagnóstico agregado de categorias/cobertura preparado localmente; conclusão das fontes não comprovada.
+
+- **17/11 — Maceió trimestral, fontes:** contratos corrigidos compartilhados e INCC-DI explícito aplicados;35testes e6cenários headless aprovados, apenas CAGED pendente no cenário imobiliário completo. Validação real depois da publicação ainda necessária.
+
+- **17/11 — Maceió mensal, correção de fontes:** contratos temporais/paginação e histórico POST v2 ajustados; INCC-DI autorizado por Lucas e explícito no mensal.134testes e12cenários de navegador sintético aprovados; geração autenticada real ainda não refeita.
+
+- **17/11 — Maceió, prévia/diagnóstico:** inventário/seletor técnico removidos, resumo de fontes e exportação JSON por slide implementados localmente. 129 testes, build e 12 cenários de navegador aprovados; publicação depende de autorização.
+
+- **17/11 — CAGED em ativação:** recursos GCP/job v1 criados pelo usuário; carga falhou no subsetor inválido de maio/2017. Correção local estrita com 7 testes; ainda sem nova imagem ou snapshot remoto.
+
+- **17/11 — Maceió, CAGED/MTE local concluído:** importador antigo+NovoCaged, ponte/Edge e slides9–14 implementados e validados no commit `50d88663`.123testes Maceió e pilotos reais set/2026/dez/2019. Próximo: bootstrap completo2017+, ativação GCP/Lovable/Scheduler e geração autenticada/homologação; exportação separada. Estados anteriores de CAGED adiado/a integrar abaixo são históricos.
+
+- **17/11 — Maceió, todas as posições:** prévia82mensais/87trimestrais implementada, incluindo estado atual, horizontal, comercial trimestral, equipe/fechamento.107testes e ensaios visuais/página aprovados. Próximo confirmado pelo usuário: CAGED9–14; depois exportação e homologação real. Estados anteriores de61–80/fechamento abaixo são históricos.
+
+- **17/11 — Maceió, após60:** prévia mensal/trimestral1–60 implementada localmente, com oferta/IVV/preços e critérios explícitos;81testes,480verificações visuais e8cenários de página aprovados. Próximo61–80 e fechamento, depois exportação; fontes/métodos reais aguardam homologação. CAGED continua adiado. Estados anteriores abaixo são históricos.
+
+- **16/11 — Maceió, continuação:** prévia1–40mensal/trimestral implementada e conferida com fixtures; fontes por padrão/tipologia/histórico, MCMV, valores com índice explícito e oferta final. Próximo41–60. Integração CAGED adiada por Lucas; conta do setor com BigQuery conectado ao Rebrain informada, não testada aqui.
+
+- **16/11 — Maceió, visual1–20:** prévia mensal/trimestral na arte original e fontes independentes de lançamentos implementadas. CAGED9–14mantém pendência explícita; demais blocos/exportação ainda em implantação. Substitui o estado antigo de somente estrutura abaixo.
+
+- **16/11 — Maceió:** pacote de referência e plano para Claude preparados; implantação runtime ainda não iniciada. Originais82/87conferidos estruturalmente, revisão de conteúdo pendente.
+
+- **16/11 — Fortaleza, acesso:** mensal/trimestral disponíveis pelo menu Rebrain → Relatórios Automatizados, pela busca e pelo início; navegação local verificada em desktop/celular e claro/escuro.
+
+- **16/11 — Fortaleza mensal, complemento:** cabeçalhos19/20/30/31 corrigidos;45/46 confirmados no PPTX novo, com301testes e240verificações visuais aprovados. Sem mudança numérica.
+
+- **16/11 — Fortaleza, dados e visual:** comparação de PPTX reais entregue e títulos mapas/IVV corrigidos. Lançamentos/VGV mensal têm conciliação no período comum; preços, estoque, casas e padrões permanecem em revisão pelo analista.
+
+- **16/11 — Fortaleza 2T2026:** causa das 64 pendências reproduzida e corrigida no fluxo de coleta; fontes independentes e diagnóstico com cobertura explícita. A revisão de 13/11 não comprovou disponibilidade real; próxima evidência é o JSON de nova geração com 45 fontes municipais/10 detalhadas.
+
+- **13/11 — Fortaleza mensal/trimestral:** revisão adicional validada com 287 testes, 604 cenários visuais, recuperação simulada e downloads reais locais; envio autorizado. Aceite com dados reais permanece pendente.
+
+- **13/11 ? Fortaleza trimestral:** revisão local de cobertura por tipologia, rastreabilidade e cabeçalhos concluída; [evidência](../features/relatorios-institucionais/fortaleza/REVISAO_TRIMESTRAL_2026-11-13.md). Homologação real pendente.
+
+- **12/11 — Grafia:** Geobrain padronizado nos textos visíveis; entrega editorial local.
+
+
+- **12/11 — PPTX SP/Fortaleza60/89:** exportação com objetos editáveis validada em arquivo real e PowerPoint; listas nativas e consultoria individual. Publicação desta correção pendente.
+
+
+- **12/11 — Fortaleza e SP:** edição na prévia implementada localmente, com Tahoma/títulos e exportação da mesma composição; mensal Fortaleza usa cobertura municipal observada para liberar fontes completas. Conferência real pós-publicação e homologação continuam abertas.
+
+
+- **Fortaleza mensal (12/11):** diagnóstico real de agosto confirma bloqueios além do fechamento. Correções locais de paginação, estados editoriais e bairro não informado; matriz municipal detalhada preparada para próximo JSON, sem declarar fontes todas resolvidas.
+
+
+- **Fortaleza trimestral (12/11):** 89 posições com implementação local; validação final/exportação real pendentes. 11–20 commitado localmente;21–89sem commit. Mensal60mantido. Ver [retomada](../features/relatorios-institucionais/fortaleza/TRIMESTRAL_2026-11-12.md).
+
+
+- 🟡 **SP — amostra histórica/manchetes12/11:**346testes e24ensaiosEdgeaprovados; envio autorizado. Exibe observações históricas parciais válidas com método explícito; equivalência com os13preços do analista ainda não concluída.
+
+- 🟡 **SP — preços12/11:** seleção corrigida localmente com diagnóstico real,342testes e50ensaiosEdge.53parcial,55/57com oito lacunas preservadas;59aceita4exatos,61–64recuperam cálculos identificados. Publicação e nova geração/JSON pendentes.
+
+- 🟡 **Fortaleza mensal —11/11:**60posições e PDF/PPTX de conferência implementados localmente; ensaios sintéticos/Office/PDF aprovados. Sem homologação real. Trimestral10/89, próximo11–20. [Estado atual](../features/relatorios-institucionais/fortaleza/MENSAL_EXPORTACAO_2026-11-11.md); supera pendências de implementação mensal nas entradas históricas abaixo.
+
+- 🟡 **SP Institucional — revisão11/11:** correções visuais/Top10/fotos/exportação verificadas localmente; publicação pendente. Escoamento adiado por Lucas, preços/histórico aguardam conciliação de método/base. [Entrega](../features/relatorios-institucionais/sp/CORRECOES_ANALISTA_2026-11-11.md).
+
 - **Fortaleza mensal60/JSON:** integrado em b6c6488,214testes e build aprovados; publicação autorizada. Próxima validação é o teste real/diagnóstico do usuário.
 
 - 🟡 **Fortaleza mensal1–60:** todas as posições da prévia implementadas; diagnóstico JSON e editor final disponíveis localmente. Publicação/revisão real/homologação/exportação ainda pendentes.
@@ -1475,6 +2101,65 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 ---
 
 ## 3. Pendências
+
+- **17/11 — Maceió, dados reais:** obter rótulos reais de tipologia/padrão/produto e cobertura mensal por diagnóstico agregado; confirmar universo antes de alterar guardas. Corrigir classificações e lacunas com evidência, preservando ausência e divergências. Série vazia em cidade não equivale automaticamente a zero. CAGED excluído.
+
+- **17/11 — Maceió trimestral, publicação/ensaio real:** autorizar envio deste lote, publicar e gerar novo JSON2T2026; conferir acesso v2/cobertura/dados monetários. CAGED segue fora do lote, carga histórica ainda independente. Não usar diagnóstico anterior ao commit2cea2276 para avaliar a correção compartilhada.
+
+- **17/11 — Maceió mensal, conferir fonte real após correção:** autorizar push, publicar frontend e gerar maio/2026 novamente; avaliar novo JSON com códigos de falha/HTTP, cobertura e valores monetários. INCC-DI do mensal já autorizado, trimestral segue separado. Não confundir ensaio sintético sem pendências com dados reais homologados. CAGED excluído deste pedido.
+
+- **17/11 — Maceió, publicar interface:** autorizar push da limpeza de prévia e diagnóstico JSON. Conferir geração autenticada e homologar critérios; carga CAGED remota ainda em execução, rota/Scheduler pendentes. Arquivo JSON não substitui exportação PPTX/PDF.
+
+- **17/11 — CAGED, retomada após falha:** autorizar envio da correção, ensaiar maio real e atualizar imagem do job; concluir histórico, publicar rota no proxy e Scheduler, conferir geração e homologar tratamento do registro em outros. Recursos GCP/Edge já criados/publicados pelo usuário; pendências anteriores sobre sua criação estão superadas por esta evidência.
+
+- **17/11 — Maceió, ativar CAGED/MTE:** aplicar recursos GCP e executar histórico completo desde201701; montar/publicar rota do proxy e EdgeLovable; configurar atualização autenticada; validar ambos os modelos com fonte real e analista. Implementação local `50d88663` concluída, pilotos não equivalem ao bootstrap. Exportação PPTX/PDF e demais homologações seguem pendentes. [Passos operacionais](../../gcp/caged-mte/README.md).
+
+- **17/11 — Maceió, após82/87:** integrar CAGED mensal à referência escolhida, usando a infraestrutura BigQuery como ponto de investigação (RAIS anual não substitui a série); desenvolver exportação PPTX/PDF e executar geração real delimitada para comprovar campos/granularidade/universo/classificações/INCC antes de homologar com o analista. Não restam posições de slide para compor; pendências antigas61–80/fechamento abaixo foram atendidas na prévia local.
+
+- **17/11 — Maceió, após60:** continuar61–80 nas ordens distintas dos modelos e depois finalizar/exportar; comprovar fontes granulares, correspondência dos padrões e métodos IVV/escoamento/preços/INCC com o analista. Histórico IVV anterior à janela coletada segue ausente e sinalizado. Geração autenticada e deploy não verificados; CAGED adiado. As pendências antigas41–60 abaixo foram atendidas nesta implementação local.
+
+- **16/11 — Maceió, após40:** continuar41–60, validar respostas reais/fluxos granulares e homologar padrões/INCC com analista; exportação depois. CAGED/BigQuery ficam para retomada solicitada, sem bloquear os demais blocos.
+
+- **16/11 — Maceió, após1–20:** integrar CAGED, validar coleta real e métodos de contagem/padrão/janelas com analista; continuar21–40e exportação. `ARTE.md` de trabalho anterior segue fora do commit deste lote.
+
+- **16/11 — Maceió:** Claude inventaria os dois originais, confirma periodicidade/municípios e mapeia dados, CAGED/INCC e fórmulas antes da integração; analista homologa conteúdo. Plano completo no handoff Maceió.
+
+- **16/11 — Fortaleza, acesso:** confirmar atualização do menu no ambiente publicado. A visibilidade do atalho não altera as pendências metodológicas a cargo do analista.
+
+- **16/11 — Fortaleza mensal, complemento:** atualizar a página após publicação e exportar novamente para receber os cabeçalhos corrigidos; conciliação dos dados continua com o analista.
+
+- **16/11 — Fortaleza, comparação:** analista confirma fotografia/base, ponderação de preço/m², universo de casas, rótulos de padrão e intenção dos totais dos quadros originais. Regenerar os arquivos para aplicar o cabeçalho corrigido; mapas seguem esquemáticos.
+
+- **16/11 — Fortaleza 2T2026:** após disponibilizar a correção, gerar novamente e conferir as respostas das 55 fontes antes não consultadas. Resolver eventuais falhas reais pelo novo diagnóstico, sem converter ausências em zero; avisos do balanço inicial e homologação continuam separados.
+
+- **13/11 — Fortaleza mensal/trimestral:** após publicação autorizada, gerar relatório/JSON reais pareados, conferir cobertura e homologar métodos/equipe/amostra histórica. Downloads60/89 e recuperação não são mais pendências de implementação; confirmação de deploy e validação autenticada seguem abertas.
+
+- **13/11 ? Fortaleza trimestral:** autorizar envio desta revisão, gerar diagnóstico real pareado e homologar fontes/metodologia/equipe. Lacunas históricas não são preenchidas com zero ou cadastro atual.
+
+- **12/11 — Grafia:** publicar o ajuste editorial Geobrain após autorização; mensagens server-side dependem do deploy das funções correspondentes.
+
+
+- **12/11 — Exportação de relatórios, correção atual:** autorizar push e conferir os três relatórios reais após deploy. Gráficos exportados como formas; eventual exigência de planilha Excel/Editar Dados precisa de um contrato adicional de gráficos nativos.
+
+
+- **12/11 — Fortaleza/SP, entrega atual:** autorizar publicação desta correção, gerar mensal agosto novamente e conferir os números com o analista. Prévia manual permanece na sessão; fotos de consultoria SP disponíveis só no composto original podem exigir upload para maior resolução.
+
+
+- **Fortaleza mensal:** publicar correções somente após autorização; gerar agosto e conferir cobertura municipal agora preservada. Categorias/meses ausentes e fotografia de outubro ainda não reconciliados. Ver [diagnóstico](../features/relatorios-institucionais/fortaleza/DIAGNOSTICO_MENSAL_2026-11-12.md).
+
+
+- **Fortaleza trimestral:** repor créditos do workspace para a revisão automática voltar a autorizar ensaios elevados; repetir regressões após ajuste do IVV mensal, capturas aguardando imagens e downloads PPTX/PDF89. Depois commit isolado e autorização de push; homologação real separada.
+
+
+- **SP — comparação de médias12/11:** comparação estoque/qty/simples preparada localmente; publicar com autorização e obter novo diagnóstico real. Não alterar o preço geral antes de conferir hipótese nos13períodos.
+
+- **SP — após publicação12/11:** nova geração/JSON para observar pontos recuperados; identificar consulta/universo/ponderação da média geral e recortes semMCMV. Mostrar amostra parcial não resolve divergência com o original. Não declarar falta de dados naAPIapenas pela divergência de conciliação.
+
+- **SP — preços12/11:** seleção de fontes corrigida localmente após JSON real; autorizar envio e gerar novamente. Confirmar grupo4e linha/série calculada; oito lacunas antigas53/55/57e agregado municipal único continuam em aberto. Estado supera a pausa aguardando JSON registrada abaixo.
+
+- **Fortaleza —11/11:** autorizar envio da exportação mensal, gerar/inspecionar dados reais e diagnostico pareado; fechar amostra/empresas, universo/capacidade, preços/IVV/INCC e equipe. PDF/PPTX mensal não é mais pendência de implementação. Próxima fatia trimestral11–20, com janela/fonte próprias; demais estados abaixo são históricos.
+
+- **SP — revisão11/11:** publicar o lote com autorização e conferir nova saída no ambiente do usuário; conciliar preços/cobertura histórica com a mesma fotografia e critério do analista. Escoamento fica separado para retomada posterior, conforme Lucas. Fotos melhoradas apenas até a resolução disponível no original; não declarar todas HD. [Contrato](../features/relatorios-institucionais/sp/CORRECOES_ANALISTA_2026-11-11.md).
 
 - **Fortaleza mensal após60:** autorizar envio, gerar teste real e analisar JSON; revisar fontes/INCC/preços/IVV/capacidade/amostra/equipe e exportação. Não há outros slides mensais. Depois, correções estéticas/diagnóstico SP indicadas pelo usuário. Trimestral segue separado.
 

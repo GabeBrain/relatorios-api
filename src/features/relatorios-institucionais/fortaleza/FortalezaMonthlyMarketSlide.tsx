@@ -1,27 +1,29 @@
+import { FortalezaArtwork } from './FortalezaArtwork';
 import { introMonth } from './intro-view';
 import type { FortalezaSelection } from './model';
 import type { MonthlyBin, MonthlySlideData } from './monthly-market';
 import layouts from './assets/monthly/layout.json';
+import { FortalezaAnalysisHeading } from './FortalezaAnalysisHeading';
 import './intro-slides.css';
 const artwork = import.meta.glob('./assets/monthly/*.png', { eager:true, import:'default', query:'?url' }) as Record<string,string>;
 const colors = ['#1B4059','#42CCA2'];
 const number = (value: number, money = false) => value.toLocaleString('pt-BR',{ maximumFractionDigits:money ? 1 : 0 });
 const percentage = (value: number | null) => value === null ? '—' : `${value > 0 ? '+' : value < 0 ? '−' : ''}${Math.abs(value).toLocaleString('pt-BR',{ maximumFractionDigits:1 })}%`;
-function Plot({ bins, x, width, large = false, money, palette = colors, bottom = 533 }: { bins: MonthlyBin[]; x:number; width:number; large?:boolean; money:boolean; palette?:string[]; bottom?:number }) {
+export function Plot({ bins, x, width, large = false, money, palette = colors, bottom = 533, quarterly = false }: { bins: MonthlyBin[]; x:number; width:number; large?:boolean; money:boolean; palette?:string[]; bottom?:number; quarterly?:boolean }) {
   const min = Math.min(0,...bins.map(bin => Math.min(0,bin.first) + Math.min(0,bin.second)));
   const max = Math.max(1,...bins.map(bin => Math.max(0,bin.first) + Math.max(0,bin.second)));
   const y = (value:number) => bottom - (value - min) / (max - min) * 275;
   const zero = y(0), step = width / bins.length, barWidth = step * .76;
-  return <g aria-label={large ? 'Acumulado no ano' : 'Histórico mensal'}><line x1={x} x2={x + width} y1={zero} y2={zero} stroke="#AAB8C2" />
+  return <g aria-label={large ? 'Acumulado no ano' : quarterly ? 'Histórico trimestral' : 'Histórico mensal'}><line x1={x} x2={x + width} y1={zero} y2={zero} stroke="#AAB8C2" />
     {bins.map((bin,index) => {
       const cx = x + step * (index + .5); let positive = 0, negative = 0;
       return <g key={bin.month}>{[bin.first,bin.second].map((value, group) => {
         const from = value >= 0 ? positive : negative;
         if (value >= 0) positive += value; else negative += value;
         const top = Math.min(y(from),y(from + value)), height = Math.abs(y(from) - y(from + value));
-        const label = number(value,money), labelSize = large ? 23 : Math.min(12,(step - 4) / (label.length * .65));
+        const label = number(value,money), labelSize = large ? 23 : quarterly ? 22 : Math.min(12,(step - 4) / (label.length * .65));
         return <g key={group}><rect x={cx - barWidth / 2} y={top} width={barWidth} height={height} fill={palette[group]} />{height > (large ? 35 : 18) && <text x={cx} y={top + height / 2 + (large ? 8 : 4)} textAnchor="middle" fontSize={labelSize} fill={group ? 'black' : 'white'} fontWeight={700}>{label}</text>}</g>;
-      })}<circle cx={cx} cy={y(bin.total)} r={large ? 6 : 4.5} fill="#AA4EBF" /><text x={cx} y={y(bin.total) - 14} textAnchor="middle" fontSize={large ? 27 : Math.min(13,(step - 3) / (number(bin.total,money).length * .65))} fill="black" fontWeight={700}>{number(bin.total,money)}</text><text x={cx} y={bottom + 27} textAnchor={large ? 'middle' : 'end'} transform={large ? undefined : `rotate(-50 ${cx} ${bottom + 27})`} fontSize={large ? 17 : 14} fill="black">{bin.label}</text></g>;
+      })}<circle cx={cx} cy={y(bin.total)} r={large ? 6 : 4.5} fill="#AA4EBF" /><text x={cx} y={y(bin.total) - 14} textAnchor="middle" fontSize={large ? 27 : quarterly ? 25 : Math.min(13,(step - 3) / (number(bin.total,money).length * .65))} fill="black" fontWeight={700}>{number(bin.total,money)}</text><text x={cx} y={bottom + 27} textAnchor={large || quarterly ? 'middle' : 'end'} transform={large || quarterly ? undefined : `rotate(-50 ${cx} ${bottom + 27})`} fontSize={large || quarterly ? 17 : 14} fill="black">{bin.label}</text></g>;
     })}
   </g>;
 }
@@ -34,7 +36,7 @@ function StockChart({ data,page,selection }: { data:MonthlySlideData; page:numbe
     <g fill="black" fontSize={15} fontWeight={700}><rect x={230} y={596} width={8} height={8} fill={palette[0]} /><text x={244} y={605}>Estoque · {data.labels[0]}</text><rect x={610} y={596} width={8} height={8} fill={palette[1]} /><text x={624} y={605}>Estoque · {data.labels[1]}</text><circle cx={1010} cy={600} r={4.5} fill="#AA4EBF" /><text x={1022} y={605}>Total</text></g>
   </g>;
 }
-function Rolling({ data }: { data: NonNullable<MonthlySlideData['rolling']> }) {
+export function Rolling({ data }: { data: NonNullable<MonthlySlideData['rolling']> }) {
   const max = Math.max(1,...data.flatMap(row => [row.launches,row.sales])), min = Math.min(0,...data.map(row => row.sales));
   const x = (index:number) => 58 + index / Math.max(1,data.length - 1) * 1150;
   const y = (value:number) => 520 - (value - min) / (max - min) * 250;
@@ -46,10 +48,13 @@ function Rolling({ data }: { data: NonNullable<MonthlySlideData['rolling']> }) {
 }
 export default function FortalezaMonthlyMarketSlide({ page,selection,cities,data }: { page:number; selection:FortalezaSelection; cities:string[]; data:MonthlySlideData | null }) {
   const divider = [18,21,29,32].includes(page);
+  const lotsTitle:Record<number,string[]>={19:['UNIDADES LANÇADAS POR MÊS –','LOTEAMENTOS'],20:['VGL POR MÊS (EM MILHÕES) –','LOTEAMENTOS'],30:['UNIDADES VENDIDAS POR MÊS –','LOTEAMENTOS'],31:['VGV POR MÊS (EM MILHÕES) –','LOTEAMENTOS']};
+  const heading=lotsTitle[page];
   const scope = layouts.find(layout => layout.page === page)?.scope;
   const money = data?.unit === 'milhões';
   return <svg className="fortaleza-intro-slide block aspect-video h-auto w-full" viewBox="0 0 1280 720" role="img" aria-label={`Fortaleza · slide ${page}`}>
-    <image href={artwork[`./assets/monthly/${page}.png`]} width={1280} height={720} aria-hidden="true" />
+    <FortalezaArtwork href={artwork[`./assets/monthly/${page}.png`]} kind="monthly" page={page} omitText={Boolean(heading)}/>
+    {heading&&<FortalezaAnalysisHeading lines={heading} scope="Fortaleza e Região Metropolitana"/>}
     {divider ? <>
       {scope && <text x={scope.x + scope.width} y={scope.y + 30} textAnchor="end" fill="white" fontSize={cities.join(', ').length > 70 ? 20 : 25}>{cities.length ? cities.join(', ') : 'Selecione o recorte autorizado'}</text>}
       <text x={1180} y={scope ? Math.max(365,scope.y + scope.height + 36) : 400} textAnchor="end" fill="white" fontSize={18}>{introMonth(selection.position)} de {selection.year}</text>

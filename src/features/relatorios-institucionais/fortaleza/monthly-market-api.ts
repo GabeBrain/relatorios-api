@@ -3,6 +3,7 @@ import { requestWithRetry } from '@/features/panorama-secovi-fiergs/lib/request-
 import { fortalezaScope, fortalezaPeriod, type FortalezaSelection } from './model';
 import { monthlyMarketMonths, monthlyStockMonths, monthlyMarketSourceIssue, monthlySourceKey, type MonthlyMarketData, type MonthlyMarketSource, type MonthlyMetric, type MonthlySegment } from './monthly-market';
 import type { FortalezaEnvelope, FortalezaReadOptions } from './api';
+import { monthlySourceCoverage } from './municipal-coverage';
 
 /** Shared monthly harvest: two in-flight source streams; each stream paginates in order. */
 export async function fetchMonthlyMarket(selection: FortalezaSelection, authorizedCities: string[], options: FortalezaReadOptions, previous?: MonthlyMarketData): Promise<MonthlyMarketData> {
@@ -11,7 +12,7 @@ export async function fetchMonthlyMarket(selection: FortalezaSelection, authoriz
   const scopeKey = JSON.stringify([scope.cities,months,'fortaleza-monthly-v4']);
   const output: MonthlyMarketData = { scopeKey, months, sources: [], issues: [] };
   const check = () => { if (options.signal?.aborted) throw new DOMException('Consulta cancelada.', 'AbortError'); };
-  const tasks = scope.cities.flatMap(city => (['Vertical','Horizontal','Comercial'] as MonthlySegment[]).flatMap(segment => (segment === 'Comercial' ? ['releases','sales'] : ['releases','sales','stock'] as MonthlyMetric[]).map(metric => ({ city, segment, metric:metric as MonthlyMetric }))));
+  const tasks = scope.cities.flatMap(city => (['Vertical','Horizontal','Comercial'] as MonthlySegment[]).flatMap(segment => (segment === 'Comercial'&&selection.periodicity==='monthly' ? ['releases','sales'] : ['releases','sales','stock'] as MonthlyMetric[]).map(metric => ({ city, segment, metric:metric as MonthlyMetric }))));
   const completed = new Map<number, MonthlyMarketSource>(); let nextTask = 0;
   async function worker() {
     while (nextTask < tasks.length) {
@@ -40,6 +41,8 @@ export async function fetchMonthlyMarket(selection: FortalezaSelection, authoriz
           if (page === last) throw new Error();
         }
         if (!source.complete) throw new Error();
+        source.emptyResult=source.segment==='Comercial'&&total===0&&source.rows.length===0;
+        source.coverage=monthlySourceCoverage(source,months);
         const issue = monthlyMarketSourceIssue(source,months);
         if (issue) { source.complete = false; source.issue = issue; source.rows = []; }
       } catch {

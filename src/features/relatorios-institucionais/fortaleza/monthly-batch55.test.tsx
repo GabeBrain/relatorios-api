@@ -16,6 +16,14 @@ function fixture():PriceCollection {
   }));return {scopeKey:'fixture55',months,sources,issues:[]};
 }
 describe('Fortaleza mensal46–55',()=>{
+  it.each([47,48,49,50,51,52,53,54,55])('tabela %i reserva cabeçalho e competência antes dos dados',page=>{
+    const data=buildOfferTable(Math.min(page,52),monthlyMarketFixture(),fixture(),selection,cities);
+    const {container}=render(<FortalezaMonthlyTableSlide page={page} selection={selection} data={data}/>);
+    expect(container.querySelector('[data-monthly-table-heading]')).toBeTruthy();
+    const first=container.querySelector('g[aria-label="Tabela de oferta e vendas"] rect')!;
+    expect(Number(first.getAttribute('y'))).toBeGreaterThanOrEqual(192);
+    expect(screen.getByText('julho de 2026')).toBeTruthy();
+  });
   it('preserva grafia autorizada sem perder identidade por caixa ou acento',()=>{
     const names=cities.map(city=>city.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase()),data=monthlyMarketFixture();
     data.sources.forEach(source=>source.city=source.city.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase());
@@ -56,13 +64,20 @@ describe('Fortaleza mensal46–55',()=>{
     const result=buildOfferTable(52,monthlyMarketFixture(),data,selection,cities);
     expect(result.status).toBe('ready');expect(result.total).toMatchObject({opening:20,stock:10,sales:-2,weighted:10000,priceUnits:10});expect(result.warnings.length).toBe(1);
   });
+  it.each(['','Não informado','—'])('mantém bairro ausente %s com totais preservados e aviso explícito',neighborhood=>{
+    const data=fixture(),before=buildOfferTable(52,null,data,selection,cities);data.sources[0].records[0].neighborhood=neighborhood;
+    const result=buildOfferTable(52,null,data,selection,cities);
+    expect(result.status).toBe('ready');expect(result.total).toEqual(before.total);
+    expect(result.rows.find(row=>row.label==='Bairro não informado')!.stock).toBe(before.total.stock);
+    expect(result.warnings.join(' ')).toContain('bairro não informado');
+  });
   it('lançamento no mês usa qty observado e abertura zero pelo lançamento posterior',()=>{
     const data=fixture(),record=data.sources[0].records[0];record.release_date='2026-07-01';record.typologies_history=(record.typologies_history as Record<string,unknown>[]).slice(-1);
     const result=buildOfferTable(52,null,data,selection,cities);expect(result.status).toBe('ready');expect(result.total).toMatchObject({opening:0,launches:100,stock:10,sales:5});
   });
-  it.each(['neighborhood','sold_in_period','qty','snapshot','conflict'])('ausência/conflito %s não vira zero',mode=>{
+  it.each(['sold_in_period','qty','snapshot','conflict'])('ausência/conflito %s não vira zero',mode=>{
     const data=fixture(),record=data.sources[0].records[0],history=record.typologies_history as Record<string,unknown>[];
-    if(mode==='neighborhood')record.neighborhood='';if(mode==='sold_in_period')delete history.at(-1)!.sold_in_period;if(mode==='qty'){record.release_date='2026-07-01';delete history.at(-1)!.qty;}if(mode==='snapshot')history.splice(-2,1);if(mode==='conflict')history.push({...history.at(-1),typology_stock:999});
+    if(mode==='sold_in_period')delete history.at(-1)!.sold_in_period;if(mode==='qty'){record.release_date='2026-07-01';delete history.at(-1)!.qty;}if(mode==='snapshot')history.splice(-2,1);if(mode==='conflict')history.push({...history.at(-1),typology_stock:999});
     expect(buildOfferTable(52,null,data,selection,cities).status).toBe('blocked');
   });
   it('capacidade ausente e estoque superior à capacidade bloqueiam50',()=>{
@@ -78,8 +93,8 @@ describe('Fortaleza mensal46–55',()=>{
   it('roster histórico incompleto bloqueia o bairro sem carregar estoque adiante',()=>{
     const data=fixture(),record=data.sources[0].records[0],history=record.typologies_history as Record<string,unknown>[];history.push({...history.at(-2),typology_id:99});expect(buildOfferTable(52,null,data,selection,cities).status).toBe('blocked');
   });
-  it.each(['duplicate','scope','placeholder'])('não consolida bairro com %s',mode=>{
-    const data=fixture(),source=data.sources[0];if(mode==='duplicate')source.records.push(structuredClone(source.records[0]));if(mode==='scope')source.records[0].city='Outra';if(mode==='placeholder')source.records[0].neighborhood='Não informado';expect(buildOfferTable(52,null,data,selection,cities).status).toBe('blocked');
+  it.each(['duplicate','scope'])('não consolida bairro com %s',mode=>{
+    const data=fixture(),source=data.sources[0];if(mode==='duplicate')source.records.push(structuredClone(source.records[0]));if(mode==='scope')source.records[0].city='Outra';expect(buildOfferTable(52,null,data,selection,cities).status).toBe('blocked');
   });
   it('cabeçalho janeiro atravessa o ano sem manter datas do original',()=>{
     const data=buildOfferTable(47,monthlyMarketFixture(),null,selection,cities);

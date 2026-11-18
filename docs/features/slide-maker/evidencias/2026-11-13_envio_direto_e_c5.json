@@ -1,0 +1,38 @@
+{
+  "date": "2026-11-13",
+  "project": "brain-rebrain-slide-maker",
+  "service": "slide-maker-agent",
+  "c5": {
+    "approved_limit_usd": 23,
+    "approved_by": "Diego Cabrero",
+    "anthropic_secret": "slide-maker-anthropic-api-key:1 montado sem leitura do valor",
+    "revision_real_agent": "slide-maker-agent-00003-pvg",
+    "health": { "status": 200, "agente": "claude", "isolamento_aprovado": true },
+    "golden_job_1": {
+      "job_id": "0c232f3e-11ec-404f-8b3c-1ddea434071d",
+      "upload": "domicilios_vagos_2010_2022.xlsx (1,5 MB) pela interface publicada",
+      "f1": "resultado=success turnos=1 ms=3316, is_error → erro_api; fase com erro motivo=erro",
+      "reading": "a API da Anthropic recusou a primeira chamada; motivo não era registrado",
+      "cost": "desprezível (uma chamada recusada)"
+    },
+    "diagnostic_revision": "slide-maker-agent-00004-tpk passa a registrar status e mensagem da API (sem custo nem conteúdo)"
+  },
+  "direct_upload": {
+    "reason": "Cloud Run recusa corpo acima de 32 MiB; Diego pediu arquivos de até 200 MB",
+    "limits": { "per_file_mb": 200, "per_job_mb": 500, "files": 10 },
+    "image": "sha256:6f8da88a4494a3d46dc425d1a41caa75efa235ab1ff95e5f3cdb6f7c7d187ea3 (48 testes lib OK)",
+    "revision": "slide-maker-agent-00005-zgx",
+    "local_tests": { "service": "88 aprovados, 2 Linux pulados", "frontend": "92 aprovados", "e2e_local": "2/2 no Edge pelo envio direto" },
+    "published_checks_without_f1": {
+      "job_id": "ef5c5404-387c-4020-8dfa-fc9ea3754c5b",
+      "signed_upload_urls": "200, caminho /storage/v1/object/upload/sign",
+      "file_201_mb": "400 recusado pelo serviço",
+      "browser_put_from_geobrain-relatorios.lovable.app": 200,
+      "put_60_mb": "400 EntityTooLarge: bucket/projeto ainda em 50 MB",
+      "concluir_wrong_type": "400 'não parece ser um arquivo .xlsx válido' (leitura parcial via ponte comprovada)",
+      "state_after": "rascunho (nenhuma fase iniciada)"
+    },
+    "pending": "Diego sobe o limite do bucket slide-maker-entrada (e o global do Storage) para 200 MB no Lovable"
+  },
+  "paid_model_calls": "apenas a F1 recusada do dourado 1"
+}

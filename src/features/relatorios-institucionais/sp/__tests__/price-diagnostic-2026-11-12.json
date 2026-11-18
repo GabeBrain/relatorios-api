@@ -1,0 +1,1549 @@
+{
+  "sourceSha256": "c1df3a157f56869b6ee7355acfee23ce6198e19ad968753ead1f85c703b32e87",
+  "quarter": "2T2026",
+  "throughMonth": "2026-06",
+  "metrics": {
+    "projects": 131,
+    "launches": 42453,
+    "sales": 38658,
+    "stock": 127840
+  },
+  "monthly": [
+    {
+      "month": "2026-04",
+      "launches": 14689,
+      "sales": 12816,
+      "openingStock": 124045,
+      "closingStock": 125998,
+      "delta": 80
+    },
+    {
+      "month": "2026-05",
+      "launches": 9757,
+      "sales": 10832,
+      "openingStock": 125998,
+      "closingStock": 124923,
+      "delta": 0
+    },
+    {
+      "month": "2026-06",
+      "launches": 18007,
+      "sales": 15010,
+      "openingStock": 124923,
+      "closingStock": 127840,
+      "delta": -80
+    }
+  ],
+  "patterns": {
+    "status": "ready",
+    "issues": [],
+    "rows": [
+      {
+        "group": "Alto",
+        "launches": 177,
+        "sales": 158,
+        "stock": 2205
+      },
+      {
+        "group": "Compacto",
+        "launches": 5460,
+        "sales": 5658,
+        "stock": 22321
+      },
+      {
+        "group": "Econômico",
+        "launches": 32257,
+        "sales": 26443,
+        "stock": 68986
+      },
+      {
+        "group": "Luxo",
+        "launches": 362,
+        "sales": 384,
+        "stock": 2411
+      },
+      {
+        "group": "Médio",
+        "launches": 1783,
+        "sales": 1610,
+        "stock": 7774
+      },
+      {
+        "group": "Médio-Alto",
+        "launches": 570,
+        "sales": 515,
+        "stock": 2403
+      },
+      {
+        "group": "Standard",
+        "launches": 1844,
+        "sales": 3890,
+        "stock": 21740
+      }
+    ],
+    "checks": []
+  },
+  "municipalPrices": {
+    "method": "geobrain-reported-prices-v1",
+    "sources": [
+      {
+        "metric": "medium-prices-meter",
+        "grouping": "overall",
+        "rows": 280,
+        "coverage": [
+          {
+            "month": "2026-06",
+            "groups": [
+              ""
+            ],
+            "ticketValues": 0,
+            "meterValues": 7
+          }
+        ]
+      },
+      {
+        "metric": "medium-prices-meter",
+        "grouping": "Padrão",
+        "rows": 280,
+        "coverage": [
+          {
+            "month": "2026-06",
+            "groups": [
+              "Alto",
+              "Compacto",
+              "Econômico",
+              "Luxo",
+              "Médio",
+              "Médio-Alto",
+              "Standard"
+            ],
+            "ticketValues": 0,
+            "meterValues": 7
+          }
+        ]
+      },
+      {
+        "metric": "medium-prices-meter",
+        "grouping": "Tipologia",
+        "rows": 160,
+        "coverage": [
+          {
+            "month": "2026-06",
+            "groups": [
+              "1",
+              "2",
+              "3",
+              "4"
+            ],
+            "ticketValues": 0,
+            "meterValues": 4
+          }
+        ]
+      },
+      {
+        "metric": "medium-prices",
+        "grouping": "overall",
+        "rows": 7,
+        "coverage": [
+          {
+            "month": "2026-06",
+            "groups": [
+              ""
+            ],
+            "ticketValues": 7,
+            "meterValues": 0
+          }
+        ]
+      },
+      {
+        "metric": "medium-prices",
+        "grouping": "Padrão",
+        "rows": 7,
+        "coverage": [
+          {
+            "month": "2026-06",
+            "groups": [
+              "Alto",
+              "Compacto",
+              "Econômico",
+              "Luxo",
+              "Médio",
+              "Médio-Alto",
+              "Standard"
+            ],
+            "ticketValues": 7,
+            "meterValues": 0
+          }
+        ]
+      },
+      {
+        "metric": "medium-prices",
+        "grouping": "Tipologia",
+        "rows": 4,
+        "coverage": [
+          {
+            "month": "2026-06",
+            "groups": [
+              "1",
+              "2",
+              "3",
+              "4"
+            ],
+            "ticketValues": 4,
+            "meterValues": 0
+          }
+        ]
+      }
+    ],
+    "series": {
+      "53": [
+        {
+          "label": "2T2023",
+          "month": "2023-06",
+          "value": null,
+          "issue": "Preço municipal duplicado para Geral em 2023-06.",
+          "variation": null
+        },
+        {
+          "label": "3T2023",
+          "month": "2023-09",
+          "value": null,
+          "issue": "Preço municipal duplicado para Geral em 2023-09.",
+          "variation": null
+        },
+        {
+          "label": "4T2023",
+          "month": "2023-12",
+          "value": null,
+          "issue": "Preço municipal duplicado para Geral em 2023-12.",
+          "variation": null
+        },
+        {
+          "label": "1T2024",
+          "month": "2024-03",
+          "value": null,
+          "issue": "Preço municipal duplicado para Geral em 2024-03.",
+          "variation": null
+        },
+        {
+          "label": "2T2024",
+          "month": "2024-06",
+          "value": null,
+          "issue": "Preço municipal duplicado para Geral em 2024-06.",
+          "variation": null
+        },
+        {
+          "label": "3T2024",
+          "month": "2024-09",
+          "value": null,
+          "issue": "Preço municipal duplicado para Geral em 2024-09.",
+          "variation": null
+        },
+        {
+          "label": "4T2024",
+          "month": "2024-12",
+          "value": null,
+          "issue": "Preço municipal duplicado para Geral em 2024-12.",
+          "variation": null
+        },
+        {
+          "label": "1T2025",
+          "month": "2025-03",
+          "value": null,
+          "issue": "Preço municipal duplicado para Geral em 2025-03.",
+          "variation": null
+        },
+        {
+          "label": "2T2025",
+          "month": "2025-06",
+          "value": null,
+          "issue": "Preço municipal duplicado para Geral em 2025-06.",
+          "variation": null
+        },
+        {
+          "label": "3T2025",
+          "month": "2025-09",
+          "value": null,
+          "issue": "Preço municipal duplicado para Geral em 2025-09.",
+          "variation": null
+        },
+        {
+          "label": "4T2025",
+          "month": "2025-12",
+          "value": null,
+          "issue": "Preço municipal duplicado para Geral em 2025-12.",
+          "variation": null
+        },
+        {
+          "label": "1T2026",
+          "month": "2026-03",
+          "value": null,
+          "issue": "Preço municipal duplicado para Geral em 2026-03.",
+          "variation": null
+        },
+        {
+          "label": "2T2026",
+          "month": "2026-06",
+          "value": null,
+          "issue": "Preço municipal duplicado para Geral em 2026-06.",
+          "variation": null
+        }
+      ],
+      "54": [
+        {
+          "label": "2T2023",
+          "month": "2023-06",
+          "value": 14363.314649786184,
+          "variation": 0.6936108662757576
+        },
+        {
+          "label": "3T2023",
+          "month": "2023-09",
+          "value": 14496.754279796989,
+          "variation": 0.9290308906015088
+        },
+        {
+          "label": "4T2023",
+          "month": "2023-12",
+          "value": 14553.572169775663,
+          "variation": 0.39193524896712323
+        },
+        {
+          "label": "1T2024",
+          "month": "2024-03",
+          "value": 14716.468398311777,
+          "variation": 1.119286912077923
+        },
+        {
+          "label": "2T2024",
+          "month": "2024-06",
+          "value": 14951.401346722932,
+          "variation": 1.5963948826071999
+        },
+        {
+          "label": "3T2024",
+          "month": "2024-09",
+          "value": 15185.124054851547,
+          "variation": 1.5632160672340072
+        },
+        {
+          "label": "4T2024",
+          "month": "2024-12",
+          "value": 15008.616224388214,
+          "variation": -1.1623733189518486
+        },
+        {
+          "label": "1T2025",
+          "month": "2025-03",
+          "value": 15859.02444801055,
+          "variation": 5.666133445670147
+        },
+        {
+          "label": "2T2025",
+          "month": "2025-06",
+          "value": 15587.685532889622,
+          "variation": -1.710943292952467
+        },
+        {
+          "label": "3T2025",
+          "month": "2025-09",
+          "value": 15559.298624437426,
+          "variation": -0.18211111837161492
+        },
+        {
+          "label": "4T2025",
+          "month": "2025-12",
+          "value": 15294.226124320934,
+          "variation": -1.7036275639068281
+        },
+        {
+          "label": "1T2026",
+          "month": "2026-03",
+          "value": 15099.464500671133,
+          "variation": -1.2734323532727878
+        },
+        {
+          "label": "2T2026",
+          "month": "2026-06",
+          "value": 15031.282494431052,
+          "variation": -0.4515524788117467
+        }
+      ],
+      "56": [
+        {
+          "label": "2T2023",
+          "month": "2023-06",
+          "value": 9763.533699556301,
+          "variation": 0.8633194001584724
+        },
+        {
+          "label": "3T2023",
+          "month": "2023-09",
+          "value": 9779.896608110725,
+          "variation": 0.16759207329992712
+        },
+        {
+          "label": "4T2023",
+          "month": "2023-12",
+          "value": 9882.545125531915,
+          "variation": 1.0495869387418795
+        },
+        {
+          "label": "1T2024",
+          "month": "2024-03",
+          "value": 10047.289479809378,
+          "variation": 1.6670235469185013
+        },
+        {
+          "label": "2T2024",
+          "month": "2024-06",
+          "value": 10333.65119053825,
+          "variation": 2.850138948462993
+        },
+        {
+          "label": "3T2024",
+          "month": "2024-09",
+          "value": 10479.200900966027,
+          "variation": 1.408502258727733
+        },
+        {
+          "label": "4T2024",
+          "month": "2024-12",
+          "value": 10801.074771934642,
+          "variation": 3.0715497680643087
+        },
+        {
+          "label": "1T2025",
+          "month": "2025-03",
+          "value": 10902.172163099205,
+          "variation": 0.9359938089425445
+        },
+        {
+          "label": "2T2025",
+          "month": "2025-06",
+          "value": 10914.106159745472,
+          "variation": 0.1094643935880953
+        },
+        {
+          "label": "3T2025",
+          "month": "2025-09",
+          "value": 10728.39445228128,
+          "variation": -1.7015750510944536
+        },
+        {
+          "label": "4T2025",
+          "month": "2025-12",
+          "value": 10851.291180667266,
+          "variation": 1.1455276829409728
+        },
+        {
+          "label": "1T2026",
+          "month": "2026-03",
+          "value": 10921.83160208126,
+          "variation": 0.6500647733024593
+        },
+        {
+          "label": "2T2026",
+          "month": "2026-06",
+          "value": 11143.710071372785,
+          "variation": 2.0315133704244626
+        }
+      ],
+      "58": [
+        {
+          "label": "2T2023",
+          "month": "2023-06",
+          "value": 15983.583285660095,
+          "variation": -0.03148991618548682
+        },
+        {
+          "label": "3T2023",
+          "month": "2023-09",
+          "value": 16211.428745850757,
+          "variation": 1.4254967494996966
+        },
+        {
+          "label": "4T2023",
+          "month": "2023-12",
+          "value": 16367.194205232658,
+          "variation": 0.9608373316372139
+        },
+        {
+          "label": "1T2024",
+          "month": "2024-03",
+          "value": 16368.820382142065,
+          "variation": 0.009935587547969917
+        },
+        {
+          "label": "2T2024",
+          "month": "2024-06",
+          "value": 17070.357194652766,
+          "variation": 4.285811659806953
+        },
+        {
+          "label": "3T2024",
+          "month": "2024-09",
+          "value": 17524.896977730354,
+          "variation": 2.6627432448804904
+        },
+        {
+          "label": "4T2024",
+          "month": "2024-12",
+          "value": 17782.087562140925,
+          "variation": 1.4675725896557028
+        },
+        {
+          "label": "1T2025",
+          "month": "2025-03",
+          "value": 18455.39906699386,
+          "variation": 3.786459281003962
+        },
+        {
+          "label": "2T2025",
+          "month": "2025-06",
+          "value": 18565.509147574925,
+          "variation": 0.5966280121137434
+        },
+        {
+          "label": "3T2025",
+          "month": "2025-09",
+          "value": 19166.611461479282,
+          "variation": 3.237736757587792
+        },
+        {
+          "label": "4T2025",
+          "month": "2025-12",
+          "value": 19603.667702547853,
+          "variation": 2.280299999543261
+        },
+        {
+          "label": "1T2026",
+          "month": "2026-03",
+          "value": 19808.449632523898,
+          "variation": 1.044610289682832
+        },
+        {
+          "label": "2T2026",
+          "month": "2026-06",
+          "value": 19930.275845788517,
+          "variation": 0.6150214455178291
+        }
+      ],
+      "59": [
+        {
+          "label": "2T2023",
+          "month": "2023-06",
+          "value": null,
+          "issue": "Preço municipal de 4+ não informado em 2023-06; nenhuma média de grupos foi presumida.",
+          "variation": null
+        },
+        {
+          "label": "3T2023",
+          "month": "2023-09",
+          "value": null,
+          "issue": "Preço municipal de 4+ não informado em 2023-09; nenhuma média de grupos foi presumida.",
+          "variation": null
+        },
+        {
+          "label": "4T2023",
+          "month": "2023-12",
+          "value": null,
+          "issue": "Preço municipal de 4+ não informado em 2023-12; nenhuma média de grupos foi presumida.",
+          "variation": null
+        },
+        {
+          "label": "1T2024",
+          "month": "2024-03",
+          "value": null,
+          "issue": "Preço municipal de 4+ não informado em 2024-03; nenhuma média de grupos foi presumida.",
+          "variation": null
+        },
+        {
+          "label": "2T2024",
+          "month": "2024-06",
+          "value": null,
+          "issue": "Preço municipal de 4+ não informado em 2024-06; nenhuma média de grupos foi presumida.",
+          "variation": null
+        },
+        {
+          "label": "3T2024",
+          "month": "2024-09",
+          "value": null,
+          "issue": "Preço municipal de 4+ não informado em 2024-09; nenhuma média de grupos foi presumida.",
+          "variation": null
+        },
+        {
+          "label": "4T2024",
+          "month": "2024-12",
+          "value": null,
+          "issue": "Preço municipal de 4+ não informado em 2024-12; nenhuma média de grupos foi presumida.",
+          "variation": null
+        },
+        {
+          "label": "1T2025",
+          "month": "2025-03",
+          "value": null,
+          "issue": "Preço municipal de 4+ não informado em 2025-03; nenhuma média de grupos foi presumida.",
+          "variation": null
+        },
+        {
+          "label": "2T2025",
+          "month": "2025-06",
+          "value": null,
+          "issue": "Preço municipal de 4+ não informado em 2025-06; nenhuma média de grupos foi presumida.",
+          "variation": null
+        },
+        {
+          "label": "3T2025",
+          "month": "2025-09",
+          "value": null,
+          "issue": "Preço municipal de 4+ não informado em 2025-09; nenhuma média de grupos foi presumida.",
+          "variation": null
+        },
+        {
+          "label": "4T2025",
+          "month": "2025-12",
+          "value": null,
+          "issue": "Preço municipal de 4+ não informado em 2025-12; nenhuma média de grupos foi presumida.",
+          "variation": null
+        },
+        {
+          "label": "1T2026",
+          "month": "2026-03",
+          "value": null,
+          "issue": "Preço municipal de 4+ não informado em 2026-03; nenhuma média de grupos foi presumida.",
+          "variation": null
+        },
+        {
+          "label": "2T2026",
+          "month": "2026-06",
+          "value": null,
+          "issue": "Preço municipal de 4+ não informado em 2026-06; nenhuma média de grupos foi presumida.",
+          "variation": null
+        }
+      ]
+    },
+    "annualChanges": {
+      "53": null,
+      "54": -3.569503870761141,
+      "56": 2.1037353702327173,
+      "58": 7.351086831851643,
+      "59": null
+    },
+    "closing": [
+      {
+        "grouping": "overall",
+        "group": "Geral",
+        "ticket": null,
+        "meter": null,
+        "issues": [
+          "Preço municipal duplicado para Geral em 2026-06.",
+          "Preço municipal duplicado para Geral em 2026-06."
+        ]
+      },
+      {
+        "grouping": "Padrão",
+        "group": "Compacto",
+        "ticket": 676167.1542139465,
+        "meter": 19598.21198179311,
+        "issues": []
+      },
+      {
+        "grouping": "Padrão",
+        "group": "Econômico",
+        "ticket": 289027.6867467847,
+        "meter": 8865.779798614458,
+        "issues": []
+      },
+      {
+        "grouping": "Padrão",
+        "group": "Standard",
+        "ticket": 512464.416100697,
+        "meter": 11178.682376037963,
+        "issues": []
+      },
+      {
+        "grouping": "Padrão",
+        "group": "Médio",
+        "ticket": 1392038.4585183018,
+        "meter": 15693.854323483347,
+        "issues": []
+      },
+      {
+        "grouping": "Padrão",
+        "group": "Médio-Alto",
+        "ticket": 2485581.7161188764,
+        "meter": 19670.828169665114,
+        "issues": []
+      },
+      {
+        "grouping": "Padrão",
+        "group": "Alto",
+        "ticket": 3646349.7531930483,
+        "meter": 22841.69030591095,
+        "issues": []
+      },
+      {
+        "grouping": "Padrão",
+        "group": "Luxo",
+        "ticket": 10926294.739287931,
+        "meter": 40296.136837005906,
+        "issues": []
+      },
+      {
+        "grouping": "Tipologia",
+        "group": "1",
+        "ticket": 421657.96936085675,
+        "meter": 15031.282494431052,
+        "issues": []
+      },
+      {
+        "grouping": "Tipologia",
+        "group": "2",
+        "ticket": 455635.9259550274,
+        "meter": 11143.710071372785,
+        "issues": []
+      },
+      {
+        "grouping": "Tipologia",
+        "group": "3",
+        "ticket": 2178936.556534219,
+        "meter": 19930.275845788517,
+        "issues": []
+      },
+      {
+        "grouping": "Tipologia",
+        "group": "4+",
+        "ticket": null,
+        "meter": null,
+        "issues": [
+          "Preço municipal de 4+ não informado em 2026-06; nenhuma média de grupos foi presumida.",
+          "Preço municipal de 4+ não informado em 2026-06; nenhuma média de grupos foi presumida."
+        ]
+      }
+    ]
+  },
+  "granularPrices": {
+    "series": {
+      "53": [
+        {
+          "label": "2T2023",
+          "month": "2023-06",
+          "value": null,
+          "variation": null,
+          "issue": "Empreendimento 64094: sem fotografia na competência necessária 2023-06. Ausência não representa estoque zero."
+        },
+        {
+          "label": "3T2023",
+          "month": "2023-09",
+          "value": null,
+          "variation": null,
+          "issue": "Estoque em 2023-09: empreendimentos 84837; municipal 84813. As tipologias não somam o estoque municipal nesta competência."
+        },
+        {
+          "label": "4T2023",
+          "month": "2023-12",
+          "value": null,
+          "variation": null,
+          "issue": "Estoque em 2023-12: empreendimentos 94901; municipal 94881. As tipologias não somam o estoque municipal nesta competência."
+        },
+        {
+          "label": "1T2024",
+          "month": "2024-03",
+          "value": null,
+          "variation": null,
+          "issue": "Estoque em 2024-03: empreendimentos 91632; municipal 91619. As tipologias não somam o estoque municipal nesta competência."
+        },
+        {
+          "label": "2T2024",
+          "month": "2024-06",
+          "value": null,
+          "variation": null,
+          "issue": "Estoque em 2024-06: empreendimentos 94670; municipal 94661. As tipologias não somam o estoque municipal nesta competência."
+        },
+        {
+          "label": "3T2024",
+          "month": "2024-09",
+          "value": null,
+          "variation": null,
+          "issue": "Estoque em 2024-09: empreendimentos 94027; municipal 94019. As tipologias não somam o estoque municipal nesta competência."
+        },
+        {
+          "label": "4T2024",
+          "month": "2024-12",
+          "value": null,
+          "variation": null,
+          "issue": "Estoque em 2024-12: empreendimentos 98030; municipal 98025. As tipologias não somam o estoque municipal nesta competência."
+        },
+        {
+          "label": "1T2025",
+          "month": "2025-03",
+          "value": null,
+          "variation": null,
+          "issue": "Estoque em 2025-03: empreendimentos 100267; municipal 100263. As tipologias não somam o estoque municipal nesta competência."
+        },
+        {
+          "label": "2T2025",
+          "month": "2025-06",
+          "value": 12218.372082576272,
+          "variation": null
+        },
+        {
+          "label": "3T2025",
+          "month": "2025-09",
+          "value": 12191.128482604194,
+          "variation": -0.22297242044976195
+        },
+        {
+          "label": "4T2025",
+          "month": "2025-12",
+          "value": 12432.984224257118,
+          "variation": 1.983866727334007
+        },
+        {
+          "label": "1T2026",
+          "month": "2026-03",
+          "value": 12288.71588875002,
+          "variation": -1.1603677194862434
+        },
+        {
+          "label": "2T2026",
+          "month": "2026-06",
+          "value": 12369.940178035058,
+          "variation": 0.6609664510137778
+        }
+      ],
+      "54": [
+        {
+          "label": "2T2023",
+          "month": "2023-06",
+          "value": null,
+          "variation": null,
+          "issue": "Empreendimento 64094: sem fotografia na competência necessária 2023-06. Ausência não representa estoque zero."
+        },
+        {
+          "label": "3T2023",
+          "month": "2023-09",
+          "value": null,
+          "variation": null,
+          "issue": "Estoque em 2023-09: empreendimentos 84837; municipal 84813. As tipologias não somam o estoque municipal nesta competência."
+        },
+        {
+          "label": "4T2023",
+          "month": "2023-12",
+          "value": null,
+          "variation": null,
+          "issue": "Estoque em 2023-12: empreendimentos 94901; municipal 94881. As tipologias não somam o estoque municipal nesta competência."
+        },
+        {
+          "label": "1T2024",
+          "month": "2024-03",
+          "value": null,
+          "variation": null,
+          "issue": "Estoque em 2024-03: empreendimentos 91632; municipal 91619. As tipologias não somam o estoque municipal nesta competência."
+        },
+        {
+          "label": "2T2024",
+          "month": "2024-06",
+          "value": null,
+          "variation": null,
+          "issue": "Estoque em 2024-06: empreendimentos 94670; municipal 94661. As tipologias não somam o estoque municipal nesta competência."
+        },
+        {
+          "label": "3T2024",
+          "month": "2024-09",
+          "value": null,
+          "variation": null,
+          "issue": "Estoque em 2024-09: empreendimentos 94027; municipal 94019. As tipologias não somam o estoque municipal nesta competência."
+        },
+        {
+          "label": "4T2024",
+          "month": "2024-12",
+          "value": null,
+          "variation": null,
+          "issue": "Estoque em 2024-12: empreendimentos 98030; municipal 98025. As tipologias não somam o estoque municipal nesta competência."
+        },
+        {
+          "label": "1T2025",
+          "month": "2025-03",
+          "value": null,
+          "variation": null,
+          "issue": "Estoque em 2025-03: empreendimentos 100267; municipal 100263. As tipologias não somam o estoque municipal nesta competência."
+        },
+        {
+          "label": "2T2025",
+          "month": "2025-06",
+          "value": 13911.344921313335,
+          "variation": null
+        },
+        {
+          "label": "3T2025",
+          "month": "2025-09",
+          "value": 14234.743552837253,
+          "variation": 2.3247114736436774
+        },
+        {
+          "label": "4T2025",
+          "month": "2025-12",
+          "value": 13872.536285728518,
+          "variation": -2.5445296275572216
+        },
+        {
+          "label": "1T2026",
+          "month": "2026-03",
+          "value": 13575.33789521003,
+          "variation": -2.1423507886170254
+        },
+        {
+          "label": "2T2026",
+          "month": "2026-06",
+          "value": 13515.426578245524,
+          "variation": -0.4413246832378694
+        }
+      ],
+      "55": [
+        {
+          "label": "2T2023",
+          "month": "2023-06",
+          "value": null,
+          "variation": null,
+          "issue": "Empreendimento 64094: sem fotografia na competência necessária 2023-06. Ausência não representa estoque zero."
+        },
+        {
+          "label": "3T2023",
+          "month": "2023-09",
+          "value": null,
+          "variation": null,
+          "issue": "Estoque em 2023-09: empreendimentos 84837; municipal 84813. As tipologias não somam o estoque municipal nesta competência."
+        },
+        {
+          "label": "4T2023",
+          "month": "2023-12",
+          "value": null,
+          "variation": null,
+          "issue": "Estoque em 2023-12: empreendimentos 94901; municipal 94881. As tipologias não somam o estoque municipal nesta competência."
+        },
+        {
+          "label": "1T2024",
+          "month": "2024-03",
+          "value": null,
+          "variation": null,
+          "issue": "Estoque em 2024-03: empreendimentos 91632; municipal 91619. As tipologias não somam o estoque municipal nesta competência."
+        },
+        {
+          "label": "2T2024",
+          "month": "2024-06",
+          "value": null,
+          "variation": null,
+          "issue": "Estoque em 2024-06: empreendimentos 94670; municipal 94661. As tipologias não somam o estoque municipal nesta competência."
+        },
+        {
+          "label": "3T2024",
+          "month": "2024-09",
+          "value": null,
+          "variation": null,
+          "issue": "Estoque em 2024-09: empreendimentos 94027; municipal 94019. As tipologias não somam o estoque municipal nesta competência."
+        },
+        {
+          "label": "4T2024",
+          "month": "2024-12",
+          "value": null,
+          "variation": null,
+          "issue": "Estoque em 2024-12: empreendimentos 98030; municipal 98025. As tipologias não somam o estoque municipal nesta competência."
+        },
+        {
+          "label": "1T2025",
+          "month": "2025-03",
+          "value": null,
+          "variation": null,
+          "issue": "Estoque em 2025-03: empreendimentos 100267; municipal 100263. As tipologias não somam o estoque municipal nesta competência."
+        },
+        {
+          "label": "2T2025",
+          "month": "2025-06",
+          "value": 17431.405765787127,
+          "variation": null
+        },
+        {
+          "label": "3T2025",
+          "month": "2025-09",
+          "value": 17675.70787729235,
+          "variation": 1.4015055055669512
+        },
+        {
+          "label": "4T2025",
+          "month": "2025-12",
+          "value": 17446.858816427277,
+          "variation": -1.2947094535267236
+        },
+        {
+          "label": "1T2026",
+          "month": "2026-03",
+          "value": 17011.701937682552,
+          "variation": -2.4941846742921903
+        },
+        {
+          "label": "2T2026",
+          "month": "2026-06",
+          "value": 17161.922730972543,
+          "variation": 0.8830438826184552
+        }
+      ],
+      "56": [
+        {
+          "label": "2T2023",
+          "month": "2023-06",
+          "value": null,
+          "variation": null,
+          "issue": "Empreendimento 64094: sem fotografia na competência necessária 2023-06. Ausência não representa estoque zero."
+        },
+        {
+          "label": "3T2023",
+          "month": "2023-09",
+          "value": null,
+          "variation": null,
+          "issue": "Estoque em 2023-09: empreendimentos 84837; municipal 84813. As tipologias não somam o estoque municipal nesta competência."
+        },
+        {
+          "label": "4T2023",
+          "month": "2023-12",
+          "value": null,
+          "variation": null,
+          "issue": "Estoque em 2023-12: empreendimentos 94901; municipal 94881. As tipologias não somam o estoque municipal nesta competência."
+        },
+        {
+          "label": "1T2024",
+          "month": "2024-03",
+          "value": null,
+          "variation": null,
+          "issue": "Estoque em 2024-03: empreendimentos 91632; municipal 91619. As tipologias não somam o estoque municipal nesta competência."
+        },
+        {
+          "label": "2T2024",
+          "month": "2024-06",
+          "value": null,
+          "variation": null,
+          "issue": "Estoque em 2024-06: empreendimentos 94670; municipal 94661. As tipologias não somam o estoque municipal nesta competência."
+        },
+        {
+          "label": "3T2024",
+          "month": "2024-09",
+          "value": null,
+          "variation": null,
+          "issue": "Estoque em 2024-09: empreendimentos 94027; municipal 94019. As tipologias não somam o estoque municipal nesta competência."
+        },
+        {
+          "label": "4T2024",
+          "month": "2024-12",
+          "value": null,
+          "variation": null,
+          "issue": "Estoque em 2024-12: empreendimentos 98030; municipal 98025. As tipologias não somam o estoque municipal nesta competência."
+        },
+        {
+          "label": "1T2025",
+          "month": "2025-03",
+          "value": null,
+          "variation": null,
+          "issue": "Estoque em 2025-03: empreendimentos 100267; municipal 100263. As tipologias não somam o estoque municipal nesta competência."
+        },
+        {
+          "label": "2T2025",
+          "month": "2025-06",
+          "value": 9852.053570722412,
+          "variation": null
+        },
+        {
+          "label": "3T2025",
+          "month": "2025-09",
+          "value": 9712.042120326223,
+          "variation": -1.4211397592504373
+        },
+        {
+          "label": "4T2025",
+          "month": "2025-12",
+          "value": 10099.01011381149,
+          "variation": 3.984414283741476
+        },
+        {
+          "label": "1T2026",
+          "month": "2026-03",
+          "value": 10115.041468193185,
+          "variation": 0.15874183906174083
+        },
+        {
+          "label": "2T2026",
+          "month": "2026-06",
+          "value": 10276.402517617946,
+          "variation": 1.5952584073150997
+        }
+      ],
+      "57": [
+        {
+          "label": "2T2023",
+          "month": "2023-06",
+          "value": null,
+          "variation": null,
+          "issue": "Empreendimento 64094: sem fotografia na competência necessária 2023-06. Ausência não representa estoque zero."
+        },
+        {
+          "label": "3T2023",
+          "month": "2023-09",
+          "value": null,
+          "variation": null,
+          "issue": "Estoque em 2023-09: empreendimentos 84837; municipal 84813. As tipologias não somam o estoque municipal nesta competência."
+        },
+        {
+          "label": "4T2023",
+          "month": "2023-12",
+          "value": null,
+          "variation": null,
+          "issue": "Estoque em 2023-12: empreendimentos 94901; municipal 94881. As tipologias não somam o estoque municipal nesta competência."
+        },
+        {
+          "label": "1T2024",
+          "month": "2024-03",
+          "value": null,
+          "variation": null,
+          "issue": "Estoque em 2024-03: empreendimentos 91632; municipal 91619. As tipologias não somam o estoque municipal nesta competência."
+        },
+        {
+          "label": "2T2024",
+          "month": "2024-06",
+          "value": null,
+          "variation": null,
+          "issue": "Estoque em 2024-06: empreendimentos 94670; municipal 94661. As tipologias não somam o estoque municipal nesta competência."
+        },
+        {
+          "label": "3T2024",
+          "month": "2024-09",
+          "value": null,
+          "variation": null,
+          "issue": "Estoque em 2024-09: empreendimentos 94027; municipal 94019. As tipologias não somam o estoque municipal nesta competência."
+        },
+        {
+          "label": "4T2024",
+          "month": "2024-12",
+          "value": null,
+          "variation": null,
+          "issue": "Estoque em 2024-12: empreendimentos 98030; municipal 98025. As tipologias não somam o estoque municipal nesta competência."
+        },
+        {
+          "label": "1T2025",
+          "month": "2025-03",
+          "value": null,
+          "variation": null,
+          "issue": "Estoque em 2025-03: empreendimentos 100267; municipal 100263. As tipologias não somam o estoque municipal nesta competência."
+        },
+        {
+          "label": "2T2025",
+          "month": "2025-06",
+          "value": 12692.597808541828,
+          "variation": null
+        },
+        {
+          "label": "3T2025",
+          "month": "2025-09",
+          "value": 12724.172492781925,
+          "variation": 0.24876455329615596
+        },
+        {
+          "label": "4T2025",
+          "month": "2025-12",
+          "value": 13200.933209671522,
+          "variation": 3.7468897656020523
+        },
+        {
+          "label": "1T2026",
+          "month": "2026-03",
+          "value": 13311.340777332625,
+          "variation": 0.836361838269236
+        },
+        {
+          "label": "2T2026",
+          "month": "2026-06",
+          "value": 13462.417379486948,
+          "variation": 1.1349465443149411
+        }
+      ],
+      "58": [
+        {
+          "label": "2T2023",
+          "month": "2023-06",
+          "value": null,
+          "variation": null,
+          "issue": "Empreendimento 64094: sem fotografia na competência necessária 2023-06. Ausência não representa estoque zero."
+        },
+        {
+          "label": "3T2023",
+          "month": "2023-09",
+          "value": null,
+          "variation": null,
+          "issue": "Estoque em 2023-09: empreendimentos 84837; municipal 84813. As tipologias não somam o estoque municipal nesta competência."
+        },
+        {
+          "label": "4T2023",
+          "month": "2023-12",
+          "value": null,
+          "variation": null,
+          "issue": "Estoque em 2023-12: empreendimentos 94901; municipal 94881. As tipologias não somam o estoque municipal nesta competência."
+        },
+        {
+          "label": "1T2024",
+          "month": "2024-03",
+          "value": null,
+          "variation": null,
+          "issue": "Estoque em 2024-03: empreendimentos 91632; municipal 91619. As tipologias não somam o estoque municipal nesta competência."
+        },
+        {
+          "label": "2T2024",
+          "month": "2024-06",
+          "value": null,
+          "variation": null,
+          "issue": "Estoque em 2024-06: empreendimentos 94670; municipal 94661. As tipologias não somam o estoque municipal nesta competência."
+        },
+        {
+          "label": "3T2024",
+          "month": "2024-09",
+          "value": null,
+          "variation": null,
+          "issue": "Estoque em 2024-09: empreendimentos 94027; municipal 94019. As tipologias não somam o estoque municipal nesta competência."
+        },
+        {
+          "label": "4T2024",
+          "month": "2024-12",
+          "value": null,
+          "variation": null,
+          "issue": "Estoque em 2024-12: empreendimentos 98030; municipal 98025. As tipologias não somam o estoque municipal nesta competência."
+        },
+        {
+          "label": "1T2025",
+          "month": "2025-03",
+          "value": null,
+          "variation": null,
+          "issue": "Estoque em 2025-03: empreendimentos 100267; municipal 100263. As tipologias não somam o estoque municipal nesta competência."
+        },
+        {
+          "label": "2T2025",
+          "month": "2025-06",
+          "value": 16833.014109231408,
+          "variation": null
+        },
+        {
+          "label": "3T2025",
+          "month": "2025-09",
+          "value": 17667.46713382715,
+          "variation": 4.957240688927599
+        },
+        {
+          "label": "4T2025",
+          "month": "2025-12",
+          "value": 17729.952133548977,
+          "variation": 0.3536726529531151
+        },
+        {
+          "label": "1T2026",
+          "month": "2026-03",
+          "value": 17807.686591981157,
+          "variation": 0.4384358053910887
+        },
+        {
+          "label": "2T2026",
+          "month": "2026-06",
+          "value": 18039.358662767256,
+          "variation": 1.3009666898024872
+        }
+      ],
+      "59": [
+        {
+          "label": "2T2023",
+          "month": "2023-06",
+          "value": null,
+          "variation": null,
+          "issue": "Empreendimento 64094: sem fotografia na competência necessária 2023-06. Ausência não representa estoque zero."
+        },
+        {
+          "label": "3T2023",
+          "month": "2023-09",
+          "value": null,
+          "variation": null,
+          "issue": "Estoque em 2023-09: empreendimentos 84837; municipal 84813. As tipologias não somam o estoque municipal nesta competência."
+        },
+        {
+          "label": "4T2023",
+          "month": "2023-12",
+          "value": null,
+          "variation": null,
+          "issue": "Estoque em 2023-12: empreendimentos 94901; municipal 94881. As tipologias não somam o estoque municipal nesta competência."
+        },
+        {
+          "label": "1T2024",
+          "month": "2024-03",
+          "value": null,
+          "variation": null,
+          "issue": "Estoque em 2024-03: empreendimentos 91632; municipal 91619. As tipologias não somam o estoque municipal nesta competência."
+        },
+        {
+          "label": "2T2024",
+          "month": "2024-06",
+          "value": null,
+          "variation": null,
+          "issue": "Estoque em 2024-06: empreendimentos 94670; municipal 94661. As tipologias não somam o estoque municipal nesta competência."
+        },
+        {
+          "label": "3T2024",
+          "month": "2024-09",
+          "value": null,
+          "variation": null,
+          "issue": "Estoque em 2024-09: empreendimentos 94027; municipal 94019. As tipologias não somam o estoque municipal nesta competência."
+        },
+        {
+          "label": "4T2024",
+          "month": "2024-12",
+          "value": null,
+          "variation": null,
+          "issue": "Estoque em 2024-12: empreendimentos 98030; municipal 98025. As tipologias não somam o estoque municipal nesta competência."
+        },
+        {
+          "label": "1T2025",
+          "month": "2025-03",
+          "value": null,
+          "variation": null,
+          "issue": "Estoque em 2025-03: empreendimentos 100267; municipal 100263. As tipologias não somam o estoque municipal nesta competência."
+        },
+        {
+          "label": "2T2025",
+          "month": "2025-06",
+          "value": 24274.667834474178,
+          "variation": null
+        },
+        {
+          "label": "3T2025",
+          "month": "2025-09",
+          "value": 24820.513561313634,
+          "variation": 2.248622846506108
+        },
+        {
+          "label": "4T2025",
+          "month": "2025-12",
+          "value": 25172.69788789365,
+          "variation": 1.4189244139127988
+        },
+        {
+          "label": "1T2026",
+          "month": "2026-03",
+          "value": 25926.930413297392,
+          "variation": 2.996232381458313
+        },
+        {
+          "label": "2T2026",
+          "month": "2026-06",
+          "value": 26189.632999999998,
+          "variation": 1.0132421482794243
+        }
+      ]
+    },
+    "annualChanges": {
+      "53": 1.2404933687927726,
+      "54": -2.8460105425265643,
+      "55": -1.5459627205942421,
+      "56": 4.30721314951618,
+      "57": 6.065106470379518,
+      "58": 7.166539193205305,
+      "59": 7.888738905033511
+    },
+    "standards": [
+      {
+        "group": "Compacto",
+        "units": 22321,
+        "ticket": 690895.0920232072,
+        "meter": 17855.234299986554,
+        "issues": []
+      },
+      {
+        "group": "Econômico",
+        "units": 68986,
+        "ticket": 292588.66786072566,
+        "meter": 8977.49890861915,
+        "issues": []
+      },
+      {
+        "group": "Standard",
+        "units": 21740,
+        "ticket": 537360.1134112239,
+        "meter": 11294.751002299912,
+        "issues": []
+      },
+      {
+        "group": "Médio",
+        "units": 7774,
+        "ticket": 1411536.9615165931,
+        "meter": 16265.08861718549,
+        "issues": []
+      },
+      {
+        "group": "Médio-Alto",
+        "units": 2403,
+        "ticket": 2550707.4723096136,
+        "meter": 21075.981161048683,
+        "issues": []
+      },
+      {
+        "group": "Alto",
+        "units": 2205,
+        "ticket": 3851276.7489206367,
+        "meter": 23942.154036281187,
+        "issues": []
+      },
+      {
+        "group": "Luxo",
+        "units": 2411,
+        "ticket": 11029624.912583986,
+        "meter": 36530.07455827456,
+        "issues": []
+      }
+    ],
+    "overall": {
+      "units": 127840,
+      "ticket": 778123.6650973874,
+      "meter": 12369.940178035058,
+      "issues": []
+    }
+  },
+  "bedroomPrices": [
+    {
+      "bedroom": 1,
+      "units": 41619,
+      "ticket": 391727.6111992126,
+      "meter": 13515.426578245524,
+      "issues": [],
+      "mcmv": {
+        "units": 20242,
+        "ticket": 259113.516924711,
+        "meter": 9664.465790929755,
+        "issues": []
+      },
+      "map": {
+        "units": 21377,
+        "ticket": 517300.6334335963,
+        "meter": 17161.922730972543,
+        "issues": []
+      }
+    },
+    {
+      "bedroom": 2,
+      "units": 72795,
+      "ticket": 459682.4138604294,
+      "meter": 10276.402517617946,
+      "issues": [],
+      "mcmv": {
+        "units": 48586,
+        "ticket": 305782.9778176844,
+        "meter": 8688.903365784387,
+        "issues": []
+      },
+      "map": {
+        "units": 24209,
+        "ticket": 768549.2815366174,
+        "meter": 13462.417379486948,
+        "issues": []
+      }
+    },
+    {
+      "bedroom": 3,
+      "units": 9916,
+      "ticket": 2373884.3304517935,
+      "meter": 18039.358662767256,
+      "issues": [],
+      "mcmv": {
+        "units": 158,
+        "ticket": 523887.7924050634,
+        "meter": 9712.431898734178,
+        "issues": []
+      },
+      "map": {
+        "units": 9758,
+        "ticket": 2403839.1831891765,
+        "meter": 18174.186950194726,
+        "issues": []
+      }
+    },
+    {
+      "bedroom": 4,
+      "units": 3510,
+      "ticket": 7455840.329863247,
+      "meter": 26189.632999999998,
+      "issues": [],
+      "mcmv": {
+        "units": 0,
+        "ticket": null,
+        "meter": null,
+        "issues": [
+          "Sem oferta ou medição completa para esta média."
+        ]
+      },
+      "map": {
+        "units": 3510,
+        "ticket": 7455840.329863247,
+        "meter": 26189.632999999998,
+        "issues": []
+      }
+    }
+  ],
+  "marketStatus": "ready",
+  "oldReviews": [
+    {
+      "number": 53,
+      "title": "Evolução R$/m², média geral",
+      "state": "blocked",
+      "reason": "Preço municipal duplicado para Geral em 2023-06."
+    },
+    {
+      "number": 55,
+      "title": "Evolução R$/m², 1 dormitório sem MCMV",
+      "state": "partial",
+      "reason": "8 fotografia(s) com cobertura parcial ou medição indisponível. Primeira ocorrência 2023-06: Empreendimento 64094: sem fotografia na competência necessária 2023-06. Ausência não representa estoque zero. Os valores observados foram preservados; variações envolvendo parciais não são calculadas."
+    },
+    {
+      "number": 56,
+      "title": "Evolução R$/m², 2 dormitórios",
+      "state": "available",
+      "reason": "Conteúdo disponível para conferência visual e numérica. Há ressalvas da fonte nos históricos; consulte os detalhes da conferência."
+    },
+    {
+      "number": 57,
+      "title": "Evolução R$/m², 2 dormitórios sem MCMV",
+      "state": "partial",
+      "reason": "8 fotografia(s) com cobertura parcial ou medição indisponível. Primeira ocorrência 2023-06: Empreendimento 64094: sem fotografia na competência necessária 2023-06. Ausência não representa estoque zero. Os valores observados foram preservados; variações envolvendo parciais não são calculadas."
+    },
+    {
+      "number": 59,
+      "title": "Evolução R$/m², 4 dormitórios",
+      "state": "blocked",
+      "reason": "Preço municipal de 4+ não informado em 2023-06; nenhuma média de grupos foi presumida."
+    },
+    {
+      "number": 61,
+      "title": "Ticket médio por sete padrões e média geral",
+      "state": "partial",
+      "reason": "Preço municipal duplicado para Geral em 2026-06."
+    },
+    {
+      "number": 62,
+      "title": "R$/m² por sete padrões e média geral",
+      "state": "partial",
+      "reason": "Preço municipal duplicado para Geral em 2026-06."
+    },
+    {
+      "number": 63,
+      "title": "Ticket por dormitório, com recortes MCMV/MAP",
+      "state": "partial",
+      "reason": "Há tipologia ou recorte MCMV/MAP sem oferta ou preço completo."
+    },
+    {
+      "number": 64,
+      "title": "R$/m² por dormitório, com recortes MCMV/MAP",
+      "state": "partial",
+      "reason": "Há tipologia ou recorte MCMV/MAP sem oferta ou preço completo."
+    }
+  ]
+}

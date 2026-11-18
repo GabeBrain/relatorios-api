@@ -82,7 +82,7 @@ export async function fetchSpBuildingRecords(report: SpPreview, options: Options
     }, { signal: options.signal, attempts: 2, sleep: options.sleep });
     checkAbort();
     if (!response.ok || !response.data) {
-      if(source==='building-with-history')throw new SpReadError(response.status===401||response.status===403?'A API v2 não autorizou a coleta detalhada. Confira o acesso GeoBrain à rota de históricos.':`A coleta detalhada na API v2 não foi concluída${response.status?` (HTTP ${response.status})`:''}. Confira conexão, disponibilidade e permissão da rota no navegador.`);
+      if(source==='building-with-history')throw new SpReadError(response.status===401||response.status===403?'A API v2 não autorizou a coleta detalhada. Confira o acesso Geobrain à rota de históricos.':`A coleta detalhada na API v2 não foi concluída${response.status?` (HTTP ${response.status})`:''}. Confira conexão, disponibilidade e permissão da rota no navegador.`);
       throw new Error('A coleta de empreendimentos não foi concluída.');
     }
     const payload = readBuildingPage(response.data, { city: 'São Paulo', uf: 'SP' }, page, source==='building-with-history'?'building-with-history-internal-v2':source);

@@ -38,3 +38,13 @@ it('gera com limite interno positivo sem pedir valor ao analista',async()=>{
  fireEvent.click(screen.getByRole('button',{name:'Preparar sugestões'}));await waitFor(()=>expect(mocks.run).toHaveBeenCalledOnce());
  expect(mocks.run.mock.calls[0][0].budgetUsd).toBeGreaterThan(0);expect(mocks.run.mock.calls[0][0].budgetUsd).toBeLessThanOrEqual(100);
 });
+it('falha salva mostra o motivo registrado, sem valores financeiros',async()=>{
+ mocks.list.mockResolvedValue([{...record,state:'failed',content:null,error_message:'Um lote não retornou um memo completo dentro do limite. O uso confirmado foi registrado.'}]);
+ render(<MemoryRouter><StudyRecommendation study={study} version={version}/></MemoryRouter>);
+ expect(await screen.findByText(/Um lote não retornou um memo completo/)).toBeInTheDocument();
+});
+it('motivo com dado financeiro cai no aviso genérico',async()=>{
+ mocks.list.mockResolvedValue([{...record,state:'failed',content:null,error_message:'Custo acima de US$ 1'}]);
+ render(<MemoryRouter><StudyRecommendation study={study} version={version}/></MemoryRouter>);
+ expect(await screen.findByText(/Não foi possível concluir esta etapa/)).toBeInTheDocument();expect(screen.queryByText(/US\$/)).not.toBeInTheDocument();
+});

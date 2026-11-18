@@ -38,6 +38,10 @@ describe('Fortaleza — coleta compartilhada 12/14 e16–25', () => {
     const result = await fetchMonthlyMarket({ ...selection,territory:'city' },['Fortaleza'],{ token:'synthetic',request });
     expect(result.issues.length).toBeGreaterThan(0);
     for (const source of result.sources.filter(source => !source.complete)) expect(source.rows).toEqual([]);
+    if(mode==='unknown'){
+      const evidence=result.sources.find(source=>source.segment==='Horizontal'&&source.metric==='releases')!.coverage!;
+      expect(evidence.rowsReceived).toBeGreaterThan(0);expect(evidence.groups.some(group=>group.group==='Não mapeado'&&group.unknownCategory)).toBe(true);
+    }
     if (mode === 'unknown' || mode === 'forbidden') expect(result.sources.filter(source => source.segment === 'Vertical').every(source => source.complete)).toBe(true);
   });
   it('adapta a coleta compartilhada para13/15 sem nova consulta vertical', async () => {

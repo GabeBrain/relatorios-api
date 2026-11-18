@@ -120,6 +120,15 @@ T0–T7 executados no recorte local: duas entradas diretas, somente Sugestão de
 - **Git/pendências:** base local `95519cf`; 3 commits remotos de tipos Supabase/cache recebidos sem doc vivo próprio, merge autorizado por Lucas após salvar este trabalho. Mensagem remota de deploy não é comprovação de runtime; sem publicação pelo agente. Próximo: validar botão histórico na sessão pessoal, depois delimitar vendas/oferta/histórico longo. Sem push/Monday/coleta longa; férias19/10 preservadas.
 - **Monday:** [DESAFIO — Estudos Entidades e Institucionais](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`.
 
+### 2026-10-15 — Validação do Fechamento: filtros aplicados à guia Divergências — Claude (sessão de Diego Cabrero)
+- **Ambiente/funcionalidade:** `/rebrain/validacao-fechamento` — guia Divergências e contador da aba.
+- **O quê:** os filtros da sidebar e a cidade ativa do cabeçalho (Tipo, Padrão, Empreendimento, Cidade, Ano, Trimestre e Período) passam a filtrar a lista de divergências, com a mesma regra usada pelas demais guias (`applyVFFilters`). A contagem da aba `Divergências (n)` passa a refletir o resultado filtrado. A validação continua rodando sobre o conjunto completo, para que medianas e médias de cidade não mudem ao filtrar.
+- **Por quê:** a guia recebia todas as divergências calculadas, ignorando os filtros aplicados; só os filtros de coluna e a busca global funcionavam.
+- **Arquivos:** `src/features/validacao-fechamento/{aggregate.ts,aggregate.test.ts,validation-rules.ts}`, `src/pages/ValidacaoFechamento.tsx`.
+- **Commits:** pendente (alteração não commitada).
+- **Monday:** —
+- **Impacto em Etapas/Pendências:** coberto por teste unitário dos filtros sobre linhas de divergência e por typecheck sem erros novos e lint limpo. Não verificado no navegador, pois exige login na API GeoBrain; validar na tela com os filtros do print.
+
 ### 2026-10-15 — Relatórios institucionais: agrupamento SP confirmado e aplicado — Codex, regra de Lucas
 - **Desenvolvimento:** regra SP v1: Compactos←Compacto; MCMV←Econômico; Médio Padrão←Standard/Médio/Médio-Alto; Luxo←Alto/Luxo. Slides 24/38/48 preenchidos sobre padrões já recebidos, sem requests adicionais; desconhecidos/duplicados/ausentes e divergências bloqueiam valores. Sinais preservados; estoque só do fechamento. Reuso do gráfico de distribuição e artes originais existentes.
 - **Validação:** 69 testes SP, tipagem/lint e 14 cenários Edge aprovados com rede de mercado bloqueada. Três gráficos revisados, com totais 24.351/26.824/124.706 preservados. Regra confirmada por Lucas, sem alegar consulta ao analista ou homologação integral.
