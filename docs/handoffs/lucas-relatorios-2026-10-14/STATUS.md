@@ -1,5 +1,11 @@
 # Estado do handoff
 
+## 18/11/2026 — Maceió: exclusão de chácaras, INCC-DI e lista Fechado
+
+Máquina de Lucas, Codex; abertura na `main` limpa, origin único, `git fetch --all` e comparação 0/0 na base `bd994c2c`. Fetch precisou de execução aprovada fora do sandbox para escrever FETCH_HEAD. Node24.19.0/dependências disponíveis; preflight offline rodado, cujo subprocesso Git não conseguiu ler o repo no sandbox (checagens Git diretas passaram). Sem token Geobrain exposto nas variáveis; Drive/Lovable/API real não testados nesta sessão.
+
+Lucas informou confirmação do analista: chácaras fora do estudo e INCC-DI correto; solicitou nomes dos empreendimentos apenas `Fechado`. Implementação `38700781`: filtro em todas as tabelas horizontais, reconciliação bruta preservada, CSV identificado separado do JSON agregado no worker existente. “Fechado” continua pendente de classificação. Padrões reutilizados: Button/BrainLoadingState, processamento cancelável no worker, invalidado por geração/seleção. Testes, lint/tipos/build e12cenários no Edge com fonte sintética aprovados; [evidências e limites](../../features/relatorios-institucionais/maceio/VALIDACAO_DADOS_REAIS_2026-11-17.md). Lucas autorizou push nesta sessão e fará nova geração para enviar JSON/CSV. Não declarar deploy ou dados reais homologados; CAGED/políticas Secovi/FIERGS/SP/Fortaleza preservados, sem escrita Monday.
+
 ## 17/11/2026 — Maceió: correções após diagnóstico com48pendências
 
 Base `1c63413f`, main/origin0/0após fetch. Lucas pediu corrigir todos os bloqueios exceto CAGED. Confirmou correspondências dos sete padrões da API para quatro famílias do original. Depois autorizou tratar competências sem registros em consultas completas como zero no mercado pesquisado, registrando a distinção de falha/campo inválido. Isso substitui a pendência anterior de interpretação de Pilar/Coqueiro, preservada como histórico abaixo; não comprova inexistência fora do mercado pesquisado.

@@ -1,5 +1,15 @@
 # Maceió — bloqueios após a coleta real — 17/11/2026
 
+## 18/11/2026 — Decisões do analista e lista de conferência
+
+Lucas confirmou exclusão de Condomínio de Chácara/Chácaras e INCC-DI com o analista; pediu a lista dos empreendimentos somente como `Fechado`. Implementação `38700781`: exclusão de valores e rótulos no horizontal mensal/trimestral, incluindo preços e anos; reconciliação bruta preservada antes do filtro. Categorias desconhecidas continuam bloqueadas, inclusive na distribuição anual. INCC-DI já configurado nas duas edições; confirmação registrada sem alterar séries ou fórmulas.
+
+Lista identificada em CSV separada do JSON, preparada pelo worker existente e baixada na seção Diagnóstico da geração: nomes/IDs/municípios/campos e lançamento, somente produtos ambíguos `Fechado`, sem reclassificação, sem chácaras ou histórico bruto. Não exige estoque positivo; sinaliza coleta parcial e ausência cadastral. Zero registros numa coleta completa mostra vazio explícito e desabilita download. CSV com BOM, aspas escapadas e proteção de fórmulas. A política de diagnóstico agregado continua preservada.
+
+**Verificação:** suíte Maceió com 165 testes/15 arquivos aprovada; rodada final de 14 testes inclui mais 2 casos de interface (lista parcial, vazio e descarte ao trocar geração). 106 regressões Secovi/FIERGS aprovadas; lint dirigido, TypeScript e build de produção aprovados. Edge headless: 12 cenários (mensal/trimestral × desktop/claro e mobile/escuro × CAGED disponível/vazio/erro), coleta deliberadamente lenta com logo Brain, download e reabertura de JSON/CSV, categoria excluída ausente nas tabelas e nenhuma exceção de página. Evidências locais ignoradas: `.local-inputs/relatorios-lucas/maceio/horizontal-policy-2026-11-18/page/`; roteiro derivado de `scripts/diagnostics/maceio-diagnostic-page-visual.mjs` em `.local-inputs/maceio-policy-qa.mjs`.
+
+**Limites/próximo:** navegador com API sintética interceptada; sem token Geobrain nas variáveis desta sessão e sem fonte local identificada com cadastros reais de Maceió. Nenhum nome real foi inferido. Lucas autorizou push e fará a geração autenticada; conferir JSON e CSV da mesma geração após atualização do ambiente. Push não comprova deploy Lovable. CAGED e domínios paralelos sem alteração; sem escrita Monday.
+
 ## Atualização posterior — diagnóstico (3), decisões e correções
 
 Recebido `maceio-mensal-2026-05-diagnostico (3).json`, gerado às19:36:20UTC:12disponíveis/48fontes/22editoriais;63consultas imobiliárias completas, zero falhas. Garden/Cobertura deixaram de bloquear após `1c63413f`, liberando7slides. Dos48pendentes,6são CAGED e42imobiliários.32têm como primeiro bloqueio Pilar; não significa que os demais dados desses slides já estejam homologados.
