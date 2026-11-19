@@ -1,5 +1,13 @@
 # Rebrain (Plataforma) — Documento Vivo
 
+## 19/11/2026 — Fortaleza: Beira Mar como grupo mensal por lista confirmada — Codex/Lucas
+
+- **Pedido:** Lucas forneceu lista do analista com13casos paraBeiraMar nos slides52–55, retirando dos bairros de origem. [Lista/contrato](../features/relatorios-institucionais/fortaleza/DECISOES.md). Base `c40757dd`, main limpa/origin0/0após fetch.
+- **Entrega:** nome normalizado+bairro de origem, restritosFortaleza/CE/Vertical/mensal. Agrupa sem duplicar estoque, oferta anterior, lançamentos, vendas, contagem ou pesos do preço;IVVcontinua a razão dos valores reagrupados. APIbruta preservada; sem nova consulta, busca aproximada ou regra geográfica geral. Trimestral e outros gráficos preservados. Contagens de correspondência/aplicação noJSONsem identificar cadastros individuais.
+- **Validação/etapas:**48testes dirigidos iniciais aprovados, incluindo13pares, escopos incorretos, totais/preços conservados e linha renderizada. 322testes/26arquivos Fortaleza, lint, tipos, build e check de documentos vivos aprovados. Sem ensaio autenticado ou verificação visual real; conferir novoJSON/linha após publicação. O diagnóstico anterior tinha53grupos, abaixo da capacidade56; a regra não amplia o número de páginas.
+- **Pendências:** publicar mediante autorização; comparar nomes reais e contagem de aplicação, pois IDs não foram fornecidos. Novo diagnóstico(2) confirmouMaracanaú/housescom0unidades e sem erros; Aquiraz26/Caucaia169/Eusébio299somam494. Tratar o bloqueio do41porsemoferta permanece entrega separada; Maceió e outros motores intocados. Sem push/deploy/Monday.
+- **Monday:** [Estudo Fortaleza](https://brain381753.monday.com/boards/18398638577/pulses/13149406420) — `13149406420`.
+
 ## 19/11/2026 — Fortaleza: causa de bloqueio de preços por cidade — Codex/Lucas
 
 - **Pedido/evidência:** diagnóstico real deoutubro/2026com44disponíveis/1fonte/15editoriais,40fontes municipais/10detalhadas concluídas. Slide41bloqueado por município sem oferta positiva de casas, mas causa municipal ausente noJSON. Lucas pediu diagnosticar antes de alterar a regra. Base `e7cdd824`, main limpa/origin0/0após fetch. [Decisão](../features/relatorios-institucionais/fortaleza/DECISOES.md).

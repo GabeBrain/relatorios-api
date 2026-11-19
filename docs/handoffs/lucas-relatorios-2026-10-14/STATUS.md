@@ -1,5 +1,11 @@
 # Estado do handoff
 
+## 19/11/2026 — Fortaleza mensal: agrupamento Beira Mar
+
+Lucas enviou lista do analista com13empreendimentos deMeireles/Mucuripe/PraiaDeIracema que devem comporBeiraMar nos52–55. [Lista e regra](../../features/relatorios-institucionais/fortaleza/DECISOES.md). Base `c40757dd`, main limpa/origin0/0após fetch. Regra por nome normalizado+bairro de origem, restritaFortaleza/CE/Vertical/mensal; sem nomes aproximados ou reclassificação do bairro inteiro. IDs não fornecidos; cadastroAPIintacto. Preservados guardas históricas, deduplicação, totais e ponderação; outros empreendimentos ficam nas linhas de origem. Trimestral mantém seu comportamento anterior.
+
+Conferência agregada `neighborhoodReclassification` informa correspondências/contribuintes/bairros sem nomes/IDs. 322testes/26arquivos Fortaleza, lint, tipos, build e check de documentos vivos aprovados. Nova geração real necessária para comprovar a correspondência cadastral e linhaBeiraMar. Sem novos endpoints, push/deploy/Monday; Novo diagnóstico(2) confirmaMaracanaú/housescom0unidades e sem erros, versus Aquiraz26/Caucaia169/Eusébio299. Slide41preços continua com a regra anterior, conforme pedido de diagnosticar primeiro.
+
 ## 19/11/2026 — Fortaleza: diagnóstico ampliado antes de alterar o slide41
 
 Lucas enviou diagnóstico mensal10/2026com44disponíveis/1fonte/15editoriais;40fontes municipais e10detalhadas concluídas. Slide41preço de casasRMbloqueado por cidade sem oferta positiva, sem identificação municipal noJSONantigo. Após sugerir verificarAquiraz, Lucas pediu melhorar diagnóstico primeiro. Base `e7cdd824`, main limpa/origin0/0após fetch. `priceAudit`/`slides[].priceCheck` mostram cidade/produto/estoque/preço/causa, sem novaAPI/identificadores e sem modificar o bloqueio ou valores do slide. [Decisão](../../features/relatorios-institucionais/fortaleza/DECISOES.md).

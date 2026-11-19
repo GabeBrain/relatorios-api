@@ -1,5 +1,29 @@
 # Fortaleza — fatos, propostas e pendências
 
+## 19/11/2026 — Beira Mar nos slides mensais52–55
+
+Lucas forneceu a lista do analista para retirar13empreendimentos de seus bairros cadastrais e agrupá-los emBeiraMar na tabela deIVVporbairro. BeiraMar é um agrupamento do relatório para estes casos, não uma alteração dos bairros daAPI. Não foi comprovada inexistência do nomeBeiraMar em todo o catálogo.
+
+| Empreendimento informado | Bairro de origem |
+|---|---|
+| Edge | Meireles |
+| Diagonal By Pininfarina | Mucuripe |
+| Edifício Sabatini | Meireles |
+| Wave | Meireles |
+| Ivens Monumental | Meireles |
+| Dm 210 | Meireles |
+| Pier 430 | Mucuripe |
+| Sky | Mucuripe |
+| Mar Del Prado | Meireles |
+| Q Tower | Meireles |
+| Mansão Seara | Meireles |
+| Bm 900 | Praia De Iracema |
+| Porto 22 | Meireles |
+
+Regra versionada `beira-mar-13-projects-name-neighborhood-v1`, somenteFortaleza/CE/Vertical e mensal52–55. Correspondência exata por nome normalizado (caixa/acentos/espaços/pontuação) e bairro de origem; sem busca aproximada ou regra geral por bairro. IDs não foram fornecidos: diferença substancial de nome naAPI não é presumida como correspondência. Preservados identificação/deduplicação, lançamento até o fechamento e fotografias históricas válidas. Preços/estoques/fluxos/contagem são transferidos uma vez para o novo grupo, comIVVcalculado pela mesma razão e peso anteriores. Totais gerais e cadastros brutos intactos; trimestral e demais análises não recebem classificação implícita.
+
+`neighborhoodReclassification` no diagnóstico agrega regra, quantidade esperada/encontrada/aplicada e bairros de origem, sem nomes/IDs individuais. Aviso externo à arte identifica a aplicação. Não são criadas linhas com unidades inventadas se nenhum caso contribuir. Nova geração real é necessária para conferir os nomes recebidos; testes com lista sintética não comprovam aplicação nos13cadastros reais. Sem nova consultaAPI/push/Monday.
+
 ## 19/11/2026 — Diagnóstico de preços por cidade e produto
 
 Lucas pediu diagnosticar antes de alterar a regra do slide41. O JSON de outubro/2026gerado em19/11tem44slides disponíveis/1fonte pendente/15editoriais;40fontes municipais e10detalhadas concluídas, sem erro de preço registrado. O41bloqueia por município sem oferta positiva de casas, mas o arquivo anterior não identificava qual cidade. Screenshot deAquiraz comAlto/R$0não prova essa causa; nenhuma cidade foi presumida nem preço baixo convertido em erro por hipótese.

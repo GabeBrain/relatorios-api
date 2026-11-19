@@ -3,8 +3,9 @@ import { monthlyMarketMonths,monthlyMarketSourceIssue,readMonthlyNumber,type Mon
 import { marketMonth,normalizeMarketText } from './market';
 import { productOf,type PriceCollection } from './monthly-prices';
 import { historyFingerprint } from '@/features/panorama-secovi-fiergs/domain/building-history';
+import { fortalezaIsBeiraMar,BEIRA_MAR_RULE,FORTALEZA_BEIRA_MAR_PROJECTS } from './beira-mar';
 export interface OfferRow { label:string; opening:number; stock:number; launches:number; sales:number; projects:number; capacity:number; weighted:number; priceUnits:number }
-export interface OfferTable { status:'ready'|'blocked'; issue:string|null; rows:OfferRow[]; total:OfferRow; warnings:string[]; pages:number }
+export interface OfferTable { status:'ready'|'blocked'; issue:string|null; rows:OfferRow[]; total:OfferRow; warnings:string[]; pages:number;neighborhoodReclassification?:{rule:string;expectedProjects:number;matchedProjects:number;appliedProjects:number;byOriginalNeighborhood:{neighborhood:string;projects:number}[]} }
 const blank=(label:string):OfferRow=>({label,opening:0,stock:0,launches:0,sales:0,projects:0,capacity:0,weighted:0,priceUnits:0});
 const keys=['opening','stock','launches','sales','projects','capacity','weighted','priceUnits'] as const;
 export function totalOffer(rows:OfferRow[]) { const total=blank('Total');for(const row of rows)for(const key of keys){total[key]+=row[key];if(!Number.isFinite(total[key])||Math.abs(total[key])>Number.MAX_SAFE_INTEGER/100)throw new Error('A agregação excede a precisão segura.');}return total; }
@@ -16,6 +17,7 @@ export function buildOfferTable(page:number,market:MonthlyMarketData|null,prices
   const rm=[47,49,51].includes(page),required=rm?FORTALEZA_CITIES.filter(city=>city!=='Fortaleza'):['Fortaleza'];
   if(required.some(city=>!cities.some(value=>normalizeMarketText(value)===normalizeMarketText(city))))return blocked('O recorte não inclui todos os municípios desta tabela.');
   const closing=fortalezaPeriod(selection).end.slice(0,7),[year,month]=closing.split('-').map(Number),opening=new Date(Date.UTC(year,month-2,1)).toISOString().slice(0,7),warnings:string[]=[];
+  const beiraMar=selection.periodicity==='monthly'&&page>=52&&page<=55,matched=new Set<string>(),applied=new Set<string>(),origins=new Map<string,number>();
   try {
     let rows:OfferRow[];
     if(page<=49) {
@@ -44,6 +46,8 @@ export function buildOfferTable(page:number,market:MonthlyMarketData|null,prices
           const release=marketMonth(building.release_date);if(!release)throw new Error('Empreendimento sem data de lançamento válida.');if(release>closing)continue;
           const product=productOf(building);if(capacityPage&&!product){if([building.standard,building.subtype,building.building_subtype].map(normalizeMarketText).some(label=>['condominio de chacaras','terreno','loteamento comercial'].includes(label)))continue;throw new Error('Produto horizontal não identificado.');}
           let label=capacityPage?product==='houses'?horizontal[2]:product==='open-lots'?horizontal[0]:product==='closed-lots'?horizontal[1]:null:typeof building.neighborhood==='string'?building.neighborhood.trim():null;
+          const reclassified=beiraMar&&!capacityPage&&fortalezaIsBeiraMar(building);
+          if(reclassified){matched.add(id);label='Beira Mar';}
           if(!label||['-','—','nao informado','sem bairro'].includes(normalizeMarketText(label))){if(capacityPage)throw new Error(`Empreendimento ${building.building_id}: produto ausente.`);label='Bairro não informado';}
           const missingNeighborhood=!capacityPage&&label==='Bairro não informado';
           const raw=building.typologies_history;if(!Array.isArray(raw))throw new Error(`Empreendimento ${building.building_id}: histórico ausente.`);
@@ -62,6 +66,7 @@ export function buildOfferTable(page:number,market:MonthlyMarketData|null,prices
           for(const item of before)project.opening+=quantity(item.typology_stock);
           if(!capacityPage&&release===closing)project.launches=project.capacity;
           if(!capacityPage&&project.opening===0&&project.stock===0&&project.launches===0&&project.sales===0)continue;
+          if(reclassified){applied.add(id);const original=String(building.neighborhood).trim();origins.set(original,(origins.get(original)??0)+1);}
           if(missingNeighborhood)warnings.push(`Empreendimento ${building.building_id}: bairro não informado; valores preservados no grupo Bairro não informado.`);
           project.projects=1;const key=normalizeMarketText(label),aggregate=grouped.get(key)??blank(label);for(const field of keys)aggregate[field]+=project[field];grouped.set(key,aggregate);
         }
@@ -71,6 +76,7 @@ export function buildOfferTable(page:number,market:MonthlyMarketData|null,prices
       if(!capacityPage&&rows.length>56)throw new Error(`Há ${rows.length} bairros; as quatro páginas oficiais comportam56. É necessária continuação antes de apresentar a tabela completa.`);
       if(!capacityPage){const source=market?.sources.find(source=>normalizeMarketText(source.city)==='fortaleza'&&source.segment==='Vertical'&&source.metric==='sales');if(source?.complete){const municipal=source.rows.filter(row=>marketMonth(row.period)===closing).reduce((sum,row)=>sum+Number(row.liquid_sales),0),granular=totalOffer(rows).sales;if(municipal!==granular)warnings.push(`Vendas detalhadas ${granular}; municipal ${municipal}. Diferença ${granular-municipal}, causa não confirmada. Tabela utiliza o universo detalhado completo, sem ajuste aos totais municipais.`);}}
     }
-    const total=totalOffer(rows);return {status:'ready',issue:null,rows,total,warnings,pages:page>=52?4:1};
+    if(beiraMar&&applied.size)warnings.push(`${applied.size} empreendimento(s) da lista confirmada agrupado(s) em Beira Mar, sem duplicação nos bairros de origem. Estoques, fluxos e pesos de preço preservados.`);
+    const total=totalOffer(rows);return {status:'ready',issue:null,rows,total,warnings,pages:page>=52?4:1,...(beiraMar?{neighborhoodReclassification:{rule:BEIRA_MAR_RULE,expectedProjects:FORTALEZA_BEIRA_MAR_PROJECTS.length,matchedProjects:matched.size,appliedProjects:applied.size,byOriginalNeighborhood:[...origins].map(([neighborhood,projects])=>({neighborhood,projects}))}}:{})};
   } catch(error){return blocked(error instanceof Error?error.message:'Tabela indisponível.');}
 }
