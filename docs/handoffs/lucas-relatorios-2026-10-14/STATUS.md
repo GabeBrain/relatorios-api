@@ -1,5 +1,13 @@
 # Estado do handoff
 
+## 19/11/2026 — Derivação autorizada dos lançamentos por tipologia
+
+Lucas autorizou oferta inicial histórica (`qty`) no mês de lançamento do empreendimento quando o fluxo explícito faltar, após revisão dos endpoints documentados. Base `00c3c9b9`, main limpa, origin0/0 após fetch. Ranking por bairro e IVV por área compartilham a regra; mantidos fluxos explícitos, reconciliação mensal municipal e balanços por área. Critérios/advertências identificam a derivação sem modificar a auditoria bruta. [D25](../../features/relatorios-institucionais/maceio/DECISOES.md) substitui a proibição anterior de D20 somente neste escopo autorizado.
+
+Validação:211testes/20arquivos Maceió, lint dirigido, TypeScript e build de produção aprovados. Check de documentos vivos aprovado. Sem ensaio autenticado real; a conferência headless cobre os cálculos e preserva os bloqueios.
+
+Diagnóstico real(6) tem46disponíveis/14fontes/22editoriais. Três slides dependem dos lançamentos; onze continuam dependentes da divergência de34unidades de Marechal, sem correção presumida. Sem token para reconsulta autenticada; controle do Opera interrompido por impossibilidade de validar a URL na ferramenta. Validação headless sobre cálculos históricos, ambas as edições e bloqueios; publicar/gerar novo diagnóstico continua necessário para medir a liberação real. Sem push/deploy/Monday.
+
 ## 19/11/2026 — Conferência no site e regra de quartos, sem editor de correções
 
 Após CSV de23pendências cadastrais, Lucas pediu aviso/tabela antes dos slides. Durante a sessão autorizou classificação automática de horizontal com quartos positivos como casas; adiou edição/memória de novas correções e geração parcial. A última clarificação manteve os dez IDs deD21. Implementação usa só fotografia histórica do fechamento para inferência; tipos explícitos/Chácaras/dez confirmados prevalecem. Lotes precisam de aberto/fechado explícito; área/zero quartos não resolvem isso.

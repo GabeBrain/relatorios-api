@@ -1,3 +1,4 @@
+import { maceioHistoricalLaunch, historicalLaunchNotice } from './historical-launch';
 import { maceioPatternFamily } from './classification';
 import { maceioCities, maceioPeriod, type MaceioSelection } from './model';
 import { marketMonth, normalizeMarketText, type MarketRow } from './market';
@@ -57,9 +58,9 @@ function ivv(data: MaceioMarketSlidesData, month: string) {
   if (opening + releases - sales !== quantity(data, 'Maceió', 'stock', month)) throw new Error(`Balanço municipal não reconciliado em ${month}; confira as fontes do IVV.`);
   return sales / total([opening, releases]) * 100;
 }
-interface Snapshot { city: string; standard: string; bedroom: unknown; area: unknown; price: unknown; stock: number; releases: unknown; sales: unknown }
+interface Snapshot { city: string; standard: string; bedroom: unknown; area: unknown; price: unknown; stock: number; releases: unknown; sales: unknown; derivedLaunch: boolean }
 /** No root prices/stock fill historical observations. Every established typology needs a snapshot. */
-function snapshots(data: MaceioMarketSlidesData, cities: readonly string[], month: string): Snapshot[] {
+function snapshots(data: MaceioMarketSlidesData, cities: readonly string[], month: string, resolveLaunches = false): Snapshot[] {
   const result: Snapshot[] = [];
   for (const city of cities) {
     const sources = data.sources.filter(item => normalizeMarketText(item.city) === normalizeMarketText(city) && item.metric === 'details');
@@ -80,7 +81,8 @@ function snapshots(data: MaceioMarketSlidesData, cities: readonly string[], mont
         if (period !== month) continue;
         if (seen.has(typology)) throw new Error('Tipologia repetida na mesma competência.');
         seen.add(typology); observed = true;
-        result.push({ city, standard: String(building.standard ?? ''), bedroom: row.number_bedroom, area: row.private_area, price: row.price, stock: requiredNumber(row.typology_stock), releases: row.releases_in_period, sales: row.sold_in_period });
+        const launch = resolveLaunches ? maceioHistoricalLaunch(row, release, month) : null;
+        result.push({ derivedLaunch: launch?.origin === 'historical-launch-cohort', city, standard: String(building.standard ?? ''), bedroom: row.number_bedroom, area: row.private_area, price: row.price, stock: requiredNumber(row.typology_stock), releases: launch ? launch.value : row.releases_in_period, sales: row.sold_in_period });
       }
       if (!observed || [...established].some(id => !seen.has(id))) throw new Error(`${city}: fotografia ${month} incompleta; não usamos cadastro atual ou estoque zero como substitutos.`);
     }
@@ -158,10 +160,10 @@ export function buildOfferPriceSlide(page: number, selection: MaceioSelection, d
       }
     } else if (logical === 47 || logical === 48) {
       const months = Array.from({length:logical===48?12:1},(_,i)=>shiftMonth(end,i-(logical===48?11:0))), opening = shiftMonth(months[0],-1);
-      const before = snapshots(data,['Maceió'],opening), after=snapshots(data,['Maceió'],end), flow=months.flatMap(month=>snapshots(data,['Maceió'],month));
+      const before = snapshots(data,['Maceió'],opening), after=snapshots(data,['Maceió'],end), flow=months.flatMap(month=>snapshots(data,['Maceió'],month,true));
       for (const [metric,field] of [['sales','sales'],['releases','releases']] as const) for (const month of months) {
-        const observations=snapshots(data,['Maceió'],month),apiField=field==='sales'?'sold_in_period':'releases_in_period',missing=observations.filter(row=>readNumber(row[field],metric==='sales')===null).length;
-        if(missing)throw new Error(`Maceió: ${apiField} ausente ou inválido em ${missing} observação(ões) de ${month}; IVV por área indisponível.`);
+        const observations=snapshots(data,['Maceió'],month,true),apiField=field==='sales'?'sold_in_period':'releases_in_period',missing=observations.filter(row=>readNumber(row[field],metric==='sales')===null).length;
+        if(missing)throw new Error(`Maceió: ${apiField}${metric==='releases'?' ou oferta inicial histórica de lançamento':''} ausente ou inválido em ${missing} observação(ões) de ${month}; IVV por área indisponível.`);
         const actual=total(observations.map(row=>requiredNumber(row[field],metric==='sales'))),expected=quantity(data,'Maceió',metric,month);
         if(actual!==expected)throw new Error(`Maceió: fluxos granulares por área divergem dos totais municipais em ${month} (${apiField}: ${actual} versus ${expected}, diferença ${actual-expected}).`);
       }
@@ -173,6 +175,7 @@ export function buildOfferPriceSlide(page: number, selection: MaceioSelection, d
       if(rows.some(row=>row.opening+row.releases-row.sales!==row.stock))throw new Error('Balanço por área não reconciliado; as faixas históricas podem ter mudado.');
       const share=(value:number,base:number)=>base>0?value/base*100:null;
       result.rows=[...rows,totals].map(row=>({label:row.label,values:[row.opening,row.stock,share(row.stock,totals.stock),row.releases,share(row.releases,totals.releases),row.sales,share(row.sales,totals.sales),share(row.sales,total([row.opening,row.releases]))]}));
+      if(flow.some(row=>row.derivedLaunch))result.warnings.push(historicalLaunchNotice);
       result.note='Oferta inicial/final são fotografias; lançamentos e vendas são fluxos da janela. IVV acumulado usa vendas ÷ (estoque anterior à janela + lançamentos), sem somar taxas mensais. Faixas contínuas: (35,40], (40,50] etc.; agrupamento a homologar.';
     } else if (result.price) {
       if(policy!=='stock-weighted')throw new Error('Confirme o critério de ponderação dos preços para esta prévia. O original não comprova a fórmula.');

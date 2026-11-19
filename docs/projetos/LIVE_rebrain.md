@@ -1,5 +1,14 @@
 # Rebrain (Plataforma) — Documento Vivo
 
+## 19/11/2026 — Maceió: lançamentos por coorte histórica autorizados — Codex/Lucas
+
+- **Pedido/decisão:** Lucas autorizou combinar data de lançamento e oferta inicial histórica após revisão dos contratos da API; [D25](../features/relatorios-institucionais/maceio/DECISOES.md) supersede D20 neste escopo. Base `00c3c9b9`, main limpa e origin0/0 após fetch.
+- **Entrega:** ranking por bairro e IVV por área, mensal/trimestral, priorizam fluxo explícito; na ausência, usam `qty` histórico apenas na competência de lançamento, zero nos demais meses elegíveis. Preservadas reconciliação mensal municipal, estoques/vendas/balanços por área, guardas numéricas e dados brutos. Notas/advertências/JSON identificam a derivação; nenhum cadastro atual ou diferença de estoque é usado para fabricar fluxos.
+Validação:211testes/20arquivos Maceió, lint dirigido, TypeScript e build de produção aprovados. Check de documentos vivos aprovado. Sem ensaio autenticado real; a conferência headless cobre os cálculos e preserva os bloqueios.
+
+- **Etapa/pendências:** implementação local para os três slides de lançamentos pendentes do diagnóstico(6), sem promessa de liberação até nova geração real. Onze slides continuam dependentes da divergência de estoque vertical Marechal226×192(delta34), não ajustada. Sem token/controle Opera para consulta autenticada; testes headless não representam homologação ou deploy. CAGED e outros motores intocados; sem push/Monday.
+- **Monday:** [Panorama Maceió / SINDUSCON](https://brain381753.monday.com/boards/18398638577/pulses/13149406169) — `13149406169`.
+
 ## 19/11/2026 — Maceió: conferência de cadastros no site e casas por quartos — Codex/Lucas
 
 - **Escopo final de Lucas:** aviso/tabela antes dos slides e regra automática de quartos positivos; editor/memória de novas correções e liberação geral de parciais adiados. Última clarificação preserva os dez IDs deD21. Base `b16c0ba0`, main/origin0/0após fetch, árvore limpa na abertura.

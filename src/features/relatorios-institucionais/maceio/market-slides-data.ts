@@ -1,3 +1,4 @@
+import { maceioHistoricalLaunch, historicalLaunchNotice } from './historical-launch';
 import { maceioPatternFamily } from './classification';
 import { checkMaceioNext, scopeMaceioRow, MACEIO_HISTORY_URL, MaceioSourceError, sourceFailure } from './source-contract';
 import { readBuildingPage } from '@/features/panorama-secovi-fiergs/domain/building-source';
@@ -154,23 +155,25 @@ function buildRanking(result:MaceioChartData,selection:MaceioSelection,data:Mace
   const expected=sum(cells.filter(cell=>cell.city===city&&period.months.includes(cell.month)));cityValues.push({label:city,value:expected});
   if(normalizeMarketText(city)!=='maceio')continue;
   const source=data.sources.find(source=>source.city===city&&source.metric==='details');if(!source?.complete)return {...result,issue:source?.issue??'Histórico por empreendimento indisponível para o ranking de bairros.'};
-  let actual=0;const ids=new Set<string>(),monthly=new Map(period.months.map(month=>[month,0]));
+  let actual=0,derived=false;const ids=new Set<string>(),monthly=new Map(period.months.map(month=>[month,0]));
   for(const building of source.rows){const id=String(building.building_id??building.id??''),neighborhood=typeof building.neighborhood==='string'?building.neighborhood.trim():'',release=marketMonth(building.release_date);
    if(!id||ids.has(id))return {...result,issue:'Empreendimento sem ID ou duplicado no ranking.'};ids.add(id);
    if(!Array.isArray(building.typologies_history))return {...result,issue:'Histórico de tipologias ausente no ranking.'};
    const seen=new Set<string>();
    for(const row of building.typologies_history as MarketRow[]){const month=marketMonth(row.period);if(!month)return {...result,issue:'Competência inválida no histórico de bairros.'};if(!period.months.includes(month))continue;
     const typology=String(row.typology_id??''),key=`${month}/${typology}`;if(!typology||seen.has(key))return {...result,issue:'Tipologia sem ID ou repetida no ranking.'};seen.add(key);
-    const field=metric==='releases'?'releases_in_period':'sold_in_period',value=readNumber(row[field],metric==='sales');
+    const field=metric==='releases'?'releases_in_period':'sold_in_period',launch=metric==='releases'?maceioHistoricalLaunch(row,release,month):null,value=launch?launch.value:readNumber(row[field],true);
+    if(launch?.origin==='historical-launch-cohort')derived=true;
     // A photograph before the explicit launch is outside the ranking's universe.
     // Conflicting positive/negative flows still block instead of being discarded.
     if(release&&month<release){if(value!==null&&value!==0)return {...result,issue:`${city}: fluxo ${field} anterior ao lançamento em ${month}; confira a origem.`};continue;}
-    if(value===null)return {...result,issue:`${city}: o histórico não forneceu fluxo explícito por tipologia para o ranking (${field}, ${month}). Não usamos capacidade ou estoque como substituto.`};
+    if(value===null)return {...result,issue:metric==='releases'?`${city}: fluxo explícito ou oferta inicial histórica/data de lançamento inválidos para o ranking (${field}, ${month}).`:`${city}: o histórico não forneceu fluxo explícito por tipologia para o ranking (${field}, ${month}).`};
     monthly.set(month,(monthly.get(month)??0)+value);
     if(value!==0&&!neighborhood)return {...result,issue:'Há fluxo sem bairro identificado.'};actual+=value;map.set(neighborhood,(map.get(neighborhood)??0)+value);
    }
   }
   for(const month of period.months){const expectedMonth=sum(cells.filter(cell=>cell.city===city&&cell.month===month));if(monthly.get(month)!==expectedMonth)return {...result,issue:`${city}: fluxo mensal do ranking diverge em ${month}: ${monthly.get(month)} versus ${expectedMonth}.`};}
+  if(derived)result.note+=` ${historicalLaunchNotice}`;
   if(actual!==expected)return {...result,issue:`${city}: a soma dos bairros diverge do total municipal (${actual} versus ${expected}, diferença ${actual-expected}); o ranking permanece em conferência.`};
  }
  result.ranking=[...map].map(([label,value])=>({label,value})).filter(row=>row.value!==0).sort((a,b)=>b.value-a.value||a.label.localeCompare(b.label,'pt-BR'));

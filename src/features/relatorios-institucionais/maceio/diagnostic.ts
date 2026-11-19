@@ -66,7 +66,7 @@ export function buildMaceioDiagnostic(selection: MaceioSelection, state: Diagnos
     criteria: { prices: 'stock-weighted', monetaryIndex: maceioMonetaryPolicy(selection), monetaryBase: maceioPeriod(selection).end.slice(0, 7),
       horizontalUniverse: { excluded: ['Condomínio de Chácaras'], confirmedBy: 'Lucas, com confirmação do analista em 18/11/2026', reconciliation: 'full-source-before-exclusion', ambiguousClosed: '10 scoped project exceptions = Condomínio de Casas; other projects use explicit product or selected-month positive bedrooms; unresolved remain pending' },
       emptyPeriods: 'completed-scoped-scan-as-zero; failed scans and missing numeric fields remain unavailable',
-      launchesByTypology: 'explicit monthly flow required; never derived from qty or stock; monthly municipal reconciliation required',
+      launchesByTypology: 'explicit flow preferred; missing flow derived from historical qty only in project launch month, zero in other eligible months; authorized by Lucas 2026-11-19; monthly municipal reconciliation required; no current catalog or stock differences',
       horizontalClassification: '10 ID/city/AL/Horizontal exceptions retained; otherwise undefined horizontal product with positive bedrooms in selected historical month = Condomínio de Casas/Sobrados, authorized by Lucas on 19/11/2026. Explicit products take precedence; zero/missing bedrooms never infer open/closed lots. Chácaras excluded.',
       patternGrouping: { Compacto:'Compactos', Econômico:'MCMV', Standard:'Médio Padrão', Médio:'Médio Padrão', 'Médio-Alto':'Médio Padrão', Alto:'Luxo', Luxo:'Luxo' } },
     summary: Object.fromEntries(statuses.map(status => [status, slides.filter(slide => slide.status === status).length])) as Record<Status, number>,

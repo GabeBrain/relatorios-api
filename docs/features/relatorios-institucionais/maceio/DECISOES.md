@@ -2,6 +2,12 @@
 
 Registro de fatos comprovados, hipóteses e decisões. Atualizado a cada entrega.
 
+## 19/11/2026 — Lançamentos derivados da oferta inicial histórica
+
+- **D25 — Nova autorização de Lucas, posterior a D20:** após conferir os endpoints, Lucas autorizou combinar data de lançamento do empreendimento com `qty` (oferta inicial) da fotografia histórica da tipologia. Usado quando o fluxo explícito está ausente/nulo/vazio: no mês de lançamento entra a oferta inicial histórica; nas demais competências elegíveis entra zero. Fluxo explícito válido, inclusive zero, prevalece; valor explícito inválido não é substituído. Cadastro atual e diferença entre estoques não são usados.
+- Ranking por bairro e IVV por área, mensal/trimestral, usam a mesma regra. Cada mês deve reconciliar ao total municipal; IVV mantém também vendas, estoques e balanços por faixa. Etapas/revisões que não sejam explicadas pela coorte continuam bloqueadas. Notas/advertências dos valores calculados e critérios do JSON identificam a derivação e a autorização; auditoria bruta conserva campos ausentes, sem alterar os registros da API.
+- Diagnóstico real(6):46disponíveis/14fontes/22editoriais; três pendências de lançamentos são candidatas a esta regra, mas sua liberação real ainda não foi observada. As outras onze dependem da diferença de estoque vertical de Marechal Deodoro (226granular versus192municipal,34unidades), que esta decisão não autoriza ajustar nem ignorar.
+
 ## 19/11/2026 — Classificação por quartos e conferência antes dos slides
 
 - **D23 — Regra automática autorizada por Lucas:** horizontal com tipo ainda indefinido e `number_bedroom` inteiro positivo em alguma tipologia da **fotografia da competência selecionada** recebe Condomínio de Casas/Sobrados (grupo de arte existente: Condomínio de Casas). Tipos explícitos da API, exclusão de Chácaras e D21 têm prioridade. Zero, nulo, campo ausente, booleano, fração ou texto não numérico não ativam a regra. Cadastro atual ou fotografias posteriores não substituem a competência histórica. Vaga de garagem não é requisito; é evidência auxiliar quando disponível na fotografia. Área positiva/600m²/zero quartos não determina loteamento aberto ou fechado: identificação explícita continua necessária.
