@@ -11,6 +11,6 @@ export function FortalezaPriceInsights({page,data,prices}:{page:number;data:Pric
     </>}
     {data.issue&&<p role="status">{data.issue}</p>}
     {page<45&&<Table><TableHeader><TableRow><TableHead>Fonte</TableHead><TableHead>Cobertura</TableHead><TableHead>Requisições</TableHead></TableRow></TableHeader><TableBody>{prices?.sources.filter(source=>data.status==='blocked'||data.sourceKeys.includes(`${source.city}/${source.segment}/histórico-preços`)).map(source=><TableRow key={`${source.city}/${source.segment}`}><TableCell>{source.city} · {source.segment}</TableCell><TableCell>{source.records.length} empreendimentos · {source.complete?'concluída':'incompleta'}</TableCell><TableCell>{source.requests}</TableCell></TableRow>)}</TableBody></Table>}
-    {data.cities?.map(city=><p key={city.city}>{city.city}: {city.units.toLocaleString('pt-BR')} unidades elegíveis · R$ {city.value.toLocaleString('pt-BR',{maximumFractionDigits:2})}/m².</p>)}
+    {data.cities?.map(city=><p key={city.city}>{city.city}: {city.value===null?'Sem oferta elegível nesta competência; preço não calculado.':`${city.units.toLocaleString('pt-BR')} unidades elegíveis · R$ ${city.value.toLocaleString('pt-BR',{maximumFractionDigits:2})}/m².`}</p>)}
   </div></details>;
 }

@@ -1,5 +1,13 @@
 # Estado do handoff
 
+## 19/11/2026 — Fortaleza: preço sem oferta e publicação autorizada com Beira Mar
+
+O diagnóstico(2) confirmouMaracanaúsemoferta válida de casas emoutubro/2026; Aquiraz26/Caucaia169/Eusébio299unidades=494e média ponderadaR$6364,763441/m². Lucas autorizou seguirAPI, liberar a regra e publicar junto àBeiraMar (`abd78164`jálocal). Base remota `c40757dd`, fetch0atrás/1àfrente, árvore limpa antes do novo ajuste.
+
+Regra regional40–43/trimestral45–48permite cidade sem estoque com rótuloSemoferta, preço nulo e exclusão do peso da média; todaszeradas não geram média. Fonte incompleta/histórico inválido/preço ausente com estoque continuam bloqueados. Auditoria v2separa ausência válida de município bloqueador. Modelos/SVG/insights preservamnullsemconverteremzero. [Decisão](../../features/relatorios-institucionais/fortaleza/DECISOES.md).
+
+Validação concluída (Claude, 19/11): Fortaleza 327 testes, tsc e eslint limpos; casos com494unidades, todaRMsemoferta e erros reais cobertos. Dois cenários visuais sintéticos locais aprovados emdesktop1440claro/celular390escuro; Semoferta/média6365semoverflow. Evidências em `.local-inputs/relatorios-lucas/fortaleza/no-offer-2026-11-19/`. Sem ensaio autenticado de nova geração; dados doJSONreal usados como evidência, não como constantes no código. Publicação autorizada para as duas correções; sem escritaMonday.
+
 ## 19/11/2026 — Fortaleza mensal: agrupamento Beira Mar
 
 Lucas enviou lista do analista com13empreendimentos deMeireles/Mucuripe/PraiaDeIracema que devem comporBeiraMar nos52–55. [Lista e regra](../../features/relatorios-institucionais/fortaleza/DECISOES.md). Base `c40757dd`, main limpa/origin0/0após fetch. Regra por nome normalizado+bairro de origem, restritaFortaleza/CE/Vertical/mensal; sem nomes aproximados ou reclassificação do bairro inteiro. IDs não fornecidos; cadastroAPIintacto. Preservados guardas históricas, deduplicação, totais e ponderação; outros empreendimentos ficam nas linhas de origem. Trimestral mantém seu comportamento anterior.

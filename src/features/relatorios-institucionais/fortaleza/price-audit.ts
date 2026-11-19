@@ -57,11 +57,12 @@ export function auditFortalezaClosingPrices(collection:PriceCollection|null,sele
     const product=({40:'vertical',41:'houses',42:'closed-lots',43:'open-lots'} as const)[slide];
     const cities=checks.filter(check=>check.city!=='Fortaleza'&&check.segment===(slide===40?'Vertical':'Horizontal')).map(check=>({city:check.city,...(slide===40?check.slide40!:check.products.find(item=>item.product===product)!)}));
     return {slide:selection.periodicity==='monthly'?slide:({40:45,41:46,42:47,43:48} as const)[slide],product,
-      blockingCities:cities.filter(city=>city.status!=='ready').map(city=>({city:city.city,status:city.status,reason:city.reason})),cities};
+      blockingCities:cities.filter(city=>city.status!=='ready'&&city.status!=='no-offer').map(city=>({city:city.city,status:city.status,reason:city.reason})),
+      noOfferCities:cities.filter(city=>city.status==='no-offer').map(city=>city.city),cities};
   });
-  return {version:'fortaleza-price-audit-v1',month,rmSlides,checks,
+  return {version:'fortaleza-price-audit-v2',month,rmSlides,checks,
     limits:['Auditoria agregada da fotografia normalizada usada nos cálculos, sem nova consulta.',
       'no-offer é diferente de consulta incompleta, classificação inválida ou preço ausente.',
       'Preços mínimo/máximo usam observações com estoque positivo e preço válido; não são médias municipais.',
-      'Esta auditoria não altera a regra atual de bloqueio do gráfico regional.']};
+      'Cidade sem oferta concluída é informativa e não bloqueia o gráfico regional; falhas e dados inválidos continuam bloqueando.']};
 }

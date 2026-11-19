@@ -1,5 +1,13 @@
 # Rebrain (Plataforma) — Documento Vivo
 
+## 19/11/2026 — Fortaleza: Sem oferta no gráfico e média regional válida — Codex/Lucas
+
+- **Evidência/decisão:** JSONoutubro(2) confirmaMaracanaúsemoferta de casas (5observações zero, sem erros). Aquiraz26/Caucaia169/Eusébio299=494unidades. Lucas autorizou liberar a regra e publicar comBeiraMar. [Contrato](../features/relatorios-institucionais/fortaleza/DECISOES.md). Main1commitlocal (`abd78164`) sobreorigin`c40757dd`, sem atraso após fetch, árvore limpa antes do ajuste.
+- **Entrega:** gráficos regionais40–43/trimestrais45–48mantêm cidade comSemoferta, preço nulo, sem barra/preço artificial. Média ponderada só pelas unidades disponíveis; todaRMsemoferta mantém a média ausente. Fonte incompleta/histórico inválido/preço ausente com estoque continuam bloqueados. Auditoria v2separa`noOfferCities`de`blockingCities`; detalhes de origem e SVG/exportação suportamnull. Sem novas consultas ou preços/estoques fixos.
+- **Validação/etapas:** concluída (suíte Fortaleza 327 testes, tsc e eslint limpos); testes de494unidades/média6364,763441, Semoferta, todaRMzerada e falhas reais; dois cenários visuais locais aprovados emdesktop1440claro/celular390escuro, comSemoferta/média6365e semoverflow. Evidências em `.local-inputs/relatorios-lucas/fortaleza/no-offer-2026-11-19/`. Componentes e arte existentes reutilizados; sem mudança de carregamento. Sem nova geração autenticada; não presumir o motivo da mudança de estoque desde oJSONantigo.
+- **Publicação:** Lucas autorizou enviar esta correção eBeiraMar após validação. Maceió/fluxos/SériesCapital37–38intocados. Sem escritaMonday.
+- **Monday:** [Estudo Fortaleza](https://brain381753.monday.com/boards/18398638577/pulses/13149406420) — `13149406420`.
+
 ## 19/11/2026 — Fortaleza: Beira Mar como grupo mensal por lista confirmada — Codex/Lucas
 
 - **Pedido:** Lucas forneceu lista do analista com13casos paraBeiraMar nos slides52–55, retirando dos bairros de origem. [Lista/contrato](../features/relatorios-institucionais/fortaleza/DECISOES.md). Base `c40757dd`, main limpa/origin0/0após fetch.

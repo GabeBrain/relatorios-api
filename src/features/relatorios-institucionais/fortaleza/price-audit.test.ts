@@ -10,13 +10,13 @@ function fixture():PriceCollection {
 }
 const check=(data:PriceCollection|null)=>auditFortalezaClosingPrices(data,selection,[...FORTALEZA_CITIES]).rmSlides.find(slide=>slide.slide===41)!;
 describe('Fortaleza · auditoria de preços sem alterar o slide',()=>{
-  it('identifica exatamente a cidade sem oferta, conserva as demais e não altera o bloqueio',()=>{
+  it('identifica cidade sem oferta sem confundir com bloqueio de fonte',()=>{
     const data=fixture(),source=data.sources.find(source=>source.city==='Aquiraz')!;source.frames['2026-10'].rows[0].units=0;
     const before=JSON.stringify(data),audit=check(data);
-    expect(audit.blockingCities).toEqual([{city:'Aquiraz',status:'no-offer',reason:expect.any(String)}]);
+    expect(audit.blockingCities).toEqual([]);expect(audit.noOfferCities).toEqual(['Aquiraz']);
     expect(audit.cities.find(city=>city.city==='Aquiraz')).toMatchObject({eligibleUnits:0,pricePerM2:null,missingPriceObservations:0});
     expect(audit.cities.find(city=>city.city==='Caucaia')).toMatchObject({status:'ready',eligibleUnits:10,pricePerM2:5000});
-    expect(buildPriceSlide(41,data,selection,[...FORTALEZA_CITIES]).status).toBe('blocked');expect(JSON.stringify(data)).toBe(before);
+    expect(buildPriceSlide(41,data,selection,[...FORTALEZA_CITIES]).status).toBe('ready');expect(JSON.stringify(data)).toBe(before);
     expect(JSON.stringify(audit)).not.toMatch(/private-id|private-name|private-token|private-typology/);
   });
   it('distingue produto sem observações de preço ausente com estoque positivo',()=>{
@@ -37,7 +37,7 @@ describe('Fortaleza · auditoria de preços sem alterar o slide',()=>{
     const current={...selection,periodicity:'quarterly' as const,position:4};
     const audit=auditFortalezaClosingPrices(null,current,[...FORTALEZA_CITIES]);expect(audit.rmSlides.find(slide=>slide.product==='houses')?.slide).toBe(46);
     const diagnostic=buildFortalezaDiagnostic(selection,{phase:'done',startedAt:0,report:null,blueprint:null,intro:null,monthlyLaunches:null});
-    expect(diagnostic.priceAudit.version).toBe('fortaleza-price-audit-v1');expect(diagnostic.priceAudit.rmSlides.find(slide=>slide.slide===41)?.blockingCities).toHaveLength(4);
+    expect(diagnostic.priceAudit.version).toBe('fortaleza-price-audit-v2');expect(diagnostic.priceAudit.rmSlides.find(slide=>slide.slide===41)?.blockingCities).toHaveLength(4);
     const slide=diagnostic.slides.find(slide=>slide.number===41)!;
     expect('priceCheck' in slide&&slide.priceCheck.blockingCities).toHaveLength(4);
   });

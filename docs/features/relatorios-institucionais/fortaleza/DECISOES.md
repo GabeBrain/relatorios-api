@@ -1,5 +1,13 @@
 # Fortaleza — fatos, propostas e pendências
 
+## 19/11/2026 — Cidade sem oferta não bloqueia preço regional
+
+Diagnóstico mensal10/2026(2), gerado19:25UTC, confirmou a causa do41:Maracanaú/housescom5observações de estoque zero, consulta concluída e sem erro de histórico/preço. Aquiraz26/Caucaia169/Eusébio299unidades somam494; média ponderada pelos preços recebidos=R$6364,763441/m². Isso não comprova por que o estoque deMaracanaú mudou desde a coleta anterior; nenhuma venda/retificação foi presumida.
+
+Lucas autorizou seguir o retorno daAPI, liberar a regra e publicar junto aBeiraMar. Nos preços regionais40–43e correspondentes trimestrais45–48, município com consulta concluída e sem estoque positivo permanece no gráfico com **Sem oferta**, preço`null`eunidades0. Não desenha barra/preço zero nem entra como média municipal artificial; média regional usa a soma dos pesos/unidades efetivamente disponíveis. Se todos estiverem sem oferta, todos mostramSemoferta e a média fica ausente. Fontes faltantes/incompletas, problemas de histórico/classificação ou estoque positivo sem preço válido continuam bloqueando. Séries históricas da capital37/38não recebem mudança implícita.
+
+Auditoria `fortaleza-price-audit-v2` mantém status`no-offer`, separa `noOfferCities` de `blockingCities` e identifica ausência válida como informativa. Preços, origem e exportação seguem o mesmo modelo/SVG, com rótulo semoferta visível e sem divisão porzero. Sem novaAPIou valor fixado por município. Publicação das duas correções foi explicitamente autorizada nesta rodada.
+
 ## 19/11/2026 — Beira Mar nos slides mensais52–55
 
 Lucas forneceu a lista do analista para retirar13empreendimentos de seus bairros cadastrais e agrupá-los emBeiraMar na tabela deIVVporbairro. BeiraMar é um agrupamento do relatório para estes casos, não uma alteração dos bairros daAPI. Não foi comprovada inexistência do nomeBeiraMar em todo o catálogo.

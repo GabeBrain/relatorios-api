@@ -37,10 +37,10 @@ describe('Fortaleza mensal 36–45',()=>{
     expect(result.status).toBe('ready');expect(result.average).toBeCloseTo((1100*2+1200*3+1300*4+1400*5)/14);
     expect(result.average).not.toBe(1250);
   });
-  it.each([40,41,42,43])('slide%s exige as quatro cidades e oferta positiva',page=>{
+  it.each([40,41,42,43])('slide%s exige as quatro fontes, mas permite cidade sem oferta',page=>{
     expect(buildPriceSlide(page,fixture(),selection,['Fortaleza','Aquiraz']).status).toBe('blocked');
     const data=fixture();data.sources.filter(source=>source.city==='Aquiraz').forEach(source=>Object.values(source.frames).forEach(frame=>frame.rows.forEach(row=>row.units=0)));
-    expect(buildPriceSlide(page,data,selection,cities).status).toBe('blocked');
+    const result=buildPriceSlide(page,data,selection,cities);expect(result.status).toBe('ready');expect(result.cities![0]).toMatchObject({value:null,units:0});
   });
   it('exclui cobertura somente no40 e exige categoria para essa exclusão',()=>{
     const data=fixture(),source=data.sources.find(source=>source.city==='Aquiraz'&&source.segment==='Vertical')!;

@@ -8,7 +8,7 @@ export interface PriceFrame { rows:PriceObservation[]; issues:string[]; productI
 export interface PriceSource { city:string; segment:'Vertical'|'Horizontal'; complete:boolean; records:Record<string,unknown>[]; frames:Record<string,PriceFrame>; issue:string|null; requests:number; startedAt:string; finishedAt:string }
 export interface PriceCollection { scopeKey:string; months:string[]; sources:PriceSource[]; issues:string[] }
 export interface PricePoint { month:string; label:string; value:number|null; units:number }
-export interface PriceSlideData { status:'ready'|'blocked'; issue:string|null; warnings:string[]; series:{ label:string; points:PricePoint[] }[]; cities?:{ city:string; value:number; units:number }[]; average?:number; changes:{ month:number|null; year:number|null }[]; sourceKeys:string[] }
+export interface PriceSlideData { status:'ready'|'blocked'; issue:string|null; warnings:string[]; series:{ label:string; points:PricePoint[] }[]; cities?:{ city:string; value:number|null; units:number }[]; average?:number; changes:{ month:number|null; year:number|null }[]; sourceKeys:string[] }
 export const priceSourceKey = (source:Pick<PriceSource,'city'|'segment'>) => `${source.city}/${source.segment}/histórico-preços`;
 export const priceSourceHasIssues = (source:PriceSource) => !source.complete || Object.values(source.frames).some(frame => frame.issues.length>0 || Object.values(frame.productIssues).some(issues=>issues.length>0) || frame.rows.some(row=>row.units>0&&row.meter===null));
 export function priceMonths(selection:FortalezaSelection) {
@@ -106,10 +106,10 @@ export function buildPriceSlide(page:number,collection:PriceCollection|null,sele
     if (rm) {
       const product:PriceProduct = ({ 40:'vertical',41:'houses',42:'closed-lots',43:'open-lots' } as const)[page as 40|41|42|43];
       const bars = required.map(city => ({ city,...framePrice(getSource(city,page === 40 ? 'Vertical' : 'Horizontal'),months.at(-1)!,product,page === 40) }));
-      if (bars.some(bar => bar.value === null)) return blockPrice('Há município sem oferta positiva elegível. O preço não é preenchido com zero.');
+
       const units = bars.reduce((sum,bar) => sum + bar.units,0), weighted = bars.reduce((sum,bar) => sum + bar.weighted,0);
       if (!Number.isSafeInteger(units) || !Number.isFinite(weighted) || weighted > Number.MAX_SAFE_INTEGER / 100) return blockPrice('A média regional excede a precisão segura.');
-      return { status:'ready',issue:null,warnings:[],series:[],cities:bars.map(bar => ({ city:bar.city,value:bar.value!,units:bar.units })),average:weighted/units,changes:[],sourceKeys };
+      return { status:'ready',issue:null,warnings:bars.filter(bar=>bar.value===null).map(bar=>`${bar.city}: sem oferta positiva elegível neste produto; preço ausente, sem preencher com zero.`),series:[],cities:bars.map(bar => ({ city:bar.city,value:bar.value,units:bar.units })),...(units?{average:weighted/units}:{}),changes:[],sourceKeys };
     }
     const products:PriceProduct[] = page === 37 ? ['vertical'] : ['houses','closed-lots'];
     const source = getSource('Fortaleza',page === 37 ? 'Vertical' : 'Horizontal');
