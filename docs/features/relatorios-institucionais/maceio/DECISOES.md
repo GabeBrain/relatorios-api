@@ -2,6 +2,19 @@
 
 Registro de fatos comprovados, hipóteses e decisões. Atualizado a cada entrega.
 
+## 19/11/2026 — Conferência identificada dos estoques
+
+- **D28 — Pedido de Lucas:** disponibilizar uma forma de investigar a diferença entre municipal e detalhamento e entre API e original, sem escolher arbitrariamente192ou226. Novo arquivo separado `estoque-conferencia.json` contém todos os municípios da edição, totais de cada fonte por grupo, diferenças por padrão cadastral e dormitórios, registros de estoque da competência por empreendimento/tipologia com nome/ID, oferta inicial, área, padrão, status atual/histórico e estágio histórico quando fornecidos. Inclui futuros com marca explícita de exclusão e conserva fontes parciais/valores nulos/duplicações na auditoria.
+- O agregado municipal não fornece IDs: o arquivo localiza os grupos e lista os cadastros a conferir, mas não prova quais IDs foram incluídos no total municipal. Padrão/status atuais são identificados como cadastrais, sem chamar isso de fotografia histórica. Sem novos endpoints/chamadas, tokens, endereços, dados de contato ou payloads brutos; diagnóstico agregado original permanece sem identificadores. Usa a geração existente no worker, com descarte na troca de geração/cancelamento/erro.
+- Referência maio conferida no slide62: Maceió3704/RM469; API no diagnóstico(8): capital4160em ambos os caminhos, RM362municipal/396granular. SomenteMarechaldiverge entre endpoints (192×226), mas o original difere também na capital. Não classificar essas duas diferenças como uma única causa.
+- Lucas também relatou confirmação do headGeoBrain: padrão econômico/Standard/etc.em horizontal identifica condomínio de casas/sobrados, pois loteamentos não possuem esse padrão. Regra recebida, ainda pendente de implementação específica; não declarar esta exportação como implementação dessa classificação.
+
+## 19/11/2026 — IVV por área: somente contribuições e área desconhecida explícita
+
+- **D27 — Correção dentro do pedido de Lucas para resolver os slides restantes:** diagnóstico(8) confirma63fontes concluídas,47disponíveis/13pendentes. Ranking25reconciliou com D25. IVV47/48atingiu a validação de área: auditoria registra uma observação com área zero em cada mês, sem provar sua contribuição individual.
+- A tabela exige área apenas dos registros que contribuem para a respectiva coluna: estoque positivo nas fotografias inicial/final, fluxo não zero nos lançamentos/vendas. Registros sem contribuição não bloqueiam por área inválida. Unidades contribuintes sem área positiva são preservadas em linha **Área não informada**, nunca atribuídas à primeira faixa ou excluídas dos totais. Auditoria bruta e dados da API intactos; sem preenchimento pelo cadastro atual. Reconciliação municipal mensal e balanços de cada faixa continuam obrigatórios.
+- A divergência vertical de Marechal226×192continua separada. Foi solicitada decisão explícita sobre qual fonte deve reger os quadros; nenhuma escolha aplicada enquanto a resposta estiver pendente. Não prometer zero pendências sem executar nova geração real.
+
 ## 19/11/2026 — Ritmo de chamadas GeoBrain
 
 - **D26 — Lucas pediu somente diminuir o ritmo:** manter endpoints, paginação, amostras e consultas existentes, sem eliminar chamadas ou introduzir cache novo. Todos os coletores imobiliários da geração mensal/trimestral passam pela mesma fila: uma requisição ativa, intervalo de2segundos após cada resposta. O limite de aproximadamente30chamadas/minuto é uma escolha conservadora local, não uma cota confirmada do provedor.

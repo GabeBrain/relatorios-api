@@ -1,5 +1,13 @@
 # Rebrain (Plataforma) — Documento Vivo
 
+## 19/11/2026 — Maceió: exportação para investigar o estoque — Codex/Lucas
+
+- **Pedido/entrega:** Lucas pediu acesso às informações que permitam explicar municipal×detalhado eAPI×original. Novo download `estoque-conferencia.json` antes dos slides, separado do JSON agregado, lista todos os municípios, dados municipais por padrão/dormitórios, comparação dos grupos e fotografias individuais com nome/ID/estoque/status histórico e atual/data de lançamento/elegibilidade. Inclui futuros sinalizados, fontes incompletas e auditoria de duplicações. Sem novas consultas ou exportação de token/endereço/payloadbruto. [D28](../features/relatorios-institucionais/maceio/DECISOES.md).
+- **Limite:** municipal não retornaIDs; o arquivo serve para localizar diferenças por grupo e conferir cadastros, não para afirmar quais IDs compõem192ou escolher226sem decisão. Original maio3704capital/469RM difere daAPI4160capital/362ou396RM. Mantidas as guardas dos11slides; investigação ainda pendente de nova exportação real e, possivelmente, suporte do provedor.
+- **Continuidade:** preservada correção local de áreaD27: registros sem contribuição não precisam de área; contribuições sem área ficam em linha explícita, sem excluir unidades ou inventar m². Regra horizontal de padrões informada pelo gestor viaLucas registrada para implementação específica, sem alegar concluída nesta entrega.
+- **Validação/etapas:**225testes Maceió/23arquivos, lint dirigido e check de documentos vivos aprovados; TypeScript e build de produção aprovados. Reutilizados Button/worker/BrainLoadingState existentes; testes headless cobrem dados, isolamento dos arquivos, cancelamento e troca de geração. Sem runtime autenticado nem conferência visual nesta sessão. Base `c70afdc4`, main/origin0/0após fetch, árvore com alterações anterioresD27preservadas. Sem push/deploy/Monday.
+- **Monday:** [Panorama Maceió / SINDUSCON](https://brain381753.monday.com/boards/18398638577/pulses/13149406169) — `13149406169`.
+
 ## 19/11/2026 — Maceió: fila e pausa contra limite de consultas — Codex/Lucas
 
 - **Pedido:** após diagnóstico(7) com63fontes429e54pendências, Lucas pediu reduzir somente o ritmo, mantendo todas as consultas. Base `c0b39d94`, main limpa/origin0/0após fetch. [D26](../features/relatorios-institucionais/maceio/DECISOES.md).

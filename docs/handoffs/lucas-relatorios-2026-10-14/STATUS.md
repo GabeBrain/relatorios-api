@@ -1,5 +1,11 @@
 # Estado do handoff
 
+## 19/11/2026 — Conferência identificada para investigar divergências
+
+Base `c70afdc4`, main/origin0/0após fetch; preservadas as alterações locais de IVV por área (D27), antes testadas mas sem build por falha temporária de revisão automática/créditos. Esta continuação adiciona arquivo separado de estoque por empreendimento/tipologia e comparações municipais por padrão/dormitórios, sem novas chamadas, mantendo diagnóstico agregado anônimo. [D28](../../features/relatorios-institucionais/maceio/DECISOES.md). Interface reutiliza Button/worker/BrainLoadingState, com carregamento, erro, cancelamento e descarte por geração existentes.
+
+Arquivo traz os municípios para investigar tantoMarechal192×226quantoAPI×original: original3704capital/469RM; API4160capital/362ou396RM. O municipal não forneceIDs, portanto o arquivo não identifica sozinho a regra de inclusão do provedor; precisa ser baixado da nova geração real e conferido. Sem ensaio autenticado nesta sessão. 225testes Maceió/23arquivos, lint dirigido e check de documentos vivos aprovados; TypeScript e build de produção aprovados; sem push/deploy/Monday. Nova regra de horizontal com padrão informada pelo headGeoBrain viaLucas permanece uma implementação pendente, não autorizando alterar loteamento explícito ou incluirChácaras.
+
 ## 19/11/2026 — Ritmo de consulta Maceió, sem eliminar fontes
 
 Diagnóstico(7):63fontes imobiliárias falharam com429;54slides pendentes. Lucas direcionou manter as chamadas e reduzir somente o ritmo. Base `c0b39d94`, origin0/0após fetch, árvore limpa na abertura. Fila única em todos os coletores imobiliários (amostra, janela curta, introdução, vertical/horizontal/comercial): uma chamada ativa, intervalo2segundos após respostas. Sem novo cache ou alteração de consulta/cálculo; CAGED separado permanece intacto.

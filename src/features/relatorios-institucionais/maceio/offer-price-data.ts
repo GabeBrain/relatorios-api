@@ -167,15 +167,20 @@ export function buildOfferPriceSlide(page: number, selection: MaceioSelection, d
         const actual=total(observations.map(row=>requiredNumber(row[field],metric==='sales'))),expected=quantity(data,'Maceió',metric,month);
         if(actual!==expected)throw new Error(`Maceió: fluxos granulares por área divergem dos totais municipais em ${month} (${apiField}: ${actual} versus ${expected}, diferença ${actual-expected}).`);
       }
-      const band=(row:Snapshot)=>{const area=requiredNumber(row.area,false,true);if(area<=0)throw new Error('Área útil histórica inválida.');const i=[35,40,50,60,70,80,85].findIndex(limit=>area<=limit);return i<0?7:i;};
-      [...before,...after,...flow].forEach(band);
+      // Only contributing rows need an area. Unknown areas remain an explicit
+      // bucket, never zero m², guessed from the catalog, or silently dropped.
+      const openingRows=before.filter(row=>row.stock!==0),closingRows=after.filter(row=>row.stock!==0),flowRows=flow.filter(row=>requiredNumber(row.releases)!==0||requiredNumber(row.sales,true)!==0);
+      const band=(row:Snapshot)=>{const area=readNumber(row.area,false,true);if(area===null||area<=0)return 8;const i=[35,40,50,60,70,80,85].findIndex(limit=>area<=limit);return i<0?7:i;};
+      const unknownArea=[...openingRows,...closingRows,...flowRows].some(row=>band(row)===8);
+      const areaBands=unknownArea?[...bands,'Área não informada']:bands;
       result.kind='table';result.columns=[`Oferta ${labelMonth(opening)}`,`Oferta ${labelMonth(end)}`,'% oferta','Lançamentos','% lanç.','Vendas líq.','% vendas','IVV (%)'];
-      const rows=bands.map((label,i)=>({label,opening:total(before.filter(row=>band(row)===i).map(row=>row.stock)),stock:total(after.filter(row=>band(row)===i).map(row=>row.stock)),releases:total(flow.filter(row=>band(row)===i).map(row=>requiredNumber(row.releases))),sales:total(flow.filter(row=>band(row)===i).map(row=>requiredNumber(row.sales,true)))}));
+      const rows=areaBands.map((label,i)=>({label,opening:total(openingRows.filter(row=>band(row)===i).map(row=>row.stock)),stock:total(closingRows.filter(row=>band(row)===i).map(row=>row.stock)),releases:total(flowRows.filter(row=>band(row)===i).map(row=>requiredNumber(row.releases))),sales:total(flowRows.filter(row=>band(row)===i).map(row=>requiredNumber(row.sales,true)))}));
       const totals={label:'Total',opening:total(rows.map(row=>row.opening)),stock:total(rows.map(row=>row.stock)),releases:total(rows.map(row=>row.releases)),sales:total(rows.map(row=>row.sales))};
       if(rows.some(row=>row.opening+row.releases-row.sales!==row.stock))throw new Error('Balanço por área não reconciliado; as faixas históricas podem ter mudado.');
       const share=(value:number,base:number)=>base>0?value/base*100:null;
       result.rows=[...rows,totals].map(row=>({label:row.label,values:[row.opening,row.stock,share(row.stock,totals.stock),row.releases,share(row.releases,totals.releases),row.sales,share(row.sales,totals.sales),share(row.sales,total([row.opening,row.releases]))]}));
       if(flow.some(row=>row.derivedLaunch))result.warnings.push(historicalLaunchNotice);
+      if(unknownArea)result.warnings.push('Área não informada preserva estoques e fluxos sem área histórica positiva; essas unidades não são atribuídas às faixas de m². O balanço de cada linha continua obrigatório.');
       result.note='Oferta inicial/final são fotografias; lançamentos e vendas são fluxos da janela. IVV acumulado usa vendas ÷ (estoque anterior à janela + lançamentos), sem somar taxas mensais. Faixas contínuas: (35,40], (40,50] etc.; agrupamento a homologar.';
     } else if (result.price) {
       if(policy!=='stock-weighted')throw new Error('Confirme o critério de ponderação dos preços para esta prévia. O original não comprova a fórmula.');
