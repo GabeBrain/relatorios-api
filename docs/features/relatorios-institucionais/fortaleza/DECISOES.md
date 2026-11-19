@@ -1,5 +1,13 @@
 # Fortaleza — fatos, propostas e pendências
 
+## 19/11/2026 — Diagnóstico de preços por cidade e produto
+
+Lucas pediu diagnosticar antes de alterar a regra do slide41. O JSON de outubro/2026gerado em19/11tem44slides disponíveis/1fonte pendente/15editoriais;40fontes municipais e10detalhadas concluídas, sem erro de preço registrado. O41bloqueia por município sem oferta positiva de casas, mas o arquivo anterior não identificava qual cidade. Screenshot deAquiraz comAlto/R$0não prova essa causa; nenhuma cidade foi presumida nem preço baixo convertido em erro por hipótese.
+
+Novo `priceAudit` agregado identifica competência, cidade/segmento, fontes recebidas/completude, fotografia e produtos: estoque observado/elegível, observações sem estoque, unidades sem preço válido, preço/m² calculado e extremos válidos. Distingue `no-offer` de fonte/mês ausente, coleta incompleta, erro de classificação/histórico, estoque inválido e preço ausente com unidades positivas. `rmSlides` e `slides[].priceCheck` apontam os municípios bloqueadores do41e correspondentes40/42/43; trimestral45–48também mapeado. A avaliação de preço reutiliza a função do slide, sem alterar fórmulas, bloqueios, arte ou fonte.
+
+Somente agregados; sem IDs, nomes, token, payload bruto ou mensagens individuais de erro que contenhamIDs. Sem nova consultaAPI. O arquivo já baixado não contém os novos dados: precisa publicar a alteração autorizada e gerar/baixar novo diagnóstico para identificar a cidade real. Correção para permitir cidade sem oferta no gráfico fica separada desta entrega, conforme pedido de diagnosticar primeiro. Sem push/deploy/Monday.
+
 ## 12/11/2026 — PPTX com objetos editáveis: SP85, Fortaleza60/89
 
 **Implementação:** `cd473deb`, local em12/11/2026. Publicação ainda não autorizada nesta entrega.

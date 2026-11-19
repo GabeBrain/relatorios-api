@@ -1,5 +1,13 @@
 # Rebrain (Plataforma) — Documento Vivo
 
+## 19/11/2026 — Fortaleza: causa de bloqueio de preços por cidade — Codex/Lucas
+
+- **Pedido/evidência:** diagnóstico real deoutubro/2026com44disponíveis/1fonte/15editoriais,40fontes municipais/10detalhadas concluídas. Slide41bloqueado por município sem oferta positiva de casas, mas causa municipal ausente noJSON. Lucas pediu diagnosticar antes de alterar a regra. Base `e7cdd824`, main limpa/origin0/0após fetch. [Decisão](../features/relatorios-institucionais/fortaleza/DECISOES.md).
+- **Entrega:** `priceAudit` e `slides[].priceCheck` para preçosRM, por cidade/produto/fechamento: oferta elegível e observada, unidades sem preço, preço calculado e extremos, completude/fotografia e códigos específicos de bloqueio. Distinguezerooferta, falha/ausência/ambiguidade de fonte, erros de histórico/classificação, estoque e preço. Mesma avaliação do slide, sem mudança de cálculo, bloqueio, arte, chamadaAPIou interface de carregamento. Sem IDs/nomes/token/erros individuais exportados na auditoria nova.
+- **Validação/etapas:** build/lint aprovados; primeira suíte304/306com dois timeouts de navegação durante buildconcorrente; reexecução com dois workers e timeout15s:306/306testes em25arquivos aprovados, sem alterar expectativas. Check de documentos vivos aprovado. Sem runtime autenticado; novoJSONda geração publicada necessário para identificar a cidade real. Nenhuma cidade presumida como culpada a partir de screenshot ou preço baixo.
+- **Pendências:** publicar mediante autorização, obter diagnóstico ampliado e só então tratar cidade sem oferta no gráfico. Não declarar slide41corrigido nesta entrega. Maceió e outros motores intocados; sem push/deploy/Monday.
+- **Monday:** [Estudo Fortaleza](https://brain381753.monday.com/boards/18398638577/pulses/13149406420) — `13149406420`.
+
 ## 19/11/2026 — Maceió: fonte detalhada adotada e casas por padrão — Codex/Lucas
 
 - **Decisões:** Lucas alinhou com analista queAPIprevalece sobre números históricos do original; confirmouMarechal226eRM396para05/2026após conferir a telaGeoBrain. Gestor/headGeoBrain confirmou viaLucas que padrão de preço em horizontal identifica casas/sobrados. [D31–D33](../features/relatorios-institucionais/maceio/DECISOES.md). Base `3d81ce8a`, main limpa/origin0/0após fetch.

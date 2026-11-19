@@ -1,5 +1,11 @@
 # Estado do handoff
 
+## 19/11/2026 — Fortaleza: diagnóstico ampliado antes de alterar o slide41
+
+Lucas enviou diagnóstico mensal10/2026com44disponíveis/1fonte/15editoriais;40fontes municipais e10detalhadas concluídas. Slide41preço de casasRMbloqueado por cidade sem oferta positiva, sem identificação municipal noJSONantigo. Após sugerir verificarAquiraz, Lucas pediu melhorar diagnóstico primeiro. Base `e7cdd824`, main limpa/origin0/0após fetch. `priceAudit`/`slides[].priceCheck` mostram cidade/produto/estoque/preço/causa, sem novaAPI/identificadores e sem modificar o bloqueio ou valores do slide. [Decisão](../../features/relatorios-institucionais/fortaleza/DECISOES.md).
+
+Build/lint aprovados. Suíte completa inicialmente304/306passaram; dois testes de navegação atingiram5segundos durante execução concorrente do build. Reexecução com dois workers e timeout15s:306/306testes em25arquivos aprovados, sem alteração de expectativas. Check de documentos vivos aprovado. Sem nova geração autenticada; próximo arquivo precisa vir do ambiente publicado para confirmar a cidade. Sem push/Monday.
+
 ## 19/11/2026 — Fontes adotadas após conferência do analista/GeoBrain
 
 Lucas alinhou com analista que números serão os daAPI, admitindo retificações históricas; original é referência de apresentação. Confirmou226deMarechal e396naRM05/2026, confrontados com a telaGeoBrain. [D31–D33](../../features/relatorios-institucionais/maceio/DECISOES.md). Base `3d81ce8a`, main/origin0/0após fetch, árvore limpa. Quadros de estoque/preços deMarechal usam detalhes elegíveis; fechamento nas séries/participações também, mantendo auditoria192×226eavisos. Sem números fixados no código. Fontes inválidas/duplicadas, demais municípios/segmentos e períodos anteriores mantêm regras próprias.

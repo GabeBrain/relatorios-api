@@ -74,7 +74,7 @@ export function normalizePriceFrames(source:PriceSource,months:string[]):Record<
   return frames;
 }
 const blockPrice = (issue:string):PriceSlideData => ({ status:'blocked',issue,warnings:[],series:[],changes:[],sourceKeys:[] });
-function framePrice(source:PriceSource,month:string,product:PriceProduct,excludeSpecial:boolean) {
+export function framePrice(source:PriceSource,month:string,product:PriceProduct,excludeSpecial:boolean) {
   const frame = source.frames[month];
   if (!source.complete || !frame) throw new Error(source.issue ?? `${source.city}: fonte de preços não concluída.`);
   if (frame.issues.length) throw new Error(`${source.city}: ${frame.issues[0]}`);
