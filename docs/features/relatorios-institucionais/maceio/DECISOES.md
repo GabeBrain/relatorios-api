@@ -2,6 +2,37 @@
 
 Registro de fatos comprovados, hipóteses e decisões. Atualizado a cada entrega.
 
+## 19/11/2026 — Dez produtos Fechado identificados como Condomínio de Casas
+
+- **D21 — Exceção por identificação, sem regra geral:** Lucas informou expressamente que somente os dez empreendimentos abaixo, identificados no relatório, devem converter o rótulo ambíguo `Fechado` para `Condomínio de Casas`. Aplicado aos dois modelos, exigindo ID e município correspondentes, UF AL e segmento Horizontal. Não depende do nome cadastral, que pode sofrer revisão. Produtos com categoria explícita continuam com ela; exclusão de Chácaras (D16) prevalece. Outros IDs, municípios e registros Fechado permanecem para conferência e no CSV de pendências.
+
+| ID | Município | Empreendimento informado |
+|---|---|---|
+| 7980 | Barra de São Miguel | Barra Beach Residencial |
+| 12692 | Maceió | Residencial Jardim Das Violetas |
+| 20502 | Maceió | Residencial Varandas Do Parque |
+| 7984 | Marechal Deodoro | Denilson Amorim Boulevard |
+| 425 | Marechal Deodoro | Residencial Amazonas |
+| 28486 | Marechal Deodoro | Residencial Ilha Da Crôa |
+| 21639 | Marechal Deodoro | Residencial Porto Grande I |
+| 21640 | Marechal Deodoro | Residencial Porto Grande II |
+| 422 | Marechal Deodoro | Villas De Santa Rita |
+| 28491 | Rio Largo | Residencial Alba Canuto |
+
+Registro versionado em `classification.ts`; critérios agregados identificam a política sem exportar IDs/nomes no diagnóstico. Não altera estoque/preço/área, nem dispensa reconciliação bruta. Não representa homologação dos demais indicadores.
+
+## 18/11/2026 — Continuidade das fontes e CAGED verificado
+
+- **D19 — Contingência identificada CAGED:** escolha técnica do Codex dentro do pedido de Lucas para corrigir as fontes pendentes. BigQuery confirmou117meses/23.751agregados reais; consulta online permanece prioritária e, em falha de transporte/5xx/404, usa cópia agregada verificada, importada sob demanda. Origem/versão/data e falha online visíveis na interface/JSON, fora da arte. Não contorna401/403/429ou resposta200inválida; não substitui competência ausente. Não representa nova homologação metodológica pelo analista. [Proveniência, contrato e provas](CAGED_CONTINGENCIA_2026-11-18.md), implementação`e67ac127`.
+- **D20 — Dependências de dados/analista:** Lucas confirmou que os10`Fechado`ainda aguardam o analista. Para lançamentos por tipologia ausentes, respondeu que consultará o analista sobre a fonte. Não derivar lançamentos de capacidade/estoque nem adotar de-para presumido. Marechal283×192precisa de conferência peloJSONv2. Pedido amplo de corrigir fontes não autoriza inventar esses valores.
+
+## 18/11/2026 — Universo horizontal e INCC confirmados pelo analista
+
+- **D16 — Chácaras excluídas:** Lucas confirmou com o analista que Condomínio de Chácara/Chácaras não participa das análises nem aparece no relatório. Aplicado ao mensal/trimestral, capital/RM, oferta/capacidade/contagem, distribuição anual e médias. A reconciliação entre fonte granular e municipal continua sobre o universo bruto antes da exclusão; divergências não são apagadas. A auditoria agregada pode conservar os rótulos recebidos como evidência da fonte.
+- **D17 — Série monetária:** INCC-DI confirmado pelo analista, comunicado por Lucas em 18/11. Mantida a configuração existente para as duas edições e o mês-base de fechamento; isso não homologa automaticamente outros métodos ou campos nominais.
+- **D18 — Fechado exige conferência:** o analista quer os empreendimentos classificados somente como `Fechado`. Não autoriza converter para Loteamento Fechado. A lista CSV separada, solicitada expressamente por Lucas, contém referência, completude, município, ID, nome, campos com o rótulo e lançamento. Usa a geração em memória, sem nova API/persistência; exclui chácaras e produtos explicitamente identificados. Inclui registros esgotados, pois o pedido é cadastral, sem presumir estoque ativo; lançamentos posteriores ao fechamento ficam fora. Ausência de nome/data é sinalizada; coleta incompleta identifica lista parcial. O diagnóstico JSON permanece agregado e não recebe nomes/IDs individuais.
+- **Evidência:** implementação `38700781`; [validação desta sessão](VALIDACAO_DADOS_REAIS_2026-11-17.md). Lucas autorizou o push para gerar novo relatório e encaminhar o JSON. Geração real/publicação Lovable ainda não observadas pelo agente.
+
 ## 17/11/2026 — CAGED MTE autorizado
 
 - **D12 — Fonte MTE:** Lucas autorizou a integração pelo MTE, em lugar de depender da cobertura recente BD Pro. D7 permanece como histórico do adiamento anterior. Importador estatístico/ajustes 2017–2019 e MOV/FOR/EXC desde 2020, com agregados e revisões; [contratos e evidências](CAGED_INTEGRACAO_2026-11-17.md).

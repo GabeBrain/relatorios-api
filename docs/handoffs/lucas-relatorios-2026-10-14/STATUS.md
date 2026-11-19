@@ -1,5 +1,31 @@
 # Estado do handoff
 
+## 19/11/2026 — Merge autorizado e dez Fechado confirmados como casas
+
+Abertura: origin único atualizado por fetch, main com1commit local desde17/11 (`48c3a6d1`) e13remotos até `12d4f40a`; merge já interrompido, seis conflitos. Lucas autorizou resolver sem push. Documentos somados com prova da identidade de três pontos, preservando os dois históricos. Regras mais recentes de18/11mantidas: exclusão de Chácaras, lançamentos explícitos sem fallback de capacidade e CAGED verificado; auditorias complementares preservadas.
+
+Lucas confirmou especificamente10IDs/municípios como Condomínio de Casas quando o produto vier Fechado. [D21 e lista](../../features/relatorios-institucionais/maceio/DECISOES.md). Classificação restrita aAL/Horizontal/ID/município/rótulo; nenhum de-para geral. CSV continua listando demais Fechado.200testes Maceió/18arquivos aprovados, cobrindo modelos mensal/trimestral, limites da exceção e totais. Sem ensaio autenticado real nesta sessão; conferir novo diagnóstico/CSV após futura publicação. Sem push, deploy ou Monday.
+
+## 18/11/2026 — Maceió: fonte real CAGED recuperada localmente
+
+Lucas pediu corrigir todos os slides de fonte. Abertura: main limpa, origin único, fetch concluído,2commits locais desde15h47(`f537eab9`/`3178df90`), sem alterações remotas novas. Skill de computador lida e tentada; tanto ela quantoCUA reportaram nativepipe indisponível. Token Geobrain pessoal continua ausente, sem extração de sessão. BigQuery conectado confirmou a carga completa2017-01a2026-09:23.751agregados/117meses, versão`8866c027…506dc`, sem escrita remota.
+
+Implementação`e67ac127`: consultaCAGEDonline prioritária, cópia agregada real/verificada sob demanda em transporte/5xx/404, origem visível fora da arte e noJSON, sem contornar401/403/429ou inventar cobertura. Seis slides9–14calculados com a fonte real em teste; etapa/retry sinalizam que o serviço online permanece degradado.186testesMaceió,4Edge,3ponteHMAC, lint/tipos/build e12cenários de navegador+4capturas reais aprovados. [Proveniência, saldos independentes e limites](../../features/relatorios-institucionais/maceio/CAGED_CONTINGENCIA_2026-11-18.md).
+
+Não concluir que todos27bloqueios reais foram eliminados:21outros permanecem sem comprovação de correção. Lucas respondeu que os10`Fechado`aguardam o analista e que consultará o analista sobre a fonte dos fluxos de lançamento por tipologia. EstoqueMarechal283×192precisa do próximoJSONv2para investigar. Sem geração imobiliária autenticada, deploy, push ou escritaMonday. Próximo: enviar lote mediante autorização e conferirJSONv2da geração real.
+
+## 18/11/2026 — Maceió: retomada após JSON33/27/22
+
+Lucas pediu continuar os slides aguardando fonte e confirmou que os10produtos`Fechado`ainda aguardam o analista. Main inicialmente limpa,4commits atrás do origin único; fetch e pull--ff-only trouxeram Estimativas/Validação do Fechamento até`3db99200`, sem diff Maceió. Código desta continuação:`f537eab9`.
+
+Corrigido recorte pré-lançamento dos rankings, preservando fluxos explícitos e reconciliação; erros passam a identificar município/mês/campo/totais/delta. Auditoria v2 agrega estoque bruto/elegível e categorias, distingue nulo/ausente/inválido/zero e conserva privacidade.175testes Maceió, lint/build/tipos e4cenários Edge com fonte sintética aprovados. Padrão de geração/BrainLoadingState/worker/cancelamento existente preservado, sem mudança React ou coleta adicional. Fonte real não reconsultada por ausência de token/payload individual; não afirmar27slides liberados nem atribuir91unidades aGarden. [Evidências e próximos passos](../../features/relatorios-institucionais/maceio/VALIDACAO_DADOS_REAIS_2026-11-17.md). Próximo: envio autorizado e novo JSONv2. Sem push/deploy ou escrita Monday nesta continuação.
+
+## 18/11/2026 — Maceió: exclusão de chácaras, INCC-DI e lista Fechado
+
+Máquina de Lucas, Codex; abertura na `main` limpa, origin único, `git fetch --all` e comparação 0/0 na base `bd994c2c`. Fetch precisou de execução aprovada fora do sandbox para escrever FETCH_HEAD. Node24.19.0/dependências disponíveis; preflight offline rodado, cujo subprocesso Git não conseguiu ler o repo no sandbox (checagens Git diretas passaram). Sem token Geobrain exposto nas variáveis; Drive/Lovable/API real não testados nesta sessão.
+
+Lucas informou confirmação do analista: chácaras fora do estudo e INCC-DI correto; solicitou nomes dos empreendimentos apenas `Fechado`. Implementação `38700781`: filtro em todas as tabelas horizontais, reconciliação bruta preservada, CSV identificado separado do JSON agregado no worker existente. “Fechado” continua pendente de classificação. Padrões reutilizados: Button/BrainLoadingState, processamento cancelável no worker, invalidado por geração/seleção. Testes, lint/tipos/build e12cenários no Edge com fonte sintética aprovados; [evidências e limites](../../features/relatorios-institucionais/maceio/VALIDACAO_DADOS_REAIS_2026-11-17.md). Lucas autorizou push nesta sessão e fará nova geração para enviar JSON/CSV. Não declarar deploy ou dados reais homologados; CAGED/políticas Secovi/FIERGS/SP/Fortaleza preservados, sem escrita Monday.
+
 ## 17/11/2026 — Maceió:19bloqueios imobiliários após geração real
 
 Diagnóstico(4):35disponíveis/25fontes/22editoriais,63consultas completas; lote `d2371881` liberou23slides. Nesta continuação, corrigidos recorte de projetos futuros nos rankings, lançamentos por quantidade histórica exclusivamente no mês de lançamento com reconciliação municipal mensal e detalhamento numérico da divergência de estoque. Lucas autorizou Fechado→Loteamento Fechado e categoria própria Chácaras para conferência posterior com o analista; demais produtos ambíguos não foram classificados.

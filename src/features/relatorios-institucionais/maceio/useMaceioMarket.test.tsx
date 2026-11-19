@@ -78,6 +78,17 @@ describe('useMaceioMarket', () => {
     expect(result.current.state?.report?.metrics).toBeTruthy();expect(result.current.state?.hasFailedCities).toBe(true);expect(result.current.state?.steps.find(step=>step.id==='caged')?.status).toBe('attention');
     await act(async()=>{await result.current.consult(true);});expect(cagedCollect).toHaveBeenCalledTimes(2);expect(result.current.state?.steps.find(step=>step.id==='caged')?.status).toBe('done');
   });
+  it('cópia verificada mantém os seis slides calculáveis e sinaliza transporte degradado com retry',async()=>{
+    collect.mockResolvedValue(successPayload());cagedCollect.mockResolvedValueOnce({report:cagedFixture(),issue:null,delivery:{kind:'verified-snapshot',verifiedAt:'2026-11-18'},failure:{code:'PROXY_UPSTREAM',httpStatus:502}});
+    const {result}=renderHook(()=>useMaceioMarket(selection,cities,token,true));
+    await act(async()=>{await result.current.consult();});
+    expect(result.current.state?.intro?.caged?.report).toBeTruthy();
+    expect(result.current.state?.message).toMatch(/cópia verificada/);
+    expect(result.current.state?.steps.find(step=>step.id==='caged')?.status).toBe('attention');
+    expect(result.current.state?.hasFailedCities).toBe(true);
+    await act(async()=>{await result.current.consult(true);});
+    expect(cagedCollect).toHaveBeenCalledTimes(2);expect(result.current.state?.steps.find(step=>step.id==='caged')?.status).toBe('done');
+  });
   it('cancelamento enquanto CAGED responde impede publicar a resposta atrasada',async()=>{
     collect.mockResolvedValue(successPayload());let finish:(value:Awaited<ReturnType<typeof collectMaceioCaged>>)=>void;
     cagedCollect.mockImplementationOnce(async()=>new Promise(resolve=>{finish=resolve;}));

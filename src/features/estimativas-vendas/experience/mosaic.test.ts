@@ -20,10 +20,10 @@ describe('resumos do mosaico', () => {
     const [tile] = await buildTiles(data, ['1'], { cutoff: 'latest', duration: 12, methods: ALL_METHODS });
     expect(tile.finotti).toBe(false); expect(tile.sales).toBeNull(); expect(tile.forecast).toEqual([]);
   });
-  it('mantém datas próprias e bloqueia uso anterior à referência congelada', async () => {
+  it('mantém datas próprias e aceita início dentro da calibração a partir de 01/2026', async () => {
     const data = fixture(); data.buildings[0].typologies_history.pop();
     const [tile] = await buildTiles(data, ['1'], { cutoff: 'latest', duration: 6, methods: ALL_METHODS });
-    expect(tile.cutoff).toBe('2026-07'); expect(tile.finotti).toBe(false);
+    expect(tile.cutoff).toBe('2026-07'); expect(tile.finotti).toBe(true);
   });
   it('ordena sem alterar a entrada e deixa valores ausentes no final', () => {
     const rows = [{ id: '2', name: 'B' }, { id: '1', name: 'A' }, { id: '3', name: 'C' }];

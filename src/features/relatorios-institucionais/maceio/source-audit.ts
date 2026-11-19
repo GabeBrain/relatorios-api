@@ -1,7 +1,6 @@
 import { marketMonth, normalizeMarketText, type MarketRow } from './market';
 import type { SlideSource } from './market-slides-data';
 import { maceioHorizontalProduct } from './classification';
-import { maceioHistoricalLaunch } from './historical-launch';
 
 const label = (value: unknown) => typeof value === 'string' || typeof value === 'number' ? String(value).trim().slice(0, 100) || '(não informado)' : '(não informado)';
 const countLabels = (values: unknown[]) => {
@@ -60,11 +59,18 @@ export function auditMaceioSource(source: SlideSource, expectedMonths: string[])
         missingArea: rows.filter(row => numeric(row.private_area) === null).length,
         eligibility: { observations:eligible.length,stock:measure(eligible.map(item=>item.row.typology_stock)),
           sales:measure(eligible.map(item=>item.row.sold_in_period)),
-          launches:measure(eligible.map(item=>maceioHistoricalLaunch(item.row,item.release,month))),
+          launches:measure(eligible.map(item=>item.row.releases_in_period)),
           excludedFutureOrInvalidReleaseStock:measure((futureByMonth.get(month)??[]).map(row=>row.typology_stock)),
           byStandard:groups(item=>item.row.pattern??item.building.standard),byTypologyKind:groups(item=>item.kind),
           byProduct:groups(item=>normalizeMarketText(item.building.building_type)==='horizontal'?maceioHorizontalProduct(item.building)||'(não identificado)':'(não aplicável)'),
-        } } : {}) };
+        },
+
+        fieldAvailability: Object.fromEntries(['typology_stock', 'qty', 'sold_in_period', 'releases_in_period', 'private_area', 'price'].map(field => [field, {
+          absent: rows.filter(row => !Object.prototype.hasOwnProperty.call(row, field)).length,
+          nullOrBlank: rows.filter(row => Object.prototype.hasOwnProperty.call(row, field) && (row[field] == null || typeof row[field] === 'string' && !String(row[field]).trim())).length,
+          invalid: rows.filter(row => row[field] != null && String(row[field]).trim() && numeric(row[field]) === null).length,
+          zero: rows.filter(row => numeric(row[field]) === 0).length,
+        }])) } : {}) };
   });
   return {
     observedGroups: detailed ? [] : countLabels(source.rows.map(row => row.group)),

@@ -12,7 +12,7 @@ describe('evidência agregada de bloqueios das fontes', () => {
     expect(audit.monthly[0].stock.value).toBe(283);
     expect(audit.monthly[0].eligibility?.stock.value).toBe(192);
     expect(audit.monthly[0].eligibility?.excludedFutureOrInvalidReleaseStock.value).toBe(91);
-    expect(audit.monthly[0].eligibility?.launches.value).toBe(200);
+    expect(audit.monthly[0].eligibility?.launches.value).toBeNull();
     expect(audit.monthly[0].eligibility?.byTypologyKind[0].value).toBe('Garden');
     expect(JSON.stringify(audit)).not.toContain('private-');
   });
@@ -47,6 +47,6 @@ describe('evidência agregada de bloqueios das fontes', () => {
     });
     expect(diagnostic.collection.vertical).toEqual({ requested: 1, completed: 1, failed: 0, emptyCompleted: 1 });
     expect(diagnostic.summary['source-pending']).toBeGreaterThan(0);
-    expect(diagnostic.auditVersion).toBe('maceio-source-audit-v1');
+    expect(diagnostic.auditVersion).toBe('maceio-source-audit-v2');
   });
 });

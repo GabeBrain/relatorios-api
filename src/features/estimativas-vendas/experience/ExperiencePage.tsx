@@ -38,7 +38,7 @@ export default function ExperiencePage() {
   const analysisOpened = useRef(false), deliveryContext = useRef<DeliveryFilters>({ ...DEFAULT_DELIVERY_FILTERS });
   function navigate(next: 'previsoes' | 'analise') {
     if (deliveryBusy) return;
-    if (next === 'analise' && !analysisOpened.current) { const initial = deliveryContext.current; setSpec({ cutoff: 'latest', duration: initial.duration, methods: ALL_METHODS }); setType(initial.type); setCity(initial.city); setSearch(initial.search); analysisOpened.current = true; }
+    if (next === 'analise' && !analysisOpened.current) { const initial = deliveryContext.current; setSpec({ cutoff: initial.start, duration: initial.duration, methods: ALL_METHODS }); setType(initial.type); setCity(initial.city); setSearch(initial.search); analysisOpened.current = true; }
     setSettingsOpen(false); setScreen(next);
   }
   const [inventoryDialog, setInventoryDialog] = useState<'others' | 'sold' | null>(null);

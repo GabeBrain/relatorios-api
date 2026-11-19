@@ -2,7 +2,7 @@ import { deliveryFixture } from './delivery.fixture';
 import { describe, expect, it } from 'vitest';
 import * as XLSX from 'xlsx';
 import { analyzeCase, buildingSpec, summarizeInventory } from './domain';
-import { buildDeliveryPlan, deliveryScope, deliverySpec, exportRequestKey, locationKey } from './deliveryScope';
+import { buildDeliveryPlan, deliveryScope, deliverySpec, deliveryStarts, exportRequestKey, locationKey } from './deliveryScope';
 import { forecastWorkbook } from './export';
 
 describe('contrato de entrega principal', () => {
@@ -11,7 +11,7 @@ describe('contrato de entrega principal', () => {
     const rows = [...inventory, { ...inventory[0], id: '003', stock: 0 }, { ...inventory[0], id: '004', type: 'Vertical' }];
     u.locations['003'] = u.locations['001']; u.locations['004'] = u.locations['001'];
     const available = { '001': ['finotti-reference' as const], '002': ['finotti-reference' as const], '003': ['finotti-reference' as const], '004': ['constant' as const] };
-    const filters = { city: 'all', type: 'all', search: '', duration: 12 };
+    const filters = { city: 'all', type: 'all', search: '', duration: 12, start: 'latest' };
     const all = deliveryScope(u, rows, available, filters);
     expect(all.ids).toEqual(['001', '002']); expect(all.sold.map(r => r.id)).toEqual(['003']); expect(all.others.map(r => r.id)).toEqual(['004']);
     expect(deliveryScope(u, rows, available, { ...filters, city: locationKey(u.locations['002']) }).ids).toEqual(['002']);
@@ -34,5 +34,34 @@ describe('contrato de entrega principal', () => {
     expect(() => buildDeliveryPlan(u, ['001'], [{ ...analyses[0], hash: 'other' }], spec)).toThrow(/desatualizados/);
     expect(exportRequestKey(u, ['001'], spec)).not.toBe(exportRequestKey(u, ['001'], deliverySpec(12)));
     expect(() => buildDeliveryPlan(u, ['002'], [{ ...analyses[1], stock: { ...analyses[1].stock, cases: [{ ...analyses[1].stock.cases[0], methods: { ...analyses[1].stock.cases[0].methods, 'finotti-reference': { ...analyses[1].stock.cases[0].methods['finotti-reference'], forecast: null } } }] } }], spec)).toThrow(/nenhum arquivo parcial/);
+  });
+  it('mês de início escolhido: só períodos com dados desde o treino, mesmo início para todos e comparação histórica nos meses já informados', async () => {
+    expect(deliveryStarts(['2025-12', '2026-01', '2026-10', '2026-08', '2026-09', '2026-10', 'x'])).toEqual(['2026-10', '2026-09', '2026-08', '2026-01']);
+    const u = deliveryFixture(), spec = deliverySpec(3, '2026-09');
+    u.buildings[0].typologies_history.push({ ...u.buildings[0].typologies_history[0], period: '2026-10', typology_stock: 140 });
+    const analysis = await analyzeCase(u, '001', buildingSpec(u, '001', spec));
+    expect(analysis.spec.cutoff).toBe('2026-09');
+    const plan = buildDeliveryPlan(u, ['001'], [analysis], spec);
+    expect(plan.forecasts.map(r => [r.inicio, r.mes, r.finalidade])).toEqual([['2026-09', '2026-10', 'comparacao_historica'], ['2026-09', '2026-11', 'projecao'], ['2026-09', '2026-12', 'projecao']]);
+    expect(plan.candidates.some(r => r['Mês de referência'] === '10/2026')).toBe(false);
+    // 002 não tem registro em 09/2026: fica sem referência, com motivo, em vez de usar outro mês.
+    const missing = await analyzeCase(u, '002', buildingSpec(u, '002', spec));
+    expect(missing.stock.cases[0].methods['finotti-reference'].forecast).toBeNull();
+    const early = deliverySpec(3, '2025-12');
+    expect(() => buildDeliveryPlan(u, ['001'], [{ ...analysis, spec: early }], early)).toThrow(/somente a referência aprovada/);
+    expect(exportRequestKey(u, ['001'], spec)).not.toBe(exportRequestKey(u, ['001'], deliverySpec(3)));
+  });
+  it('início entre 01/2026 e o treino gera previsão, avisa e não conta meses calibrados como precisão', async () => {
+    const u = deliveryFixture(), spec = deliverySpec(4, '2026-06');
+    const analysis = await analyzeCase(u, '001', buildingSpec(u, '001', spec));
+    const forecast = analysis.stock.cases[0].methods['finotti-reference'].forecast!;
+    expect(forecast).not.toBeNull();
+    expect(forecast.warnings.some(w => /calibração/.test(w))).toBe(true);
+    const plan = buildDeliveryPlan(u, ['001'], [analysis], spec);
+    expect(plan.forecasts.map(r => [r.mes, r.finalidade])).toEqual([['2026-07', 'comparacao_historica'], ['2026-08', 'comparacao_historica'], ['2026-09', 'comparacao_historica'], ['2026-10', 'projecao']]);
+    const finotti = analysis.stock.trials.filter(t => t.method === 'finotti-reference');
+    expect(finotti.filter(t => t.targetMonth <= '2026-09').every(t => t.error === null && /calibração/.test(t.reason))).toBe(true);
+    const before = await analyzeCase(u, '001', buildingSpec(u, '001', deliverySpec(4, '2025-12')));
+    expect(before.stock.cases[0].methods['finotti-reference'].forecast).toBeNull();
   });
 });

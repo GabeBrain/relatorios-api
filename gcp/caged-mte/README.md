@@ -1,6 +1,8 @@
 # CAGED MTE — importação e ponte de agregados
 
-Implementação local da fonte MTE para Maceió 9–14. **Não implantada.** Sem chaves de serviço no Lovable, sem SQL do navegador e sem cópia de microdados no Supabase. A conta conectada ao plugin BigQuery não comprova a identidade de workload do Cloud Run.
+Implementação da fonte MTE para Maceió 9–14. **Estado observado em 18/11/2026:** a tabela `project-d1ce8c6e-941c-4b31-8fd.rebrain_caged.caged_mte_snapshots` está carregada de janeiro/2017 a setembro/2026, com 23.751 agregados e versão `8866c0278dfb8cc661f0a7b19055d796f783101a995f87f0c528f7cab6c506dc`. Acesso online do aplicativo à ponte/Edge ainda não foi confirmado; não tratar os passos de preparação histórica abaixo como estado atual dessa carga. [Conferência real e contingência identificada no frontend](../../docs/features/relatorios-institucionais/maceio/CAGED_CONTINGENCIA_2026-11-18.md).
+
+Sem chaves de serviço no Lovable, sem SQL do navegador e sem cópia de microdados no Supabase. A conta conectada ao plugin BigQuery não comprova a identidade de workload do Cloud Run. Nenhum deploy de serviço foi executado pelo agente nesta conferência.
 
 ## Fluxo e contratos
 

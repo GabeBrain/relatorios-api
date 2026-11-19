@@ -49,13 +49,13 @@ describe('experiência: rigor temporal e exportação do conjunto', () => {
     expect(available['001']).toContain('finotti-reference'); expect(available['002']).toEqual([]);
     expect((await analyzeCase(data, '001', spec)).stock.trials.every(t => t.provenance === 'unknown')).toBe(true);
   });
-  it('mantém referência e política explícita; passado anterior ao treino fica bloqueado', async () => {
+  it('mantém referência e política explícita; início na calibração avisa e não conta como precisão', async () => {
     const data = dataset(); const a = await analyzeCase(data, '001', spec);
     expect(present(a).method).toBe('finotti-reference');
     const old = await analyzeCase(data, '001', { ...spec, cutoff: '2026-06' });
-    expect(old.stock.cases[0].methods['finotti-reference'].forecast).toBeNull();
-    expect(present(old).method).toBe('stock-trend');
-    expect(old.stock.trials.some(t => t.error !== null)).toBe(true);
+    expect(old.stock.cases[0].methods['finotti-reference'].forecast?.warnings.some(w => /calibração/.test(w))).toBe(true);
+    expect(old.stock.trials.filter(t => t.method === 'finotti-reference' && t.targetMonth <= '2026-09').every(t => t.error === null)).toBe(true);
+    expect(old.stock.trials.some(t => t.method !== 'finotti-reference' && t.error !== null)).toBe(true);
   });
   it('mudanças futuras não alteram previsão e ausência não vira zero', async () => {
     const a = dataset(), b = dataset(); b.buildings[0].typologies_history.at(-1)!.typology_stock = null;

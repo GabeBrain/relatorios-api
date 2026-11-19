@@ -72,8 +72,9 @@ describe('retrospectiva e alvos', () => {
     expect([recent.predicted, recent.actual, recent.error]).toEqual([30, 45, -15]);
     expect(constant.provenance).toBe('unknown');
     expect(constant.matched).toBe(true); expect(recent.matched).toBe(true);
-    expect(out.trials.find(t => t.method === 'finotti-reference')).toMatchObject({ predicted: null, error: null, matched: false });
-    expect(out.trials.find(t => t.method === 'finotti-reference')!.reason).toContain('setembro/2026');
+    // Início em 06/2026 gera previsão, mas o alvo cai na calibração (até 09/2026): sem erro de precisão.
+    expect(out.trials.find(t => t.method === 'finotti-reference')).toMatchObject({ error: null, matched: false });
+    expect(out.trials.find(t => t.method === 'finotti-reference')!.reason).toContain('calibração');
   });
   it('alterar futuro muda o alvo, nunca a previsão ou a condição passada', async () => {
     const original = building(), changed = building(); changed.typologies_history.at(-1)!.typology_stock = 20;

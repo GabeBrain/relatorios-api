@@ -18,7 +18,7 @@ describe('Maceió: classificações confirmadas e fontes independentes', () => {
     expect(maceioHorizontalProduct({work:'Condomínio de Casas/Sobrados',standard:'Econômico'})).toBe('Condomínio de Casas');
     expect(maceioHorizontalProduct({work:'Loteamento Aberto'})).toBe('Loteamento Aberto');
     expect(maceioHorizontalProduct({standard:'Loteamento Fechado'})).toBe('Loteamento Fechado');
-    expect(maceioHorizontalProduct({work:'Fechado',standard:'Econômico'})).toBe('Loteamento Fechado');
+    expect(maceioHorizontalProduct({work:'Fechado',standard:'Econômico'})).toBe('');
     expect(maceioHorizontalProduct({work:'Condomínio de Chácaras'})).toBe('Condomínio de Chácaras');
     expect(maceioHorizontalProduct({standard:'Econômico'})).toBe('');
   });

@@ -7,6 +7,7 @@ import { buildRemainingSlide } from './remaining-data';
 import { buildCagedSlide } from './caged';
 import { maceioMonetaryPolicy } from './criteria';
 import { auditMaceioSource } from './source-audit';
+import { auditMaceioStock } from './stock-audit';
 
 export type DiagnosticGeneration = Pick<MaceioGenerationState, 'phase' | 'startedAt' | 'finishedAt' | 'blueprint' | 'report' | 'intro'>;
 type Status = 'available' | 'source-pending' | 'method-pending' | 'editorial-review' | 'not-implemented';
@@ -59,19 +60,27 @@ export function buildMaceioDiagnostic(selection: MaceioSelection, state: Diagnos
     period: maceioPeriod(selection), cities: [...maceioCities(selection.periodicity)],
     reference: { file: reference.file, sourceId: reference.sourceId, slideCount: reference.slideCount },
     homologated: false,
-    auditVersion: 'maceio-source-audit-v1',
+    auditVersion: 'maceio-source-audit-v2',
     collection: { vertical: collectionStatus(sources?.sources), horizontal: collectionStatus(sources?.horizontal), commercial: collectionStatus(sources?.commercial) },
     criteria: { prices: 'stock-weighted', monetaryIndex: maceioMonetaryPolicy(selection), monetaryBase: maceioPeriod(selection).end.slice(0, 7),
+      horizontalUniverse: { excluded: ['Condomínio de Chácaras'], confirmedBy: 'Lucas, com confirmação do analista em 18/11/2026', reconciliation: 'full-source-before-exclusion', ambiguousClosed: '10 scoped project exceptions = Condomínio de Casas, confirmed by Lucas on 19/11/2026; other Fechado remain pending' },
       emptyPeriods: 'completed-scoped-scan-as-zero; failed scans and missing numeric fields remain unavailable',
-      launchesByTypology: 'explicit monthly flow; otherwise historical qty only in project launch month; monthly municipal reconciliation required',
-      horizontalClassification: 'Fechado = Loteamento Fechado; Condomínio de Chácaras kept separate for analyst review; price standards alone do not identify product',
+      launchesByTypology: 'explicit monthly flow required; never derived from qty or stock; monthly municipal reconciliation required',
+      horizontalClassification: 'Fechado = Condomínio de Casas only for 10 identified ID/city/AL/Horizontal exceptions confirmed on 19/11/2026; Chácaras excluded; price standards alone do not identify product',
       patternGrouping: { Compacto:'Compactos', Econômico:'MCMV', Standard:'Médio Padrão', Médio:'Médio Padrão', 'Médio-Alto':'Médio Padrão', Alto:'Luxo', Luxo:'Luxo' } },
     summary: Object.fromEntries(statuses.map(status => [status, slides.filter(slide => slide.status === status).length])) as Record<Status, number>,
     slides,
+    stockReconciliation: {
+      vertical: auditMaceioStock(sources?.sources, maceioCities(selection.periodicity), maceioPeriod(selection).end.slice(0, 7)),
+      horizontal: auditMaceioStock(sources?.horizontal, maceioCities(selection.periodicity), maceioPeriod(selection).end.slice(0, 7)),
+      commercial: selection.periodicity === 'quarterly' ? auditMaceioStock(sources?.commercial, ['Maceió'], maceioPeriod(selection).end.slice(0, 7)) : [],
+    },
     sources: {
       vertical: metadata(sources?.sources), horizontal: metadata(sources?.horizontal, true), commercial: metadata(sources?.commercial, true),
       launches: intro?.cities.map(city => ({ city: city.city, unitsComplete: city.unitsComplete, buildingsComplete: city.buildingsComplete, issues: city.issues, failures: city.failures ?? [] })) ?? [],
-      caged: intro?.caged?.report ? { snapshotVersion: intro.caged.report.snapshotVersion, publishedThrough: intro.caged.report.publishedThrough, coverageStart: intro.caged.report.coverageStart } : null,
+      caged: intro?.caged ? { snapshotVersion: intro.caged.report?.snapshotVersion??null, publishedThrough: intro.caged.report?.publishedThrough??null, coverageStart: intro.caged.report?.coverageStart??null,
+        delivery: intro.caged.delivery?.kind??(intro.caged.report?'online':null), verifiedAt: intro.caged.delivery?.verifiedAt??null,
+        failure: intro.caged.failure?{code:intro.caged.failure.code,httpStatus:intro.caged.failure.httpStatus}:null } : null,
     },
     limits: ['Diagnóstico de conferência; não equivale à homologação.', 'Preços ponderados pelo estoque histórico; critério registrado para revisão do analista.', maceioMonetaryPolicy(selection) === 'INCC-DI' ? 'VGL/VGV corrigidos pelo INCC-DI até o mês de fechamento; série autorizada por Lucas em 17/11/2026.' : 'Valores corrigidos pelo INCC permanecem indisponíveis até a definição da série.'],
   };

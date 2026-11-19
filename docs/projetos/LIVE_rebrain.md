@@ -1,5 +1,33 @@
 # Rebrain (Plataforma) — Documento Vivo
 
+## 19/11/2026 — Maceió: conciliação autorizada e dez Fechado como casas — Codex/Lucas
+
+- **Sessão:** merge já interrompido;1commit local `48c3a6d1` e13remotos até `12d4f40a`. Lucas autorizou resolver os seis conflitos sem push. Históricos dos dois lados preservados por identidade de três pontos; regras posteriores de18/11prevalecem. Mantidas auditorias complementares e reconciliação mensal; removido fallback local de lançamento por capacidade, incompatível com a decisão posterior de exigir fluxo explícito.
+- **Nova decisão de Lucas:** somente os10IDs/municípios de [D21](../features/relatorios-institucionais/maceio/DECISOES.md), comAL/Horizontal e rótuloFechado, passam aCondomínio de Casas. Mensal/trimestral, totais/preços e CSV de conferência usam a mesma regra; demaisFechado continuam pendentes. Chácaras continuam excluídas, conforme18/11. Não altera números nem contorna reconciliação.
+- **Evoluções remotas preservadas:** exclusão/listaFechado `38700781`, auditoria v2 `f537eab9`, contingência CAGED real verificada `e67ac127` e documentação `12d4f40a`; carga2017-01a2026-09verificada noBigQuery, sem declarar rota online recuperada ou homologação. Também preservadas Estimativas/Validação/AELO recebidas do remoto.
+- **Validação/etapas:**200testes/18arquivos Maceió,51regressões Estimativas/Validação do Fechamento, tipos/lint e build aprovados. Exceções cobrem cada parID/município, escopos incorretos e totais/preços/CSV nas duas edições. Sem geração autenticada real nesta sessão; confirmação dos demais slides exige novo diagnóstico. Visual/carregamento existentes preservados.
+- **CAGED conferido hoje:** SELECTsBigQuery confirmam versão existente,117meses/23.751células sem duplicatas, grades completas e somas porUF/setor/Brasil reconciliadas. Rota online e automação não foram confirmadas. [Conferência19/11](../features/relatorios-institucionais/maceio/CAGED_CONTINGENCIA_2026-11-18.md).
+- **Pendências:** estoque deMarechal e campos/fluxos ausentes continuam em conferência; nenhum zero ou classificação extra presumido. [Evidências](../features/relatorios-institucionais/maceio/VALIDACAO_DADOS_REAIS_2026-11-17.md). Sem push/deploy/Monday, conforme solicitado.
+- **Monday:** [Panorama Maceió / SINDUSCON](https://brain381753.monday.com/boards/18398638577/pulses/13149406169) — `13149406169`.
+
+## 18/11/2026 — Estimativas de vendas: início da previsão a partir de 01/2026 — Diego / Claude
+
+- **Pedido:** Diego pediu liberar inícios a partir de 01/2026 no filtro "Começar a previsão em" (entrada anterior limitava a 09/2026, fim da calibração Finotti).
+- **Entrega:** `REFERENCE_EARLIEST_START = '2026-01'` e `REFERENCE_TRAINED_THROUGH = '2026-09'` em `expanded/referenceModels.ts`. A referência agora projeta de inícios ≥ 01/2026 (antes ≥ 09/2026) e, entre 01 e 08/2026, inclui aviso de que o início está dentro da calibração. Isso vale também para Análise detalhada, mapa e comparação, que usam o mesmo motor.
+- **Proteção mantida:** comparações da referência com meses ≤ 09/2026 deixam de contar como erro/precisão (`error` nulo, motivo "Mês usado na calibração") em `scientific/study.ts`; a retrospectiva independente da bancada (`expanded/evaluation.ts`) continua bloqueando a referência antes de 09/2026. A tela da entrega avisa que a comparação com meses informados até 09/2026 não mede precisão.
+- **Decisão alterada:** a regra "bloquear Finotti congelado para datas anteriores ao treinamento" do [plano do fluxo essencial](../features/estimativas-vendas/PLANO_FLUXO_ESSENCIAL_V1_2026-10-28.md) passa a valer só para medição de precisão; a projeção aceita 01/2026. Gabriel, responsável pela feature, deve ser informado.
+- **Validação:** 131 testes de `estimativas-vendas` (quatro testes da trava antiga reescritos para a nova fronteira, um novo de início na calibração), typecheck e ESLint aprovados. `ExperiencePage.test.tsx` exigiu `--testTimeout=60000` nesta máquina (lentidão, passa sem alteração). Sem token Geobrain: tela não verificada no navegador.
+- **Monday:** [Cálculo das estimativas da cidade pelo IVV](https://brain381753.monday.com/boards/18398428946/pulses/13096757074) — `13096757074` (referência, sem escrita).
+
+## 18/11/2026 — Estimativas de vendas: filtro de mês de início da previsão — Diego / Claude
+
+- **Pedido:** Diego pediu um filtro para o usuário escolher a partir de qual período a estimativa é feita. Confirmado: controla o mês de início da previsão (não lançamento nem janela de histórico).
+- **Entrega:** aba Previsões ganha "Começar a previsão em": "Último dado de cada empreendimento" (padrão, comportamento anterior) ou um mês com dados no universo carregado, somente a partir de 09/2026 (`REFERENCE_FIRST_START`), porque a referência Finotti foi treinada até essa data e já bloqueia inícios anteriores. Mês fixo vale para todos: sem registro nesse mês, o empreendimento vai para "Sem referência" com motivo, sem trocar de mês. Meses já informados saem no arquivo como `comparacao_historica` e sem linha candidata, regra de exportação já existente. Trocar o início reclassifica o universo localmente, sem nova consulta à API; a Análise detalhada abre no mesmo início. `buildDeliveryPlan` aceita `latest` ou mês ≥ 09/2026.
+- **Decisão alterada:** o [plano do fluxo essencial](../features/estimativas-vendas/PLANO_FLUXO_ESSENCIAL_V1_2026-10-28.md) fixava a entrega no último período de cada empreendimento; agora isso é o padrão, não a única opção. Nenhum parâmetro temporal antes da carga continua valendo. Gabriel, responsável pela feature, deve ser informado.
+- **Validação:** 40 testes de `estimativas-vendas/experience` (novo caso de início fixo, comparação histórica, ausência no mês e bloqueio < 09/2026), typecheck e ESLint aprovados. Sem token Geobrain nesta sessão: carregamento real e troca de mês na tela não foram verificados no navegador.
+- **Etapas/Pendências:** conferir após publicação numa cidade real, inclusive cadência trimestral. Inícios anteriores a 09/2026 dependem de modelo independente do treino Finotti. Sem Monday nesta entrega.
+- **Monday:** [Cálculo das estimativas da cidade pelo IVV](https://brain381753.monday.com/boards/18398428946/pulses/13096757074) — `13096757074` (referência, sem escrita).
+
 ## 17/11/2026 — Maceió: rankings, fluxo de lançamentos e produtos horizontais — Codex
 
 - **Evidência:** diagnóstico real(4):35disponíveis/25fontes/22editoriais;23slides liberados após `d2371881`,19imobiliários ainda bloqueados. CAGED fora do lote; base main/origin0/0após fetch.
@@ -8,7 +36,6 @@
 - **Validação/etapas:**160testes/15arquivos, tipos/lint e build aprovados; auditoria/diagnóstico finais reconferidos em8testes. Sem token/acessoOpera para geração autenticada; dados reais precisam de novo JSON após publicação. [Investigação](../features/relatorios-institucionais/maceio/VALIDACAO_DADOS_REAIS_2026-11-17.md). Visual existente preservado, CAGED/SP intocados.
 - **Pendências:** localizar diferença elegível de Marechal, conferir fluxos e produtos remanescentes; não excluir unidades/ajustar saldos para liberar slides. Não declarar19slides resolvidos. Sem push/deploy/Monday neste lote.
 - **Monday:** [Panorama Maceió / SINDUSCON](https://brain381753.monday.com/boards/18398638577/pulses/13149406169) — `13149406169`.
-
 ## 17/11/2026 — Maceió: classificações, varreduras vazias e IVV histórico — Codex
 
 - **Pedido/evidência:** diagnóstico mensal(3) com12disponíveis/48fontes/22editoriais;63consultas imobiliárias completas. Lucas pediu corrigir os42bloqueios imobiliários, mantendo6CAGED fora. Base `1c63413f`, main/origin0/0após fetch.
@@ -702,6 +729,46 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 ---
 
 ## 1. Desenvolvimentos
+
+### 2026-11-18 — Maceió: contingência CAGED com agregados reais — Lucas / Codex
+
+- **Ambiente/funcionalidade:** `/rebrain/relatorios-institucionais/maceio` — fontes dos slides de emprego9–14, mensal/trimestral.
+- **Fonte/evidência:** BigQuery confirmou carga2017-01a2026-09,23.751agregados/117meses, versão`8866c027…506dc`. Todas as gradesUF×setor reconciliadas, maio/junho conferidos porSELECTindependente; sem microdados, credenciais ou escrita remota.
+- **Entrega:** online prioritário; em transporte/5xx/404 usa cópia real verificada importada sob demanda, identificada na interface/JSON e fora da arte. Não contorna401/403/429ou resposta200inválida, não inventa meses. EtapaCAGED em atenção/retry disponíveis. Origem/falha sanitizada no diagnóstico; serviço backend não declarado reparado.
+- **Commits:** `e67ac127`(código); documentação neste fechamento. Preservados os dois commits anteriores locais`f537eab9`/`3178df90`.
+- **Validação:**186testesMaceió/17arquivos,4Edge/3ponteHMAC, lint/tipos/build aprovados;12cenários Edge e4capturas comCAGEDreal/APIimobiliária sintética, downloadJSON e saldos conferidos. Padrões existentes deBrainLoadingState, cancelamento/retry, origem eworker preservados. [Proveniência, decisão e limites](../features/relatorios-institucionais/maceio/CAGED_CONTINGENCIA_2026-11-18.md).
+- **Impacto em Etapas/Pendências:** seisCAGED calculáveis localmente com fonte real. Os21outros bloqueios do últimoJSONnão foram declarados resolvidos:11estoqueMarechal,4fluxos e6tipologias. Lucas aguarda o analista para10`Fechado`e consultará fonte dos lançamentos por tipologia. NovoJSONv2e conferência imobiliária real ainda necessários; navegador pessoal/token indisponíveis. Sem push/deploy/Monday nesta continuação.
+- **Monday:** [Panorama Maceió / SINDUSCON](https://brain381753.monday.com/boards/18398638577/pulses/13149406169) — `13149406169`.
+
+### 2026-11-18 — Maceió: rankings e causas dos slides pendentes — Lucas / Codex
+
+- **Ambiente/funcionalidade:** `/rebrain/relatorios-institucionais/maceio` — mensal/trimestral, rankings e diagnóstico.
+- **Evidência:** JSON real33disponíveis/27fontes/22editoriais,63fontes imobiliárias concluídas; Marechal Deodoro283estoque detalhado×192municipal.10produtos`Fechado`ainda aguardam confirmação do analista, segundo Lucas nesta sessão.
+- **Entrega:** rankings respeitam a data explícita de lançamento ao exigir fluxos, bloqueando valores contraditórios pré-lançamento; ausências em meses válidos continuam bloqueadas. Erros de estoque/IVV/ranking identificam campo/mês/totais/delta. Auditoria v2 separa estoque bruto/elegível e categorias para localizar diferenças, e propriedade ausente/nulo/inválido/zero. Sem inferir fluxos de capacidade ou relaxar reconciliação.
+- **Commits:** `f537eab9` (código); fechamento documental no commit desta entrada. Base`3db99200`após fetch e fast-forward de4commits remotos.
+- **Validação:**175testes Maceió/16arquivos, lint/tipos/build e4cenários Edge com fonte sintética aprovados, com download JSONv2 conferido. [Evidências e limites](../features/relatorios-institucionais/maceio/VALIDACAO_DADOS_REAIS_2026-11-17.md). Motor/carregamento/worker existentes preservados; shared/CAGED/outros relatórios sem diff.
+- **Impacto em Etapas/Pendências:** correção local e diagnóstico prontos; sem token/payload individual para reexecutar dados reais. Não afirmar liberação dos27slides. Após envio autorizado, obter JSONv2; classificação dos10`Fechado`, estoque Marechal, fluxos ausentes e CAGED permanecem pendentes. Sem push/deploy/Monday nesta continuação.
+- **Monday:** [Panorama Maceió / SINDUSCON](https://brain381753.monday.com/boards/18398638577/pulses/13149406169) — `13149406169`.
+
+### 2026-11-18 — Validação do Fechamento: estoque nas comparações Garden e Cobertura — Edgar / Codex
+
+- **Mudança:** as divergências de ticket Garden e Cobertura são verificadas somente quando a respectiva tipologia tem estoque positivo no último histórico validado. Comparação e ticket Padrão permanecem inalterados.
+- **Validação:** testes direcionados cobrem estoque zero, positivo e negativo para ambas as tipologias; sem consulta autenticada à API.
+- **Etapas/Pendências:** ajuste local; conferência com dados reais e publicação pendentes.
+- **Monday:** —
+### 2026-11-18 — Maceió: chácaras excluídas e lista Fechado — Lucas / Codex
+
+- **Ambiente/funcionalidade:** `/rebrain/relatorios-institucionais/maceio` — mensal/trimestral, horizontal e conferência cadastral.
+- **O quê/decisão:** Lucas confirmou com o analista exclusão de Condomínio de Chácara/Chácaras e uso de INCC-DI. Chácaras deixam os valores e rótulos de todos os quadros horizontais, incluindo preços/anos; reconciliação do estoque bruto preservada. INCC-DI já estava configurado para ambas as edições. Lista CSV dos empreendimentos só como `Fechado`, com nome/ID/município/campos, separada do diagnóstico JSON agregado; classificação não alterada. Usa a geração carregada, com indicação de parcial/vazio e descarte ao trocar geração.
+- **Commits:** `38700781` (implementação); fechamento documental no commit desta entrada. Base `bd994c2c`, main/origin0/0 após fetch.
+- **Validação:** 165 testes Maceió +2 casos adicionais de interface, 106 regressões Secovi/FIERGS, lint/tipos/build aprovados. 12 cenários Edge com fonte sintética e resposta lenta, desktop/claro e mobile/escuro; JSON/CSV baixados/reabertos. [Decisões, evidências e limites](../features/relatorios-institucionais/maceio/VALIDACAO_DADOS_REAIS_2026-11-17.md).
+- **Impacto em Etapas/Pendências:** regra de exclusão e lista implementadas; INCC-DI confirmado. Lucas autorizou push e fará nova geração autenticada para enviar JSON/CSV. Fonte real/deploy/homologação ainda não observados pelo agente; demais divergências/CAGED/exportação continuam separados. Sem escrita Monday.
+- **Monday:** [Panorama Maceió / SINDUSCON](https://brain381753.monday.com/boards/18398638577/pulses/13149406169) — `13149406169`.
+
+### 2026-11-18 — Valor da parcela por tipologia no AELO — Edgar / Codex
+- **Ambiente/funcionalidade:** Relatório AELO — tabela e exportação Excel.
+- **O quê:** `Valor da parcela` passa a usar `typologies_history[].installment_value_typology` do último registro disponível da tipologia no período.
+- **Arquivos:** `src/pages/RelatorioAelo.tsx`.
 
 - **17/11/2026 · Gabriel (Claude Code):** CLAUDE.md da equipe enxugado para só importar o `AGENTS.md` (menos contexto por sessão). Regras que existiam só no CLAUDE.md foram movidas para o fim do AGENTS.md; nada removido. Aviso aos devs no topo do CLAUDE.md até 01/12/2026.
 
@@ -1943,6 +2010,12 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 
 ## 2. Etapas
 
+- **18/11 — Maceió, CAGED:** carga BigQuery2017–set/2026observada e seis modelosCAGED calculados com agregados reais(`e67ac127`), contingência identificada e online prioritário. Publicação e prova autenticada do aplicativo pendentes; ponte online ainda sem reparo observado. Não homologa os21bloqueios imobiliários do últimoJSON.
+
+- **18/11 — Maceió, JSON33/27/22:** recorte dos rankings e auditoria v2 implementados localmente(`f537eab9`),175testes/build e4cenários com fonte sintética aprovados. Nova geração autenticada necessária para medir liberação; não altera classificação dos10`Fechado`.
+
+- **18/11 — Maceió, confirmação do analista:** exclusão de chácaras em todos os quadros horizontais e CSV identificado de `Fechado` implementados (`38700781`); INCC-DI confirmado nas duas edições. Push autorizado por Lucas, nova geração real e homologação pendentes.
+
 - **17/11 — Maceió, runtime após publicação:** fontes coletadas no JSON real;55indicadores ainda bloqueados por validação, não por HTTP. Diagnóstico agregado de categorias/cobertura preparado localmente; conclusão das fontes não comprovada.
 
 - **17/11 — Maceió trimestral, fontes:** contratos corrigidos compartilhados e INCC-DI explícito aplicados;35testes e6cenários headless aprovados, apenas CAGED pendente no cenário imobiliário completo. Validação real depois da publicação ainda necessária.
@@ -2110,6 +2183,12 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 ---
 
 ## 3. Pendências
+
+- **18/11 — Maceió, fontes apósCAGED:** autorizar envio do lote local e gerarJSONv2. CAGED dispõe de contingência real identificada atéset/2026; reparar acesso online continua separado. InvestigarMarechal283×192pela auditoria v2, aguardar fonte dos lançamentos por tipologia e classificação dos10`Fechado`pelo analista. Lucas confirmou que fará essas consultas. Não usar a disponibilidade dos seisCAGED para concluir todos27bloqueios resolvidos.
+
+- **18/11 — Maceió, continuação local:** autorizar envio do recorte dos rankings/auditoria v2 e gerar novo JSON. Investigar estoque de Marechal283×192pelas partições de estoque e fluxos por campo/mês;10`Fechado`continuam com o analista. Os27bloqueios do JSON anterior não foram declarados resolvidos. CAGED continua frente separada.
+
+- **18/11 — Maceió, próxima evidência:** após atualização do ambiente, Lucas gerará relatório e enviará JSON e CSV `Fechado` pareados. Conferir exclusão de chácaras/totais e os empreendimentos ambíguos com o analista; não converter `Fechado` em loteamento automaticamente. INCC-DI está confirmado. Registros anteriores de chácaras como categoria do estudo são históricos e substituídos por esta decisão; auditoria bruta continua preservada.
 
 - **17/11 — Maceió, dados reais:** obter rótulos reais de tipologia/padrão/produto e cobertura mensal por diagnóstico agregado; confirmar universo antes de alterar guardas. Corrigir classificações e lacunas com evidência, preservando ausência e divergências. Série vazia em cidade não equivale automaticamente a zero. CAGED excluído.
 

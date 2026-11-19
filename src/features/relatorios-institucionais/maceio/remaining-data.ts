@@ -15,7 +15,7 @@ const standards=['Compacto','Econômico','Standard','Médio','Médio-Alto','Alto
 const rmStandards=['Compacto','Econômico','Standard','Médio','Alto','Luxo','Super Luxo'];
 const typologies=['1 Dormitório','2 Dormitórios','3 Dormitórios','4 ou + Dormitórios'];
 const families=['Compactos','MCMV','Médio Padrão','Luxo'];
-const types=['Condomínio de Casas','Loteamento Fechado','Loteamento Aberto','Condomínio de Chácaras'];
+const types=['Condomínio de Casas','Loteamento Fechado','Loteamento Aberto'];
 export function remainingRole(page:number,selection:MaceioSelection){
   if(selection.periodicity==='monthly')return ({61:'editorial',62:'years',63:'standards-combined',64:'bedrooms-combined',65:'area',66:'range',67:'stage-bedrooms',68:'stage-standards',69:'vgv',70:'editorial',71:'horizontal-type-capital',72:'horizontal-years-capital',73:'horizontal-prices-capital',74:'editorial',75:'horizontal-type-rm',76:'horizontal-years-rm',77:'horizontal-prices-rm'} as Record<number,string>)[page]??'editorial';
   return ({61:'years',62:'standards-capital',63:'standards-rm',64:'bedrooms-capital',65:'bedrooms-rm',66:'area',67:'range',68:'stage-bedrooms',69:'stage-standards',70:'vgv',71:'editorial',72:'horizontal-type-capital',73:'horizontal-years-capital',74:'horizontal-prices-capital',75:'editorial',76:'horizontal-type-rm',77:'horizontal-years-rm',78:'horizontal-prices-rm',79:'editorial',80:'commercial-type',81:'commercial-years',82:'commercial-prices'} as Record<number,string>)[page]??'editorial';
@@ -48,10 +48,14 @@ function details(data:MaceioMarketSlidesData,selection:MaceioSelection,cities:re
     const rows=municipal[0].rows.filter(row=>marketMonth(row.period)===end),groups=new Set<string>();
     const expected=sum(rows.map(row=>{const group=norm(row.group);if(norm(row.city)!==norm(city)||row.state!=='AL'||norm(row.building_type)!==norm(segment)||!group||/^(total|subtotal)(\b|$)/.test(group)||groups.has(group))throw new Error('Estoque municipal duplicado ou fora do universo.');groups.add(group);return number(row.stock);}));
     const actual=sum(result.filter(row=>row.city===city).map(row=>row.stock));
-    if(expected!==actual)throw new Error(`${city}: estoque granular diverge do total municipal ${segment} em ${end}: histórico ${actual}, municipal ${expected}, diferença ${actual-expected}.`);
+    if(expected!==actual)throw new Error(`${city}: estoque granular diverge do total municipal ${segment} em ${end} (${actual} versus ${expected}, diferença ${actual-expected}).`);
   }
-  const active=new Set(result.filter(row=>row.stock>0).map(row=>row.id));
-  return result.filter(row=>active.has(row.id));
+  // Reconcile the full source above before applying the analyst's report universe.
+  const eligible=result.filter(row=>segment!=='Horizontal'||row.type!=='Condomínio de Chácaras');
+  const active=new Set(eligible.filter(row=>row.stock>0).map(row=>row.id));
+  const selected=eligible.filter(row=>active.has(row.id));
+  if(segment==='Horizontal'&&selected.some(row=>!row.type))throw new Error('Categoria sem correspondência explícita: produto horizontal não informado.');
+  return selected;
 }
 function qty(row:Detail){const value=number(row.qty);if(value<row.stock)throw new Error('Capacidade histórica menor que o estoque.');return value;}
 function beds(row:Detail){const value=number(row.bedroom);if(value<1)throw new Error('Tipologia sem correspondência com1–4oumais dormitórios.');return Math.min(4,value)-1;}

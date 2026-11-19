@@ -4,17 +4,19 @@ import { BrainLoadingState } from '@/components/feedback/BrainLoadingState';
 import type { MaceioGenerationState } from './useMaceioMarket';
 import type { MaceioSelection } from './model';
 import type { buildMaceioDiagnostic,DiagnosticGeneration } from './diagnostic';
+import type { MaceioClosedReview } from './closed-review';
 type Snapshot=ReturnType<typeof buildMaceioDiagnostic>;
 export function MaceioDiagnosticExport({selection,state}:{selection:MaceioSelection;state:MaceioGenerationState}){
+  const [closedReview,setClosedReview]=useState<MaceioClosedReview|null>(null);
   const [snapshot,setSnapshot]=useState<Snapshot|null>(null),[loading,setLoading]=useState(false),[error,setError]=useState(false),[attempt,setAttempt]=useState(0),[startedAt,setStartedAt]=useState<number|null>(null),[cancelled,setCancelled]=useState(false);const running=useRef<Worker|null>(null);
   useEffect(()=>{
-    setSnapshot(null);setError(false);setCancelled(false);setLoading(state.phase==='done');
+    setSnapshot(null);setClosedReview(null);setError(false);setCancelled(false);setLoading(state.phase==='done');
     if(state.phase!=='done')return;
     let worker:Worker|undefined,active=true;setStartedAt(Date.now());
     try {
       worker=new Worker(new URL('./diagnostic.worker.ts',import.meta.url),{type:'module'});
       running.current=worker;
-      worker.onmessage=(event:MessageEvent<{type:string;snapshot?:Snapshot}>)=>{if(!active||running.current!==worker)return;setLoading(false);if(event.data.type==='ready'&&event.data.snapshot)setSnapshot(event.data.snapshot);else setError(true);worker?.terminate();running.current=null;};
+      worker.onmessage=(event:MessageEvent<{type:string;snapshot?:Snapshot;closedReview?:MaceioClosedReview}>)=>{if(!active||running.current!==worker)return;setLoading(false);if(event.data.type==='ready'&&event.data.snapshot){setSnapshot(event.data.snapshot);setClosedReview(event.data.closedReview??null);}else setError(true);worker?.terminate();running.current=null;};
       worker.onerror=()=>{if(!active||running.current!==worker)return;setLoading(false);setError(true);worker?.terminate();running.current=null;};
       const generation:DiagnosticGeneration={phase:state.phase,startedAt:state.startedAt,finishedAt:state.finishedAt,blueprint:state.blueprint,report:state.report,intro:state.intro};
       worker.postMessage({selection,generation});
@@ -28,5 +30,6 @@ export function MaceioDiagnosticExport({selection,state}:{selection:MaceioSelect
     {cancelled&&<p role="status">Diagnóstico cancelado.<Button variant="outline" className="ml-3" onClick={()=>setAttempt(value=>value+1)}>Preparar diagnóstico</Button></p>}
     {error&&<p role="alert" className="text-sm text-destructive">Não foi possível preparar o diagnóstico.<Button variant="outline" className="ml-3" onClick={()=>setAttempt(value=>value+1)}>Tentar diagnóstico novamente</Button></p>}
     {snapshot&&<><p className="text-sm">{snapshot.slides.length} slides · {snapshot.summary.available} com dados disponíveis · {snapshot.summary['source-pending']} aguardando fonte · {snapshot.summary['editorial-review']} para revisão editorial{snapshot.summary['method-pending'] ? ` · ${snapshot.summary['method-pending']} aguardando critério` : ''}{snapshot.summary['not-implemented']?` · ${snapshot.summary['not-implemented']} ainda não implementados`:''}.</p><Button variant="outline" onClick={download}>Baixar diagnóstico JSON</Button></>}
+    {closedReview&&<div className="space-y-2 border-t pt-3"><p className="text-sm font-medium">Conferência de empreendimentos com produto “Fechado”</p><p className="text-sm text-muted-foreground">{closedReview.count} empreendimento(s) sem produto explícito identificado. A lista inclui nome, ID e município para revisão do analista, sem alterar a classificação.</p>{!closedReview.complete&&<p role="status" className="text-sm text-destructive">Lista parcial. Coleta horizontal pendente em: {closedReview.missingCities.join(', ')}.</p>}{closedReview.complete&&closedReview.count===0&&<p role="status" className="text-sm text-muted-foreground">Nenhum empreendimento classificado apenas como “Fechado” na coleta deste período.</p>}<Button variant="outline" disabled={!closedReview.count} onClick={()=>{const url=URL.createObjectURL(new Blob([closedReview.csv],{type:'text/csv;charset=utf-8'})),link=document.createElement('a');link.href=url;link.download=`maceio-${selection.periodicity}-${selection.year}-${selection.position}-fechado-conferencia.csv`;link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}}>Baixar lista “Fechado” (CSV)</Button></div>}
   </section>;
 }
