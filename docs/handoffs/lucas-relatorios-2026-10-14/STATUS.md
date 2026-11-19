@@ -1,5 +1,11 @@
 # Estado do handoff
 
+## 19/11/2026 — Ritmo de consulta Maceió, sem eliminar fontes
+
+Diagnóstico(7):63fontes imobiliárias falharam com429;54slides pendentes. Lucas direcionou manter as chamadas e reduzir somente o ritmo. Base `c0b39d94`, origin0/0após fetch, árvore limpa na abertura. Fila única em todos os coletores imobiliários (amostra, janela curta, introdução, vertical/horizontal/comercial): uma chamada ativa, intervalo2segundos após respostas. Sem novo cache ou alteração de consulta/cálculo; CAGED separado permanece intacto.
+
+429 respeita Retry-After; sem valor válido, espera60segundos. Após uma nova tentativa bloqueada, não envia o restante e informa limite persistente em vez de gerar54falsas pendências de fonte. Esperas canceláveis com BrainLoadingState existente.216testes/21arquivos e lint dirigidos aprovados; TypeScript e build de produção aprovados; check de documentos vivos aprovado. Sem geração autenticada para comprovar aderência à cota desconhecida ou verificação visual nesta sessão; teste headless comprova concorrência, intervalos, retomada,429persistente e cancelamento. Sem push/deploy/Monday.
+
 ## 19/11/2026 — Derivação autorizada dos lançamentos por tipologia
 
 Lucas autorizou oferta inicial histórica (`qty`) no mês de lançamento do empreendimento quando o fluxo explícito faltar, após revisão dos endpoints documentados. Base `00c3c9b9`, main limpa, origin0/0 após fetch. Ranking por bairro e IVV por área compartilham a regra; mantidos fluxos explícitos, reconciliação mensal municipal e balanços por área. Critérios/advertências identificam a derivação sem modificar a auditoria bruta. [D25](../../features/relatorios-institucionais/maceio/DECISOES.md) substitui a proibição anterior de D20 somente neste escopo autorizado.

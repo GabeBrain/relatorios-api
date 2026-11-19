@@ -1,5 +1,13 @@
 # Rebrain (Plataforma) — Documento Vivo
 
+## 19/11/2026 — Maceió: fila e pausa contra limite de consultas — Codex/Lucas
+
+- **Pedido:** após diagnóstico(7) com63fontes429e54pendências, Lucas pediu reduzir somente o ritmo, mantendo todas as consultas. Base `c0b39d94`, main limpa/origin0/0após fetch. [D26](../features/relatorios-institucionais/maceio/DECISOES.md).
+- **Entrega:** uma fila por geração compartilha os coletores imobiliários e suas páginas/tentativas, com uma chamada ativa e2segundos entre respostas e novas chamadas. Sem eliminar endpoints, amostras, páginas ou adicionar cache.429espera Retry-After válido ou60segundos; persistindo após a retentativa, interrompe chamadas restantes e exibe erro específico. Cancelamento/BrainLoadingState/tempo real existentes mantidos; CAGED e demais motores intocados.
+- **Validação/etapa:**216testes Maceió/21arquivos e lint dirigido aprovados, incluindo fila concorrente sem perda de consultas, espera/retomada,429persistente e cancelamento. TypeScript e build de produção aprovados; check de documentos vivos aprovado. Sem ensaio autenticado ou visual nesta sessão; verificações headless não provam a cota do provedor.
+- **Pendências:** publicar mediante autorização e repetir geração real; cadência conservadora não é garantia de cota conhecida. Divergência34unidades Marechal continua sem ajuste. Sem push/deploy/Monday.
+- **Monday:** [Panorama Maceió / SINDUSCON](https://brain381753.monday.com/boards/18398638577/pulses/13149406169) — `13149406169`.
+
 ## 19/11/2026 — Maceió: lançamentos por coorte histórica autorizados — Codex/Lucas
 
 - **Pedido/decisão:** Lucas autorizou combinar data de lançamento e oferta inicial histórica após revisão dos contratos da API; [D25](../features/relatorios-institucionais/maceio/DECISOES.md) supersede D20 neste escopo. Base `00c3c9b9`, main limpa e origin0/0 após fetch.

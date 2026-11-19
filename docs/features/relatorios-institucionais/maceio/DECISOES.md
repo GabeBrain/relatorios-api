@@ -2,6 +2,12 @@
 
 Registro de fatos comprovados, hipóteses e decisões. Atualizado a cada entrega.
 
+## 19/11/2026 — Ritmo de chamadas GeoBrain
+
+- **D26 — Lucas pediu somente diminuir o ritmo:** manter endpoints, paginação, amostras e consultas existentes, sem eliminar chamadas ou introduzir cache novo. Todos os coletores imobiliários da geração mensal/trimestral passam pela mesma fila: uma requisição ativa, intervalo de2segundos após cada resposta. O limite de aproximadamente30chamadas/minuto é uma escolha conservadora local, não uma cota confirmada do provedor.
+- HTTP429 pausa a fila pelo `Retry-After` válido (mínimo2segundos); sem cabeçalho válido,60segundos. Retenta uma vez após a pausa; persistindo429, não envia as consultas enfileiradas/seguintes e encerra a geração com mensagem específica. Cancelamento continua possível durante a espera, mantendo BrainLoadingState e tempo real existentes. Não há bypass de autenticação, fonte, escopo ou cálculo; CAGED e outros motores não foram alterados.
+- Evidência real: diagnóstico(7) teve63/63fontes imobiliárias bloqueadas por429 e54slides pendentes. Não comprova qual é a cota, sua janela ou chave (conta/token/IP). A nova cadência precisa ser conferida numa geração autenticada após publicação.
+
 ## 19/11/2026 — Lançamentos derivados da oferta inicial histórica
 
 - **D25 — Nova autorização de Lucas, posterior a D20:** após conferir os endpoints, Lucas autorizou combinar data de lançamento do empreendimento com `qty` (oferta inicial) da fotografia histórica da tipologia. Usado quando o fluxo explícito está ausente/nulo/vazio: no mês de lançamento entra a oferta inicial histórica; nas demais competências elegíveis entra zero. Fluxo explícito válido, inclusive zero, prevalece; valor explícito inválido não é substituído. Cadastro atual e diferença entre estoques não são usados.
