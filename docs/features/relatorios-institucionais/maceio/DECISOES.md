@@ -2,6 +2,11 @@
 
 Registro de fatos comprovados, hipóteses e decisões. Atualizado a cada entrega.
 
+## 19/11/2026 — CSV de todos os produtos horizontais não identificados
+
+- **D22 — Ampliação solicitada por Lucas:** após diagnóstico(5) mostrar produtos sem tipo identificado além dos dez Fechado confirmados, Lucas pediu adaptar o CSV para exportar esses empreendimentos também. A lista identificada agora inclui qualquer produto horizontal sem correspondência, inclusive Econômico/Standard/Médio sem tipo explícito e campos vazios, preservando os rótulos originais em seis colunas. Exporta referência, completude, município, ID, nome, motivo da conferência e lançamento. Continua separada do JSON agregado e usa a geração em memória, sem nova consulta.
+- Mantidos recorte AL/municípios/segmento, exclusão de lançamentos futuros, deduplicação, aviso de lista parcial, registros esgotados, proteção de fórmulas/aspas e exclusão de Chácaras/casos já classificados, inclusive D21. Não converte produto desconhecido nem muda cálculos. Botão passa a “Baixar produtos sem classificação (CSV)” e arquivo termina em `horizontal-conferencia.csv`, mensal/trimestral.
+
 ## 19/11/2026 — Dez produtos Fechado identificados como Condomínio de Casas
 
 - **D21 — Exceção por identificação, sem regra geral:** Lucas informou expressamente que somente os dez empreendimentos abaixo, identificados no relatório, devem converter o rótulo ambíguo `Fechado` para `Condomínio de Casas`. Aplicado aos dois modelos, exigindo ID e município correspondentes, UF AL e segmento Horizontal. Não depende do nome cadastral, que pode sofrer revisão. Produtos com categoria explícita continuam com ela; exclusão de Chácaras (D16) prevalece. Outros IDs, municípios e registros Fechado permanecem para conferência e no CSV de pendências.

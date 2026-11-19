@@ -10,6 +10,19 @@ describe('decisões do analista Maceió em 18/11/2026', () => {
   for (const periodicity of ['monthly', 'quarterly'] as const) {
     const selection: MaceioSelection = { uf: 'AL', city: 'Maceió', territory: 'capital-rm', periodicity, year: 2026, position: periodicity === 'monthly' ? 5 : 2 };
     const pages = periodicity === 'monthly' ? [71, 72, 73, 75, 76, 77] : [72, 73, 74, 76, 77, 78];
+    it(`exporta também padrão econômico e campos vazios, com rótulos originais e motivo / ${periodicity}`,()=>{
+      const data=remainingFixture(selection),rows=data.horizontal![0].rows;
+      delete rows[0].building_subtype;Object.assign(rows[0],{work:'Econômico',standard:'Econômico',name:'Projeto econômico',address:'segredo-endereco'});
+      delete rows[1].building_subtype;rows[1].standard='';rows[1].name='Projeto sem tipo';
+      const before=JSON.stringify(data),review=buildMaceioClosedReview(selection,data);
+      expect(review.count).toBe(2);expect(review.complete).toBe(true);
+      expect(review.csv).toContain('Projeto econômico');expect(review.csv).toContain('Projeto sem tipo');
+      expect(review.csv).toContain('Motivo da conferência');expect(review.csv).toContain('Campos de produto não informados');
+      expect(review.csv).toContain('Rótulos sem correspondência');expect(review.csv).toContain('"Econômico"');
+      for(const field of MACEIO_PRODUCT_FIELDS)expect(review.csv.split('\r\n')[0]).toContain(`"${field}"`);
+      expect(review.csv).not.toContain('segredo-endereco');expect(JSON.stringify(data)).toBe(before);
+      rows[0].work='=FORMULA()';expect(buildMaceioClosedReview(selection,data).csv).toContain('"\'=FORMULA()"');
+    });
     it(`exclui chácaras de todos os totais, preços e rótulos, preservando reconciliação bruta / ${periodicity}`, () => {
       const data = remainingFixture(selection);
       const before = pages.map(page => buildRemainingSlide(page, selection, data, 'stock-weighted'));

@@ -1,5 +1,13 @@
 # Rebrain (Plataforma) — Documento Vivo
 
+## 19/11/2026 — Maceió: CSV ampliado de produtos horizontais pendentes — Codex/Lucas
+
+- **Pedido/evidência:** diagnóstico real(5) com40disponíveis/20fontes/22editoriais; Lucas pediu adaptar oCSV para identificar também produtos sem categoria além deFechado. Base `500c476b`, main/origin0/0após fetch, árvore limpa.
+- **Entrega:** exporta todos os horizontais sem correspondência, inclusive rótulos econômicos e campos vazios, com nome/ID/município/motivo/seis campos originais de produto/data de lançamento. Mantidos escopo, lista parcial, deduplicação, esgotados, proteção CSV e exclusão de futuros/Chácaras/casos já classificados. Mensal/trimestral; botão “Baixar produtos sem classificação (CSV)”. [D22](../features/relatorios-institucionais/maceio/DECISOES.md).
+- **Validação/etapas:**33testes dirigidos, tipos, lint e build aprovados: lista ampliada e vazia/parcial, exceções confirmadas, privacidade doJSON e cancelamento/erro/troca de geração. Reutilizados Button/BrainLoadingState/worker existentes, sem novo fluxo ou consulta. Não houve ensaio autenticado de download nesta sessão; conferência headless sobre CSV produzido e DOM dos estados.
+- **Pendências:** publicar mediante autorização e obterCSV real para o analista;20slides continuam em conferência. Cálculos/classificações/CAGED não alterados. Sem push/deploy/Monday.
+- **Monday:** [Panorama Maceió / SINDUSCON](https://brain381753.monday.com/boards/18398638577/pulses/13149406169) — `13149406169`.
+
 ## 19/11/2026 — Maceió: conciliação autorizada e dez Fechado como casas — Codex/Lucas
 
 - **Sessão:** merge já interrompido;1commit local `48c3a6d1` e13remotos até `12d4f40a`. Lucas autorizou resolver os seis conflitos sem push. Históricos dos dois lados preservados por identidade de três pontos; regras posteriores de18/11prevalecem. Mantidas auditorias complementares e reconciliação mensal; removido fallback local de lançamento por capacidade, incompatível com a decisão posterior de exigir fluxo explícito.

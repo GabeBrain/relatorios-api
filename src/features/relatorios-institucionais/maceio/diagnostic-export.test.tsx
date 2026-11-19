@@ -18,15 +18,15 @@ describe('Maceio — preparo automático do diagnóstico',()=>{
     delete building.building_subtype;building.work='Fechado';building.standard='Econômico';data.horizontal![0].complete=false;
     act(()=>workers[0].ready(buildMaceioDiagnostic(selection,state),buildMaceioClosedReview(selection,data)));
     expect(screen.getByText(/Lista parcial/)).toBeTruthy();
-    expect(screen.getByRole('button',{name:'Baixar lista “Fechado” (CSV)'}).hasAttribute('disabled')).toBe(false);
+    expect(screen.getByRole('button',{name:'Baixar produtos sem classificação (CSV)'}).hasAttribute('disabled')).toBe(false);
     view.rerender(<MaceioDiagnosticExport selection={selection} state={{...state,phase:'loading'}}/>);
-    expect(screen.queryByRole('button',{name:'Baixar lista “Fechado” (CSV)'})).toBeNull();
+    expect(screen.queryByRole('button',{name:'Baixar produtos sem classificação (CSV)'})).toBeNull();
   });
   it('coleta completa sem ambíguos informa lista vazia e desabilita download',()=>{
     render(<MaceioDiagnosticExport selection={selection} state={state}/>);
     act(()=>workers[0].ready(buildMaceioDiagnostic(selection,state),buildMaceioClosedReview(selection,remainingFixture(selection))));
-    expect(screen.getByText(/Nenhum empreendimento classificado apenas/)).toBeTruthy();
-    expect(screen.getByRole('button',{name:'Baixar lista “Fechado” (CSV)'}).hasAttribute('disabled')).toBe(true);
+    expect(screen.getByText(/Nenhum empreendimento horizontal sem tipo/)).toBeTruthy();
+    expect(screen.getByRole('button',{name:'Baixar produtos sem classificação (CSV)'}).hasAttribute('disabled')).toBe(true);
   });
   it('inicia ao terminar, não envia a chave de sessão ao worker e disponibiliza o arquivo concluído',()=>{
     render(<MaceioDiagnosticExport selection={selection} state={state}/>);expect(workers).toHaveLength(1);expect(JSON.stringify(workers[0].postMessage.mock.calls)).not.toContain('confidential-token');expect(screen.getByText('Preparando diagnóstico JSON')).toBeTruthy();expect(screen.queryByRole('button',{name:'Baixar diagnóstico JSON'})).toBeNull();act(()=>workers[0].ready(buildMaceioDiagnostic(selection,state)));expect(screen.getByRole('button',{name:'Baixar diagnóstico JSON'})).toBeTruthy();

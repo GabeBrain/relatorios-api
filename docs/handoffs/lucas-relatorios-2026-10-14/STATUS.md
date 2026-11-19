@@ -1,5 +1,9 @@
 # Estado do handoff
 
+## 19/11/2026 — CSV ampliado de produtos horizontais pendentes
+
+Depois do push de `500c476b`, diagnóstico real(5) registra40disponíveis/20fontes/22editoriais; CAGED disponível por cópia verificada, online502. Lucas pediu **somente ampliar o CSV** para identificar os demais produtos horizontais sem categoria. Lista passa a incluir rótulos não correspondidos e campos vazios, com motivo e seis campos de produto daAPI, preservando nomes/IDs apenas noCSV solicitado. Classificados (incluindo dez exceções), Chácaras e futuros ficam fora. Mesma geração/worker/BrainLoadingState/estados existentes; sem mudança dos cálculos/fontes/CAGED.33testes dirigidos aprovados; publicação e geração autenticada ainda necessárias. Base `500c476b`, main/origin0/0após fetch, árvore limpa na abertura. Sem push/Monday.
+
 ## 19/11/2026 — Merge autorizado e dez Fechado confirmados como casas
 
 Abertura: origin único atualizado por fetch, main com1commit local desde17/11 (`48c3a6d1`) e13remotos até `12d4f40a`; merge já interrompido, seis conflitos. Lucas autorizou resolver sem push. Documentos somados com prova da identidade de três pontos, preservando os dois históricos. Regras mais recentes de18/11mantidas: exclusão de Chácaras, lançamentos explícitos sem fallback de capacidade e CAGED verificado; auditorias complementares preservadas.
