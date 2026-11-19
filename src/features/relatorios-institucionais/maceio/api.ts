@@ -16,6 +16,7 @@ export interface MaceioReadOptions {
   token: string;
   signal?: AbortSignal;
   onProgress?: (label: string) => void;
+  onUnitsProgress?: (completed:number,total:number)=>void;
   onStage?: (stage: 'validation' | 'sources' | 'reconciliation') => void;
   request?: MaceioRequest;
   sleep?: (ms: number, signal?: AbortSignal) => Promise<void>;
@@ -34,9 +35,10 @@ export async function collectMaceioMarket(selection: MaceioSelection, authorized
   const scopeKey = JSON.stringify({ cities: scope.cities, start: period.start, end: period.end, segment: 'Vertical' });
   options.onStage?.('sources');
   const reusable = previous?.scopeKey === scopeKey ? previous.collection.outcomes.filter(city => city.status === 'completed' && city.value && buildCityMarket(city.value, selection).status === 'complete') : [];
+  let completedCities=0;
   const collection = await collectByCity(scope.cities, async city => {
     const cached = reusable.find(value => value.city === city)?.value;
-    if (cached) { options.onProgress?.(`${city} · fontes já concluídas nesta tentativa preservadas`); return cached; }
+    if (cached) { options.onUnitsProgress?.(++completedCities,scope.cities.length); options.onProgress?.(`${city} · fontes já concluídas nesta tentativa preservadas`); return cached; }
     const input: CityMarketInput = { city, uf: 'AL', sampleConfirmed: false, releases: [], sales: [], stock: [], complete: { releases: false, sales: false, stock: false }, startedAt: new Date().toISOString(), finishedAt: '', requests: 0 };
     const read = async (path: string, query: Record<string, unknown>) => {
       const request = options.request ?? (requestOptions => httpRequest<MaceioEnvelope>(requestOptions));
@@ -99,7 +101,7 @@ export async function collectMaceioMarket(selection: MaceioSelection, authorized
     } catch (failure) {
       checkAbort(options.signal);
       throw failure instanceof MaceioReadError ? failure : new MaceioReadError('Não foi possível concluir as fontes deste município.');
-    }
+    } finally { options.onUnitsProgress?.(++completedCities,scope.cities.length); }
   }, { concurrency: 1, attempts: 1, signal: options.signal });
   checkAbort(options.signal);
   const result: MaceioCollection = { scopeKey, collection };

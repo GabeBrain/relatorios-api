@@ -2,6 +2,12 @@
 
 Registro de fatos comprovados, hipóteses e decisões. Atualizado a cada entrega.
 
+## 19/11/2026 — Cadência leve, espera automática e progresso por etapa
+
+- **D29 — Pedido posterior de Lucas:** substituir o intervalo2segundos após cada resposta por500ms entre inícios de chamada e até2requisições em andamento. Nenhuma consulta removida.429pausa global por Retry-After válido (mínimo1segundo), ou60segundos sem cabeçalho válido. Continua retentando após as pausas até recuperar ou o usuário cancelar, em vez de encerrar após dois429. Intervalo aumenta até2segundos após429e volta gradualmente ao piso500mscom sucessos; respostas em andamento não liberam novas chamadas durante a pausa. Não representa cota oficial conhecida.
+- **D30 — Espera e percentuais:** BrainLoadingState/tempo real/cancelamento preservados; aviso específico **Aguardando resposta da API — retomada automática após a pausa**, mantido mesmo quando outra requisição termina. Cada etapa tem percentual/barra: fontes por unidades efetivamente processadas nos coletores (municípios/fontes; páginas de uma fonte não são uma nova fonte), estrutura por posições realmente organizadas, etapas indivisíveis0→100somente ao concluir. Pausas não avançam percentual.100%significa processamento concluído, não homologação dos dados; fontes com falhas mantêm estadoConferir.
+- Visual reutiliza Progress/Button/BrainLoadingState; sem novo primitive ou mudança transversal. Testes com relógio controlado cobrem sobreposição limitada, intervalos, pausa global mesmo com sucesso concorrente,429repetidos/recuperação e cancelamento.
+
 ## 19/11/2026 — Conferência identificada dos estoques
 
 - **D28 — Pedido de Lucas:** disponibilizar uma forma de investigar a diferença entre municipal e detalhamento e entre API e original, sem escolher arbitrariamente192ou226. Novo arquivo separado `estoque-conferencia.json` contém todos os municípios da edição, totais de cada fonte por grupo, diferenças por padrão cadastral e dormitórios, registros de estoque da competência por empreendimento/tipologia com nome/ID, oferta inicial, área, padrão, status atual/histórico e estágio histórico quando fornecidos. Inclui futuros com marca explícita de exclusão e conserva fontes parciais/valores nulos/duplicações na auditoria.

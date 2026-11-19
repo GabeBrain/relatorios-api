@@ -1,5 +1,11 @@
 # Estado do handoff
 
+## 19/11/2026 — Cadência leve e percentuais reais na espera da API
+
+Lucas relatou lentidão após a serialização2segundos e pediu pequeno intervalo, pausa429até recuperar e percentuais. Base `bed4405f`, main/origin0/0após fetch, árvore limpa. Nova fila500msentre inícios/até2em andamento, pausa compartilhada Retry-Afterou60segundos, adaptação de intervalo e recuperação contínua cancelável. Mantidas consultas/paginação/fontes. Aviso estável de espera e barras/percentuais baseados em unidades processadas e posições da prévia, sem avanço por tempo ou durante pausas. [D29/D30](../../features/relatorios-institucionais/maceio/DECISOES.md).
+
+228testes/24arquivos Maceió, lint dirigido e build aprovados; visual local em desktop1440claro/celular390escuro com componentes reais, espera/retomada sintéticas, logo/tempo/percentual37estável e sem overflow. Evidências em `.local-inputs/relatorios-lucas/maceio/progress-2026-11-19/`. Não exercitado contra a API autenticada; cota do provedor continua desconhecida. Sem push/deploy/Monday. Investigações de estoque e regra horizontal do gestor continuam pendentes; esta entrega altera transporte/progresso, não dados.
+
 ## 19/11/2026 — Conferência identificada para investigar divergências
 
 Base `c70afdc4`, main/origin0/0após fetch; preservadas as alterações locais de IVV por área (D27), antes testadas mas sem build por falha temporária de revisão automática/créditos. Esta continuação adiciona arquivo separado de estoque por empreendimento/tipologia e comparações municipais por padrão/dormitórios, sem novas chamadas, mantendo diagnóstico agregado anônimo. [D28](../../features/relatorios-institucionais/maceio/DECISOES.md). Interface reutiliza Button/worker/BrainLoadingState, com carregamento, erro, cancelamento e descarte por geração existentes.

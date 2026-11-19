@@ -60,7 +60,7 @@ export default function MaceioInstitutionalPage() {
     </section>
     {scope.isLoading || busy ? <section aria-label="Carregamento do relatório Maceió" aria-busy="true" className="relative min-h-[32rem] overflow-hidden rounded-xl border bg-card">
     {scope.isLoading && <BrainLoadingState variant="overlay" className="absolute z-10 justify-start overflow-y-auto py-8" title="Conferindo municípios autorizados" description="Aguarde a confirmação do seu acesso ao catálogo de cidades." startedAt={loadingStart.current} />}
-    {querying && market.state && <BrainLoadingState variant="overlay" className="absolute z-10 justify-start overflow-y-auto py-8" title="Consultando fontes do relatório" startedAt={market.state.startedAt} description={market.state.message}><MaceioGenerationPanel state={market.state} compact /><Button className="mt-4" variant="outline" onClick={market.cancel}>Cancelar consulta</Button></BrainLoadingState>}
+    {querying && market.state && <BrainLoadingState variant="overlay" className="absolute z-10 justify-start overflow-y-auto py-8" title="Consultando fontes do relatório" startedAt={market.state.startedAt} description={market.state.waitingForApi?'Aguardando resposta da API — retomada automática após a pausa':market.state.message}><MaceioGenerationPanel state={market.state} compact /><Button className="mt-4" variant="outline" onClick={market.cancel}>Cancelar consulta</Button></BrainLoadingState>}
     </section> : <>
     {market.state && !querying && <MaceioGenerationPanel state={market.state} />}
     {market.state?.phase === 'cancelled' && <p role="status" className="text-sm text-muted-foreground">{market.state.message}</p>}

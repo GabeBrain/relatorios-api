@@ -1,5 +1,13 @@
 # Rebrain (Plataforma) — Documento Vivo
 
+## 19/11/2026 — Maceió: cadência leve e progresso visível — Codex/Lucas
+
+- **Pedido:** consulta lenta com2segundos após cada resposta. Lucas pediu apenas pequeno intervalo, pausa429até recuperar, aviso epercentuais. Base `bed4405f`, main limpa/origin0/0após fetch. [D29/D30](../features/relatorios-institucionais/maceio/DECISOES.md).
+- **Entrega:**500msentre inícios, até2chamadas ativas, cooldown global Retry-Afterou60segundos, retentativa contínua cancelável e intervalo adaptativo após429. Sem eliminar consultas ou cache novo. Aviso de espera separado do texto da fonte; respostas concorrentes não escondem a pausa. Percentuais de tarefas efetivamente processadas/posições da prévia; etapas indivisíveis só concluem100%ao terminar. Nenhum avanço fictício no tempo ou enquanto aguardaAPI.
+- **Validação/etapas:**228testes/24arquivos Maceió, lint e build aprovados. Progress/BrainLoadingState/Button reutilizados; desktop1440claro e390escuro com espera deliberada, retomada, barra/37%estáveis, logo/tempo e ausência de overflow verificados emfixturevisual local. Sem ensaio autenticado/cota confirmada; isso não comprova tempo real da geração do usuário. Evidências `.local-inputs/relatorios-lucas/maceio/progress-2026-11-19/`.
+- **Pendências:** publicar mediante autorização e medir execução real; investigação dos estoques/arquivo de conferência e nova classificação horizontal informada pelo gestor não foram substituídas por ajuste numérico. Sem push/deploy/Monday; CAGED e outros motores intocados.
+- **Monday:** [Panorama Maceió / SINDUSCON](https://brain381753.monday.com/boards/18398638577/pulses/13149406169) — `13149406169`.
+
 ## 19/11/2026 — Maceió: exportação para investigar o estoque — Codex/Lucas
 
 - **Pedido/entrega:** Lucas pediu acesso às informações que permitam explicar municipal×detalhado eAPI×original. Novo download `estoque-conferencia.json` antes dos slides, separado do JSON agregado, lista todos os municípios, dados municipais por padrão/dormitórios, comparação dos grupos e fotografias individuais com nome/ID/estoque/status histórico e atual/data de lançamento/elegibilidade. Inclui futuros sinalizados, fontes incompletas e auditoria de duplicações. Sem novas consultas ou exportação de token/endereço/payloadbruto. [D28](../features/relatorios-institucionais/maceio/DECISOES.md).

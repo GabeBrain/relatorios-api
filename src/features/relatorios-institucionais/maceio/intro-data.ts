@@ -27,12 +27,13 @@ export const launchMonths=(selection:MaceioSelection,count:number)=>{
 };
 
 /** Independent of the short-window stock balance: these sources serve slides16–20. */
-export async function collectMaceioIntro(selection:MaceioSelection,authorized:string[],options:{token:string;signal?:AbortSignal;request?:MaceioRequest;onProgress?:(message:string)=>void}):Promise<MaceioIntroData> {
+export async function collectMaceioIntro(selection:MaceioSelection,authorized:string[],options:{token:string;signal?:AbortSignal;request?:MaceioRequest;onProgress?:(message:string)=>void;onUnitsProgress?:(completed:number,total:number)=>void}):Promise<MaceioIntroData> {
   const scope=maceioScope(selection,authorized);
   if(!options.token||!scope.valid)throw new Error('Confirme a autenticação e o recorte completo.');
   const check=()=>{if(options.signal?.aborted)throw new DOMException('Consulta cancelada.','AbortError');};
   const end=maceioPeriod(selection).end,months=launchMonths(selection,Math.max(61,60+Number(end.slice(5,7)))),cities:LaunchCitySource[]=[];
   const request:MaceioRequest=options.request??(args=>httpRequest<MaceioEnvelope>(args));
+  let completedUnits=0;
   for(const city of scope.cities){
     const source:LaunchCitySource={city,units:[],buildings:[],unitsComplete:false,buildingsComplete:false,issues:[]};
     for(const kind of ['units','buildings'] as const){
@@ -59,6 +60,7 @@ export async function collectMaceioIntro(selection:MaceioSelection,authorized:st
         }
         source[kind]=rows;source[kind==='units'?'unitsComplete':'buildingsComplete']=true;
       }catch(error){check();(source.failures??=[]).push({source:kind,...sourceFailure(error)});source.issues.push(`${city}: ${kind==='units'?'histórico de unidades':'cadastro de empreendimentos'} não concluído. Tente novamente.`);}
+      options.onUnitsProgress?.(++completedUnits,scope.cities.length*2);
     }
     cities.push(source);
   }

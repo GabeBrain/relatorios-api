@@ -22,7 +22,7 @@ export const maceioSourceMonths=(selection:MaceioSelection)=>{
  return Array.from({length:count},(_,i)=>shiftMonth(end,i-count+1));
 };
 
-export async function collectMaceioMarketSlides(selection:MaceioSelection,authorized:string[],intro:MaceioIntroData,options:{token:string;signal?:AbortSignal;request?:MaceioRequest;onProgress?:(text:string)=>void;segment?:'Vertical'|'Horizontal'|'Comercial';closingOnly?:boolean}):Promise<MaceioMarketSlidesData>{
+export async function collectMaceioMarketSlides(selection:MaceioSelection,authorized:string[],intro:MaceioIntroData,options:{token:string;signal?:AbortSignal;request?:MaceioRequest;onProgress?:(text:string)=>void;onUnitsProgress?:(completed:number,total:number)=>void;segment?:'Vertical'|'Horizontal'|'Comercial';closingOnly?:boolean}):Promise<MaceioMarketSlidesData>{
  const scope=maceioScope(selection,authorized),months=maceioSourceMonths(selection),period=maceioPeriod(selection);
  if(!options.token||!scope.valid)throw new Error('Confirme autenticação e municípios do estudo.');
  const check=()=>{if(options.signal?.aborted)throw new DOMException('Consulta cancelada.','AbortError');};
@@ -32,12 +32,12 @@ export async function collectMaceioMarketSlides(selection:MaceioSelection,author
   {city,metric:'releases',group:'Padrão'},{city,metric:'sales',group:'Padrão'},{city,metric:'stock',group:'Padrão'},
   {city,metric:'releases',group:'Tipologia'},{city,metric:'sales',group:'Tipologia'},{city,metric:'stock',group:'Tipologia'},{city,metric:'details',group:'Empreendimento'}
  ] as const).filter(task=>!options.closingOnly||task.metric==='details'||task.metric==='stock'&&task.group==='Padrão'));
- const sources:SlideSource[]=new Array(tasks.length);let next=0;
+ const sources:SlideSource[]=new Array(tasks.length);let next=0,completedUnits=0;
  async function worker(){
   while(next<tasks.length){check();const index=next++,task=tasks[index];
    const source:SlideSource={...task,rows:[],complete:false,issue:null,requests:0};
    const reused=intro.cities.find(item=>normalizeMarketText(item.city)===normalizeMarketText(task.city));
-   if(segment==='Vertical'&&task.metric==='releases'&&task.group==='Padrão'&&reused?.unitsComplete&&new Set(reused.units.map(row=>marketMonth(row.period))).has(months[0])){sources[index]={...source,rows:reused.units,complete:true};continue;}
+   if(segment==='Vertical'&&task.metric==='releases'&&task.group==='Padrão'&&reused?.unitsComplete&&new Set(reused.units.map(row=>marketMonth(row.period))).has(months[0])){sources[index]={...source,rows:reused.units,complete:true};options.onUnitsProgress?.(++completedUnits,tasks.length);continue;}
    try{
     let expectedTotal:number|undefined,expectedLast:number|undefined;
     for(let page=1;page<=100;page++){
@@ -60,7 +60,7 @@ export async function collectMaceioMarketSlides(selection:MaceioSelection,author
     }
     if(!source.complete)throw new Error();
    }catch(error){check();source.failure=sourceFailure(error);source.complete=false;source.rows=[];source.issue=`${task.city}: fonte ${task.metric}/${task.group} não concluída. Tente novamente.`;}
-   sources[index]=source;
+   sources[index]=source;options.onUnitsProgress?.(++completedUnits,tasks.length);
   }
  }
  const outcomes=await Promise.allSettled([worker(),worker()]);check();const failure=outcomes.find(result=>result.status==='rejected');if(failure?.status==='rejected')throw failure.reason;
