@@ -1,4 +1,4 @@
-import { MACEIO_PRODUCT_FIELDS, maceioHorizontalProduct } from './classification';
+import { MACEIO_PRODUCT_FIELDS, maceioHorizontalProduct, maceioHorizontalPatternInference } from './classification';
 import { marketMonth, normalizeMarketText } from './market';
 import { maceioCities, maceioPeriod, type MaceioSelection } from './model';
 import type { MaceioMarketSlidesData } from './market-slides-data';
@@ -26,7 +26,7 @@ export function buildMaceioClosedReview(selection: MaceioSelection, data: Maceio
       if (maceioHorizontalProduct(building)) continue;
       const automatic=Boolean(maceioHorizontalProduct(building,end));
       const values=MACEIO_PRODUCT_FIELDS.map(field=>text(building[field]));
-      const reason=automatic?'Condomínio de Casas/Sobrados por quartos positivos na competência':values.some(Boolean)?'Rótulos sem correspondência com o tipo de produto':'Campos de produto não informados';
+      const reason=automatic&&maceioHorizontalPatternInference(building,end)?'Condomínio de Casas/Sobrados por padrão do empreendimento confirmado pelo gestor GeoBrain':automatic?'Condomínio de Casas/Sobrados por quartos positivos na competência':values.some(Boolean)?'Rótulos sem correspondência com o tipo de produto':'Campos de produto não informados';
       const release = marketMonth(building.release_date);
       if (release && release > end) continue;
       const id = text(building.building_id ?? building.id), name = text(building.name) || text(building.building_name) || 'Nome não informado';

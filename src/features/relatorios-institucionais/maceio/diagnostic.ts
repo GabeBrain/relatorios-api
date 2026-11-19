@@ -1,3 +1,4 @@
+import { maceioUsesDetailedStock } from './stock-policy';
 import { maceioCities, maceioPeriod, maceioReference, type MaceioSelection } from './model';
 import type { MaceioGenerationState } from './useMaceioMarket';
 import { buildMaceioLaunchSeries, buildMaceioPattern } from './intro-data';
@@ -64,19 +65,20 @@ export function buildMaceioDiagnostic(selection: MaceioSelection, state: Diagnos
     auditVersion: 'maceio-source-audit-v2',
     collection: { vertical: collectionStatus(sources?.sources), horizontal: collectionStatus(sources?.horizontal), commercial: collectionStatus(sources?.commercial) },
     criteria: { prices: 'stock-weighted', monetaryIndex: maceioMonetaryPolicy(selection), monetaryBase: maceioPeriod(selection).end.slice(0, 7),
-      horizontalUniverse: { excluded: ['Condomínio de Chácaras'], confirmedBy: 'Lucas, com confirmação do analista em 18/11/2026', reconciliation: 'full-source-before-exclusion', ambiguousClosed: '10 scoped project exceptions = Condomínio de Casas; other projects use explicit product or selected-month positive bedrooms; unresolved remain pending' },
+      horizontalUniverse: { excluded: ['Condomínio de Chácaras'], confirmedBy: 'Lucas, com confirmação do analista em 18/11/2026', reconciliation: 'full-source-before-exclusion', ambiguousClosed: '10 scoped project exceptions = Condomínio de Casas; other projects use explicit product, recognized project price standard or selected-month positive bedrooms; unresolved remain pending' },
       emptyPeriods: 'completed-scoped-scan-as-zero; failed scans and missing numeric fields remain unavailable',
       launchesByTypology: 'explicit flow preferred; missing flow derived from historical qty only in project launch month, zero in other eligible months; authorized by Lucas 2026-11-19; monthly municipal reconciliation required; no current catalog or stock differences',
-      horizontalClassification: '10 ID/city/AL/Horizontal exceptions retained; otherwise undefined horizontal product with positive bedrooms in selected historical month = Condomínio de Casas/Sobrados, authorized by Lucas on 19/11/2026. Explicit products take precedence; zero/missing bedrooms never infer open/closed lots. Chácaras excluded.',
+      stockAuthority: 'API; Marechal Deodoro/Vertical selected closing month uses detailed eligible snapshots by Lucas decision 2026-11-19; municipal mismatch remains audited; reference deck is not a numerical target',
+      horizontalClassification: '10 ID/city/AL/Horizontal exceptions retained; otherwise undefined horizontal product with a recognized project price standard or positive bedrooms in selected historical month = Condomínio de Casas/Sobrados, authorized by Lucas on 19/11/2026. Explicit products take precedence; zero/missing bedrooms never infer open/closed lots. Chácaras excluded.',
       patternGrouping: { Compacto:'Compactos', Econômico:'MCMV', Standard:'Médio Padrão', Médio:'Médio Padrão', 'Médio-Alto':'Médio Padrão', Alto:'Luxo', Luxo:'Luxo' } },
     summary: Object.fromEntries(statuses.map(status => [status, slides.filter(slide => slide.status === status).length])) as Record<Status, number>,
     slides,
     horizontalClassificationAudit:(sources?.horizontal??[]).filter(source=>source.metric==='details').map(source=>({
-      city:source.city,complete:source.complete,rule:'positive-bedrooms-selected-historical-month-v1',
+      city:source.city,complete:source.complete,rule:'project-standard-or-historical-bedrooms-v2',
       automaticProjects:new Set(source.rows.filter(building=>!maceioHorizontalProduct(building)&&maceioHorizontalProduct(building,maceioPeriod(selection).end.slice(0,7))).map(building=>String(building.building_id??building.id??'')).filter(Boolean)).size,
     })),
     stockReconciliation: {
-      vertical: auditMaceioStock(sources?.sources, maceioCities(selection.periodicity), maceioPeriod(selection).end.slice(0, 7)),
+      vertical: auditMaceioStock(sources?.sources, maceioCities(selection.periodicity), maceioPeriod(selection).end.slice(0, 7)).map(audit=>({...audit,selectedSource:maceioUsesDetailedStock(audit.city,'Vertical')?'detailed':'reconciled',decision:maceioUsesDetailedStock(audit.city,'Vertical')?'Lucas 2026-11-19: detailed API adopted; raw mismatch retained':null})),
       horizontal: auditMaceioStock(sources?.horizontal, maceioCities(selection.periodicity), maceioPeriod(selection).end.slice(0, 7)),
       commercial: selection.periodicity === 'quarterly' ? auditMaceioStock(sources?.commercial, ['Maceió'], maceioPeriod(selection).end.slice(0, 7)) : [],
     },

@@ -1,5 +1,13 @@
 # Estado do handoff
 
+## 19/11/2026 — Fontes adotadas após conferência do analista/GeoBrain
+
+Lucas alinhou com analista que números serão os daAPI, admitindo retificações históricas; original é referência de apresentação. Confirmou226deMarechal e396naRM05/2026, confrontados com a telaGeoBrain. [D31–D33](../../features/relatorios-institucionais/maceio/DECISOES.md). Base `3d81ce8a`, main/origin0/0após fetch, árvore limpa. Quadros de estoque/preços deMarechal usam detalhes elegíveis; fechamento nas séries/participações também, mantendo auditoria192×226eavisos. Sem números fixados no código. Fontes inválidas/duplicadas, demais municípios/segmentos e períodos anteriores mantêm regras próprias.
+
+Também incorporada confirmação do headGeoBrain viaLucas: padrão reconhecido de horizontal sem tipo explícito identifica casas/sobrados. Tipos explícitos/Chácaras/dezIDs prevalecem, com motivo na conferência e critérios doJSON; registro API intacto. Regra de áreaD27já entregue é mantida.
+
+234testes/25arquivos Maceió, lint dirigido, tipos, build e check de documentos vivos aprovados. testes completos mensais/trimestrais com as decisões produzem zero fontes pendentes emfixture, preservando discrepância bruta. Nova geração autenticada do usuário será necessária para contar o efeito real. Material3Tmaisrecente ainda aguardado; não recebido/homologado por inferência. Sem push/deploy/Monday; CAGED e motores paralelos intocados.
+
 ## 19/11/2026 — Cadência leve e percentuais reais na espera da API
 
 Lucas relatou lentidão após a serialização2segundos e pediu pequeno intervalo, pausa429até recuperar e percentuais. Base `bed4405f`, main/origin0/0após fetch, árvore limpa. Nova fila500msentre inícios/até2em andamento, pausa compartilhada Retry-Afterou60segundos, adaptação de intervalo e recuperação contínua cancelável. Mantidas consultas/paginação/fontes. Aviso estável de espera e barras/percentuais baseados em unidades processadas e posições da prévia, sem avanço por tempo ou durante pausas. [D29/D30](../../features/relatorios-institucionais/maceio/DECISOES.md).

@@ -8,7 +8,7 @@ import type {MaceioSelection} from './model';
 import type {MarketRow} from './market';
 
 describe('horizontal com quartos: regra automática autorizada',()=>{
-  const base={building_id:'unlisted',city:'Maceió',state:'AL',building_type:'Horizontal',release_date:'2020-01-01',work:'Econômico',standard:'Econômico'};
+  const base={building_id:'unlisted',city:'Maceió',state:'AL',building_type:'Horizontal',release_date:'2020-01-01',work:'Sem tipo',standard:''};
   const row=(rooms:unknown,month='2026-05')=>({period:`${month}-01`,number_bedroom:rooms,private_area:600});
   it('aceita quartos positivos, sem exigir garagem e sem converter zero/nulo/catálogo atual',()=>{
     expect(maceioHorizontalProduct({...base,typologies_history:[row('2')]},'2026-05')).toBe('Condomínio de Casas');
@@ -24,7 +24,7 @@ describe('horizontal com quartos: regra automática autorizada',()=>{
     const selection:MaceioSelection={uf:'AL',city:'Maceió',territory:'capital-rm',periodicity,year:2026,position:periodicity==='monthly'?5:2};
     const data=remainingFixture(selection),page=periodicity==='monthly'?71:72;
     const source=data.horizontal!.find(s=>s.city==='Maceió'&&s.metric==='details')!,building=source.rows[0];
-    delete building.building_subtype;building.work='Econômico';building.standard='Econômico';building.name='private-test-name';
+    delete building.building_subtype;building.work='Sem tipo';building.standard='';building.name='private-test-name';
     (building.typologies_history as MarketRow[])[0].number_bedroom=2;
     const copy=JSON.stringify(data),model=buildRemainingSlide(page,selection,data,'stock-weighted');
     expect(model.issue).toBeNull();expect(model.tables[0].rows.at(-1)!.values[4]).toBe(600);

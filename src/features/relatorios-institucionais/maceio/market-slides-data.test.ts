@@ -60,7 +60,7 @@ describe('Maceió · contratos dos slides21–40',()=>{
   const source=data.sources.find(source=>source.city==='Maceió'&&source.metric==='details')!;
   const histories=source.rows[0].typologies_history as Record<string,unknown>[];histories.at(-1)!.releases_in_period=0;
   expect(buildMaceioMarketSlide(25,selection,data).issue).toMatch(/diverge/);delete histories.at(-1)!.releases_in_period;histories.at(-1)!.qty=1000;
-  expect(buildMaceioMarketSlide(25,selection,data).issue).toMatch(/fluxo explícito/);
+  expect(buildMaceioMarketSlide(25,selection,data).issue).toMatch(/diverge/);
  });
  it('rejeita duplicações, subtotal e valores booleanos sem bloquear fontes independentes',()=>{
   for(const kind of ['duplicate','subtotal','boolean']){const data=marketSlidesFixture(selection),source=data.sources.find(s=>s.city==='Maceió'&&s.metric==='sales'&&s.group==='Padrão')!;

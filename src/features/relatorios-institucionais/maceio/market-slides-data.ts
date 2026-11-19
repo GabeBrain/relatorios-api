@@ -1,4 +1,5 @@
 import { maceioHistoricalLaunch, historicalLaunchNotice } from './historical-launch';
+import { maceioDetailedClosingCells } from './stock-policy';
 import { maceioPatternFamily } from './classification';
 import { checkMaceioNext, scopeMaceioRow, MACEIO_HISTORY_URL, MaceioSourceError, sourceFailure } from './source-contract';
 import { readBuildingPage } from '@/features/panorama-secovi-fiergs/domain/building-source';
@@ -96,6 +97,10 @@ export function readCells(selection:MaceioSelection,data:MaceioMarketSlidesData,
   // Lucas confirmed: a completed scoped scan without records means zero in the surveyed market.
   // Missing numeric fields on existing records still fail above.
   for(const month of months.filter(month=>!observed.has(month)))for(const label of group==='Tipologia'?['1','2','3','4']:patterns)cells.push({city,month,group:label,value:0});
+  if(metric==='stock'&&!money&&(group==='Padrão'||group==='Tipologia')){
+    try{const selected=maceioDetailedClosingCells(data,city,data.end,group);if(selected){for(let index=cells.length-1;index>=0;index--)if(cells[index].city===city&&cells[index].month===data.end)cells.splice(index,1);cells.push(...selected);}}
+    catch(error){return {cells:[],issue:error instanceof Error?error.message:'Fonte detalhada de fechamento indisponível.'};}
+  }
  }
  return {cells,issue:null};
 }

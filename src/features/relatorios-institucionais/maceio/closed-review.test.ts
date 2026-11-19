@@ -15,13 +15,13 @@ describe('decisões do analista Maceió em 18/11/2026', () => {
       delete rows[0].building_subtype;Object.assign(rows[0],{work:'Econômico',standard:'Econômico',name:'Projeto econômico',address:'segredo-endereco'});
       delete rows[1].building_subtype;rows[1].standard='';rows[1].name='Projeto sem tipo';
       const before=JSON.stringify(data),review=buildMaceioClosedReview(selection,data);
-      expect(review.count).toBe(2);expect(review.complete).toBe(true);
-      expect(review.csv).toContain('Projeto econômico');expect(review.csv).toContain('Projeto sem tipo');
+      expect(review.count).toBe(1);expect(review.automaticProjects).toHaveLength(1);expect(review.complete).toBe(true);
+      expect(review.automaticProjects[0].name).toBe('Projeto econômico');expect(review.csv).not.toContain('Projeto econômico');expect(review.csv).toContain('Projeto sem tipo');
       expect(review.csv).toContain('Motivo da conferência');expect(review.csv).toContain('Campos de produto não informados');
-      expect(review.csv).toContain('Rótulos sem correspondência');expect(review.csv).toContain('"Econômico"');
+      expect(review.automaticProjects[0].reason).toContain('padrão');
       for(const field of MACEIO_PRODUCT_FIELDS)expect(review.csv.split('\r\n')[0]).toContain(`"${field}"`);
       expect(review.csv).not.toContain('segredo-endereco');expect(JSON.stringify(data)).toBe(before);
-      rows[0].work='=FORMULA()';expect(buildMaceioClosedReview(selection,data).csv).toContain('"\'=FORMULA()"');
+      rows[0].standard='';rows[0].work='=FORMULA()';expect(buildMaceioClosedReview(selection,data).csv).toContain('"\'=FORMULA()"');
     });
     it(`exclui chácaras de todos os totais, preços e rótulos, preservando reconciliação bruta / ${periodicity}`, () => {
       const data = remainingFixture(selection);
@@ -43,7 +43,7 @@ describe('decisões do analista Maceió em 18/11/2026', () => {
     it(`lista somente produto ambíguo Fechado sem vazar diagnóstico ou reclassificar / ${periodicity}`, () => {
       const data = remainingFixture(selection), building = data.horizontal![0].rows[0];
       delete building.building_subtype;
-      Object.assign(building, { work: ' Fechado ', standard: 'Econômico', name: 'Projeto para conferência', address: 'segredo-endereco', token: 'segredo-token' });
+      Object.assign(building, { work: ' Fechado ', standard: '', name: 'Projeto para conferência', address: 'segredo-endereco', token: 'segredo-token' });
       data.horizontal![0].rows.push({ ...building });
       const review = buildMaceioClosedReview(selection, data);
       expect(review.complete).toBe(true);
@@ -71,7 +71,7 @@ describe('decisões do analista Maceió em 18/11/2026', () => {
     it(`CSV protege fórmulas e escapa aspas; ignora futuros e outros segmentos / ${periodicity}`, () => {
       const data = remainingFixture(selection), building = data.horizontal![0].rows[0];
       delete building.building_subtype;
-      Object.assign(building, { work: 'Fechado', standard: 'Econômico', name: '=HYPERLINK("externo")' });
+      Object.assign(building, { work: 'Fechado', standard: '', name: '=HYPERLINK("externo")' });
       expect(buildMaceioClosedReview(selection, data).csv).toContain('"\'=HYPERLINK(""externo"")"');
       building.release_date = '2027-01-01';
       expect(buildMaceioClosedReview(selection, data).count).toBe(0);

@@ -1,4 +1,5 @@
 import { maceioHistoricalLaunch, historicalLaunchNotice } from './historical-launch';
+import { maceioStockDecision, maceioDetailedClosingCells } from './stock-policy';
 import { maceioPatternFamily } from './classification';
 import { maceioCities, maceioPeriod, type MaceioSelection } from './model';
 import { marketMonth, normalizeMarketText, type MarketRow } from './market';
@@ -42,7 +43,8 @@ function source(data: MaceioMarketSlidesData, city: string, metric: 'stock' | 's
   if (matches.length !== 1 || !matches[0].complete) throw new Error(`${city}: fonte ${metric}/${group} incompleta. Tente novamente.`);
   return matches[0].rows;
 }
-function quantity(data: MaceioMarketSlidesData, city: string, metric: 'stock' | 'sales' | 'releases', month: string) {
+function quantity(data: MaceioMarketSlidesData, city: string, metric: 'stock' | 'sales' | 'releases', month: string, useSelected=true) {
+  if(metric==='stock'&&useSelected){const selected=maceioDetailedClosingCells(data,city,month,'Padrão');if(selected)return total(selected.map(row=>row.value));}
   const rows = source(data, city, metric).filter(row => marketMonth(row.period) === month), seen = new Set<string>();
   return total(rows.map(row => {
     const key = normalizeMarketText(row.group);
@@ -60,7 +62,7 @@ function ivv(data: MaceioMarketSlidesData, month: string) {
 }
 interface Snapshot { city: string; standard: string; bedroom: unknown; area: unknown; price: unknown; stock: number; releases: unknown; sales: unknown; derivedLaunch: boolean }
 /** No root prices/stock fill historical observations. Every established typology needs a snapshot. */
-function snapshots(data: MaceioMarketSlidesData, cities: readonly string[], month: string, resolveLaunches = false): Snapshot[] {
+function snapshots(data: MaceioMarketSlidesData, cities: readonly string[], month: string, resolveLaunches = false, warnings:string[]=[]): Snapshot[] {
   const result: Snapshot[] = [];
   for (const city of cities) {
     const sources = data.sources.filter(item => normalizeMarketText(item.city) === normalizeMarketText(city) && item.metric === 'details');
@@ -86,8 +88,8 @@ function snapshots(data: MaceioMarketSlidesData, cities: readonly string[], mont
       }
       if (!observed || [...established].some(id => !seen.has(id))) throw new Error(`${city}: fotografia ${month} incompleta; não usamos cadastro atual ou estoque zero como substitutos.`);
     }
-    const actual = total(result.filter(row => row.city === city).map(row => row.stock)), expected = quantity(data, city, 'stock', month);
-    if (actual !== expected) throw new Error(`${city}: estoque granular diverge do estoque municipal em ${month} (${actual} versus ${expected}, diferença ${actual-expected}).`);
+    const actual = total(result.filter(row => row.city === city).map(row => row.stock)), expected = quantity(data, city, 'stock', month,false);
+    if (actual !== expected && !maceioStockDecision(city,'Vertical',actual,expected,warnings)) throw new Error(`${city}: estoque granular diverge do estoque municipal em ${month} (${actual} versus ${expected}, diferença ${actual-expected}).`);
   }
   return result;
 }
@@ -195,7 +197,7 @@ export function buildOfferPriceSlide(page: number, selection: MaceioSelection, d
         })}];
         if(selection.periodicity==='quarterly')result.warnings.push('Série trimestral utiliza o preço no fechamento de cada trimestre. O original51 apresenta datas mensais inconsistentes com as outras séries; critério a homologar.');
       }else{
-        const typology=logical>=59,meter=logical!==56&&logical!==59,rows=snapshots(data,maceioCities(selection.periodicity),end).filter(row=>row.stock>0);
+        const typology=logical>=59,meter=logical!==56&&logical!==59,rows=snapshots(data,maceioCities(selection.periodicity),end,false,result.warnings).filter(row=>row.stock>0);
         result.unit=meter?'money':'ticket';result.groups=typology?['1 dorm','2 dorm','3 dorm','4 dorm']:standards;
         const group=(row:Snapshot)=>{const index=typology?bedroom(row.bedroom):standards.findIndex(name=>normalizeMarketText(name)===normalizeMarketText(row.standard));if(index<0)throw new Error('Padrão granular sem correspondência explícita com as categorias de preço do original.');return index;};
         rows.forEach(group);

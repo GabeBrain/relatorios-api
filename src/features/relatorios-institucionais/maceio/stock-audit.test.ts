@@ -46,11 +46,11 @@ describe('diagnóstico agregado de estoque, sem alterar dados', () => {
     expect(audit.monthly[0].fieldAvailability?.sold_in_period).toEqual({ absent: 1, nullOrBlank: 1, invalid: 1, zero: 1 });
     expect(audit.monthly[0].fieldAvailability?.releases_in_period.absent).toBe(4);
   });
-  for (const periodicity of ['monthly', 'quarterly'] as const) it(`mensagem informa totais e delta sem liberar o slide / ${periodicity}`, () => {
+  for (const periodicity of ['monthly', 'quarterly'] as const) it(`decisão de Marechal preserva totais e delta como aviso / ${periodicity}`, () => {
     const selected = { ...selection, periodicity, position: periodicity === 'monthly' ? 5 : 2 }, data = remainingFixture(selected);
     const source = data.sources.find(item => item.city === 'Marechal Deodoro' && item.metric === 'details')!;
     (source.rows[0].typologies_history as MarketRow[]).at(-1)!.typology_stock = 391;
-    expect(buildRemainingSlide(periodicity === 'monthly' ? 62 : 61, selected, data).issue).toContain('diferença 91');
-    expect(buildOfferPriceSlide(periodicity === 'monthly' ? 56 : 55, selected, data, 'stock-weighted').issue).toContain('diferença 91');
+    expect(buildRemainingSlide(periodicity === 'monthly' ? 62 : 61, selected, data).warnings.join(' ')).toContain('diferença 91');
+    expect(buildOfferPriceSlide(periodicity === 'monthly' ? 56 : 55, selected, data, 'stock-weighted').warnings.join(' ')).toContain('diferença 91');
   });
 });

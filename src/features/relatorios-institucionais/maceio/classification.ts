@@ -21,7 +21,7 @@ export function maceioExcludedHorizontal(building: Record<string, unknown>): boo
   return MACEIO_PRODUCT_FIELDS.some(field => ['condominio de chacara', 'condominio de chacaras'].includes(normalizeMarketText(building[field])));
 }
 
-/** Explicit product labels only. Price standards do not identify a product. */
+/** Explicit products first, then the rules authorized for the selected study. */
 export function maceioHorizontalProduct(building: Record<string, unknown>,month?:string): string {
   if (maceioExcludedHorizontal(building)) return 'Condomínio de Chácaras';
   const values = MACEIO_PRODUCT_FIELDS.map(field => building[field]);
@@ -35,8 +35,16 @@ export function maceioHorizontalProduct(building: Record<string, unknown>,month?
   const city=MACEIO_CONFIRMED_CLOSED_HOUSES[String(building.building_id??building.id??'').trim()];
   if(city&&normalizeMarketText(building.building_type)==='horizontal'&&normalizeMarketText(building.state??building.uf)==='al'
     &&normalizeMarketText(building.city)===normalizeMarketText(city)&&values.some(value=>normalizeMarketText(value)==='fechado'))return 'Condomínio de Casas';
-  if(maceioHorizontalBedroomInference(building,month))return 'Condomínio de Casas';
+  if(maceioHorizontalPatternInference(building,month)||maceioHorizontalBedroomInference(building,month))return 'Condomínio de Casas';
   return '';
+}
+
+/** GeoBrain head confirmation relayed by Lucas: lots have no price standard. */
+export function maceioHorizontalPatternInference(building:Record<string,unknown>,month?:string):boolean {
+  if(!month||normalizeMarketText(building.building_type)!=='horizontal'||normalizeMarketText(building.state??building.uf)!=='al')return false;
+  const release=marketMonth(building.release_date);if(!release||release>month)return false;
+  const standards=['compacto','compactos','economico','standard','medio','medio-alto','medio alto','alto','luxo','super luxo'];
+  return [building.standard,building.work].some(value=>standards.includes(normalizeMarketText(value)));
 }
 
 /** Lucas authorized on 19/11/2026. Only the selected historical photograph;

@@ -6,7 +6,7 @@ import { remainingFixture } from './__tests__/remaining-fixture';
 import type { MaceioSelection } from './model';
 
 const confirmed=[['7980','Barra de São Miguel'],['12692','Maceió'],['20502','Maceió'],['7984','Marechal Deodoro'],['425','Marechal Deodoro'],['28486','Marechal Deodoro'],['21639','Marechal Deodoro'],['21640','Marechal Deodoro'],['422','Marechal Deodoro'],['28491','Rio Largo']];
-const project=(id:string,city:string)=>({building_id:id,city,state:'AL',building_type:'Horizontal',work:'Fechado',standard:'Econômico',release_date:'2020-01-01'});
+const project=(id:string,city:string)=>({building_id:id,city,state:'AL',building_type:'Horizontal',work:'Fechado',standard:'',release_date:'2020-01-01'});
 describe('10 exceções Fechado confirmadas por Lucas em 19/11/2026',()=>{
   it('conserva exatamente os dez IDs e municípios informados',()=>expect(Object.entries(MACEIO_CONFIRMED_CLOSED_HOUSES).sort()).toEqual([...confirmed].sort()));
   for(const [id,city] of confirmed)it(`classifica somente no escopo correto: ${id}`,()=>{

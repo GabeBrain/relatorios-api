@@ -56,8 +56,8 @@ describe('Maceió · todos os slides restantes',()=>{
   it('preços mínimo/médio/máximo são históricos e ponderados pelo estoque',()=>{
     const model=buildRemainingSlide(66,monthly,remainingFixture(monthly),'stock-weighted');expect(model.tables[0].rows[0].values[0]).toBe(30);expect(model.tables[0].rows[0].values[4]).toBe(5640);
   });
-  it('horizontal exige subtipo explícito sem inferir pelo padrão',()=>{
-    const data=remainingFixture(monthly);delete data.horizontal![0].rows[0].building_subtype;data.horizontal![0].rows[0].standard='Econômico';expect(buildRemainingSlide(71,monthly,data).issue).toMatch(/Categoria/);
+  it('horizontal sem subtipo usa o padrão confirmado como casas',()=>{
+    const data=remainingFixture(monthly);delete data.horizontal![0].rows[0].building_subtype;data.horizontal![0].rows[0].standard='Econômico';expect(buildRemainingSlide(71,monthly,data).issue).toBeNull();
   });
   it('classifica os5padrões comerciais peloR$/m²do fechamento',()=>{
     const model=buildRemainingSlide(80,quarterly,remainingFixture(quarterly));expect(model.tables[0].rows.map(row=>row.label)).toEqual(['Econômico','Standard','Médio','Alto','Alto +','Total']);expect(model.tables[0].rows.at(-1)!.values[1]).toBe(5);

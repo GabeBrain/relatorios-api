@@ -1,5 +1,14 @@
 # Rebrain (Plataforma) — Documento Vivo
 
+## 19/11/2026 — Maceió: fonte detalhada adotada e casas por padrão — Codex/Lucas
+
+- **Decisões:** Lucas alinhou com analista queAPIprevalece sobre números históricos do original; confirmouMarechal226eRM396para05/2026após conferir a telaGeoBrain. Gestor/headGeoBrain confirmou viaLucas que padrão de preço em horizontal identifica casas/sobrados. [D31–D33](../features/relatorios-institucionais/maceio/DECISOES.md). Base `3d81ce8a`, main limpa/origin0/0após fetch.
+- **Entrega:** detalhamento deMarechal rege quadros dependentes de estoque/preços; fechamento nas séries/participações usa a mesma fotografia. Nenhum hardcode226/396ou alteração dos dados brutos. Auditoria e exportação mantêm192×226, critério de fonte/decisão e avisos; outros municípios/segmentos e guardas de integridade permanecem. Histórico anterior e fluxos não recebem substituição implícita.
+- **Horizontal:** sem produto explícito, padrão reconhecido do empreendimento classifica casas/sobrados; quarto histórico positivo segue como alternativa autorizada. Tipos explícitos/dezIDs/exclusãoChácaras prevalecem. UI/conferência/JSON identificam motivo, sem gravar na origem ou criar editor.
+- **Validação/etapas:**234testes/25arquivos Maceió, lint dirigido, tipos, build e check de documentos vivos aprovados; testes de diagnóstico completo nas duas edições sem fontes pendentes emfixture e casoRM396consistente com auditoria192/226preservada. Validação real depende de publicar/gerar novoJSON; não afirmar zero pendências reais por inferência. Reutilizados modelos/componentes existentes; textos de regra atualizados, sem novo fluxo de carregamento.
+- **Pendências:** publicar somente com autorização, conferir nova geração e panorama3Tquando analista enviar. CAGED e outros motores intocados; sem push/deploy/Monday.
+- **Monday:** [Panorama Maceió / SINDUSCON](https://brain381753.monday.com/boards/18398638577/pulses/13149406169) — `13149406169`.
+
 ## 19/11/2026 — Maceió: cadência leve e progresso visível — Codex/Lucas
 
 - **Pedido:** consulta lenta com2segundos após cada resposta. Lucas pediu apenas pequeno intervalo, pausa429até recuperar, aviso epercentuais. Base `bed4405f`, main limpa/origin0/0após fetch. [D29/D30](../features/relatorios-institucionais/maceio/DECISOES.md).

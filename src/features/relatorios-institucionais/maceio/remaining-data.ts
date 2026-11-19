@@ -1,4 +1,5 @@
 import { maceioPatternFamily, maceioHorizontalProduct } from './classification';
+import { maceioStockDecision } from './stock-policy';
 import {maceioCities,maceioPeriod,type MaceioSelection} from './model';
 import {marketMonth,normalizeMarketText as norm,type MarketRow} from './market';
 import {readNumber,type MaceioMarketSlidesData,type SlideSource} from './market-slides-data';
@@ -21,7 +22,7 @@ export function remainingRole(page:number,selection:MaceioSelection){
   return ({61:'years',62:'standards-capital',63:'standards-rm',64:'bedrooms-capital',65:'bedrooms-rm',66:'area',67:'range',68:'stage-bedrooms',69:'stage-standards',70:'vgv',71:'editorial',72:'horizontal-type-capital',73:'horizontal-years-capital',74:'horizontal-prices-capital',75:'editorial',76:'horizontal-type-rm',77:'horizontal-years-rm',78:'horizontal-prices-rm',79:'editorial',80:'commercial-type',81:'commercial-years',82:'commercial-prices'} as Record<number,string>)[page]??'editorial';
 }
 /** Complete closing snapshots, in their own segment. No inferred horizontal product or current stage. */
-function details(data:MaceioMarketSlidesData,selection:MaceioSelection,cities:readonly string[],segment:'Vertical'|'Horizontal'|'Comercial'):Detail[]{
+function details(data:MaceioMarketSlidesData,selection:MaceioSelection,cities:readonly string[],segment:'Vertical'|'Horizontal'|'Comercial',warnings:string[]):Detail[]{
   const sources=segment==='Vertical'?data.sources:segment==='Horizontal'?data.horizontal:data.commercial,end=maceioPeriod(selection).end.slice(0,7),result:Detail[]=[];
   if(data.end!==end)throw new Error('A fonte não corresponde ao período selecionado.');
   for(const city of cities){
@@ -48,7 +49,7 @@ function details(data:MaceioMarketSlidesData,selection:MaceioSelection,cities:re
     const rows=municipal[0].rows.filter(row=>marketMonth(row.period)===end),groups=new Set<string>();
     const expected=sum(rows.map(row=>{const group=norm(row.group);if(norm(row.city)!==norm(city)||row.state!=='AL'||norm(row.building_type)!==norm(segment)||!group||/^(total|subtotal)(\b|$)/.test(group)||groups.has(group))throw new Error('Estoque municipal duplicado ou fora do universo.');groups.add(group);return number(row.stock);}));
     const actual=sum(result.filter(row=>row.city===city).map(row=>row.stock));
-    if(expected!==actual)throw new Error(`${city}: estoque granular diverge do total municipal ${segment} em ${end} (${actual} versus ${expected}, diferença ${actual-expected}).`);
+    if(expected!==actual&&!maceioStockDecision(city,segment,actual,expected,warnings))throw new Error(`${city}: estoque granular diverge do total municipal ${segment} em ${end} (${actual} versus ${expected}, diferença ${actual-expected}).`);
   }
   // Reconcile the full source above before applying the analyst's report universe.
   const eligible=result.filter(row=>segment!=='Horizontal'||row.type!=='Condomínio de Chácaras');
@@ -80,8 +81,8 @@ export function buildRemainingSlide(page:number,selection:MaceioSelection,data:M
     if(result.price&&policy!=='stock-weighted')throw new Error('Confirme o critério de preços para esta prévia; o método do original ainda não foi homologado.');
     const horizontal=role.startsWith('horizontal'),commercial=role.startsWith('commercial'),segment=horizontal?'Horizontal':commercial?'Comercial':'Vertical';
     const cities=role.endsWith('-rm')?maceioCities(selection.periodicity).filter(city=>norm(city)!=='maceio'):role.endsWith('-capital')||commercial||['area','range'].includes(role)?['Maceió']:maceioCities(selection.periodicity);
-    const rows=details(data,selection,cities,segment);
-    if(horizontal)result.warnings.push('Tipos explícitos da API e dez IDs confirmados são preservados. Horizontal sem tipo definido com quartos positivos na fotografia do fechamento é classificado automaticamente como Condomínio de Casas/Sobrados, por regra autorizada. Zero ou ausência de quartos não define loteamento aberto/fechado. Consulte os detalhes da geração.');
+    const rows=details(data,selection,cities,segment,result.warnings);
+    if(horizontal)result.warnings.push('Tipos explícitos da API e dez IDs confirmados são preservados. Horizontal sem tipo definido com padrão de preço reconhecido do empreendimento ou quartos positivos na fotografia do fechamento é classificado como Condomínio de Casas/Sobrados, por regra autorizada. Zero ou ausência de quartos não define loteamento aberto/fechado. Consulte os detalhes da geração.');
     if(!rows.length)throw new Error('Nenhum empreendimento com estoque positivo no fechamento deste recorte.');
     const yearLimit=selection.year-(selection.periodicity==='monthly'?5:4),years=[`Até ${yearLimit}`,...Array.from({length:selection.year-yearLimit},(_,i)=>String(yearLimit+1+i))];
     const yearGroup=(row:Detail)=>row.year<=yearLimit?0:row.year-yearLimit;
@@ -127,7 +128,7 @@ export function buildRemainingSlide(page:number,selection:MaceioSelection,data:M
         const values=(part:Detail[]):Cell[]=>[weighted(part,'price'),weighted(part,'area'),weighted(part,'meter')];
         result.tables=[{columns:['Preço médio','Área privativa média','R$/m² privativo'],formats:['money','decimal','money'],rows:[...groups.map((label,i)=>({label,values:values(rows.filter(row=>group(row)===i))})),{label:'Média geral',values:values(rows)}]}];
       }else result.tables=[capacityTable(groups,rows,group,true)];
-      result.warnings.push(commercial?'Classes comerciais por R$/m² histórico: até10mil,12mil,14mil,16mil e acima; limites e universo a homologar.':'Tipo horizontal exige subtipo explícito: condomínio de casas, loteamento fechado ou aberto. Não deduzimos produto de um padrão de preço.');
+      result.warnings.push(commercial?'Classes comerciais por R$/m² histórico: até10mil,12mil,14mil,16mil e acima; limites e universo a homologar.':'Horizontal: tipos explícitos prevalecem; sem tipo, padrão de preço reconhecido identifica casas/sobrados conforme confirmação do gestor GeoBrain, ou quartos históricos positivos conforme autorização anterior. Loteamentos sem identificação aberto/fechado continuam para conferência.');
     }
     if(role.startsWith('standards')||role==='commercial-type'){
       const ranges=role==='commercial-type'?['Até R$10mil/m²','R$10–12mil/m²','R$12–14mil/m²','R$14–16mil/m²','Acima R$16mil/m²']:['Studio/loft/1quarto','Até R$400mil','R$400mil–1mi','R$1–2mi','R$2–3mi','R$3–5mi','Acima R$5mi'];
