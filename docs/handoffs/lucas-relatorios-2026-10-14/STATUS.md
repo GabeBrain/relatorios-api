@@ -1,5 +1,13 @@
 # Estado do handoff
 
+## 19/11/2026 — Conferência no site e regra de quartos, sem editor de correções
+
+Após CSV de23pendências cadastrais, Lucas pediu aviso/tabela antes dos slides. Durante a sessão autorizou classificação automática de horizontal com quartos positivos como casas; adiou edição/memória de novas correções e geração parcial. A última clarificação manteve os dez IDs deD21. Implementação usa só fotografia histórica do fechamento para inferência; tipos explícitos/Chácaras/dez confirmados prevalecem. Lotes precisam de aberto/fechado explícito; área/zero quartos não resolvem isso.
+
+Conferência separa pendentes de automáticos, mostra cidade/nome/ID/rótulos/quartos/área/garagem quando informados e conservaCSV só de pendentes. JSON recebe regra/contagens, sem dados identificados; nenhuma gravação no cadastro API/localStorage/backend. Suíte de205testes Maceió aprovada; nove testes dirigidos finais incluem um caso adicional de UI. Tipos/lint/build aprovados. Ensaios reais autenticados ainda dependem de publicação e nova geração; fontes/guardas/CAGED preservados. Base `b16c0ba0`, main/origin0/0após fetch. Sem push/Monday.
+
+Verificação visual final:12cenários Edge headless com API sintética interceptada, mensal/trimestral, desktop/claro e celular/escuro, pendências/vazio/erro de fonte, BrainLoadingState lento, CSV/JSON reabertos e tabelas sem overflow de página ou exceção. Mais2capturas inspecionadas da seção de conferência. Somente as execuções finais completas são evidência; não equivalem à geração real do usuário.
+
 ## 19/11/2026 — CSV ampliado de produtos horizontais pendentes
 
 Depois do push de `500c476b`, diagnóstico real(5) registra40disponíveis/20fontes/22editoriais; CAGED disponível por cópia verificada, online502. Lucas pediu **somente ampliar o CSV** para identificar os demais produtos horizontais sem categoria. Lista passa a incluir rótulos não correspondidos e campos vazios, com motivo e seis campos de produto daAPI, preservando nomes/IDs apenas noCSV solicitado. Classificados (incluindo dez exceções), Chácaras e futuros ficam fora. Mesma geração/worker/BrainLoadingState/estados existentes; sem mudança dos cálculos/fontes/CAGED.33testes dirigidos aprovados; publicação e geração autenticada ainda necessárias. Base `500c476b`, main/origin0/0após fetch, árvore limpa na abertura. Sem push/Monday.

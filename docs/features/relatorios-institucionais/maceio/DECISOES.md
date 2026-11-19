@@ -2,6 +2,12 @@
 
 Registro de fatos comprovados, hipóteses e decisões. Atualizado a cada entrega.
 
+## 19/11/2026 — Classificação por quartos e conferência antes dos slides
+
+- **D23 — Regra automática autorizada por Lucas:** horizontal com tipo ainda indefinido e `number_bedroom` inteiro positivo em alguma tipologia da **fotografia da competência selecionada** recebe Condomínio de Casas/Sobrados (grupo de arte existente: Condomínio de Casas). Tipos explícitos da API, exclusão de Chácaras e D21 têm prioridade. Zero, nulo, campo ausente, booleano, fração ou texto não numérico não ativam a regra. Cadastro atual ou fotografias posteriores não substituem a competência histórica. Vaga de garagem não é requisito; é evidência auxiliar quando disponível na fotografia. Área positiva/600m²/zero quartos não determina loteamento aberto ou fechado: identificação explícita continua necessária.
+- **D24 — Conferência no site:** aviso com quantidade e tabela antes dos slides, usando a mesma lista do CSV, com município/nome/ID/rótulos daAPI e quartos/área/garagem disponíveis. Classificados automaticamente saem das pendências/CSV e aparecem em detalhes próprios, com motivo e evidências; JSON conserva apenas regra/contagens por município, sem nomes/IDs. Dados brutos e classificações da origem não são sobrescritos. Mantidos recorte, completude/parcial, futuros, deduplicação e esgotados da lista.
+- Lucas inicialmente pediu edição/memória de correções porID, mas depois adiou essa funcionalidade. Na última clarificação, **manteve expressamente os dez empreendimentos deD21como casas**. Não criar formulário/localStorage/tabela no backend para novas correções nesta etapa. Liberação geral de relatórios parciais também fica para depois; guardas de campos, escopo e reconciliação atuais permanecem.
+
 ## 19/11/2026 — CSV de todos os produtos horizontais não identificados
 
 - **D22 — Ampliação solicitada por Lucas:** após diagnóstico(5) mostrar produtos sem tipo identificado além dos dez Fechado confirmados, Lucas pediu adaptar o CSV para exportar esses empreendimentos também. A lista identificada agora inclui qualquer produto horizontal sem correspondência, inclusive Econômico/Standard/Médio sem tipo explícito e campos vazios, preservando os rótulos originais em seis colunas. Exporta referência, completude, município, ID, nome, motivo da conferência e lançamento. Continua separada do JSON agregado e usa a geração em memória, sem nova consulta.

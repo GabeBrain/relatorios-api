@@ -62,7 +62,7 @@ export function auditMaceioSource(source: SlideSource, expectedMonths: string[])
           launches:measure(eligible.map(item=>item.row.releases_in_period)),
           excludedFutureOrInvalidReleaseStock:measure((futureByMonth.get(month)??[]).map(row=>row.typology_stock)),
           byStandard:groups(item=>item.row.pattern??item.building.standard),byTypologyKind:groups(item=>item.kind),
-          byProduct:groups(item=>normalizeMarketText(item.building.building_type)==='horizontal'?maceioHorizontalProduct(item.building)||'(não identificado)':'(não aplicável)'),
+          byProduct:groups(item=>normalizeMarketText(item.building.building_type)==='horizontal'?maceioHorizontalProduct(item.building,month)||'(não identificado)':'(não aplicável)'),
         },
 
         fieldAvailability: Object.fromEntries(['typology_stock', 'qty', 'sold_in_period', 'releases_in_period', 'private_area', 'price'].map(field => [field, {

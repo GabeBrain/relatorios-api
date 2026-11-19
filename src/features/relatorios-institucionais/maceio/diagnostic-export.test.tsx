@@ -12,6 +12,23 @@ class FakeWorker {onmessage:((event:{data:unknown})=>void)|null=null;onerror:(()
 const state:MaceioGenerationState={key:'Bearer confidential-token',phase:'done',startedAt:Date.parse('2026-11-10T15:00:00Z'),finishedAt:'2026-11-10T15:01:00Z',message:'Done',report:null,hasFailedCities:false,blueprint:null,intro:null,steps:[]};
 beforeEach(()=>{workers.length=0;vi.stubGlobal('Worker',FakeWorker);});afterEach(()=>{cleanup();vi.unstubAllGlobals();});
 describe('Maceio — preparo automático do diagnóstico',()=>{
+  it('mostra pendências e classificações automáticas em tabelas separadas',()=>{
+    render(<MaceioDiagnosticExport selection={selection} state={state}/>);
+    const data=remainingFixture(selection),source=data.horizontal![0];
+    delete source.rows[0].building_subtype;source.rows[0].work='Econômico';source.rows[0].standard='Econômico';source.rows[0].name='Casa sugerida';
+    (source.rows[0].typologies_history as Record<string,unknown>[])[0].number_bedroom=2;
+    delete source.rows[1].building_subtype;source.rows[1].work='Standard';source.rows[1].standard='Standard';source.rows[1].name='Lote para conferir';
+    (source.rows[1].typologies_history as Record<string,unknown>[])[0].number_bedroom=0;
+    act(()=>workers[0].ready(buildMaceioDiagnostic(selection,state),buildMaceioClosedReview(selection,data)));
+    const pending=screen.getByRole('table',{name:'Empreendimentos horizontais com cadastro a conferir'});
+    expect(pending.textContent).toContain('Lote para conferir');expect(pending.textContent).not.toContain('Casa sugerida');
+    expect(screen.getByRole('alert').textContent).toContain('1 empreendimento');
+    expect(screen.getByText(/Classificação automática: 1 empreendimento/)).toBeTruthy();
+    const automatic=screen.getByRole('table',{name:'Empreendimentos classificados automaticamente por quartos',hidden:true});
+    expect(automatic.textContent).toContain('Casa sugerida');expect(automatic.textContent).toContain('2');
+    expect(screen.getByRole('button',{name:'Baixar produtos sem classificação (CSV)'}).hasAttribute('disabled')).toBe(false);
+    expect(screen.queryByRole('button',{name:/Salvar correção/})).toBeNull();
+  });
   it('lista parcial permite baixar e troca de geração descarta a lista anterior',()=>{
     const view=render(<MaceioDiagnosticExport selection={selection} state={state}/>);
     const data=remainingFixture(selection),building=data.horizontal![0].rows[0];

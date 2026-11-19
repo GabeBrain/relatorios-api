@@ -68,6 +68,7 @@ export default function MaceioInstitutionalPage() {
     {market.state?.report && <details className="rounded-xl border bg-card p-4"><summary className="cursor-pointer text-sm font-medium">Conferência do núcleo vertical</summary><div className="mt-4"><MaceioMarketPanel report={market.state.report} /></div></details>}
     {market.state?.hasFailedCities && <Button variant="outline" disabled={!ready || busy} onClick={() => { void market.consult(true); }}>Tentar fontes pendentes</Button>}
     {market.state && <MaceioDiagnosticExport selection={selection} state={market.state} />}
+    <p className="text-xs text-muted-foreground">Classificação horizontal: tipos explícitos e dez empreendimentos confirmados têm prioridade. Na ausência de tipo, quartos positivos na fotografia do fechamento identificam Condomínio de Casas/Sobrados. A aplicação automática fica registrada nos detalhes e no diagnóstico; zero ou ausência de quartos não define loteamento aberto/fechado.</p>
     <Tabs defaultValue="structure">
       <TabsList className="flex h-auto max-w-full flex-wrap justify-start"><TabsTrigger value="structure">Slides</TabsTrigger><TabsTrigger value="references">Referências</TabsTrigger><TabsTrigger value="method">Metodologia</TabsTrigger></TabsList>
       <TabsContent value="structure" className="mt-4 space-y-4">

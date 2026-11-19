@@ -39,7 +39,7 @@ function details(data:MaceioMarketSlidesData,selection:MaceioSelection,cities:re
         if(!month||!tid)throw new Error('Competência ou ID de tipologia inválido.');
         if(month<=end)established.add(tid);if(month!==end)continue;
         if(seen.has(tid))throw new Error('Tipologia duplicada no fechamento.');seen.add(tid);
-        result.push({id:`${city}/${id}`,city,year:Number(release.slice(0,4)),standard:String(row.pattern??building.standard??''),family:String(row.standard_family??building.standard_family??maceioPatternFamily(row.pattern??building.standard)??''),type:maceioHorizontalProduct(building),bedroom:row.number_bedroom,area:row.private_area,price:row.price,stock:number(row.typology_stock),qty:row.qty,stage:row.estagio_empreendimento??row.building_status});
+        result.push({id:`${city}/${id}`,city,year:Number(release.slice(0,4)),standard:String(row.pattern??building.standard??''),family:String(row.standard_family??building.standard_family??maceioPatternFamily(row.pattern??building.standard)??''),type:maceioHorizontalProduct(building,end),bedroom:row.number_bedroom,area:row.private_area,price:row.price,stock:number(row.typology_stock),qty:row.qty,stage:row.estagio_empreendimento??row.building_status});
       }
       if(!seen.size||[...established].some(tid=>!seen.has(tid)))throw new Error(`${city}: fotografia de fechamento incompleta; ausência não é estoque zero.`);
     }
@@ -81,6 +81,7 @@ export function buildRemainingSlide(page:number,selection:MaceioSelection,data:M
     const horizontal=role.startsWith('horizontal'),commercial=role.startsWith('commercial'),segment=horizontal?'Horizontal':commercial?'Comercial':'Vertical';
     const cities=role.endsWith('-rm')?maceioCities(selection.periodicity).filter(city=>norm(city)!=='maceio'):role.endsWith('-capital')||commercial||['area','range'].includes(role)?['Maceió']:maceioCities(selection.periodicity);
     const rows=details(data,selection,cities,segment);
+    if(horizontal)result.warnings.push('Tipos explícitos da API e dez IDs confirmados são preservados. Horizontal sem tipo definido com quartos positivos na fotografia do fechamento é classificado automaticamente como Condomínio de Casas/Sobrados, por regra autorizada. Zero ou ausência de quartos não define loteamento aberto/fechado. Consulte os detalhes da geração.');
     if(!rows.length)throw new Error('Nenhum empreendimento com estoque positivo no fechamento deste recorte.');
     const yearLimit=selection.year-(selection.periodicity==='monthly'?5:4),years=[`Até ${yearLimit}`,...Array.from({length:selection.year-yearLimit},(_,i)=>String(yearLimit+1+i))];
     const yearGroup=(row:Detail)=>row.year<=yearLimit?0:row.year-yearLimit;

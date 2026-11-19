@@ -1,5 +1,15 @@
 # Rebrain (Plataforma) — Documento Vivo
 
+## 19/11/2026 — Maceió: conferência de cadastros no site e casas por quartos — Codex/Lucas
+
+- **Escopo final de Lucas:** aviso/tabela antes dos slides e regra automática de quartos positivos; editor/memória de novas correções e liberação geral de parciais adiados. Última clarificação preserva os dez IDs deD21. Base `b16c0ba0`, main/origin0/0após fetch, árvore limpa na abertura.
+- **Entrega:** horizontal sem tipo definido com quartos inteiros positivos na fotografia do fechamento vira Condomínio de Casas/Sobrados. Tipos explícitos/exclusão de Chácaras/dez confirmados prevalecem. Zero/ausência de quartos e área não deduzem loteamento aberto/fechado. Fonte histórica futura/cadastro atual não preenchem a competência.
+- **Conferência:** tabela dos pendentes com município/nome/ID/rótulos/quartos/área/garagem e aviso de quantidade; detalhes separados dos automáticos. CSV mantém somente pendentes. JSON registra regra/contagem municipal sem cadastros individuais. Sem alterações dos dados brutos, preços/estoque ou gravação de correções em navegador/backend. [D23/D24](../features/relatorios-institucionais/maceio/DECISOES.md).
+- **Validação/etapas:**suíte205testes Maceió e nove testes dirigidos finais aprovados (um caso adicional deUI), tipos/lint/build aprovados. Reutilizados Table/Alert/Button e worker/BrainLoadingState existentes; nenhum novo primitive ou fluxo de carregamento. Sem nova geração autenticada; conferir novo diagnóstico/CSV após publicação. Não afirmar que todos os slides pendentes foram liberados.
+- **Navegador:**12cenários finais Edge headless (mensal/trimestral×1440claro/390escuro×pendentes/vazio/falha horizontal), com rede externa interceptada e respostas sintéticas, logoBrain/espera deliberada, tabelas separadas, download/reaberturaJSON/CSV, regra/contagens e ausência de overflow/exceções aprovados; mais2capturas da seção para inspeção visual. Evidências ignoradas em `.local-inputs/relatorios-lucas/maceio/product-review-2026-11-19/{page,capture}/`; roteiros locais `maceio-product-review-qa.mjs`/`maceio-product-review-capture.mjs`. Isso não comprova os dados reais ou deploy.
+- **Pendências:** editor/memória e geração parcial futuros; divergência de estoque/fluxos ausentes continuam em conferência. CAGED/SP/outros motores intocados; sem push/deploy/Monday.
+- **Monday:** [Panorama Maceió / SINDUSCON](https://brain381753.monday.com/boards/18398638577/pulses/13149406169) — `13149406169`.
+
 ## 19/11/2026 — Maceió: CSV ampliado de produtos horizontais pendentes — Codex/Lucas
 
 - **Pedido/evidência:** diagnóstico real(5) com40disponíveis/20fontes/22editoriais; Lucas pediu adaptar oCSV para identificar também produtos sem categoria além deFechado. Base `500c476b`, main/origin0/0após fetch, árvore limpa.
