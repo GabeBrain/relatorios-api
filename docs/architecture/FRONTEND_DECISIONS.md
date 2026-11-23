@@ -1,3 +1,9 @@
+## 23/11/2026 — Maceió: geração parcial e fechamento explícitos
+
+Lucas autorizou isolar empreendimentos inconsistentes e continuar com a base válida, com logs e CSV para correção. Reutilizados avisos por slide, seção de diagnóstico, Button e worker cancelável/BrainLoadingState existentes. Dados anteriores não preenchem fotos ausentes; `partialSlides` e avisos identificam cobertura. CSV identificado é separado do JSON agregado e descartado ao trocar geração.
+
+Mês/trimestre ainda em andamento impede geração, com motivo visível e proteção no hook, usando SãoPaulo. Estoques/preços/IVV/escoamento usam base válida explícita; negativos legítimos renderizam unidades com sinal/eixo zero. CAGED atrasado usa competência real autorizada e exibida no gráfico/interface/JSON, sem mudar datas dos valores. Anos/janelas sem INCC não contaminam os cobertos. [Regras e evidências](../features/relatorios-institucionais/maceio/VALIDACAO_3T2026_2026-11-23.md). Nenhum primitive, token visual ou rota nova.
+
 ## 18/11/2026 — Maceió: contingência CAGED identificada por versão
 
 Pedido de Lucas para corrigir fontes pendentes. Consulta CAGED online permanece prioritária; em transporte/5xx/404, cópia de agregados reais verificada noBigQuery entra sob demanda, com versão/data/cobertura explícitas. Autorização/limites não são contornados;200inválido e competência sem cobertura permanecem indisponíveis. Asset não se atualiza automaticamente nem elimina a necessidade de reparar a ponte online. [Contrato/proveniência/limites](../features/relatorios-institucionais/maceio/CAGED_CONTINGENCIA_2026-11-18.md).

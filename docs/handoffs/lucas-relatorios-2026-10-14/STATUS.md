@@ -1,5 +1,13 @@
 # Estado do handoff
 
+## 23/11/2026 — Maceió: regras gerais para qualquer período fechado
+
+Base main limpa `12d4f40a`, origin único; fetch/pull--ff-only trouxeram12commits até `b9417b04`, incluindo decisões19/11, cadência e Fortaleza. Lucas entregou JSON3T2026(23pendentes), setembro(22), outubro(36), mais conferências de estoque, e determinou corrigir o motor de todas as edições fechadas. Autorizou excluir empreendimento inconsistente do cálculo com logs/CSV e usar setembroCAGED identificado em outubro. [Decisões/evidências e hashes dos seis arquivos](../../features/relatorios-institucionais/maceio/VALIDACAO_3T2026_2026-11-23.md).
+
+Código `579e0a89`: base válida explícita por indicador, mesma coorte IVV/escoamento, taxas sem balanço nulas, Médio-Alto, comercial por padrão declarado, negativos com sinal, estoque adotadoMarechal com fotos incompletas isoladas, janelasINCC sem índice omitidas com aviso e comparação2021semfalha. CSV identifica faltantes e valores anteriores, sem imputar dados ou expor campos fora da lista permitida. Worker/BrainLoadingState/cancelamento existentes; período em andamento impedido na interface/hook emSãoPaulo. CAGED conserva referência real na arte/aviso/JSON e não reutiliza acumulado de outro ano. Sem novo endpoint ou alteração dos motores paralelos/índice compartilhado.
+
+Validação final:264testes/30arquivos, lint, tipos/build aprovados;15períodos completos e primeiro ano2021;12cenários Edge emdesktop1440claro/mobile390escuro (23/22/36posições, CSV/JSON reabertos, negativos, CAGED real, vazio/fonte parcial, calendário sem chamadas pesadas), sem overflow/exceções. BigQuery consultado somente leitura confirmou última carga2026-09. API imobiliária autenticada não reexecutada por falta de token pessoal; fixtures demonstram o motor, não homologam números recebidos. Nova geração publicada eCSV fornecerão os IDs faltantes, ausentes nos arquivos de conferência antigos. Sem escritaMonday, push ou deploy nesta rodada; envio aguarda autorização conformeAGENTS.
+
 ## 19/11/2026 — Fortaleza: preço sem oferta e publicação autorizada com Beira Mar
 
 O diagnóstico(2) confirmouMaracanaúsemoferta válida de casas emoutubro/2026; Aquiraz26/Caucaia169/Eusébio299unidades=494e média ponderadaR$6364,763441/m². Lucas autorizou seguirAPI, liberar a regra e publicar junto àBeiraMar (`abd78164`jálocal). Base remota `c40757dd`, fetch0atrás/1àfrente, árvore limpa antes do novo ajuste.

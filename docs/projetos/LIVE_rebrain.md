@@ -814,6 +814,17 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-11-23 — Maceió: geração robusta em períodos fechados e CSV de inconsistências — Lucas / Codex
+
+- **Ambiente/funcionalidade:** `/rebrain/relatorios-institucionais/maceio` — relatórios mensal e trimestral, além da edição de referência.
+- **Pedido/evidência:** Lucas enviou diagnósticos3T2026(23fontes pendentes), setembro(22) e outubro(36), com conferências de estoque. Autorizou isolar empreendimentos inconsistentes, avisar nos logs, exportar CSV e usar CAGEDsetembro identificado em outubro. Reforçou qualquer mês/trimestre fechado; período em andamento não deve gerar. [D34–D44 e evidências](../features/relatorios-institucionais/maceio/VALIDACAO_3T2026_2026-11-23.md).
+- **Entrega:** exclusões por cálculo, cobertura e `partialSlides` explícitos, sem preencher histórico/preço/área. IVV/escoamento preservam a mesma coorte durante a janela; taxas sem balanço ficam nulas, outras linhas/meses continuam. Estoque deMarechal mantém fonte adotada com isolamento de fotos faltantes; Médio-Alto preservado; comercial usa padrão declarado; negativos legítimos em unidades/eixo zero. INCC valida cobertura das janelas, sem bloquear as recentes por índice antigo ausente. Proteção para comparação do primeiro ano e gráficos com histórico curto.
+- **Interface:** CSV identificado separado, com ID/tipologia/mês/motivo e valores anteriores em colunas próprias, worker/BrainLoadingState/cancelamento/descarte existentes. Sem nova API/persistência. Mês/trimestre não encerrado bloqueado emSãoPaulo na interface/hook. CAGED online prioritário, contingência no mesmo ano com referência real explícita na arte/interface/JSON; sem contornar autorização ou contrato.
+- **Commits:** `579e0a89` (código e testes); documentação neste fechamento.
+- **Validação:**264testes/30arquivos, lint dirigido, tipos/build aprovados.15períodos completos (jan–out2026,1T–3T2026,dez/4T2025), primeiro ano2021, virada de mês/trimestre e casos exatos23/22/36.12cenários Edge desktop1440claro/mobile390escuro com fonte imobiliária sintética, CAGED real verificado, CSV/JSON baixados e reabertos, negativos/competência inspecionados, vazio/fonte parcial/fechamento sem chamadas pesadas. Sem overflow/exceções. BigQuery relido: carga ainda2026-09, sem escrita. Artefatos ignorados em `.local-inputs/relatorios-lucas/maceio/partial-2026-11-23/`.
+- **Impacto em Etapas/Pendências:** correção geral local concluída; aguarda autorização de push e nova geração no ambiente publicado para comprovar cobertura real e corrigir cadastros peloCSV. Não declarar zero pendências reais por fixture; sem tokenAPI pessoal/homologação/deploy observado. Fonte onlineCAGED continua degradada. Sem escritaMonday; outros motores/índice compartilhado preservados.
+- **Monday:** [DESAFIO — Estudos Entidades e Institucionais](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`.
+
 ### 2026-11-18 — Maceió: contingência CAGED com agregados reais — Lucas / Codex
 
 - **Ambiente/funcionalidade:** `/rebrain/relatorios-institucionais/maceio` — fontes dos slides de emprego9–14, mensal/trimestral.
@@ -2094,6 +2105,8 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 
 ## 2. Etapas
 
+- **23/11 — Maceió:** correção compartilhada para períodos fechados concluída localmente em `579e0a89`, incluindo23/22/36causas recebidas, avisos/CSV, negativos, INCC e CAGEDcom referência explícita.264testes e12cenários visuais aprovados. Publicação e conferência imobiliária real após atualização ainda pendentes; não confundir esses marcos com homologação.
+
 - **18/11 — Maceió, CAGED:** carga BigQuery2017–set/2026observada e seis modelosCAGED calculados com agregados reais(`e67ac127`), contingência identificada e online prioritário. Publicação e prova autenticada do aplicativo pendentes; ponte online ainda sem reparo observado. Não homologa os21bloqueios imobiliários do últimoJSON.
 
 - **18/11 — Maceió, JSON33/27/22:** recorte dos rankings e auditoria v2 implementados localmente(`f537eab9`),175testes/build e4cenários com fonte sintética aprovados. Nova geração autenticada necessária para medir liberação; não altera classificação dos10`Fechado`.
@@ -2267,6 +2280,8 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 ---
 
 ## 3. Pendências
+
+- **23/11 — Maceió:** autorizar envio da correção geral, gerar relatório no ambiente atualizado e enviar novo diagnóstico/CSV de inconsistências para correção cadastral. Não é necessário decidir de novo como tratar caso isolado: exclusão com log já foi autorizada. Competência ainda não fechada permanece impedida; fonte global sem base real permanece indisponível. Reparar ponte onlineCAGED e atualizar carga seguem tarefas remotas separadas, sem alegação de execução nesta sessão.
 
 - **18/11 — Maceió, fontes apósCAGED:** autorizar envio do lote local e gerarJSONv2. CAGED dispõe de contingência real identificada atéset/2026; reparar acesso online continua separado. InvestigarMarechal283×192pela auditoria v2, aguardar fonte dos lançamentos por tipologia e classificação dos10`Fechado`pelo analista. Lucas confirmou que fará essas consultas. Não usar a disponibilidade dos seisCAGED para concluir todos27bloqueios resolvidos.
 
