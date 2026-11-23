@@ -1,4 +1,6 @@
-import { useState } from 'react';
+import { useMemo,useState } from 'react';
+import MaceioPptxExport from './MaceioPptxExport';
+import type {MaceioGenerationState} from './useMaceioMarket';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
 import { maceioPeriod, maceioReference,maceioSlideTitle, type MaceioSelection } from './model';
@@ -11,8 +13,9 @@ import {buildCagedSlide} from './caged';
 import { maceioMonetaryPolicy } from './criteria';
 
 const introTitles=['Abertura Brain','Sobre este relatório','Apresentação institucional','Presença e atuação','Soluções Brain','Sumário','Municípios do estudo','Emprego','Saldo do emprego formal no Brasil · construção civil','Desempenho por estado · saldo total','Desempenho por estado · construção civil','Emprego em Alagoas · construção civil','Saldo por setor · Alagoas','Desempenho dos estados do Nordeste','Lançamentos verticais','Empreendimentos verticais lançados','Empreendimentos lançados por padrão','Empreendimentos lançados · acumulado 12 meses','Unidades verticais lançadas','Unidades lançadas · acumulado 12 meses'];
-export default function MaceioIntroSlides({selection,data,initialMonetaryPolicy=maceioMonetaryPolicy(selection),initialPricePolicy='stock-weighted'}:{selection:MaceioSelection;data:MaceioIntroData|null;initialMonetaryPolicy?:MonetaryPolicy;initialPricePolicy?:PricePolicy}){
+export default function MaceioIntroSlides({selection,data,generation=null,initialMonetaryPolicy=maceioMonetaryPolicy(selection),initialPricePolicy='stock-weighted'}:{selection:MaceioSelection;data:MaceioIntroData|null;generation?:MaceioGenerationState|null;initialMonetaryPolicy?:MonetaryPolicy;initialPricePolicy?:PricePolicy}){
  const [page,setPage]=useState(1),[expanded,setExpanded]=useState(false),[monetaryPolicy]=useState<MonetaryPolicy>(initialMonetaryPolicy),[pricePolicy]=useState<PricePolicy>(initialPricePolicy);
+ const revision=useMemo(()=>({selection,data,generation,monetaryPolicy,pricePolicy}),[selection,data,generation,monetaryPolicy,pricePolicy]);
  const reference=maceioReference(selection.periodicity),market=page>=21&&page<=40&&![29,39].includes(page)?buildMaceioMarketSlide(page,selection,data?.slides??null,monetaryPolicy):null;
  const advanced=page>=41&&page<=60?buildOfferPriceSlide(page,selection,data?.slides??null,pricePolicy):null;
  const remaining=page>=61?buildRemainingSlide(page,selection,data?.slides??null,pricePolicy):null;
@@ -24,6 +27,7 @@ export default function MaceioIntroSlides({selection,data,initialMonetaryPolicy=
  return <section className="space-y-4 min-w-0" aria-label="Prévia dos slides Maceió">
   <header className="space-y-1"><h2 className="text-lg font-semibold">Slides do relatório · {selection.periodicity==='monthly'?'Mensal':'Trimestral'}</h2><p className="text-sm text-muted-foreground">Prévia: {reference.slideCount} slides, na sequência original · {maceioPeriod(selection).label}. Fontes e métodos pendentes permanecem identificados.</p></header>
   {navigation}
+  <MaceioPptxExport selection={selection} generation={generation} revision={revision} renderSlide={number=><MaceioReportSlide page={number} selection={selection} data={data} monetaryPolicy={monetaryPolicy} pricePolicy={pricePolicy}/>}/>
   <div className="flex flex-wrap items-center justify-between gap-2"><p className="text-sm font-medium">Slide {page} · {title}</p><Button variant="outline" onClick={()=>setExpanded(true)}>Ampliar slides</Button></div>
   {market?.money && monetaryPolicy === 'INCC-DI' && <p className="text-sm text-muted-foreground">Valores corrigidos pelo INCC-DI · base {maceioPeriod(selection).label}.</p>}
   {[...(market?.warnings??[]),...(advanced?.warnings??[]),...(remaining?.warnings??[])].map(warning=><p key={warning} role="status" className="text-sm text-muted-foreground">{warning}</p>)}
