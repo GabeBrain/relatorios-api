@@ -814,6 +814,16 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-11-23 — Maceió: varredura completa mensal e trimestral — Lucas / Codex
+
+- **Ambiente/funcionalidade:** `/rebrain/relatorios-institucionais/maceio`, 82 posições mensais e 87 trimestrais.
+- **O quê/por quê:** corrigidos percentuais indevidos em contagens IVV, títulos ausentes/desatualizados, lacunas ligadas, valores residuais de tabelas dos modelos, classificação quatro ou mais/Super Luxo/histórico, falsos bloqueios por registros sem contribuição e empreendimentos inválidos. D37 estendida com logs/CSV e mesma coorte temporal; falhas globais e ausência real continuam explícitas. CAGED valida cobertura publicada.
+- **Arquivos:** módulo Maceió, [decisões e evidências](../features/relatorios-institucionais/maceio/VARREDURA_COMPLETA_2026-11-23.md), decisão frontend e STATUS do handoff.
+- **Commits:** `00c42855` (código/regressões); documentação nesta entrega.
+- **Monday:** [DESAFIO — Estudos Entidades e Institucionais](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`. Sem escrita no Monday.
+- **Validação:** 298 testes/31 arquivos, lint e build aprovados; 338 visitas Edge (169 posições em desktop claro/celular escuro), CSV/JSON reabertos, sem exceções ou overflow. Imobiliário sintético, CAGED snapshot real verificado. Sem token pessoal para nova geração autenticada; não equivale a homologação de valores ou deploy observado.
+- **Impacto em Etapas/Pendências:** varredura local concluída; envio depende de autorização, seguido de nova geração real e conferência dos arquivos pareados.
+
 ### 2026-11-23 — Maceió: geração robusta em períodos fechados e CSV de inconsistências — Lucas / Codex
 
 - **Ambiente/funcionalidade:** `/rebrain/relatorios-institucionais/maceio` — relatórios mensal e trimestral, além da edição de referência.
@@ -2105,6 +2115,8 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 
 ## 2. Etapas
 
+- **23/11 — Maceió, varredura completa:** concluída localmente em `00c42855`; 169 posições, 298 testes e 338 visitas de navegador. [Evidências](../features/relatorios-institucionais/maceio/VARREDURA_COMPLETA_2026-11-23.md). Motores paralelos preservados.
+
 - **23/11 — Maceió:** correção compartilhada para períodos fechados concluída localmente em `579e0a89`, incluindo23/22/36causas recebidas, avisos/CSV, negativos, INCC e CAGEDcom referência explícita.264testes e12cenários visuais aprovados. Publicação e conferência imobiliária real após atualização ainda pendentes; não confundir esses marcos com homologação.
 
 - **18/11 — Maceió, CAGED:** carga BigQuery2017–set/2026observada e seis modelosCAGED calculados com agregados reais(`e67ac127`), contingência identificada e online prioritário. Publicação e prova autenticada do aplicativo pendentes; ponte online ainda sem reparo observado. Não homologa os21bloqueios imobiliários do últimoJSON.
@@ -2280,6 +2292,8 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 ---
 
 ## 3. Pendências
+
+- **23/11 — Maceió, após varredura:** autorizar envio das correções, observar publicação e gerar JSON/CSV pareados com API real. Não declarar os dados imobiliários homologados a partir das fixtures; ausência real de fechamento/fonte continua explícita. Correções locais e limites em [varredura](../features/relatorios-institucionais/maceio/VARREDURA_COMPLETA_2026-11-23.md).
 
 - **23/11 — Maceió:** autorizar envio da correção geral, gerar relatório no ambiente atualizado e enviar novo diagnóstico/CSV de inconsistências para correção cadastral. Não é necessário decidir de novo como tratar caso isolado: exclusão com log já foi autorizada. Competência ainda não fechada permanece impedida; fonte global sem base real permanece indisponível. Reparar ponte onlineCAGED e atualizar carga seguem tarefas remotas separadas, sem alegação de execução nesta sessão.
 

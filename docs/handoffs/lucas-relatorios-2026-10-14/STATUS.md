@@ -1,5 +1,11 @@
 # Estado do handoff
 
+## 23/11/2026 — Maceió: varredura integral das duas edições
+
+Lucas solicitou revisão completa; escopo exclusivo Maceió confirmado. Base main limpa `4d7c4e6b`, origin único atualizado por fetch (0/0). Código `00c42855` corrige unidades IVV, títulos/arte residual, classificação histórica/quatro ou mais/Super Luxo, validação dos contribuintes, isolamento cadastral com CSV e limites temporais CAGED. [Evidências detalhadas](../../features/relatorios-institucionais/maceio/VARREDURA_COMPLETA_2026-11-23.md).
+
+298 testes/31 arquivos, lint e build aprovados; 169 posições em dois tamanhos/temas, 338 visitas Edge sem exceções ou overflow, CSV/JSON reabertos e capturas inspecionadas. Imobiliário sintético e snapshot CAGED real: sem token pessoal para reexecutar API imobiliária autenticada, sem homologação de números ou deploy observado. Registros anteriores de envio pendente referem-se às respectivas rodadas; base `4d7c4e6b` já publicada no Git. Esta nova varredura aguarda autorização de push. Nenhuma escrita Monday.
+
 ## 23/11/2026 — Maceió: regras gerais para qualquer período fechado
 
 Base main limpa `12d4f40a`, origin único; fetch/pull--ff-only trouxeram12commits até `b9417b04`, incluindo decisões19/11, cadência e Fortaleza. Lucas entregou JSON3T2026(23pendentes), setembro(22), outubro(36), mais conferências de estoque, e determinou corrigir o motor de todas as edições fechadas. Autorizou excluir empreendimento inconsistente do cálculo com logs/CSV e usar setembroCAGED identificado em outubro. [Decisões/evidências e hashes dos seis arquivos](../../features/relatorios-institucionais/maceio/VALIDACAO_3T2026_2026-11-23.md).

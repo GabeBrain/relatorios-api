@@ -2,6 +2,14 @@
 
 Registro de fatos comprovados, hipóteses e decisões. Atualizado a cada entrega.
 
+## 23/11/2026 — Varredura integral mensal e trimestral
+
+- **D45 — Validação conforme contribuição (DET):** estoque zero não exige preço/área nos indicadores de estoque; capacidade positiva continua exigindo os campos próprios. Categoria sem oferta válida conhecida tem preço nulo e aviso, sem inventar zero. Ausência de base válida continua indisponível.
+- **D46 — Consistência histórica (DET):** quartos quatro ou mais usam a mesma categoria em todos os blocos; padrão/família históricos prevalecem sobre cadastro atual quando informados. Super Luxo é categoria distinta e não recebe faixa ou família presumida; comercial conserva D35.
+- **D47 — Isolamento completo e auditável (DET):** D37 também cobre identificação, data, histórico e duplicações inválidas. Todas as cópias de ID duplicado são excluídas; contexto municipal/UF/segmento errado continua falha global. CSV permite identificar os casos, JSON permanece agregado e coorte temporal é preservada.
+- **D48 — Arte sem valores residuais (DET):** limpar superfície das tabelas originais antes de dados/indisponibilidade. Contagens e taxas têm unidades próprias; lacunas não são ligadas; títulos usam a referência selecionada, preservando título original no diagnóstico. CAGED completo só dentro da cobertura declarada.
+- **Evidência:** código `00c42855`; [varredura de 169 posições, 298 testes e 338 visitas no navegador](VARREDURA_COMPLETA_2026-11-23.md). Correções locais, sem homologação de dados imobiliários reais ou deploy observado.
+
 ## 23/11/2026 — Diagnóstico 3T e correções de recorte/classificação
 
 - **D34 — Categorias explícitas:** corrigida omissão de Médio-Alto nos quadros trimestrais de RM/VGV. Categoria própria da API; não agrupar com Médio/Alto nem inventar sua faixa de preço na referência. Faixas são vinculadas pelo rótulo, preservando as correspondências anteriores.

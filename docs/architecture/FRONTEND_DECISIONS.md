@@ -1,3 +1,7 @@
+## 23/11/2026 — Maceió: superfícies analíticas e semântica das tabelas
+
+Reutilizados componentes SVG do relatório e os modelos de referência. Superfície analítica limpa antes das tabelas dinâmicas ou aviso de fonte para impedir números residuais do raster; títulos e rodapés preservados, rótulos de oferta redesenhados. IVV distingue calendário/área e contagem/taxa; null interrompe linhas. Títulos da interface/diagnóstico acompanham seleção, categoria quatro ou mais explícita e ausência conhecida de oferta tem mensagem própria. Nenhum primitive, token, endpoint ou fluxo de carregamento novo; worker e BrainLoadingState existentes preservados. Sucesso, parcial, categoria vazia e fonte inválida cobertos em testes; quatro cenários desktop claro/celular escuro percorreram as 169 posições. [Evidências e limites](../features/relatorios-institucionais/maceio/VARREDURA_COMPLETA_2026-11-23.md).
+
 ## 23/11/2026 — Maceió: geração parcial e fechamento explícitos
 
 Lucas autorizou isolar empreendimentos inconsistentes e continuar com a base válida, com logs e CSV para correção. Reutilizados avisos por slide, seção de diagnóstico, Button e worker cancelável/BrainLoadingState existentes. Dados anteriores não preenchem fotos ausentes; `partialSlides` e avisos identificam cobertura. CSV identificado é separado do JSON agregado e descartado ao trocar geração.
