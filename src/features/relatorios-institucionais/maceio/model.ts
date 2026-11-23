@@ -63,6 +63,13 @@ export function maceioPeriod(selection: Pick<MaceioSelection, 'periodicity' | 'y
   };
 }
 
+/** Calendar closure in the study's timezone; not a claim of source coverage. */
+export function maceioPeriodIsClosed(selection:Pick<MaceioSelection,'periodicity'|'year'|'position'>,now=new Date()) {
+  const parts=new Intl.DateTimeFormat('en-US',{year:'numeric',month:'2-digit',timeZone:'America/Sao_Paulo'}).formatToParts(now);
+  const current=`${parts.find(part=>part.type==='year')!.value}-${parts.find(part=>part.type==='month')!.value}`;
+  return maceioPeriod(selection).end.slice(0,7)<current;
+}
+
 export interface MaceioBlueprint {
   status: 'structure-only';
   createdAt: string;

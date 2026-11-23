@@ -19,6 +19,14 @@ const selection: MaceioSelection = { uf: 'AL', city: 'Maceió', territory: 'capi
 const cities = [...MACEIO_CITIES_MONTHLY];
 const token = 'synthetic-token';
 
+it('não consulta fontes de um período ainda não encerrado mesmo com acesso pronto',async()=>{
+  const now=new Date(),open={...selection,year:now.getFullYear()+1,position:1};
+  collect.mockClear();
+  const {result}=renderHook(()=>useMaceioMarket(open,cities,token,true));
+  await act(async()=>result.current.consult());
+  expect(collect).not.toHaveBeenCalled();expect(result.current.state).toBeNull();
+});
+
 function successPayload() {
   const inputs = cities.map(city => marketFixture(selection, city));
   const report = buildMaceioMarket(selection, cities, inputs);

@@ -3,7 +3,7 @@ import { createMaceioRequestLane } from './request-lane';
 import { useEffect, useRef, useState } from 'react';
 import { collectMaceioMarket, type MaceioCollection } from './api';
 import type { MaceioMarketReport } from './market';
-import { maceioScope, prepareMaceioBlueprint, type MaceioBlueprint, type MaceioSelection } from './model';
+import { maceioScope, maceioPeriodIsClosed, prepareMaceioBlueprint, type MaceioBlueprint, type MaceioSelection } from './model';
 import { collectMaceioIntro, type MaceioIntroData } from './intro-data';
 import { collectMaceioMarketSlides } from './market-slides-data';
 import {collectMaceioCaged} from './caged-api';
@@ -41,7 +41,7 @@ export function useMaceioMarket(selection: MaceioSelection, authorizedCities: st
     return () => { operation.current?.abort(); };
   }, [key, ready]);
   async function consult(retryMissing = false) {
-    if (!ready || operation.current && !operation.current.signal.aborted) return;
+    if (!ready || !maceioPeriodIsClosed(selection) || operation.current && !operation.current.signal.aborted) return;
     operation.current?.abort();
     const controller = new AbortController(); operation.current = controller;
     const seed = retryMissing ? cache.current : undefined;

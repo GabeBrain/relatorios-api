@@ -4,6 +4,7 @@ import {maceioCities,maceioPeriod,type MaceioSelection} from './model';
 import {marketMonth,normalizeMarketText as norm,type MarketRow} from './market';
 import {readNumber,type MaceioMarketSlidesData,type SlideSource} from './market-slides-data';
 import type {PricePolicy} from './offer-price-data';
+import {partialNotice,excludeInvalidProjects} from './partial-data';
 
 type Cell=number|string|null;
 export interface RemainingTable {title?:string;columns:string[];rows:{label:string;values:Cell[]}[];formats:('count'|'percent'|'money'|'decimal'|'text')[]}
@@ -13,7 +14,7 @@ const number=(value:unknown,decimal=false)=>{const n=readNumber(value,false,deci
 const sum=(values:number[])=>{const n=values.reduce((a,b)=>a+b,0);if(!Number.isFinite(n)||Math.abs(n)>=Number.MAX_SAFE_INTEGER/100)throw new Error('Totais fora da precisão segura.');return n;};
 const ratio=(a:number,b:number)=>b>0?a/b*100:null;
 const standards=['Compacto','Econômico','Standard','Médio','Médio-Alto','Alto','Luxo'];
-const rmStandards=['Compacto','Econômico','Standard','Médio','Alto','Luxo','Super Luxo'];
+const rmStandards=['Compacto','Econômico','Standard','Médio','Médio-Alto','Alto','Luxo','Super Luxo'];
 const typologies=['1 Dormitório','2 Dormitórios','3 Dormitórios','4 ou + Dormitórios'];
 const families=['Compactos','MCMV','Médio Padrão','Luxo'];
 const types=['Condomínio de Casas','Loteamento Fechado','Loteamento Aberto'];
@@ -26,6 +27,7 @@ function details(data:MaceioMarketSlidesData,selection:MaceioSelection,cities:re
   const sources=segment==='Vertical'?data.sources:segment==='Horizontal'?data.horizontal:data.commercial,end=maceioPeriod(selection).end.slice(0,7),result:Detail[]=[];
   if(data.end!==end)throw new Error('A fonte não corresponde ao período selecionado.');
   for(const city of cities){
+    let excludedSnapshots=0,excludedStock=0;
     const matches=(sources??[]).filter(s=>norm(s.city)===norm(city)&&s.metric==='details');
     if(matches.length!==1||!matches[0].complete)throw new Error(`${city}: histórico ${segment} não concluído. Tente novamente.`);
     const projects=new Set<string>();
@@ -33,23 +35,36 @@ function details(data:MaceioMarketSlidesData,selection:MaceioSelection,cities:re
       const id=String(building.building_id??building.id??'').trim(),release=marketMonth(building.release_date);
       if(!id||projects.has(id)||!release||norm(building.city)!==norm(city)||building.state!=='AL'||norm(building.building_type)!==norm(segment))throw new Error('Identificação, segmento, município ou data inválida no histórico.');
       projects.add(id);if(release>end)continue;
-      if(!Array.isArray(building.typologies_history))throw new Error('Fotografia histórica por tipologia ausente.');
+      if(!Array.isArray(building.typologies_history)){excludedSnapshots++;continue;}
       const histories=building.typologies_history as MarketRow[],established=new Set<string>(),seen=new Set<string>();
+      let invalidSnapshot=false;
       for(const row of histories){
         const month=marketMonth(row.period),tid=String(row.typology_id??'').trim();
         if(!month||!tid)throw new Error('Competência ou ID de tipologia inválido.');
         if(month<=end)established.add(tid);if(month!==end)continue;
         if(seen.has(tid))throw new Error('Tipologia duplicada no fechamento.');seen.add(tid);
-        result.push({id:`${city}/${id}`,city,year:Number(release.slice(0,4)),standard:String(row.pattern??building.standard??''),family:String(row.standard_family??building.standard_family??maceioPatternFamily(row.pattern??building.standard)??''),type:maceioHorizontalProduct(building,end),bedroom:row.number_bedroom,area:row.private_area,price:row.price,stock:number(row.typology_stock),qty:row.qty,stage:row.estagio_empreendimento??row.building_status});
+        if(readNumber(row.typology_stock,false)===null){invalidSnapshot=true;continue;}
+        result.push({id:`${city}/${id}`,city,year:Number(release.slice(0,4)),standard:String((segment==='Comercial'?building.standard:row.pattern??building.standard)??''),family:String(row.standard_family??building.standard_family??maceioPatternFamily(row.pattern??building.standard)??''),type:maceioHorizontalProduct(building,end),bedroom:row.number_bedroom,area:row.private_area,price:row.price,stock:number(row.typology_stock),qty:row.qty,stage:row.estagio_empreendimento??row.building_status});
       }
-      if(!seen.size||[...established].some(tid=>!seen.has(tid)))throw new Error(`${city}: fotografia de fechamento incompleta; ausência não é estoque zero.`);
+      if(invalidSnapshot||!seen.size||[...established].some(tid=>!seen.has(tid))){
+        const excluded=result.filter(row=>row.id===`${city}/${id}`);
+        excludedStock+=sum(excluded.map(row=>row.stock));excludedSnapshots++;
+        for(let i=result.length-1;i>=0;i--)if(result[i].id===`${city}/${id}`)result.splice(i,1);
+      }
     }
     const municipal=(sources??[]).filter(s=>norm(s.city)===norm(city)&&s.metric==='stock'&&s.group==='Padrão');
     if(municipal.length!==1||!municipal[0].complete)throw new Error(`${city}: estoque municipal ${segment} indisponível para reconciliação.`);
     const rows=municipal[0].rows.filter(row=>marketMonth(row.period)===end),groups=new Set<string>();
     const expected=sum(rows.map(row=>{const group=norm(row.group);if(norm(row.city)!==norm(city)||row.state!=='AL'||norm(row.building_type)!==norm(segment)||!group||/^(total|subtotal)(\b|$)/.test(group)||groups.has(group))throw new Error('Estoque municipal duplicado ou fora do universo.');groups.add(group);return number(row.stock);}));
     const actual=sum(result.filter(row=>row.city===city).map(row=>row.stock));
-    if(expected!==actual&&!maceioStockDecision(city,segment,actual,expected,warnings))throw new Error(`${city}: estoque granular diverge do total municipal ${segment} em ${end} (${actual} versus ${expected}, diferença ${actual-expected}).`);
+    if(excludedSnapshots)partialNotice(warnings,`${city}, ${end}: ${excludedSnapshots} empreendimento(s) com fotografia incompleta desconsiderado(s); estoque observado excluído ${excludedStock}. Estoque coberto ${actual}, total municipal ${expected}. Quantidades ausentes não foram preenchidas.`);
+    // Check the original observed stock, including the excluded project, so
+    // exclusion cannot hide an unrelated discrepancy between complete sources.
+    const observed=actual+excludedStock;
+    if(expected!==observed&&!maceioStockDecision(city,segment,observed,expected,warnings)){
+      if(excludedSnapshots)partialNotice(warnings,`${city}, ${end}: reconciliação incompleta (${observed} observado versus ${expected} municipal); total do quadro limitado aos empreendimentos com fotografia válida.`);
+      else throw new Error(`${city}: estoque granular diverge do total municipal ${segment} em ${end} (${actual} versus ${expected}, diferença ${actual-expected}).`);
+    }
   }
   // Reconcile the full source above before applying the analyst's report universe.
   const eligible=result.filter(row=>segment!=='Horizontal'||row.type!=='Condomínio de Chácaras');
@@ -81,7 +96,20 @@ export function buildRemainingSlide(page:number,selection:MaceioSelection,data:M
     if(result.price&&policy!=='stock-weighted')throw new Error('Confirme o critério de preços para esta prévia; o método do original ainda não foi homologado.');
     const horizontal=role.startsWith('horizontal'),commercial=role.startsWith('commercial'),segment=horizontal?'Horizontal':commercial?'Comercial':'Vertical';
     const cities=role.endsWith('-rm')?maceioCities(selection.periodicity).filter(city=>norm(city)!=='maceio'):role.endsWith('-capital')||commercial||['area','range'].includes(role)?['Maceió']:maceioCities(selection.periodicity);
-    const rows=details(data,selection,cities,segment,result.warnings);
+    const detailRows=details(data,selection,cities,segment,result.warnings);
+    const rows=excludeInvalidProjects(detailRows,row=>{
+      const stockOnly=role==='years'||role==='standards-combined'||role==='bedrooms-combined';
+      if(!stockOnly&&!['area','range'].includes(role)&&!role.includes('prices'))qty(row);
+      if(role.startsWith('standards')||role==='vgv')match(row.standard,role.endsWith('-rm')||role==='vgv'&&selection.periodicity==='quarterly'?rmStandards:standards);
+      if(role.startsWith('bedrooms')||role==='bedrooms-combined'||['area','range','stage-bedrooms'].includes(role))if(row.stock>0||role.startsWith('stage')||role.startsWith('bedrooms'))beds(row);
+      if(role==='stage-standards')match(row.family,families);
+      if(role.startsWith('stage')&&(qty(row)>0||row.stock>0))match(String(row.stage??''),['Planta','Construção','Pronto']);
+      if(role==='commercial-type'||role==='commercial-years'||role==='commercial-prices')match(row.standard,['Econômico','Standard','Médio','Alto','Alto +']);
+      const needsArea=['area','range'].includes(role)||role.includes('prices'),needsPrice=role==='range'||role==='vgv'||role.includes('prices');
+      const contributes=role==='vgv'?qty(row)>0:row.stock>0;
+      if(contributes&&needsArea&&number(row.area,true)<=0)throw new Error('Área histórica sem base positiva.');
+      if(contributes&&needsPrice&&number(row.price,true)<=0)throw new Error('Preço histórico sem base positiva.');
+    },result.warnings,`slide ${page}`);
     if(horizontal)result.warnings.push('Tipos explícitos da API e dez IDs confirmados são preservados. Horizontal sem tipo definido com padrão de preço reconhecido do empreendimento ou quartos positivos na fotografia do fechamento é classificado como Condomínio de Casas/Sobrados, por regra autorizada. Zero ou ausência de quartos não define loteamento aberto/fechado. Consulte os detalhes da geração.');
     if(!rows.length)throw new Error('Nenhum empreendimento com estoque positivo no fechamento deste recorte.');
     const yearLimit=selection.year-(selection.periodicity==='monthly'?5:4),years=[`Até ${yearLimit}`,...Array.from({length:selection.year-yearLimit},(_,i)=>String(yearLimit+1+i))];
@@ -123,19 +151,25 @@ export function buildRemainingSlide(page:number,selection:MaceioSelection,data:M
       result.note+=' VGV de conferência = ticket ponderado pela capacidade histórica do grupo × quantidade. Vendidas = capacidade−estoque, não fluxo da janela. Valores nominais, sem INCC; fórmula e classificação não homologadas.';
     }else{
       const groups=commercial?['Econômico','Standard','Médio','Alto','Alto +']:types;
-      const group=(row:Detail)=>{if(!commercial)return match(row.type,types);const area=number(row.area,true),price=number(row.price,true);if(area<=0||price<=0)throw new Error('Área ou preço comercial inválido.');const meter=price/area;return meter<=10000?0:meter<=12000?1:meter<=14000?2:meter<=16000?3:4;};rows.forEach(group);
+      // As in the monthly standard tables, preserve the source's declared
+      // classification. Typology prices do not reclassify a project.
+      const group=(row:Detail)=>match(commercial?row.standard:row.type,groups);rows.forEach(group);
       if(role.includes('prices')){
         const values=(part:Detail[]):Cell[]=>[weighted(part,'price'),weighted(part,'area'),weighted(part,'meter')];
         result.tables=[{columns:['Preço médio','Área privativa média','R$/m² privativo'],formats:['money','decimal','money'],rows:[...groups.map((label,i)=>({label,values:values(rows.filter(row=>group(row)===i))})),{label:'Média geral',values:values(rows)}]}];
       }else result.tables=[capacityTable(groups,rows,group,true)];
-      result.warnings.push(commercial?'Classes comerciais por R$/m² histórico: até10mil,12mil,14mil,16mil e acima; limites e universo a homologar.':'Horizontal: tipos explícitos prevalecem; sem tipo, padrão de preço reconhecido identifica casas/sobrados conforme confirmação do gestor GeoBrain, ou quartos históricos positivos conforme autorização anterior. Loteamentos sem identificação aberto/fechado continuam para conferência.');
+      result.warnings.push(commercial?'Padrão comercial declarado no empreendimento pela API, seguindo o critério dos quadros mensais. Preços das tipologias não reclassificam o empreendimento. Faixas do modelo são referência visual e não comprovam o enquadramento cadastral.':'Horizontal: tipos explícitos prevalecem; sem tipo, padrão de preço reconhecido identifica casas/sobrados conforme confirmação do gestor GeoBrain, ou quartos históricos positivos conforme autorização anterior. Loteamentos sem identificação aberto/fechado continuam para conferência.');
     }
     if(role.startsWith('standards')||role==='commercial-type'){
       const ranges=role==='commercial-type'?['Até R$10mil/m²','R$10–12mil/m²','R$12–14mil/m²','R$14–16mil/m²','Acima R$16mil/m²']:['Studio/loft/1quarto','Até R$400mil','R$400mil–1mi','R$1–2mi','R$2–3mi','R$3–5mi','Acima R$5mi'];
-      for(const table of result.tables){table.columns.unshift('Faixa da referência');table.formats.unshift('text');table.rows.forEach((row,i)=>row.values.unshift(i<ranges.length?ranges[i]:''));}
+      // Reference bands belong to labels, never to a row's position. The API
+      // can contain an additional declared standard absent from the template.
+      const referenceGroups=role==='commercial-type'?['Econômico','Standard','Médio','Alto','Alto +']:role==='standards-rm'?['Compacto','Econômico','Standard','Médio','Alto','Luxo','Super Luxo']:standards;
+      for(const table of result.tables){table.columns.unshift('Faixa da referência');table.formats.unshift('text');table.rows.forEach(row=>{const index=referenceGroups.indexOf(row.label);row.values.unshift(index>=0?ranges[index]:row.label==='Total'?'':'—');});}
     }
     for(const table of result.tables)for(const row of table.rows)for(const value of row.values)if(typeof value==='number'&&(!Number.isFinite(value)||Math.abs(value)>=Number.MAX_SAFE_INTEGER/100))throw new Error('Totais fora da precisão segura.');
     if(result.price)result.note+=' Médias de preços/áreas ponderadas por estoque histórico positivo, salvo o ticket-capacidade do VGV, explicitado acima. Sem correção monetária implícita.';
+    if(result.warnings.some(warning=>warning.startsWith('Base parcial:')))result.note+=' Base parcial: empreendimento(s) inconsistente(s) desconsiderado(s); totais e médias representam somente os registros válidos. Consulte os avisos desta geração.';
     return result;
   }catch(error){return {...result,tables:[],stages:[],issue:error instanceof Error?error.message:'Fonte indisponível para este slide.'};}
 }

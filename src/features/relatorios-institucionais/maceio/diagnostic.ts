@@ -69,9 +69,11 @@ export function buildMaceioDiagnostic(selection: MaceioSelection, state: Diagnos
       emptyPeriods: 'completed-scoped-scan-as-zero; failed scans and missing numeric fields remain unavailable',
       launchesByTypology: 'explicit flow preferred; missing flow derived from historical qty only in project launch month, zero in other eligible months; authorized by Lucas 2026-11-19; monthly municipal reconciliation required; no current catalog or stock differences',
       stockAuthority: 'API; Marechal Deodoro/Vertical selected closing month uses detailed eligible snapshots by Lucas decision 2026-11-19; municipal mismatch remains audited; reference deck is not a numerical target',
+      partialData:'Authorized by Lucas 2026-11-23: isolate inconsistent projects per calculation; preserve valid projects, log excluded coverage, never fill missing snapshots/prices/areas. IVV uses the same covered cohort for the entire window; unreconciled area rates remain null.',
       horizontalClassification: '10 ID/city/AL/Horizontal exceptions retained; otherwise undefined horizontal product with a recognized project price standard or positive bedrooms in selected historical month = Condomínio de Casas/Sobrados, authorized by Lucas on 19/11/2026. Explicit products take precedence; zero/missing bedrooms never infer open/closed lots. Chácaras excluded.',
       patternGrouping: { Compacto:'Compactos', Econômico:'MCMV', Standard:'Médio Padrão', Médio:'Médio Padrão', 'Médio-Alto':'Médio Padrão', Alto:'Luxo', Luxo:'Luxo' } },
     summary: Object.fromEntries(statuses.map(status => [status, slides.filter(slide => slide.status === status).length])) as Record<Status, number>,
+    partialSlides:slides.filter(slide=>slide.values&&typeof slide.values==='object'&&'warnings' in slide.values&&Array.isArray(slide.values.warnings)&&slide.values.warnings.some((warning:unknown)=>typeof warning==='string'&&warning.startsWith('Base parcial:'))).map(slide=>slide.number),
     slides,
     horizontalClassificationAudit:(sources?.horizontal??[]).filter(source=>source.metric==='details').map(source=>({
       city:source.city,complete:source.complete,rule:'project-standard-or-historical-bedrooms-v2',
@@ -85,7 +87,7 @@ export function buildMaceioDiagnostic(selection: MaceioSelection, state: Diagnos
     sources: {
       vertical: metadata(sources?.sources), horizontal: metadata(sources?.horizontal, true), commercial: metadata(sources?.commercial, true),
       launches: intro?.cities.map(city => ({ city: city.city, unitsComplete: city.unitsComplete, buildingsComplete: city.buildingsComplete, issues: city.issues, failures: city.failures ?? [] })) ?? [],
-      caged: intro?.caged ? { snapshotVersion: intro.caged.report?.snapshotVersion??null, publishedThrough: intro.caged.report?.publishedThrough??null, coverageStart: intro.caged.report?.coverageStart??null,
+      caged: intro?.caged ? { snapshotVersion: intro.caged.report?.snapshotVersion??null, publishedThrough: intro.caged.report?.publishedThrough??null, coverageStart: intro.caged.report?.coverageStart??null,referenceMonth:intro.caged.report?.end??null,requestedMonth:intro.caged.requestedEnd??maceioPeriod(selection).end.slice(0,7),
         delivery: intro.caged.delivery?.kind??(intro.caged.report?'online':null), verifiedAt: intro.caged.delivery?.verifiedAt??null,
         failure: intro.caged.failure?{code:intro.caged.failure.code,httpStatus:intro.caged.failure.httpStatus}:null } : null,
     },

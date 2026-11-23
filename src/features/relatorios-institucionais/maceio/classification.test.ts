@@ -73,9 +73,9 @@ describe('Maceió: classificações confirmadas e fontes independentes', () => {
       expect(model.issue).toBeNull();expect(model.rows[2].values[8]).toBeNull();
       expect(model.rows[0].values[13]).not.toBeNull();
       expect(model.warnings.some(w=>w.includes('2021-03')&&w.includes('Balanço'))).toBe(true);
-      // A bad closing balance remains blocked in the monthly series.
+      // The monthly series also retains valid months and marks only the bad rate.
       (data.sources.find(s=>s.city==='Maceió'&&s.metric==='stock')!.rows.at(-1) as MarketRow).stock=1;
-      expect(buildOfferPriceSlide(periodicity==='monthly'?45:44,selection,data).issue).toMatch(/Balanço/);
+      const series=buildOfferPriceSlide(periodicity==='monthly'?45:44,selection,data);expect(series.issue).toBeNull();expect(series.series[0].values.at(-1)).toBeNull();expect(series.warnings.join(' ')).toContain('Balanço');
     });
   }
 });

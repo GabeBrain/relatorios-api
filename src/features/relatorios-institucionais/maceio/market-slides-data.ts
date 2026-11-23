@@ -10,13 +10,14 @@ import { maceioPeriod, maceioScope, type MaceioSelection } from './model';
 import { shiftMonth, type MaceioIntroData, type MaceioSeries } from './intro-data';
 import type { MaceioEnvelope, MaceioRequest } from './api';
 import incc from '../fortaleza/incc-di.json';
+import {partialNotice} from './partial-data';
 
 export type MonetaryPolicy='unconfirmed'|'INCC-DI';
 export type SlideMetric='releases'|'sales'|'stock'|'details';
 export type SlideGroup='Padrão'|'Tipologia'|'Empreendimento';
 export interface SlideSource {city:string;metric:SlideMetric;group:SlideGroup;rows:MarketRow[];complete:boolean;issue:string|null;requests:number;failure?:{code:string;httpStatus:number|null};endpoint?:string}
 export interface MaceioMarketSlidesData {start:string;end:string;sources:SlideSource[];finishedAt:string;horizontal?:SlideSource[];commercial?:SlideSource[]}
-export interface MaceioChartData {kind:'line'|'area'|'comparison'|'ranking';series:MaceioSeries;groups:string[];values:number[][];years:string[];ranking:{label:string;value:number}[];cities:{label:string;value:number}[];issue:string|null;note:string;money:boolean}
+export interface MaceioChartData {kind:'line'|'area'|'comparison'|'ranking';series:MaceioSeries;groups:string[];values:number[][];years:string[];ranking:{label:string;value:number}[];cities:{label:string;value:number}[];issue:string|null;note:string;money:boolean;warnings?:string[]}
 const patterns=['Luxo','Médio Padrão','MCMV','Compactos'];
 export const maceioSourceMonths=(selection:MaceioSelection)=>{
  const end=maceioPeriod(selection).end.slice(0,7),count=60+Number(end.slice(5));
@@ -75,11 +76,12 @@ export function readNumber(value:unknown,negative:boolean,money=false):number|nu
 const fields={releases:'releases_in_period',sales:'liquid_sales',stock:'stock'} as const;
 const moneyFields={releases:'vgv_release',sales:'vgv_liquid_sales',stock:'vgv_stock'} as const;
 interface Cell {city:string;month:string;group:string;value:number}
-export function readCells(selection:MaceioSelection,data:MaceioMarketSlidesData,metric:Exclude<SlideMetric,'details'>,group:SlideGroup,money:boolean,policy:MonetaryPolicy,requiredMonths?:readonly string[]){
+export function readCells(selection:MaceioSelection,data:MaceioMarketSlidesData,metric:Exclude<SlideMetric,'details'>,group:SlideGroup,money:boolean,policy:MonetaryPolicy,requiredMonths?:readonly string[],warnings:string[]=[]):{cells:Cell[];issue:string|null;unavailableMonths?:string[]}{
  const scope=maceioScope(selection,[...new Set(data.sources.map(source=>source.city))]),months=maceioSourceMonths(selection),cells:Cell[]=[];
  if(!scope.valid||data.start!==months[0]||data.end!==months.at(-1))return {cells,issue:'O histórico não corresponde ao recorte/período selecionado.'};
  if(money&&policy!=='INCC-DI')return {cells,issue:'A série do INCC de Maceió ainda precisa ser definida pelo analista. Escolha o índice somente após confirmar o critério.'};
  const indices:Record<string,number>=incc.indices,base=indices[months.at(-1)!];
+ const unavailableMonths=new Set<string>();
  if(money&&(!base||base<=0))return {cells,issue:'Falta INCC-DI para o fechamento selecionado; nenhuma base anterior é aplicada silenciosamente.'};
  for(const city of scope.cities){
   const source=data.sources.find(item=>item.city===city&&item.metric===metric&&item.group===group);
@@ -89,8 +91,8 @@ export function readCells(selection:MaceioSelection,data:MaceioMarketSlidesData,
    if(!month||!months.includes(month)||!label||/^(total|subtotal)(\b|$)/i.test(label))return {cells:[],issue:`${city}: competência ou grupo inválido no histórico.`};
    const key=`${month}/${normalizeMarketText(label)}`,raw=readNumber(row[money?moneyFields[metric]:fields[metric]],metric==='sales',money);
    if(seen.has(key)||raw===null)return {cells:[],issue:`${city}: duplicação ou quantidade inválida na fonte.`};seen.add(key);observed.add(month);
-   if(money&&(!indices[month]||indices[month]<=0))return {cells:[],issue:`Falta INCC-DI para ${month}.`};
-   const value=money?raw*base/indices[month]/1e6:raw;
+   if(money&&raw!==0&&(!indices[month]||indices[month]<=0)){unavailableMonths.add(month);continue;}
+   const value=money?raw===0?0:raw*base/indices[month]/1e6:raw;
    cells.push({city,month,group:label,value});
   }
   if((requiredMonths??months).some(month=>!months.includes(month)))return {cells:[],issue:'Periodo solicitado fora da consulta.'};
@@ -98,11 +100,11 @@ export function readCells(selection:MaceioSelection,data:MaceioMarketSlidesData,
   // Missing numeric fields on existing records still fail above.
   for(const month of months.filter(month=>!observed.has(month)))for(const label of group==='Tipologia'?['1','2','3','4']:patterns)cells.push({city,month,group:label,value:0});
   if(metric==='stock'&&!money&&(group==='Padrão'||group==='Tipologia')){
-    try{const selected=maceioDetailedClosingCells(data,city,data.end,group);if(selected){for(let index=cells.length-1;index>=0;index--)if(cells[index].city===city&&cells[index].month===data.end)cells.splice(index,1);cells.push(...selected);}}
+    try{const selected=maceioDetailedClosingCells(data,city,data.end,group,warnings);if(selected){for(let index=cells.length-1;index>=0;index--)if(cells[index].city===city&&cells[index].month===data.end)cells.splice(index,1);cells.push(...selected);}}
     catch(error){return {cells:[],issue:error instanceof Error?error.message:'Fonte detalhada de fechamento indisponível.'};}
   }
  }
- return {cells,issue:null};
+ return {cells,issue:null,unavailableMonths:[...unavailableMonths].sort()};
 }
 class QuantityRangeError extends Error {}
 function checkTotals(values:number[][]){if(values.some(row=>row.some(value=>!Number.isFinite(value)||Math.abs(value)>=Number.MAX_SAFE_INTEGER/100)))throw new QuantityRangeError();}
@@ -115,17 +117,21 @@ function calculateMaceioMarketSlide(page:number,selection:MaceioSelection,data:M
  const note=(money?'Valores em R$ milhões, corrigidos por INCC-DI ao mês do fechamento; série escolhida explicitamente para conferência metodológica.':metric==='stock'?'Oferta no último mês de cada período, sem soma de estoques.':'Fluxos municipais verticais por competência. Vendas líquidas negativas preservadas.')+' Competências sem registros em consulta concluída contam como zero no mercado pesquisado, por decisão do analista. Falhas ou campos inválidos não viram zero.';
  const result:MaceioChartData={kind,series:emptySeries,groups:[],values:[],years:[],ranking:[],cities:[],issue:null,note,money};
  const block=(issue:string)=>({...result,issue});if(!data)return block('Gere o relatório para consultar as fontes deste bloco.');
- const read=readCells(selection,data,metric,'Padrão',money,policy);if(read.issue)return block(read.issue);
+ const read=readCells(selection,data,metric,'Padrão',money,policy,undefined,result.warnings??=[]);if(read.issue)return block(read.issue);
  let cells=read.cells.map(cell=>({...cell,group:maceioPatternFamily(cell.group)??cell.group}));const months=maceioSourceMonths(selection),end=months.at(-1)!;
+ const unavailable=read.unavailableMonths??[];
+ if(unavailable.length)partialNotice(result.warnings??=[],`INCC-DI ausente em ${unavailable.length} competência(s), de ${unavailable[0]} a ${unavailable.at(-1)}. Somente janelas integralmente cobertas são exibidas; sem usar índice de outro mês.`);
  if([22,33].includes(page)){
   if(cells.some(cell=>!patterns.some(name=>normalizeMarketText(name)===normalizeMarketText(cell.group))))return block('A classificação MCMV não foi confirmada nos padrões da fonte.');
   cells=cells.filter(cell=>normalizeMarketText(cell.group)==='mcmv');
  }
- const periodMonths=(year:number)=>maceioPeriod({...selection,year}).months;
+ // The comparison year may precede the earliest selectable report year.
+ const periodMonths=(year:number)=>maceioPeriod(selection).months.map(month=>`${year}${month.slice(4)}`);
  if(area){
-  result.groups=patterns;result.years=Array.from({length:6},(_,i)=>String(selection.year-5+i));result.values=result.years.map(()=>patterns.map(()=>0));
-  for(const cell of cells){const index=patterns.findIndex(name=>normalizeMarketText(name)===normalizeMarketText(cell.group));if(index<0)return block('Padrão sem correspondência explícita com Luxo, Médio Padrão, MCMV e Compactos.');result.values[result.years.indexOf(cell.month.slice(0,4))][index]+=cell.value;}
-  checkTotals(result.values);if(result.values.some(row=>row.some(value=>value<0)))return block('Há vendas líquidas negativas por padrão no acumulado anual. Os valores não foram convertidos em participações positivas.');
+  result.groups=patterns;result.years=Array.from({length:6},(_,i)=>String(selection.year-5+i)).filter(year=>!money||!unavailable.some(month=>month.startsWith(year)));result.values=result.years.map(()=>patterns.map(()=>0));
+  if(!result.years.length)return block('Nenhum ano com cobertura de INCC-DI para o indicador.');
+  for(const cell of cells){const year=result.years.indexOf(cell.month.slice(0,4));if(year<0)continue;const index=patterns.findIndex(name=>normalizeMarketText(name)===normalizeMarketText(cell.group));if(index<0)return block('Padrão sem correspondência explícita com Luxo, Médio Padrão, MCMV e Compactos.');result.values[year][index]+=cell.value;}
+  checkTotals(result.values);if(result.values.some(row=>row.some(value=>value<0))){(result.warnings??=[]).push('Vendas líquidas negativas preservadas. Exibição em unidades com sinal, sem percentuais de participação.');result.note+=' Valores com sinal em unidades; distratos não são excluídos.';}
   return result;
  }
  if(comparison){
@@ -141,10 +147,11 @@ function calculateMaceioMarketSlide(page:number,selection:MaceioSelection,data:M
    }
    if(typology){for(const city of maceioScope(selection,data.sources.map(source=>source.city)).cities){const expected=sum(read.cells.filter(cell=>cell.city===city&&window.includes(cell.month))),actual=sum(values.filter(cell=>cell.city===city));if(expected!==actual)return block(`${city}: total por tipologia diverge do total municipal no período comparado.`);}}
   }
-  checkTotals(result.values);if(result.values.some(row=>row.some(value=>value<0)))return block('Participações por categoria contêm vendas líquidas negativas; revise o recorte antes de interpretar os percentuais.');return result;
+  checkTotals(result.values);if(result.values.some(row=>row.some(value=>value<0))){(result.warnings??=[]).push('Vendas líquidas negativas preservadas. Comparação em unidades com sinal; participações percentuais não são apresentadas.');result.note+=' Comparação em unidades com sinal, sem percentuais.';}return result;
  }
  if(ranking)return buildRanking(result,selection,data,read.cells,metric,page===36);
- const keys=rolling?months.slice(-38):selection.periodicity==='monthly'?months.slice(-25):months.slice(-51).filter((_,i)=>i%3===2);
+ const keys=(rolling?months.slice(-38):selection.periodicity==='monthly'?months.slice(-25):months.slice(-51).filter((_,i)=>i%3===2)).filter(month=>{const count=metric==='stock'?1:rolling?12:selection.periodicity==='monthly'?1:3;return !money||!Array.from({length:count},(_,i)=>shiftMonth(month,i-count+1)).some(month=>unavailable.includes(month));});
+ if(!keys.length)return block('Nenhuma janela com cobertura de INCC-DI para o indicador.');
  result.series={labels:keys.map(month=>selection.periodicity==='quarterly'&&!rolling?`${Math.ceil(Number(month.slice(5))/3)}T/${month.slice(2,4)}`:`${new Intl.DateTimeFormat('pt-BR',{month:'short',timeZone:'UTC'}).format(new Date(`${month}-01T00:00:00Z`)).replace('.','')}/${month.slice(2,4)}`),capital:[],rm:[],issue:null,note};
  for(const month of keys){const count=metric==='stock'?1:rolling?12:selection.periodicity==='monthly'?1:3,window=Array.from({length:count},(_,i)=>shiftMonth(month,i-count+1));result.series.capital.push(sum(cells.filter(cell=>normalizeMarketText(cell.city)==='maceio'&&window.includes(cell.month))));result.series.rm.push(sum(cells.filter(cell=>normalizeMarketText(cell.city)!=='maceio'&&window.includes(cell.month))));}
  return result;
@@ -160,29 +167,42 @@ function buildRanking(result:MaceioChartData,selection:MaceioSelection,data:Mace
   const expected=sum(cells.filter(cell=>cell.city===city&&period.months.includes(cell.month)));cityValues.push({label:city,value:expected});
   if(normalizeMarketText(city)!=='maceio')continue;
   const source=data.sources.find(source=>source.city===city&&source.metric==='details');if(!source?.complete)return {...result,issue:source?.issue??'Histórico por empreendimento indisponível para o ranking de bairros.'};
-  let actual=0,derived=false;const ids=new Set<string>(),monthly=new Map(period.months.map(month=>[month,0]));
+  let actual=0,derived=false,excludedFlows=0,excludedProjects=0,coveredProjects=0;const ids=new Set<string>(),monthly=new Map(period.months.map(month=>[month,0]));
   for(const building of source.rows){const id=String(building.building_id??building.id??''),neighborhood=typeof building.neighborhood==='string'?building.neighborhood.trim():'',release=marketMonth(building.release_date);
    if(!id||ids.has(id))return {...result,issue:'Empreendimento sem ID ou duplicado no ranking.'};ids.add(id);
    if(!Array.isArray(building.typologies_history))return {...result,issue:'Histórico de tipologias ausente no ranking.'};
-   const seen=new Set<string>();
+   const seen=new Set<string>(),staged:{month:string;value:number}[]=[];let projectIssue='';
+   for(const month of period.months){
+    if(release&&month<release)continue;
+    const history=building.typologies_history as MarketRow[],current=new Set(history.filter(row=>marketMonth(row.period)===month).map(row=>String(row.typology_id??'')));
+    const established=history.filter(row=>{const p=marketMonth(row.period);return p!==null&&p<=month;}).map(row=>String(row.typology_id??''));
+    if(!current.size||established.some(id=>!current.has(id)))projectIssue='fotografia mensal incompleta';
+   }
    for(const row of building.typologies_history as MarketRow[]){const month=marketMonth(row.period);if(!month)return {...result,issue:'Competência inválida no histórico de bairros.'};if(!period.months.includes(month))continue;
     const typology=String(row.typology_id??''),key=`${month}/${typology}`;if(!typology||seen.has(key))return {...result,issue:'Tipologia sem ID ou repetida no ranking.'};seen.add(key);
     const field=metric==='releases'?'releases_in_period':'sold_in_period',launch=metric==='releases'?maceioHistoricalLaunch(row,release,month):null,value=launch?launch.value:readNumber(row[field],true);
     if(launch?.origin==='historical-launch-cohort')derived=true;
-    // A photograph before the explicit launch is outside the ranking's universe.
-    // Conflicting positive/negative flows still block instead of being discarded.
-    if(release&&month<release){if(value!==null&&value!==0)return {...result,issue:`${city}: fluxo ${field} anterior ao lançamento em ${month}; confira a origem.`};continue;}
-    if(value===null)return {...result,issue:metric==='releases'?`${city}: fluxo explícito ou oferta inicial histórica/data de lançamento inválidos para o ranking (${field}, ${month}).`:`${city}: o histórico não forneceu fluxo explícito por tipologia para o ranking (${field}, ${month}).`};
-    monthly.set(month,(monthly.get(month)??0)+value);
-    if(value!==0&&!neighborhood)return {...result,issue:'Há fluxo sem bairro identificado.'};actual+=value;map.set(neighborhood,(map.get(neighborhood)??0)+value);
+    // Apply the same release-date universe used by the historical stock/flow
+    // audit. Out-of-scope photos do not veto a fully reconciled scoped ranking.
+    // Monthly comparison below remains visible for every covered month.
+    if(release&&month<release){if(value!==null&&value!==0)excludedFlows++;continue;}
+    if(value===null){projectIssue=`${field} ausente ou inválido em ${month}`;continue;}
+    if(value!==0&&!neighborhood){projectIssue='fluxo sem bairro identificado';continue;}
+    staged.push({month,value});
    }
+   if(projectIssue){excludedProjects++;partialNotice(result.warnings??=[],`${city}: empreendimento desconsiderado do ranking por ${projectIssue}.`);continue;}
+   if(staged.length)coveredProjects++;
+   for(const {month,value} of staged){monthly.set(month,(monthly.get(month)??0)+value);actual+=value;map.set(neighborhood,(map.get(neighborhood)??0)+value);}
   }
-  for(const month of period.months){const expectedMonth=sum(cells.filter(cell=>cell.city===city&&cell.month===month));if(monthly.get(month)!==expectedMonth)return {...result,issue:`${city}: fluxo mensal do ranking diverge em ${month}: ${monthly.get(month)} versus ${expectedMonth}.`};}
+  if(excludedProjects&&!coveredProjects)return {...result,issue:`${city}: nenhum empreendimento com fluxos válidos para o ranking; os registros inconsistentes estão nos avisos.`};
+  for(const month of period.months){const expectedMonth=sum(cells.filter(cell=>cell.city===city&&cell.month===month));if(monthly.get(month)!==expectedMonth){if(excludedProjects)partialNotice(result.warnings??=[],`${city}, ${month}: ranking coberto ${monthly.get(month)}, total municipal ${expectedMonth}; ${excludedProjects} empreendimento(s) excluído(s).`);else return {...result,issue:`${city}: fluxo mensal do ranking diverge em ${month}: ${monthly.get(month)} versus ${expectedMonth}.`};}}
   if(derived)result.note+=` ${historicalLaunchNotice}`;
-  if(actual!==expected)return {...result,issue:`${city}: a soma dos bairros diverge do total municipal (${actual} versus ${expected}, diferença ${actual-expected}); o ranking permanece em conferência.`};
+  if(excludedFlows)result.note+=` ${excludedFlows} fluxo(s) informado(s) em fotografias anteriores ao lançamento ficaram fora do recorte histórico. Os fluxos elegíveis foram comparados ao total municipal em cada mês${excludedProjects?', com diferenças de cobertura registradas nos avisos':', com reconciliação integral'}.`;
+  if(actual!==expected&&!excludedProjects)return {...result,issue:`${city}: a soma dos bairros diverge do total municipal (${actual} versus ${expected}, diferença ${actual-expected}); o ranking permanece em conferência.`};
+  if(excludedProjects)result.note+=` Base parcial dos bairros: ${excludedProjects} empreendimento(s) desconsiderado(s); bairros somam ${actual}, total municipal ${expected}. Ranking de cidades mantém os agregados municipais completos.`;
  }
  result.ranking=[...map].map(([label,value])=>({label,value})).filter(row=>row.value!==0).sort((a,b)=>b.value-a.value||a.label.localeCompare(b.label,'pt-BR'));
  result.cities=includeCities?cityValues.sort((a,b)=>b.value-a.value||a.label.localeCompare(b.label,'pt-BR')):[];
- if(result.ranking.some(row=>row.value<0)||result.cities.some(row=>row.value<0))return {...result,issue:'Ranking com vendas líquidas negativas: valores preservados, sem conversão em participação positiva.'};
+ if(result.ranking.some(row=>row.value<0)||result.cities.some(row=>row.value<0)){(result.warnings??=[]).push('Vendas líquidas negativas preservadas no ranking em unidades com sinal; sem converter distratos em participações positivas.');result.note+=' Ranking em unidades com sinal, sem percentuais quando houver vendas negativas.';}
  return result;
 }

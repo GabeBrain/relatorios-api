@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { BrainLoadingState } from '@/components/feedback/BrainLoadingState';
 import { useGeoApiScope, type GeoScope } from '@/features/shared/geo-api-scope-engine';
 import { useAuthStore } from '@/store/auth-store';
-import { MACEIO_REFERENCES, MACEIO_UF, maceioCities, maceioPeriod, maceioScope, type MaceioSelection, type Periodicity } from './model';
+import { MACEIO_REFERENCES, MACEIO_UF, maceioCities, maceioPeriod, maceioPeriodIsClosed, maceioScope, type MaceioSelection, type Periodicity } from './model';
 import { useMaceioMarket } from './useMaceioMarket';
 import { MaceioGenerationPanel } from './MaceioGenerationPanel';
 import { MaceioMarketPanel } from './MaceioMarketPanel';
@@ -29,7 +29,8 @@ export default function MaceioInstitutionalPage() {
   const selection: MaceioSelection = { ...geo, territory: 'capital-rm', periodicity, year, position };
   const coverage = maceioScope(selection, authorized);
   const studyCities = maceioCities(periodicity);
-  const ready = scope.hasToken && scope.strictReady && !scope.isLoading && !scope.error && coverage.valid;
+  const accessReady = scope.hasToken && scope.strictReady && !scope.isLoading && !scope.error && coverage.valid;
+  const closed=maceioPeriodIsClosed(selection),ready=accessReady&&closed;
   const market = useMaceioMarket(selection, authorized, token, ready);
   const querying = market.state?.phase === 'loading';
   const busy = querying;
@@ -54,9 +55,10 @@ export default function MaceioInstitutionalPage() {
         <div className="space-y-1.5"><label htmlFor="maceio-year" className="text-sm font-medium">Ano de referência</label><Select value={String(year)} disabled={busy} onValueChange={value => setYear(Number(value))}><SelectTrigger id="maceio-year"><SelectValue /></SelectTrigger><SelectContent>{years.map(value => <SelectItem key={value} value={String(value)}>{value}</SelectItem>)}</SelectContent></Select></div>
       </div>
       <p className="text-sm font-medium">Referência selecionada: {maceioPeriod(selection).label}</p>
+      {!closed&&<p role="status" className="text-sm text-muted-foreground">Este período ainda não encerrou. Selecione um mês ou trimestre fechado para gerar o relatório.</p>}
       {scope.hasToken && !scope.isLoading && !scope.error && coverage.missing.length > 0 && <p role="status" className="text-sm text-destructive">O conjunto exige acesso aos {studyCities.length} municípios da edição. Não disponíveis: {coverage.missing.join(', ')}.</p>}
       <div className="flex flex-wrap items-center gap-3"><Button disabled={!ready || busy} onClick={() => { void market.consult(); }}>Gerar relatório</Button></div>
-      {!ready && !scope.isLoading && !scope.error && <p className="text-sm text-muted-foreground">Faça login com acesso aos {studyCities.length} municípios da edição para continuar.</p>}
+      {!accessReady && !scope.isLoading && !scope.error && <p className="text-sm text-muted-foreground">Faça login com acesso aos {studyCities.length} municípios da edição para continuar.</p>}
     </section>
     {scope.isLoading || busy ? <section aria-label="Carregamento do relatório Maceió" aria-busy="true" className="relative min-h-[32rem] overflow-hidden rounded-xl border bg-card">
     {scope.isLoading && <BrainLoadingState variant="overlay" className="absolute z-10 justify-start overflow-y-auto py-8" title="Conferindo municípios autorizados" description="Aguarde a confirmação do seu acesso ao catálogo de cidades." startedAt={loadingStart.current} />}

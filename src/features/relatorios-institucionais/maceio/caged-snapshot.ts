@@ -36,8 +36,11 @@ export function reportFromVerifiedSnapshot(snapshot: VerifiedCagedSnapshot, end:
     publishedThrough: snapshot.publishedThrough, loadedAt: snapshot.loadedAt, source: snapshot.source, completePeriods, rows }, end);
 }
 
-export async function loadVerifiedCagedReport(end: string) {
+export async function loadVerifiedCagedReport(end: string,allowLatest=false) {
   const snapshot = (await import('./assets/caged-verified-snapshot.json')).default;
-  const report = reportFromVerifiedSnapshot(snapshot, end);
-  return report ? { report, verifiedAt: snapshot.verifiedAt } : null;
+  // Lucas authorized the latest available reference explicitly on 23/11/2026.
+  // Never relabel balances as the requested month, or reuse an older year.
+  const reference=allowLatest&&end>snapshot.publishedThrough&&end.slice(0,4)===snapshot.publishedThrough.slice(0,4)?snapshot.publishedThrough:end;
+  const report = reportFromVerifiedSnapshot(snapshot, reference);
+  return report ? { report, verifiedAt: snapshot.verifiedAt,requestedEnd:reference!==end?end:undefined } : null;
 }

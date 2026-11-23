@@ -35,7 +35,7 @@ describe('Maceió41–60 · oferta, IVV e preços',()=>{
   });
   it('bloqueia o IVV quando o balanço diverge',()=>{
     const data=offerPriceFixture(selection);data.sources.find(s=>s.city==='Maceió'&&s.metric==='stock')!.rows.at(-1)!.stock=1;
-    expect(buildOfferPriceSlide(45,selection,data).issue).toMatch(/Balanço/);
+    const model=buildOfferPriceSlide(45,selection,data);expect(model.issue).toBeNull();expect(model.series[0].values.at(-1)).toBeNull();expect(model.warnings.join(' ')).toContain('Balanço');
   });
   it('tabela histórica preserva competências sem cobertura como ausentes',()=>{
     const model=buildOfferPriceSlide(46,selection,offerPriceFixture(selection));expect(model.rows[0].values[0]).toBeNull();expect(model.warnings[0]).toContain('2021-01');
@@ -57,7 +57,10 @@ describe('Maceió41–60 · oferta, IVV e preços',()=>{
   for(const fault of ['price','private_area','typology_stock','number_bedroom'] as const)it(`não preenche ${fault} ausente com cadastro atual`,()=>{
     const data=offerPriceFixture(selection),building=data.sources.find(s=>s.metric==='details')!.rows[0];building[fault]=999;
     (building.typologies_history as MarketRow[]).at(-1)![fault]=null;
-    expect(buildOfferPriceSlide(60,selection,data,'stock-weighted').issue).not.toBeNull();
+    const model=buildOfferPriceSlide(60,selection,data,'stock-weighted');
+    expect(model.issue).toBeNull();expect(model.warnings.join(' ')).toContain('Base parcial:');
+    expect(model.series[0].values[0]).toBeNull();
+    expect(model.series[0].values[1]).toBe(5740);
   });
   it('rejeita histórico duplicado',()=>{
     const data=offerPriceFixture(selection),rows=data.sources.find(s=>s.metric==='details')!.rows;rows.push(rows[0]);expect(buildOfferPriceSlide(59,selection,data,'stock-weighted').issue).toMatch(/identificação/);

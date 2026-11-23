@@ -10,7 +10,7 @@ export interface CagedReport {
   version:typeof CAGED_VERSION; end:string; snapshotVersion:string; publishedThrough:string;
   coverageStart:string; loadedAt:string; source:string; completePeriods:string[]; rows:CagedRow[];
 }
-export interface CagedSource {report:CagedReport|null;issue:string|null;delivery?:{kind:'online'|'verified-snapshot';verifiedAt?:string};failure?:{code:string;httpStatus:number|null}}
+export interface CagedSource {report:CagedReport|null;issue:string|null;requestedEnd?:string;delivery?:{kind:'online'|'verified-snapshot';verifiedAt?:string};failure?:{code:string;httpStatus:number|null}}
 const monthPattern=/^20\d{2}-(0[1-9]|1[0-2])$/;
 export const cagedEnd=(selection:MaceioSelection)=>maceioPeriod(selection).end.slice(0,7);
 export function cagedPeriods(end:string){const year=Number(end.slice(0,4));return [...Array.from({length:10},(_,i)=>String(year-9+i)),`${year-1}${end.slice(4)}`,end];}
@@ -37,7 +37,8 @@ export function cagedBalance(report:CagedReport,period:string,uf:string,sector:C
 export const cagedChange=(now:number|null,before:number|null)=>now===null||before===null||before===0?null:(now-before)/Math.abs(before)*100;
 export function cagedIssue(selection:MaceioSelection,source?:CagedSource):string|null {
   if(source?.issue)return source.issue;
-  if(!source?.report||source.report.end!==cagedEnd(selection))return 'Gere o relatório para consultar o CAGED desta competência.';
+  const requested=cagedEnd(selection),lagged=source?.requestedEnd===requested&&source.report&&source.report.end<requested&&source.report.end===source.report.publishedThrough&&source.report.end.slice(0,4)===requested.slice(0,4);
+  if(!source?.report||source.report.end!==requested&&!lagged)return 'Gere o relatório para consultar o CAGED desta competência.';
   const report=source.report;
   if(!report.completePeriods.includes(report.end)||!report.completePeriods.includes(String(selection.year)))return `CAGED sem cobertura completa para ${report.end}. Publicação disponível até ${report.publishedThrough}.`;
   return null;
@@ -45,7 +46,7 @@ export function cagedIssue(selection:MaceioSelection,source?:CagedSource):string
 export interface CagedTableRow {label:string;values:(number|null)[];percent?:boolean}
 export interface CagedSlideModel {kind:'summary'|'states'|'sectors'|'northeast';labels:string[];rows:CagedTableRow[];issue:string|null;note:string;warning:string|null;sourceNotice:string|null}
 export function buildCagedSlide(page:number,selection:MaceioSelection,source?:CagedSource):CagedSlideModel {
-  const issue=cagedIssue(selection,source),report=source?.report,end=cagedEnd(selection),periods=cagedPeriods(end);
+  const issue=cagedIssue(selection,source),report=source?.report,end=report?.end??cagedEnd(selection),periods=cagedPeriods(end);
   const label=(p:string)=>p.length===4?p+(p===String(selection.year)?'*':''):`${new Intl.DateTimeFormat('pt-BR',{month:'short',timeZone:'UTC'}).format(new Date(`${p}-01T00:00:00Z`)).replace('.','')}/${p.slice(2,4)}`;
   const labels=[...periods.map(label),'Variação %'],rows:CagedTableRow[]=[];
   const value=(period:string,uf:string,sector:CagedSector)=>report?cagedBalance(report,period,uf,sector):null;
@@ -60,6 +61,10 @@ export function buildCagedSlide(page:number,selection:MaceioSelection,source?:Ca
     for(const [sector,name] of [['construction','Construção Civil'],['agriculture','Agropecuária'],['services','Serviços'],['commerce','Comércio'],['manufacturing','Indústria de transformação']] as [CagedSector,string][]){rows.push({label:name,values:years.map(y=>value(y,'AL',sector))});}
   }else if(page===14){kind='northeast';for(const sector of ['total','construction'] as const)for(const uf of CAGED_NORTHEAST)rows.push({label:`${uf} · ${sector==='total'?'Total':'Construção'}`,values:values(uf,sector)});
   }else for(const uf of CAGED_UFS.filter(uf=>!['BR','NI'].includes(uf)))rows.push({label:uf,values:values(uf,page===11?'construction':'total')});
-  const sourceNotice=!issue&&source?.delivery?.kind==='verified-snapshot'?`Serviço online indisponível. Exibindo cópia verificada da fonte MTE em ${source.delivery.verifiedAt}, com revisão até ${report?.publishedThrough}.`:null;
-  return {kind,labels,rows,issue,sourceNotice,note:report?`${report.source}. Revisão ${report.publishedThrough}. Quebra de série em 2020: CAGED antigo por subsetor IBGE; Novo Caged por CNAE 2.0. *Ano corrente até ${end}. Comparação mensal contra o mesmo mês do ano anterior. Variação de saldo sobre o módulo da base anterior; base zero fica sem percentual. Participação = saldo construção / saldo total.`:'Fonte oficial MTE ainda não consultada.',warning:!issue&&report&&periods.slice(0,10).some(p=>!report.completePeriods.includes(p))?`Histórico com cobertura a partir de ${report.coverageStart}. Células ausentes permanecem sem valor.`:null};
+  const lagNotice=source?.requestedEnd&&report&&source.requestedEnd!==report.end?` Emprego referente a ${new Intl.DateTimeFormat('pt-BR',{month:'long',year:'numeric',timeZone:'UTC'}).format(new Date(`${report.end}-01T00:00:00Z`))}, última competência disponível; relatório imobiliário de ${source.requestedEnd}.`:'';
+  const sourceNotice=!issue&&source?.delivery?.kind==='verified-snapshot'?`Serviço online indisponível. Exibindo cópia verificada da fonte MTE em ${source.delivery.verifiedAt}, com revisão até ${report?.publishedThrough}.${lagNotice}`:!issue&&lagNotice?lagNotice.trim():null;
+  const notices:string[]=[];
+  if(!issue&&report&&periods.slice(0,10).some(p=>!report.completePeriods.includes(p)))notices.push(`Histórico com cobertura a partir de ${report.coverageStart}. Células ausentes permanecem sem valor.`);
+  if(!issue&&lagNotice)notices.push(`Emprego: ${report!.end} (última competência disponível). *Ano acumulado até ${report!.end}.`);
+  return {kind,labels,rows,issue,sourceNotice,note:report?`${report.source}. Revisão ${report.publishedThrough}. Quebra de série em 2020: CAGED antigo por subsetor IBGE; Novo Caged por CNAE 2.0. *Ano corrente até ${end}. Comparação mensal contra o mesmo mês do ano anterior. Variação de saldo sobre o módulo da base anterior; base zero fica sem percentual. Participação = saldo construção / saldo total.`:'Fonte oficial MTE ainda não consultada.',warning:notices.join(' ')||null};
 }

@@ -13,10 +13,17 @@ describe('Maceió · contratos dos slides21–40',()=>{
   source.rows.push({building_id:'synthetic/future',release_date:'2027-01-01',typologies_history:[{typology_id:1,period:`${data.end}-01`,sold_in_period:null}]});
   expect(buildMaceioMarketSlide(36,current,data)).toEqual(baseline);
   (source.rows.at(-1)!.typologies_history as Record<string,unknown>[])[0].sold_in_period=1;
-  expect(buildMaceioMarketSlide(36,current,data).issue).toMatch(/anterior ao lançamento/);
+  const scoped=buildMaceioMarketSlide(36,current,data);
+  expect(scoped.issue).toBeNull();expect(scoped.ranking).toEqual(baseline.ranking);
+  expect(scoped.note).toContain('1 fluxo(s)');
+  const municipal=data.sources.find(item=>item.city==='Maceió'&&item.metric==='sales'&&item.group==='Padrão')!;
+  const closing=municipal.rows.find(row=>String(row.period).startsWith(data.end))!;
+  closing.liquid_sales=Number(closing.liquid_sales)+1;
+  expect(buildMaceioMarketSlide(36,current,data).issue).toMatch(/fluxo mensal.*diverge/);
+  closing.liquid_sales=Number(closing.liquid_sales)-1;
   source.rows.pop();
   (source.rows[0].typologies_history as Record<string,unknown>[]).at(-1)!.sold_in_period=null;
-  expect(buildMaceioMarketSlide(36,current,data).issue).toContain(`sold_in_period, ${data.end}`);
+  const partial=buildMaceioMarketSlide(36,current,data);expect(partial.issue).toBeNull();expect(partial.warnings?.join(' ')).toContain(`sold_in_period ausente ou inválido em ${data.end}`);
  });
  it('mantém o recorte MCMV dos slides22/33 separado do total vertical',()=>{
   const data=marketSlidesFixture(selection),all=buildMaceioMarketSlide(30,selection,data),mcmv=buildMaceioMarketSlide(33,selection,data);

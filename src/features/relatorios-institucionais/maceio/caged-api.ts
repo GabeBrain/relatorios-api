@@ -8,7 +8,7 @@ export async function collectMaceioCaged(selection:MaceioSelection,authorized:st
   const url=String(import.meta.env.VITE_SUPABASE_URL??'').replace(/\/$/,''),key=String(import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY??'');
   const contingency=async(code:string,httpStatus:number|null,issue:string):Promise<CagedSource>=>{
     check();
-    try{const verified=await loadVerifiedCagedReport(cagedEnd(selection));check();if(verified)return {report:verified.report,issue:null,delivery:{kind:'verified-snapshot',verifiedAt:verified.verifiedAt},failure:{code,httpStatus}};}catch{check();}
+    try{const verified=await loadVerifiedCagedReport(cagedEnd(selection),true);check();if(verified)return {report:verified.report,issue:null,requestedEnd:verified.requestedEnd,delivery:{kind:'verified-snapshot',verifiedAt:verified.verifiedAt},failure:{code,httpStatus}};}catch{check();}
     return {report:null,issue,failure:{code,httpStatus}};
   };
   if(!url||!key)return contingency('CLIENT_CONFIGURATION',null,'O serviço CAGED ainda não está configurado neste ambiente e não há cópia verificada para a competência.');

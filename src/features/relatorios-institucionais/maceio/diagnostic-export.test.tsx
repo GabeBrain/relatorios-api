@@ -7,12 +7,27 @@ import type { MaceioSelection } from './model';
 import { buildMaceioClosedReview } from './closed-review';
 import { remainingFixture } from './__tests__/remaining-fixture';
 import { buildMaceioStockReview } from './stock-review';
+import {buildMaceioDataIssuesReview} from './data-issues-review';
+import type {MarketRow} from './market';
 const selection:MaceioSelection={uf:'AL',city:'Macei\u00f3',territory:'capital-rm',periodicity:'monthly',year:2026,position:5};
 const workers:FakeWorker[]=[];
-class FakeWorker {onmessage:((event:{data:unknown})=>void)|null=null;onerror:(()=>void)|null=null;postMessage=vi.fn();terminate=vi.fn();constructor(){workers.push(this);}ready(snapshot:unknown,closedReview?:unknown,stockReview?:unknown){this.onmessage?.({data:{type:'ready',snapshot,closedReview,stockReview}});}}
+class FakeWorker {onmessage:((event:{data:unknown})=>void)|null=null;onerror:(()=>void)|null=null;postMessage=vi.fn();terminate=vi.fn();constructor(){workers.push(this);}ready(snapshot:unknown,closedReview?:unknown,stockReview?:unknown,dataReview?:unknown){this.onmessage?.({data:{type:'ready',snapshot,closedReview,stockReview,dataReview}});}}
 const state:MaceioGenerationState={key:'Bearer confidential-token',phase:'done',startedAt:Date.parse('2026-11-10T15:00:00Z'),finishedAt:'2026-11-10T15:01:00Z',message:'Done',report:null,hasFailedCities:false,blueprint:null,intro:null,steps:[]};
 beforeEach(()=>{workers.length=0;vi.stubGlobal('Worker',FakeWorker);});afterEach(()=>{cleanup();vi.unstubAllGlobals();});
 describe('Maceio — preparo automático do diagnóstico',()=>{
+  it('baixa inconsistências em CSV separado e descarta a lista ao mudar a geração',()=>{
+    const view=render(<MaceioDiagnosticExport selection={selection} state={state}/>);
+    const data=remainingFixture(selection),building=data.sources.find(source=>source.metric==='details')!.rows[0];
+    (building.typologies_history as MarketRow[]).at(-1)!.price=0;
+    const review=buildMaceioDataIssuesReview(selection,data);
+    const create=vi.fn(()=> 'blob:issues');vi.stubGlobal('URL',Object.assign(URL,{createObjectURL:create,revokeObjectURL:vi.fn()}));
+    const click=vi.spyOn(HTMLAnchorElement.prototype,'click').mockImplementation(function(this:HTMLAnchorElement){expect(this.download).toBe('maceio-monthly-2026-5-inconsistencias.csv');});
+    act(()=>workers[0].ready(buildMaceioDiagnostic(selection,state),undefined,undefined,review));
+    fireEvent.click(screen.getByRole('button',{name:'Baixar inconsistências (CSV)'}));
+    expect((create.mock.calls as unknown as [Blob][])[0][0].type).toBe('text/csv;charset=utf-8');expect(click).toHaveBeenCalledOnce();
+    view.rerender(<MaceioDiagnosticExport selection={selection} state={{...state,phase:'loading'}}/>);
+    expect(screen.queryByRole('button',{name:'Baixar inconsistências (CSV)'})).toBeNull();click.mockRestore();
+  });
   it('exporta conferência de estoque separada e descarta na troca de geração',()=>{
     const view=render(<MaceioDiagnosticExport selection={selection} state={state}/>);
     const review=buildMaceioStockReview(selection,remainingFixture(selection));

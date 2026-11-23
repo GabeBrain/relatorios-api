@@ -61,13 +61,15 @@ describe('CAGED real verificado no BigQuery em 18/11/2026', () => {
     const controller = new AbortController(); controller.abort();
     await expect(collectMaceioCaged(selection, [...maceioCities('monthly')], { token: 'x', signal: controller.signal })).rejects.toMatchObject({ name: 'AbortError' });
   });
-  it('falha de rede usa cópia verificada e mantém competências futuras bloqueadas', async () => {
+  it('falha de rede usa última competência autorizada explicitamente, sem inventar outro ano', async () => {
     vi.stubEnv('VITE_SUPABASE_URL', 'https://fixture.invalid'); vi.stubEnv('VITE_SUPABASE_PUBLISHABLE_KEY', 'test-public');
     const request = vi.fn<typeof fetch>().mockRejectedValue(new Error('private network details'));
     const source = await collectMaceioCaged(selection, [...maceioCities('monthly')], { token: 'x', request });
     expect(source.delivery?.kind).toBe('verified-snapshot'); expect(source.failure?.code).toBe('NETWORK');
     const future = await collectMaceioCaged({ ...selection, position: 10 }, [...maceioCities('monthly')], { token: 'x', request });
-    expect(future.report).toBeNull(); expect(future.issue).toMatch(/não há cópia verificada/);
+    expect(future.report?.end).toBe('2026-09');expect(future.requestedEnd).toBe('2026-10');expect(future.issue).toBeNull();
+    const uncovered=await collectMaceioCaged({...selection,year:2027,position:1},[...maceioCities('monthly')],{token:'x',request});
+    expect(uncovered.report).toBeNull();expect(uncovered.issue).toMatch(/não há cópia verificada/);
     expect(JSON.stringify(source)).not.toContain('private');
   });
 });

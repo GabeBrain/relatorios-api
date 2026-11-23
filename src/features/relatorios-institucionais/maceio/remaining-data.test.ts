@@ -25,6 +25,16 @@ describe('Maceió · todos os slides restantes',()=>{
   it('capacidade de oferta não é o fluxo do trimestre',()=>{
     const data=remainingFixture(quarterly),table=buildRemainingSlide(64,quarterly,data).tables[0];expect(table.rows.at(-1)!.values).toEqual([2000,100,1000,100,50]);
   });
+  it('preserva Médio-Alto na RM e no VGV trimestral sem deslocar faixas do modelo',()=>{
+    const data=remainingFixture(quarterly);
+    const source=data.sources.find(s=>s.metric==='details'&&s.city==='Marechal Deodoro')!;
+    source.rows[0].standard='Médio-Alto';
+    const model=buildRemainingSlide(63,quarterly,data);
+    expect(model.issue).toBeNull();
+    expect(model.tables[0].rows.find(row=>row.label==='Médio-Alto')!.values[0]).toBe('—');
+    expect(model.tables[0].rows.find(row=>row.label==='Alto')!.values[0]).toBe('R$2–3mi');
+    expect(buildRemainingSlide(70,quarterly,data,'stock-weighted').issue).toBeNull();
+  });
   it('usa4oumais dormitórios sem excluir unidades de5dorms',()=>{
     const data=remainingFixture(monthly),row=(data.sources.find(s=>s.metric==='details')!.rows.at(-1)!.typologies_history as MarketRow[]).at(-1)!;row.number_bedroom=5;
     expect(buildRemainingSlide(64,monthly,data).tables[0].rows[3].values[0]).toBe(400);
@@ -34,13 +44,13 @@ describe('Maceió · todos os slides restantes',()=>{
   });
   it('histórico de estágio é obrigatório e não usa status atual',()=>{
     const data=remainingFixture(monthly),building=data.sources.find(s=>s.metric==='details')!.rows[0];building.building_status='Pronto';const row=(building.typologies_history as MarketRow[]).at(-1)!;delete row.estagio_empreendimento;
-    expect(buildRemainingSlide(67,monthly,data).issue).toMatch(/Categoria/);
+    const model=buildRemainingSlide(67,monthly,data);expect(model.issue).toBeNull();expect(model.warnings.join(' ')).toMatch(/Base parcial:.*Categoria/);expect(model.note).toContain('somente os registros válidos');
   });
   it('gráficos de tempo médio representam participação por estágio',()=>{
     const model=buildRemainingSlide(67,monthly,remainingFixture(monthly));expect(model.kind).toBe('stages');for(const panel of model.stages)for(const values of panel.values)expect(values.reduce<number>((a,b)=>a+(b??0),0)).toBeCloseTo(100);
   });
   it('não converte Econômico emMCMV na família',()=>{
-    const data=remainingFixture(monthly);data.sources.find(s=>s.metric==='details')!.rows[0].standard_family='Econômico';expect(buildRemainingSlide(68,monthly,data).issue).toMatch(/correspondência/);
+    const data=remainingFixture(monthly);data.sources.find(s=>s.metric==='details')!.rows[0].standard_family='Econômico';const model=buildRemainingSlide(68,monthly,data);expect(model.issue).toBeNull();expect(model.warnings.join(' ')).toMatch(/Base parcial:.*correspondência/);
   });
   it('VGV exige escolha de método e reconcilia capacidade=vendidas+final',()=>{
     const data=remainingFixture(monthly);expect(buildRemainingSlide(69,monthly,data).issue).toMatch(/critério/);
@@ -48,7 +58,7 @@ describe('Maceió · todos os slides restantes',()=>{
     expect(Number(values[1])).toBe(Number(values[2])+Number(values[3]));expect(Number(values[4])).toBeCloseTo(Number(values[5])+Number(values[6]));
   });
   it('rejeita capacidade menor que estoque',()=>{
-    const data=remainingFixture(quarterly);(data.sources.find(s=>s.metric==='details')!.rows[0].typologies_history as MarketRow[]).at(-1)!.qty=0;expect(buildRemainingSlide(64,quarterly,data).issue).toMatch(/Capacidade/);
+    const data=remainingFixture(quarterly);(data.sources.find(s=>s.metric==='details')!.rows[0].typologies_history as MarketRow[]).at(-1)!.qty=0;const model=buildRemainingSlide(64,quarterly,data);expect(model.issue).toBeNull();expect(model.warnings.join(' ')).toContain('Capacidade');expect(model.tables[0].rows.at(-1)!.values[2]).toBe(900);
   });
   it('histórico por área inclui áreas fracionárias sem perder o total',()=>{
     const data=remainingFixture(monthly);(data.sources.find(s=>s.metric==='details')!.rows[0].typologies_history as MarketRow[]).at(-1)!.private_area=44.5;const model=buildRemainingSlide(65,monthly,data);expect(model.tables[0].rows[1].values[0]).toBe(100);expect(model.tables[0].rows.at(-1)!.values.at(-1)).toBe(1000);
@@ -59,25 +69,34 @@ describe('Maceió · todos os slides restantes',()=>{
   it('horizontal sem subtipo usa o padrão confirmado como casas',()=>{
     const data=remainingFixture(monthly);delete data.horizontal![0].rows[0].building_subtype;data.horizontal![0].rows[0].standard='Econômico';expect(buildRemainingSlide(71,monthly,data).issue).toBeNull();
   });
-  it('classifica os5padrões comerciais peloR$/m²do fechamento',()=>{
+  it('preserva os5padrões comerciais declarados pela fonte',()=>{
     const model=buildRemainingSlide(80,quarterly,remainingFixture(quarterly));expect(model.tables[0].rows.map(row=>row.label)).toEqual(['Econômico','Standard','Médio','Alto','Alto +','Total']);expect(model.tables[0].rows.at(-1)!.values[1]).toBe(5);
   });
   it('falha horizontal não derruba vertical ou comercial',()=>{
     const data=remainingFixture(quarterly);data.horizontal![0].complete=false;expect(buildRemainingSlide(72,quarterly,data).issue).not.toBeNull();expect(buildRemainingSlide(64,quarterly,data).issue).toBeNull();expect(buildRemainingSlide(80,quarterly,data).issue).toBeNull();
   });
-  it('não classifica preço comercial zero como Econômico',()=>{
-    const data=remainingFixture(quarterly);(data.commercial![0].rows[0].typologies_history as MarketRow[])[0].price=0;expect(buildRemainingSlide(80,quarterly,data).issue).toMatch(/preço comercial/);
+  it('preço zero não altera padrão comercial nem cria média de preço válida',()=>{
+    const data=remainingFixture(quarterly);(data.commercial![0].rows[0].typologies_history as MarketRow[])[0].price=0;
+    expect(buildRemainingSlide(80,quarterly,data).issue).toBeNull();
+    const model=buildRemainingSlide(82,quarterly,data,'stock-weighted');expect(model.issue).toBeNull();expect(model.tables[0].rows[0].values).toEqual([null,null,null]);expect(model.warnings.join(' ')).toContain('Preço histórico sem base positiva');
   });
   it('não duplica contagem de empreendimentos em classes comerciais distintas',()=>{
     const data=remainingFixture(quarterly),source=data.commercial![0],building=source.rows[0],row=(building.typologies_history as MarketRow[])[0];
     (building.typologies as MarketRow[]).push({id:2,type_of_typology:'Padrão'});(building.typologies_history as MarketRow[]).push({...row,typology_id:2,price:850000});
     data.commercial![1].rows[0].stock=200;
-    expect(buildRemainingSlide(80,quarterly,data).issue).toMatch(/mais de um grupo/);
+    const model=buildRemainingSlide(80,quarterly,data);
+    expect(model.issue).toBeNull();
+    expect(model.tables[0].rows[0].values.slice(1,7)).toEqual([1,20,400,12.5,200,12.5]);
+    expect(model.tables[0].rows.at(-1)!.values[1]).toBe(5);
+    building.standard='Sem classificação';
+    const partial=buildRemainingSlide(80,quarterly,data);expect(partial.issue).toBeNull();expect(partial.tables[0].rows.at(-1)!.values[1]).toBe(4);expect(partial.warnings.join(' ')).toContain('correspondência');
   });
   for(const fault of ['stock','duplicate','missing','universe'] as const)it(`bloqueia histórico ${fault} sem preencher dados atuais`,()=>{
     const data=remainingFixture(monthly),source=data.sources.find(s=>s.metric==='details')!,building=source.rows[0],history=building.typologies_history as MarketRow[];
     if(fault==='stock')history.at(-1)!.typology_stock=0;if(fault==='duplicate')source.rows.push(building);if(fault==='missing')history.pop();if(fault==='universe')building.building_type='Comercial';
-    expect(buildRemainingSlide(62,monthly,data).issue).not.toBeNull();
+    const model=buildRemainingSlide(62,monthly,data);
+    if(fault==='missing'){expect(model.issue).toBeNull();expect(model.warnings.join(' ')).toContain('fotografia incompleta');expect(model.tables[0].rows.at(-1)!.values[0]).toBe(900);}
+    else expect(model.issue).not.toBeNull();
   });
   it('explica ausência de fonte e universo vazio',()=>{
     expect(buildRemainingSlide(62,monthly,null).issue).toMatch(/Gere/);

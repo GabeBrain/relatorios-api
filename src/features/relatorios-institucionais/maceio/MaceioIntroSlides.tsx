@@ -26,7 +26,7 @@ export default function MaceioIntroSlides({selection,data,initialMonetaryPolicy=
   {navigation}
   <div className="flex flex-wrap items-center justify-between gap-2"><p className="text-sm font-medium">Slide {page} · {title}</p><Button variant="outline" onClick={()=>setExpanded(true)}>Ampliar slides</Button></div>
   {market?.money && monetaryPolicy === 'INCC-DI' && <p className="text-sm text-muted-foreground">Valores corrigidos pelo INCC-DI · base {maceioPeriod(selection).label}.</p>}
-  {[...(advanced?.warnings??[]),...(remaining?.warnings??[])].map(warning=><p key={warning} role="status" className="text-sm text-muted-foreground">{warning}</p>)}
+  {[...(market?.warnings??[]),...(advanced?.warnings??[]),...(remaining?.warnings??[])].map(warning=><p key={warning} role="status" className="text-sm text-muted-foreground">{warning}</p>)}
   {caged?.warning&&<p role="status" className="text-sm text-muted-foreground">{caged.warning}</p>}
   {caged?.sourceNotice&&<p role="status" className="text-sm text-muted-foreground">{caged.sourceNotice}</p>}
 
