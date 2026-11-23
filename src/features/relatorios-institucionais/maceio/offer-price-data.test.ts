@@ -63,7 +63,7 @@ describe('Maceió41–60 · oferta, IVV e preços',()=>{
     expect(model.series[0].values[1]).toBe(5740);
   });
   it('rejeita histórico duplicado',()=>{
-    const data=offerPriceFixture(selection),rows=data.sources.find(s=>s.metric==='details')!.rows;rows.push(rows[0]);expect(buildOfferPriceSlide(59,selection,data,'stock-weighted').issue).toMatch(/identificação/);
+    const data=offerPriceFixture(selection),rows=data.sources.find(s=>s.metric==='details')!.rows;rows.push(rows[0]);const model=buildOfferPriceSlide(59,selection,data,'stock-weighted');expect(model.issue).toBeNull();expect(model.warnings.join(' ')).toContain('empreendimento duplicado');expect(model.series[0].values[0]).toBeNull();
   });
   it('mantém os demais slides quando uma fonte granular falha',()=>{
     const data=offerPriceFixture(selection);data.sources.find(s=>s.metric==='details')!.complete=false;

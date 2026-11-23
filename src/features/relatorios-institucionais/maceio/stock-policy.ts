@@ -2,6 +2,8 @@ import { marketMonth, normalizeMarketText, type MarketRow } from './market';
 import type { MaceioMarketSlidesData } from './market-slides-data';
 import { auditMaceioStock } from './stock-audit';
 import {partialNotice} from './partial-data';
+import {projectsForSnapshot} from './project-validation';
+import {readNumber} from './market-slides-data';
 
 /** Lucas explicitly chose the detailed API for Marechal after matching the
  * GeoBrain screen. Never fixes a quantity or waives other data checks. */
@@ -21,19 +23,19 @@ export function maceioStockDecision(city:string,segment:string,actual:number,exp
 export function maceioDetailedClosingCells(data:MaceioMarketSlidesData,city:string,month:string,group:'Padrão'|'Tipologia',warnings:string[]=[]) {
   if(month!==data.end||!maceioUsesDetailedStock(city,'Vertical'))return null;
   const audit=auditMaceioStock(data.sources,[city],month)[0];
-  const invalidCore=Object.entries(audit.invalid).some(([key,count])=>!['missingEstablishedSnapshots','missingSnapshotProjects'].includes(key)&&count>0);
-  if(!audit.complete||invalidCore||audit.granularEligible.value===null||audit.municipal.value===null||audit.municipal.invalidGroups)throw new Error(`${city}: detalhamento de fechamento incompleto ou inválido para a fonte adotada.`);
-  const source=data.sources.find(item=>item.city===city&&item.metric==='details')!;
+  if(!audit.complete||audit.municipal.value===null||audit.municipal.invalidGroups)throw new Error(`${city}: detalhamento de fechamento incompleto ou inválido para a fonte adotada.`);
+  const source=data.sources.find(item=>normalizeMarketText(item.city)===normalizeMarketText(city)&&item.metric==='details')!;
   const totals=new Map<string,number>();
-  let excluded=0,excludedStock=0;
-  for(const building of source.rows){
+  const checked=projectsForSnapshot(source.rows,city,'Vertical',month,warnings);
+  let excluded=checked.excludedCount,excludedStock=checked.excludedStock;
+  for(const building of checked.rows){
     const release=marketMonth(building.release_date);if(!release||release>month)continue;
     const history=building.typologies_history as MarketRow[],observed=history.filter(row=>marketMonth(row.period)===month),seen=new Set(observed.map(row=>String(row.typology_id)));
     const established=history.filter(row=>{const period=marketMonth(row.period);return period!==null&&period<=month;}).map(row=>String(row.typology_id));
-    if(!observed.length||established.some(id=>!seen.has(id))){excluded++;excludedStock+=observed.reduce((sum,row)=>sum+Number(row.typology_stock),0);continue;}
+    if(!observed.length||established.some(id=>!seen.has(id))||observed.some(row=>readNumber(row.typology_stock,false)===null)){excluded++;excludedStock+=observed.reduce((sum,row)=>sum+(readNumber(row.typology_stock,false)??0),0);continue;}
     for(const row of building.typologies_history as MarketRow[]){
       if(marketMonth(row.period)!==month)continue;
-      const label=group==='Padrão'?String(building.standard??''):String(row.number_bedroom??'');
+      const label=group==='Padrão'?String(row.pattern??building.standard??''):String(row.number_bedroom??'');
       if(!label.trim())throw new Error(`${city}: grupo ausente no estoque detalhado de fechamento.`);
       const value=(totals.get(label)??0)+Number(row.typology_stock);
       if(!Number.isSafeInteger(value))throw new Error('Estoque detalhado fora da precisão segura.');totals.set(label,value);

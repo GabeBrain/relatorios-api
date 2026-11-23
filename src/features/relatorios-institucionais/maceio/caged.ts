@@ -18,6 +18,10 @@ export function parseCagedReport(raw:unknown,end:string):CagedReport {
   if(!raw||typeof raw!=='object')throw new Error('Resposta CAGED inválida.');
   const data=raw as CagedReport,periods=cagedPeriods(end),seen=new Set<string>();
   if(data.version!==CAGED_VERSION||data.end!==end||!monthPattern.test(data.publishedThrough)||!monthPattern.test(data.coverageStart)||data.coverageStart>data.publishedThrough||!/^[a-f0-9]{64}$/.test(data.snapshotVersion)||!Number.isFinite(Date.parse(data.loadedAt))||data.source!=='MTE · CAGED antigo / Novo Caged · com ajustes'||!Array.isArray(data.completePeriods)||!Array.isArray(data.rows)||data.rows.length>2500||new Set(data.completePeriods).size!==data.completePeriods.length||data.completePeriods.some(p=>!periods.includes(p)))throw new Error('Contrato CAGED não confirmado.');
+  for(const period of data.completePeriods){
+    const start=period.length===7?period:`${period}-01`,last=period.length===7?period:period===end.slice(0,4)?end:`${period}-12`;
+    if(start<data.coverageStart||last>data.publishedThrough)throw new Error('Competência CAGED fora da cobertura publicada.');
+  }
   const rows=data.rows.map(row=>{
     if(!row||!periods.includes(row.period)||!data.completePeriods.includes(row.period)||!CAGED_UFS.includes(row.uf)||!(CAGED_SECTORS as readonly string[]).includes(row.sector)||typeof row.balance!=='number'||!Number.isSafeInteger(row.balance)||seen.has(`${row.period}/${row.uf}/${row.sector}`))throw new Error('Agregado CAGED inválido ou duplicado.');
     seen.add(`${row.period}/${row.uf}/${row.sector}`);return {period:row.period,uf:row.uf,sector:row.sector,balance:row.balance};

@@ -1,5 +1,14 @@
 import { marketMonth, normalizeMarketText, type MarketRow } from './market';
 
+/** Explicit bedroom counts; four or more share the report's final bucket. */
+export function maceioBedroomIndex(value:unknown):number|null {
+  const raw=normalizeMarketText(value),numeric=/^\d+(?:\.0+)?$/.test(raw);
+  const match=/^(\d+)(?:\s*(ou\s*(?:\+|mais)|\+))?(?:\s+(?:dorm|dormitorio|dormitorios|quarto|quartos))?$/.exec(raw);
+  const count=numeric?Number(raw):match?Number(match[1]):NaN;
+  if(!Number.isSafeInteger(count)||count<1||match?.[2]&&count<4)return null;
+  return Math.min(4,count)-1;
+}
+
 /** Grouping explicitly confirmed by Lucas on 17/11/2026, for both editions. */
 export function maceioPatternFamily(value: unknown): string | null {
   const raw = normalizeMarketText(value);

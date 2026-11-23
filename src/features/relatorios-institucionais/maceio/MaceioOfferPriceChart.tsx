@@ -2,8 +2,15 @@ import type { OfferPriceSlide } from './offer-price-data';
 
 const palette = ['#5B7537', '#FFC000'];
 const format = (value: number | null, unit: OfferPriceSlide['unit']) => value === null ? '—' : value.toLocaleString('pt-BR', {maximumFractionDigits:unit==='count'||unit==='money'?0:1}) + (unit==='percent'?'%':'');
+function segments(values:(number|null)[],point:(value:number,index:number)=>string){
+  const result:string[][]=[];let current:string[]=[];
+  values.forEach((value,index)=>{if(value===null){if(current.length)result.push(current);current=[];}else current.push(point(value,index));});
+  if(current.length)result.push(current);
+  return result.map(points=>points.join(' '));
+}
 export default function MaceioOfferPriceChart({model}:{model:OfferPriceSlide}) {
   if(model.kind==='editorial')return null;
+  if(model.emptyOffer)return <g data-maceio-chart data-maceio-empty><text x={640} y={360} textAnchor="middle" fontSize={25} fill="#425428">Sem oferta nos registros válidos dos fechamentos exibidos</text><text x={640} y={403} textAnchor="middle" fontSize={19} fill="#777">Este número de dormitórios não tem preço calculável na base coberta.</text></g>;
   if(model.kind==='shares'){
     const colors=['#425428','#829667','#FFC000','#B9CBA8'];
     return <g data-maceio-chart>{model.series.map((series,s)=><g key={series.label}>
@@ -16,7 +23,7 @@ export default function MaceioOfferPriceChart({model}:{model:OfferPriceSlide}) {
     return <g data-maceio-chart>{model.groups.map((group,i)=>{const value=model.series[0].values[i],length=value===null?0:value/max*650;return <g key={group}><text x={320} y={220+i*55} textAnchor="end" fontSize={20}>{group}</text><rect x={335} y={201+i*55} height={22} width={length} fill={palette[0]}/><text x={347+length} y={220+i*55} fontSize={20} fontWeight={700}>{format(value,'months')}</text></g>})}</g>;
   }
   if(model.kind==='table'){
-    const history=model.unit==='percent',first=history?148:172,left=48,width=1184,labelWidth=history?142:180,cell=(width-labelWidth)/model.columns.length;
+    const history=model.tableKind==='calendar',first=history?148:172,left=48,width=1184,labelWidth=history?142:180,cell=(width-labelWidth)/model.columns.length;
     const height=Math.min(38,420/(model.rows.length+1));
     return <g data-maceio-chart data-maceio-table>
       <rect x={left} y={first} width={width} height={height} fill="#D9D9D9"/>
@@ -37,7 +44,7 @@ export default function MaceioOfferPriceChart({model}:{model:OfferPriceSlide}) {
   return <g data-maceio-chart>
     <line x1={left} x2={right} y1={y(0)} y2={y(0)} stroke="#D4D4D4"/>
     {model.series.map((series,s)=><g key={series.label}>
-      {line&&!model.price&&<polyline fill="none" stroke={palette[s%2]} strokeWidth={4} points={series.values.map((v,i)=>v===null?'':`${left+step*(i+.5)},${y(v)}`).join(' ')}/>}
+      {line&&!model.price&&segments(series.values,(v,i)=>`${left+step*(i+.5)},${y(v)}`).map((points,i)=><polyline key={i} fill="none" stroke={palette[s%2]} strokeWidth={4} points={points}/>)}
       {series.values.map((v,i)=>{const x=left+step*(i+.5)+(s-(seriesCount-1)/2)*bar;return <g key={i}>
         {v!==null&&(!line||model.price)&&<rect x={x-bar*.45} y={Math.min(y(v),y(0))} width={bar*.9} height={Math.max(1,Math.abs(y(v)-y(0)))} fill={palette[s%2]}/>}
         <text x={x} y={v===null?bottom-8:v>=0?y(v)-12:y(v)+20} textAnchor="middle" fontSize={line?14:Math.min(17,bar*.85/Math.max(1,format(v,model.unit).length)*1.6)} fill="#425428" fontWeight={700}>{format(v,model.unit)}</text>
@@ -45,7 +52,7 @@ export default function MaceioOfferPriceChart({model}:{model:OfferPriceSlide}) {
     </g>)}
     {model.averages?.map((average,i)=>average.value!==null&&<g key={average.label}><line x1={left} x2={right} y1={y(average.value)} y2={y(average.value)} stroke={i?'#856700':'#425428'} strokeWidth={3}/><rect x={right-90} y={y(average.value)-23-i*25} width={90} height={23} fill={i?'#856700':'#425428'}/><text x={right-45} y={y(average.value)-6-i*25} textAnchor="middle" fill="white" fontSize={17}>{format(average.value,model.unit)}</text></g>)}
     {variation.length>0&&<g data-maceio-price-variation>
-      <polyline fill="none" stroke="#FFC000" strokeWidth={3} points={variation.map((v,i)=>v===null?'':`${left+step*(i+.5)},${365-v/variationMax*80}`).join(' ')}/>
+      {segments(variation,(v,i)=>`${left+step*(i+.5)},${365-v/variationMax*80}`).map((points,i)=><polyline key={i} fill="none" stroke="#FFC000" strokeWidth={3} points={points}/>)}
       {variation.map((v,i)=>v!==null&&<text key={i} x={left+step*(i+.5)} y={355-v/variationMax*80} textAnchor="middle" fontSize={13} fill="#6B5300">{format(v,'percent')}</text>)}
     </g>}
     {model.groups.map((group,i)=><text key={group} x={left+step*(i+.5)} y={555} textAnchor={line?'end':'middle'} transform={line?`rotate(-45 ${left+step*(i+.5)} 555)`:undefined} fontSize={line?15:17}>{group}</text>)}

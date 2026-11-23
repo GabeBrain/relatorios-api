@@ -5,6 +5,7 @@ export default function MaceioRemainingChart({model}:{model:RemainingSlide}){
   if(model.kind==='stages'){
     const colors=['#5B7537','#7CA83E','#1F5F8A'];
     return <g data-maceio-chart data-maceio-stages>{model.stages.map((panel,p)=><g key={panel.label} transform={`translate(0 ${185+p*245})`}>
+      <rect x={15} y={56} width={100} height={48} rx={6} fill="#777"/>{panel.label.split(' ').map((word,i)=><text key={i} x={65} y={75+i*18} textAnchor="middle" fontSize={13} fontWeight={700} fill="white">{word}</text>)}
       {[...panel.values.keys()].reverse().map((i,r)=><g key={i}>
         <text x={225} y={r*44+22} textAnchor="end" fontSize={16} fill="#777">{model.groups[i].replace('Dormitórios','dorms').replace('Dormitório','dorm')}</text>
         {panel.values[i].map((value,s)=>{const before=panel.values[i].slice(0,s).reduce<number>((a,b)=>a+(b??0),0),width=(value??0)*8;return <g key={s}><rect x={245+before*8} y={r*44} width={width} height={27} fill={colors[s]}/>{width>40&&<text x={245+before*8+width/2} y={r*44+21} textAnchor="middle" fontSize={18} fontWeight={700} fill="white">{value?.toLocaleString('pt-BR',{maximumFractionDigits:1})}%</text>}</g>})}

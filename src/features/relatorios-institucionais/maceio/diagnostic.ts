@@ -1,5 +1,5 @@
 import { maceioUsesDetailedStock } from './stock-policy';
-import { maceioCities, maceioPeriod, maceioReference, type MaceioSelection } from './model';
+import { maceioCities, maceioPeriod, maceioReference,maceioSlideTitle, type MaceioSelection } from './model';
 import type { MaceioGenerationState } from './useMaceioMarket';
 import { buildMaceioLaunchSeries, buildMaceioPattern } from './intro-data';
 import { buildMaceioMarketSlide, maceioSourceMonths, type SlideSource } from './market-slides-data';
@@ -13,14 +13,14 @@ import { auditMaceioStock } from './stock-audit';
 
 export type DiagnosticGeneration = Pick<MaceioGenerationState, 'phase' | 'startedAt' | 'finishedAt' | 'blueprint' | 'report' | 'intro'>;
 type Status = 'available' | 'source-pending' | 'method-pending' | 'editorial-review' | 'not-implemented';
-interface DiagnosticSlide { number: number; title: string; status: Status; issue: string | null; values: unknown }
+interface DiagnosticSlide { number: number; title: string; referenceTitle:string; status: Status; issue: string | null; values: unknown }
 
 /** Only calculated slide aggregates and explicit source metadata leave this boundary. */
 export function buildMaceioDiagnostic(selection: MaceioSelection, state: DiagnosticGeneration) {
   const reference = maceioReference(selection.periodicity), intro = state.intro ?? null;
   const slides: DiagnosticSlide[] = reference.slides.map(definition => {
     const page = definition.number;
-    const base: DiagnosticSlide = { number: page, title: definition.title, status: 'editorial-review', issue: null, values: null };
+    const base: DiagnosticSlide = { number: page, title: maceioSlideTitle(page,selection),referenceTitle:definition.title, status: 'editorial-review', issue: null, values: null };
     const calculated = (value: { issue: string | null }, methodPending = false): DiagnosticSlide => ({
       ...base, status: methodPending ? 'method-pending' : value.issue ? 'source-pending' : 'available', issue: value.issue, values: value,
     });

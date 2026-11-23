@@ -95,7 +95,7 @@ describe('Maceió · todos os slides restantes',()=>{
     const data=remainingFixture(monthly),source=data.sources.find(s=>s.metric==='details')!,building=source.rows[0],history=building.typologies_history as MarketRow[];
     if(fault==='stock')history.at(-1)!.typology_stock=0;if(fault==='duplicate')source.rows.push(building);if(fault==='missing')history.pop();if(fault==='universe')building.building_type='Comercial';
     const model=buildRemainingSlide(62,monthly,data);
-    if(fault==='missing'){expect(model.issue).toBeNull();expect(model.warnings.join(' ')).toContain('fotografia incompleta');expect(model.tables[0].rows.at(-1)!.values[0]).toBe(900);}
+    if(fault==='missing'||fault==='duplicate'){expect(model.issue).toBeNull();expect(model.warnings.join(' ')).toContain(fault==='missing'?'fotografia incompleta':'empreendimento duplicado');expect(model.tables[0].rows.at(-1)!.values[0]).toBe(900);}
     else expect(model.issue).not.toBeNull();
   });
   it('explica ausência de fonte e universo vazio',()=>{

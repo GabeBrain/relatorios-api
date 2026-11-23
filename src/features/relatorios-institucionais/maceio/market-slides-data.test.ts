@@ -10,7 +10,7 @@ describe('Maceió · contratos dos slides21–40',()=>{
  for(const periodicity of ['monthly','quarterly'] as const)it(`ranking ignora fotografias pré-lançamento sem transformar fluxo válido ausente em zero / ${periodicity}`,()=>{
   const current={...selection,periodicity,position:periodicity==='monthly'?5:2},data=marketSlidesFixture(current),source=data.sources.find(item=>item.city==='Maceió'&&item.metric==='details')!;
   const baseline=buildMaceioMarketSlide(36,current,data);expect(baseline.issue).toBeNull();
-  source.rows.push({building_id:'synthetic/future',release_date:'2027-01-01',typologies_history:[{typology_id:1,period:`${data.end}-01`,sold_in_period:null}]});
+  source.rows.push({city:'Maceió',state:'AL',building_type:'Vertical',building_id:'synthetic/future',release_date:'2027-01-01',typologies_history:[{typology_id:1,period:`${data.end}-01`,sold_in_period:null}]});
   expect(buildMaceioMarketSlide(36,current,data)).toEqual(baseline);
   (source.rows.at(-1)!.typologies_history as Record<string,unknown>[])[0].sold_in_period=1;
   const scoped=buildMaceioMarketSlide(36,current,data);

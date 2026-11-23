@@ -97,6 +97,7 @@ export function buildMaceioLaunchSeries(page:number,selection:MaceioSelection,da
     const chunk=Array.from({length:size},(_,i)=>totals.get(shiftMonth(month,i-size+1))!);
     return {capital:chunk.reduce((sum,next)=>sum+next.capital,0),rm:chunk.reduce((sum,next)=>sum+next.rm,0)};
   });
+  if(values.some(value=>!Number.isSafeInteger(value.capital)||!Number.isSafeInteger(value.rm)))return empty('Quantidade acumulada fora do limite seguro.');
   const labels=keys.map(month=>!rolling&&selection.periodicity==='quarterly'?`${Math.ceil(Number(month.slice(5))/3)}T/${month.slice(2,4)}`:`${new Intl.DateTimeFormat('pt-BR',{month:'short',timeZone:'UTC'}).format(new Date(`${month}-01T00:00:00Z`)).replace('.','')}/${month.slice(2,4)}`);
   return {labels,capital:values.map(value=>value.capital),rm:values.map(value=>value.rm),issue:null,note:rolling?`${note} Soma de 12 competências; 39 fechamentos mensais completos.`:note};
 }
@@ -104,7 +105,7 @@ export function buildMaceioLaunchSeries(page:number,selection:MaceioSelection,da
 export function buildMaceioPattern(selection:MaceioSelection,data:MaceioIntroData|null){
   const years=Array.from({length:6},(_,i)=>selection.year-5+i),names=['Luxo','Médio Padrão','MCMV','Compactos'];
   const values=years.map(()=>names.map(()=>0));
-  if(!data||!maceioScope(selection,data.cities.map(item=>item.city)).valid||data.cities.some(item=>!item.buildingsComplete))return {years,names,values,issue:'Cadastro completo de empreendimentos ainda não disponível.'};
+  if(!data||!maceioScope(selection,data.cities.map(item=>item.city)).valid||data.cities.length!==maceioScope(selection,data.cities.map(item=>item.city)).cities.length||new Set(data.cities.map(item=>normalizeMarketText(item.city))).size!==data.cities.length||data.cities.some(item=>!item.buildingsComplete))return {years,names,values,issue:'Cadastro completo e único por município ainda não disponível.'};
   const end=maceioPeriod(selection).end.slice(0,7);
   for(const source of data.cities){
     const seen=new Set<string>();

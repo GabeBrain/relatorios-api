@@ -1,11 +1,12 @@
 import { maceioHistoricalLaunch, historicalLaunchNotice } from './historical-launch';
 import { maceioStockDecision, maceioDetailedClosingCells } from './stock-policy';
-import { maceioPatternFamily } from './classification';
+import { maceioPatternFamily,maceioBedroomIndex } from './classification';
 import { maceioCities, maceioPeriod, type MaceioSelection } from './model';
 import { marketMonth, normalizeMarketText, type MarketRow } from './market';
 import { shiftMonth } from './intro-data';
 import { readCells, readNumber, type MaceioMarketSlidesData } from './market-slides-data';
 import {partialNotice,excludeInvalidProjects} from './partial-data';
+import {projectsForSnapshot} from './project-validation';
 
 export type PricePolicy = 'unconfirmed' | 'stock-weighted';
 export interface OfferPriceSlide {
@@ -19,9 +20,11 @@ export interface OfferPriceSlide {
   note: string;
   warnings: string[];
   price: boolean;
+  tableKind?: 'calendar' | 'area';
+  emptyOffer?: boolean;
   averages?: {label:string;value:number|null}[];
 }
-const standards = ['Compacto', 'Econômico', 'Standard', 'Médio', 'Médio-Alto', 'Alto', 'Luxo'];
+const standards = ['Compacto', 'Econômico', 'Standard', 'Médio', 'Médio-Alto', 'Alto', 'Luxo', 'Super Luxo'];
 const bands = ['Até 35 m²', 'De 35 a 40 m²', 'De 40 a 50 m²', 'De 50 a 60 m²', 'De 60 a 70 m²', 'De 70 a 80 m²', 'De 80 a 85 m²', 'Acima de 85 m²'];
 const total = (values: number[]) => {
   const value = values.reduce((sum, item) => sum + item, 0);
@@ -35,9 +38,9 @@ const requiredNumber = (value: unknown, signed = false, decimal = false) => {
 };
 const labelMonth = (month: string) => new Intl.DateTimeFormat('pt-BR', { month: 'short', timeZone: 'UTC' }).format(new Date(`${month}-01T00:00:00Z`)).replace('.', '') + '/' + month.slice(2,4);
 const bedroom = (value: unknown) => {
-  const match = /^([1-4])(?:\s+(?:dorm|dormitorio|dormitorios|quarto|quartos))?$/.exec(normalizeMarketText(value));
-  if (!match) throw new Error('Tipologia sem correspondência explícita com 1–4 dormitórios.');
-  return Number(match[1]) - 1;
+  const index=maceioBedroomIndex(value);
+  if(index===null)throw new Error('Tipologia sem correspondência explícita com 1–4 ou mais dormitórios.');
+  return index;
 };
 function source(data: MaceioMarketSlidesData, city: string, metric: 'stock' | 'sales' | 'releases', group = 'Padrão') {
   const matches = data.sources.filter(item => normalizeMarketText(item.city) === normalizeMarketText(city) && item.metric === metric && item.group === group);
@@ -66,11 +69,12 @@ interface Snapshot { id:string; city: string; standard: string; bedroom: unknown
 function snapshots(data: MaceioMarketSlidesData, cities: readonly string[], month: string, resolveLaunches = false, warnings:string[]=[],excludedProjects?:Set<string>): Snapshot[] {
   const result: Snapshot[] = [];
   for (const city of cities) {
-    let excludedSnapshots=0,excludedStock=0;
     const sources = data.sources.filter(item => normalizeMarketText(item.city) === normalizeMarketText(city) && item.metric === 'details');
     if (sources.length !== 1 || !sources[0].complete) throw new Error(`${city}: histórico granular incompleto.`);
+    const checked=projectsForSnapshot(sources[0].rows,city,'Vertical',month,warnings,excludedProjects);
+    let excludedSnapshots=checked.excludedCount,excludedStock=checked.excludedStock;
     const ids = new Set<string>();
-    for (const building of sources[0].rows) {
+    for (const building of checked.rows) {
       const id = String(building.building_id ?? building.id ?? '').trim(), release = marketMonth(building.release_date);
       if (!id || ids.has(id) || !release || normalizeMarketText(building.city) !== normalizeMarketText(city) || building.state !== 'AL' || normalizeMarketText(building.building_type) !== 'vertical') throw new Error('Histórico sem identificação, data ou universo vertical municipal confiável.');
       ids.add(id);
@@ -87,7 +91,7 @@ function snapshots(data: MaceioMarketSlidesData, cities: readonly string[], mont
         seen.add(typology); observed = true;
         if(readNumber(row.typology_stock,false)===null){invalidSnapshot=true;continue;}
         const launch = resolveLaunches ? maceioHistoricalLaunch(row, release, month) : null;
-        result.push({ id:`${city}/${id}`, derivedLaunch: launch?.origin === 'historical-launch-cohort', city, standard: String(building.standard ?? ''), bedroom: row.number_bedroom, area: row.private_area, price: row.price, stock: requiredNumber(row.typology_stock), releases: launch ? launch.value : row.releases_in_period, sales: row.sold_in_period });
+        result.push({ id:`${city}/${id}`, derivedLaunch: launch?.origin === 'historical-launch-cohort', city, standard: String(row.pattern??building.standard??''), bedroom: row.number_bedroom, area: row.private_area, price: row.price, stock: requiredNumber(row.typology_stock), releases: launch ? launch.value : row.releases_in_period, sales: row.sold_in_period });
       }
       if (invalidSnapshot || !observed || [...established].some(id => !seen.has(id))){
         excludedProjects?.add(`${city}/${id}`);
@@ -128,11 +132,11 @@ export function buildOfferPriceSlide(page: number, selection: MaceioSelection, d
       const comparisonMonths=[`${selection.year-1}${end.slice(4)}`,end];
       const typology = logical === 42, read = readCells(selection, data, 'stock', typology ? 'Tipologia' : 'Padrão', false, 'unconfirmed',comparisonMonths,result.warnings);
       if (read.issue) throw new Error(read.issue);
-      result.kind='shares';result.unit = 'percent'; result.groups = typology ? ['1 dorm', '2 dorm', '3 dorm', '4 dorm'] : ['Compactos', 'MCMV', 'Médio Padrão', 'Luxo'];
+      result.kind='shares';result.unit = 'percent'; result.groups = typology ? ['1 dorm', '2 dorm', '3 dorm', '4 ou + dorm'] : ['Compactos', 'MCMV', 'Médio Padrão', 'Luxo'];
       for (const year of [selection.year - 1, selection.year]) {
         const month = `${year}${end.slice(4)}`, values = result.groups.map(() => 0);
         for (const city of maceioCities(selection.periodicity)) {
-          const rows = read.cells.filter(cell => cell.city === city && cell.month === month);
+          const rows = read.cells.filter(cell => normalizeMarketText(cell.city) === normalizeMarketText(city) && cell.month === month);
           if (total(rows.map(row => row.value)) !== quantity(data, city, 'stock', month,true,result.warnings)) throw new Error(`${city}: participação da oferta sem reconciliação municipal.`);
           for (const row of rows) {
             const index = typology ? bedroom(row.group) : result.groups.findIndex(group => normalizeMarketText(group) === normalizeMarketText(maceioPatternFamily(row.group)));
@@ -150,15 +154,17 @@ export function buildOfferPriceSlide(page: number, selection: MaceioSelection, d
       const monthly=new Map(months.map(month=>[month,snapshots(data,['Maceió'],month,false,result.warnings,excluded)]));
       for(const observations of monthly.values())for(const row of observations)if(readNumber(row.sales,true)===null)excluded.add(row.id);
       const covered=(rows:Snapshot[])=>rows.filter(row=>!excluded.has(row.id));
-      const current=covered(rawCurrent),history=[...monthly.values()].flatMap(covered);
+      const current=covered(rawCurrent).filter(row=>row.stock>0),history=[...monthly.values()].flatMap(covered).filter(row=>requiredNumber(row.sales,true)!==0);
       if(excluded.size)partialNotice(result.warnings,`${excluded.size} empreendimento(s) fora de toda a janela de escoamento; mesma base para estoque e média de vendas.`);
       if(!current.length&&!history.length)throw new Error('Nenhum empreendimento válido para o escoamento.');
       for(const month of months){const actual=total(covered(monthly.get(month)!).map(row=>requiredNumber(row.sales,true))),expected=quantity(data,'Maceió','sales',month);if(actual!==expected){if(excluded.size)partialNotice(result.warnings,`${month}, escoamento: vendas cobertas ${actual}, total municipal ${expected}.`);else throw new Error('Vendas granulares do escoamento divergem do total municipal.');}}
       result.groups = ['Econômico', 'Alto', 'Compacto', 'Luxo', 'Médio', 'Médio-Alto', 'Standard', 'Super Luxo']; result.unit = 'months';
-      if ([...current, ...history].some(row => !result.groups.some(group => normalizeMarketText(group) === normalizeMarketText(row.standard)))) throw new Error('Padrão sem correspondência explícita com o escoamento do original.');
+      const valid=excludeInvalidProjects([...current,...history],row=>{if(!result.groups.some(group=>normalizeMarketText(group)===normalizeMarketText(row.standard)))throw new Error('Padrão sem correspondência explícita com o escoamento do original.');},result.warnings,'escoamento');
+      const validIds=new Set(valid.map(row=>row.id));
+      if(!validIds.size)throw new Error('Nenhum empreendimento com padrão válido para o escoamento.');
       result.series = [{ label: 'Meses', values: result.groups.map(group => {
         const matches = (row: Snapshot) => normalizeMarketText(row.standard) === normalizeMarketText(group);
-        const stock = total(current.filter(matches).map(row => row.stock)), sales = total(history.filter(matches).map(row => requiredNumber(row.sales, true)));
+        const stock = total(current.filter(row=>validIds.has(row.id)&&matches(row)).map(row => row.stock)), sales = total(history.filter(row=>validIds.has(row.id)&&matches(row)).map(row => requiredNumber(row.sales, true)));
         return sales > 0 ? stock / (sales / 12) : null;
       }) }];
       if(result.series[0].values.some(value=>value===null))result.warnings.push('— indica padrão sem média de vendas líquidas positiva nos12meses; não há estimativa de escoamento para esse grupo.');
@@ -170,7 +176,7 @@ export function buildOfferPriceSlide(page: number, selection: MaceioSelection, d
         result.kind = 'series'; result.groups = months.map(labelMonth); result.series = [{label:'Vertical',values:months.map(month => {try{return ivv(data,month);}catch(error){partialNotice(result.warnings,`${month}: IVV sem valor. ${error instanceof Error?error.message:'Fonte não reconciliada.'}`);return null;}})}];
         if(result.series[0].values.every(value=>value===null))throw new Error('Nenhuma competência com IVV reconciliado.');
       } else {
-        result.kind = 'table'; const years = Array.from({length:Math.max(1,selection.year-2012)},(_,i)=>2013+i);
+        result.kind = 'table';result.tableKind='calendar'; const years = Array.from({length:Math.max(1,selection.year-2012)},(_,i)=>2013+i);
         result.columns = years.map(String);
         result.rows = Array.from({length:12},(_,i)=>({label:new Intl.DateTimeFormat('pt-BR',{month:'long',timeZone:'UTC'}).format(new Date(Date.UTC(2020,i,1))),values:years.map(year=>{
           const month = `${year}-${String(i+1).padStart(2,'0')}`;
@@ -206,7 +212,7 @@ export function buildOfferPriceSlide(page: number, selection: MaceioSelection, d
       const band=(row:Snapshot)=>{const area=readNumber(row.area,false,true);if(area===null||area<=0)return 8;const i=[35,40,50,60,70,80,85].findIndex(limit=>area<=limit);return i<0?7:i;};
       const unknownArea=[...openingRows,...closingRows,...flowRows].some(row=>band(row)===8);
       const areaBands=unknownArea?[...bands,'Área não informada']:bands;
-      result.kind='table';result.columns=[`Oferta ${labelMonth(opening)}`,`Oferta ${labelMonth(end)}`,'% oferta','Lançamentos','% lanç.','Vendas líq.','% vendas','IVV (%)'];
+      result.kind='table';result.tableKind='area';result.columns=[`Oferta ${labelMonth(opening)}`,`Oferta ${labelMonth(end)}`,'% oferta','Lançamentos','% lanç.','Vendas líq.','% vendas','IVV (%)'];
       const rows=areaBands.map((label,i)=>({label,opening:total(openingRows.filter(row=>band(row)===i).map(row=>row.stock)),stock:total(closingRows.filter(row=>band(row)===i).map(row=>row.stock)),releases:total(flowRows.filter(row=>band(row)===i).map(row=>requiredNumber(row.releases))),sales:total(flowRows.filter(row=>band(row)===i).map(row=>requiredNumber(row.sales,true)))}));
       const totals={label:'Total',opening:total(rows.map(row=>row.opening)),stock:total(rows.map(row=>row.stock)),releases:total(rows.map(row=>row.releases)),sales:total(rows.map(row=>row.sales))};
       const balanced=(row:typeof totals)=>row.opening+row.releases-row.sales===row.stock;
@@ -218,20 +224,24 @@ export function buildOfferPriceSlide(page: number, selection: MaceioSelection, d
       if(unknownArea)result.warnings.push('Área não informada preserva estoques e fluxos sem área histórica positiva; essas unidades não são atribuídas às faixas de m². O balanço de cada linha continua obrigatório.');
       result.note='Oferta inicial/final são fotografias; lançamentos e vendas são fluxos da janela. IVV acumulado usa vendas ÷ (estoque anterior à janela + lançamentos), sem somar taxas mensais. Faixas contínuas: (35,40], (40,50] etc.; agrupamento a homologar.';
     } else if (result.price) {
+      let universeSeen=false,targetSeen=false;
       if(policy!=='stock-weighted')throw new Error('Confirme o critério de ponderação dos preços para esta prévia. O original não comprova a fórmula.');
       result.note='Critério de conferência: todas as tipologias com estoque histórico positivo, incluindo Garden e Cobertura. Ticket = Σ(estoque×preço)÷Σestoque; R$/m² = Σ(estoque×preço/área)÷Σestoque. Preços nominais, sem INCC. Critério não homologado.';
       result.unit='money';
       if(logical<=54){
         const months=Array.from({length:13},(_,i)=>shiftMonth(end,(i-12)*(selection.periodicity==='monthly'?1:3)));
         result.kind='series';result.groups=months.map(month=>selection.periodicity==='monthly'?labelMonth(month):`${Math.ceil(Number(month.slice(5))/3)}T/${month.slice(2,4)}`);
-        result.series=[{label:logical===50?'Média':`${logical-50} dormitório(s)`,values:months.map(month=>{
-          const rows=excludeInvalidProjects(snapshots(data,['Maceió'],month,false,result.warnings).filter(row=>row.stock>0),row=>{if(logical!==50)bedroom(row.bedroom);if(requiredNumber(row.price,false,true)<=0||requiredNumber(row.area,false,true)<=0)throw new Error('Preço ou área histórica sem base positiva.');},result.warnings,month);
+        result.series=[{label:logical===50?'Média':`${logical===54?'4 ou mais':logical-50} dormitório(s)`,values:months.map(month=>{
+          const rawRows=snapshots(data,['Maceió'],month,false,result.warnings).filter(row=>row.stock>0);
+          if(rawRows.some(row=>maceioBedroomIndex(row.bedroom)===null||maceioBedroomIndex(row.bedroom)===logical-51))targetSeen=true;
+          const rows=excludeInvalidProjects(rawRows,row=>{if(logical!==50)bedroom(row.bedroom);if(requiredNumber(row.price,false,true)<=0||requiredNumber(row.area,false,true)<=0)throw new Error('Preço ou área histórica sem base positiva.');},result.warnings,month);
+          if(rows.length)universeSeen=true;
           return price(logical===50?rows:rows.filter(row=>bedroom(row.bedroom)===logical-51),true,result.warnings);
         })}];
         if(selection.periodicity==='quarterly')result.warnings.push('Série trimestral utiliza o preço no fechamento de cada trimestre. O original51 apresenta datas mensais inconsistentes com as outras séries; critério a homologar.');
       }else{
         const typology=logical>=59,meter=logical!==56&&logical!==59,rawRows=snapshots(data,maceioCities(selection.periodicity),end,false,result.warnings).filter(row=>row.stock>0);
-        result.unit=meter?'money':'ticket';result.groups=typology?['1 dorm','2 dorm','3 dorm','4 dorm']:standards;
+        result.unit=meter?'money':'ticket';result.groups=typology?['1 dorm','2 dorm','3 dorm','4 ou + dorm']:standards;
         const group=(row:Snapshot)=>{const index=typology?bedroom(row.bedroom):standards.findIndex(name=>normalizeMarketText(name)===normalizeMarketText(row.standard));if(index<0)throw new Error('Padrão granular sem correspondência explícita com as categorias de preço do original.');return index;};
         const rows=excludeInvalidProjects(rawRows,row=>{group(row);if(requiredNumber(row.price,false,true)<=0||meter&&requiredNumber(row.area,false,true)<=0)throw new Error('Preço ou área histórica sem base positiva.');},result.warnings,end);
         const combined=logical===57;
@@ -242,7 +252,10 @@ export function buildOfferPriceSlide(page: number, selection: MaceioSelection, d
           if(!typology){const average=price(selected,meter,result.warnings);(result.averages??=[]).push({label:`Média ${label}`,value:average===null?null:meter?average:average/1000});}
         }
       }
-      if(result.series.every(series=>series.values.every(value=>value===null)))throw new Error('Nenhuma unidade ofertada com estoque histórico positivo no recorte de preços.');
+      if(result.series.every(series=>series.values.every(value=>value===null))){
+        if(logical>=51&&logical<=54&&universeSeen&&!targetSeen){result.emptyOffer=true;result.warnings.push('Sem oferta deste número de dormitórios entre os registros válidos dos fechamentos exibidos; não representa preço zero.');}
+        else throw new Error('Nenhuma unidade ofertada com estoque histórico positivo no recorte de preços.');
+      }
       if(result.series.some(series=>series.values.some(value=>value===null)))result.warnings.push('— indica grupo sem estoque ofertado positivo; não representa preço zero.');
     } else throw new Error('Slide sem contrato neste bloco.');
     if(result.warnings.some(warning=>warning.startsWith('Base parcial:')))result.note+=' Base parcial: empreendimento(s) inconsistente(s) desconsiderado(s); médias e totais limitados aos registros válidos. Consulte os avisos desta geração.';

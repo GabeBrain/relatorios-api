@@ -63,6 +63,15 @@ export function maceioPeriod(selection: Pick<MaceioSelection, 'periodicity' | 'y
   };
 }
 
+/** Titles follow the selected edition; original titles remain in provenance. */
+export function maceioSlideTitle(page:number,selection:MaceioSelection){
+  const original=maceioReference(selection.periodicity).slides[page-1]?.title??'';
+  const month=maceioPeriod(selection).end.slice(0,7),date=new Intl.DateTimeFormat('pt-BR',{month:'long',year:'numeric',timeZone:'UTC'}).format(new Date(`${month}-01T00:00:00Z`));
+  return original.replace(/\bRAKING\b/g,'RANKING')
+    .replace(/\b[1-4]T\s*20\d{2}\b/gi,`${selection.position}T${selection.year}`)
+    .replace(/\b(?:janeiro|fevereiro|março|abril|maio|junho|julho|agosto|setembro|outubro|novembro|dezembro)\s*\/?\s*20\d{2}\b/gi,date);
+}
+
 /** Calendar closure in the study's timezone; not a claim of source coverage. */
 export function maceioPeriodIsClosed(selection:Pick<MaceioSelection,'periodicity'|'year'|'position'>,now=new Date()) {
   const parts=new Intl.DateTimeFormat('en-US',{year:'numeric',month:'2-digit',timeZone:'America/Sao_Paulo'}).formatToParts(now);

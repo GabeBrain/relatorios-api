@@ -1,6 +1,6 @@
 import { maceioHistoricalLaunch, historicalLaunchNotice } from './historical-launch';
 import { maceioDetailedClosingCells } from './stock-policy';
-import { maceioPatternFamily } from './classification';
+import { maceioPatternFamily,maceioBedroomIndex } from './classification';
 import { checkMaceioNext, scopeMaceioRow, MACEIO_HISTORY_URL, MaceioSourceError, sourceFailure } from './source-contract';
 import { readBuildingPage } from '@/features/panorama-secovi-fiergs/domain/building-source';
 import { httpRequest } from '@/lib/http-client';
@@ -11,6 +11,7 @@ import { shiftMonth, type MaceioIntroData, type MaceioSeries } from './intro-dat
 import type { MaceioEnvelope, MaceioRequest } from './api';
 import incc from '../fortaleza/incc-di.json';
 import {partialNotice} from './partial-data';
+import {projectsForSnapshot} from './project-validation';
 
 export type MonetaryPolicy='unconfirmed'|'INCC-DI';
 export type SlideMetric='releases'|'sales'|'stock'|'details';
@@ -135,14 +136,14 @@ function calculateMaceioMarketSlide(page:number,selection:MaceioSelection,data:M
   return result;
  }
  if(comparison){
-  const typology=page===23||page===34,groups=typology?['1 dorm','2 dorm','3 dorm','4 dorm']:['Compactos','MCMV','Médio Padrão','Luxo'];
+  const typology=page===23||page===34,groups=typology?['1 dorm','2 dorm','3 dorm','4 ou + dorm']:['Compactos','MCMV','Médio Padrão','Luxo'];
   const input=typology?readCells(selection,data,metric,'Tipologia',false,policy):read;
   if(input.issue)return block(input.issue);result.groups=groups;result.years=[selection.year-1,selection.year].map(year=>selection.periodicity==='monthly'?`${end.slice(5)}/${year}`:`${selection.position}T/${year}`);
   result.values=[selection.year-1,selection.year].map(year=>groups.map(()=>0));
   for(const [index,year] of [selection.year-1,selection.year].entries()){
    const window=periodMonths(year),values=input.cells.map(cell=>({...cell,group:typology?cell.group:maceioPatternFamily(cell.group)??cell.group})).filter(cell=>window.includes(cell.month));
-   for(const cell of values){const raw=normalizeMarketText(cell.group),match=typology?/^([1-4])(?:\s+(?:dorm|dormitorio|dormitorios|quarto|quartos))?$/.exec(raw):null;
-    const groupIndex=typology?match?Number(match[1])-1:-1:groups.findIndex(name=>normalizeMarketText(name)===raw);
+   for(const cell of values){const raw=normalizeMarketText(cell.group);
+    const groupIndex=typology?maceioBedroomIndex(raw)??-1:groups.findIndex(name=>normalizeMarketText(name)===raw);
     if(groupIndex<0)return block('Categoria da fonte sem correspondência comprovada com os grupos do original.');result.values[index][groupIndex]+=cell.value;
    }
    if(typology){for(const city of maceioScope(selection,data.sources.map(source=>source.city)).cities){const expected=sum(read.cells.filter(cell=>cell.city===city&&window.includes(cell.month))),actual=sum(values.filter(cell=>cell.city===city));if(expected!==actual)return block(`${city}: total por tipologia diverge do total municipal no período comparado.`);}}
@@ -167,8 +168,10 @@ function buildRanking(result:MaceioChartData,selection:MaceioSelection,data:Mace
   const expected=sum(cells.filter(cell=>cell.city===city&&period.months.includes(cell.month)));cityValues.push({label:city,value:expected});
   if(normalizeMarketText(city)!=='maceio')continue;
   const source=data.sources.find(source=>source.city===city&&source.metric==='details');if(!source?.complete)return {...result,issue:source?.issue??'Histórico por empreendimento indisponível para o ranking de bairros.'};
-  let actual=0,derived=false,excludedFlows=0,excludedProjects=0,coveredProjects=0;const ids=new Set<string>(),monthly=new Map(period.months.map(month=>[month,0]));
-  for(const building of source.rows){const id=String(building.building_id??building.id??''),neighborhood=typeof building.neighborhood==='string'?building.neighborhood.trim():'',release=marketMonth(building.release_date);
+  let checked:ReturnType<typeof projectsForSnapshot>;
+  try{checked=projectsForSnapshot(source.rows,city,'Vertical',data.end,result.warnings??=[]);}catch{return {...result,issue:'Histórico fora do município, UF ou segmento solicitado.'};}
+  let actual=0,derived=false,excludedFlows=0,excludedProjects=checked.excludedCount,coveredProjects=0;const ids=new Set<string>(),monthly=new Map(period.months.map(month=>[month,0]));
+  for(const building of checked.rows){const id=String(building.building_id??building.id??''),neighborhood=typeof building.neighborhood==='string'?building.neighborhood.trim():'',release=marketMonth(building.release_date);
    if(!id||ids.has(id))return {...result,issue:'Empreendimento sem ID ou duplicado no ranking.'};ids.add(id);
    if(!Array.isArray(building.typologies_history))return {...result,issue:'Histórico de tipologias ausente no ranking.'};
    const seen=new Set<string>(),staged:{month:string;value:number}[]=[];let projectIssue='';

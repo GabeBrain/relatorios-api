@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
-import { maceioPeriod, maceioReference, type MaceioSelection } from './model';
+import { maceioPeriod, maceioReference,maceioSlideTitle, type MaceioSelection } from './model';
 import MaceioReportSlide from './MaceioReportSlide';
 import { buildMaceioLaunchSeries, maceioSlideIssue, type MaceioIntroData } from './intro-data';
 import { buildMaceioMarketSlide, type MonetaryPolicy } from './market-slides-data';
@@ -18,7 +18,7 @@ export default function MaceioIntroSlides({selection,data,initialMonetaryPolicy=
  const remaining=page>=61?buildRemainingSlide(page,selection,data?.slides??null,pricePolicy):null;
  const caged=page>=9&&page<=14?buildCagedSlide(page,selection,data?.caged):null;
  const issue=remaining?.issue??advanced?.issue??market?.issue??maceioSlideIssue(page,selection,data);
- const title=page<=20?introTitles[page-1]:[22,33].includes(page)?`Unidades ${page===22?'lançadas':'vendidas'} · MCMV`:reference.slides[page-1].title.replace(/VERTICAIS(?=LANÇ|VEND)/g,'VERTICAIS ').replace(/\s+/g,' ');
+ const title=page<=20?introTitles[page-1]:[22,33].includes(page)?`Unidades ${page===22?'lançadas':'vendidas'} · MCMV`:maceioSlideTitle(page,selection).replace(/VERTICAIS(?=LANÇ|VEND)/g,'VERTICAIS ').replace(/\s+/g,' ');
  const navigation=<nav className="flex flex-wrap gap-2" aria-label="Slides implementados Maceió"><Button variant="outline" disabled={page===1} onClick={()=>setPage(page-1)}>Anterior</Button>{Array.from({length:reference.slideCount},(_,i)=>i+1).map(number=><Button key={number} variant={page===number?'default':'outline'} aria-pressed={page===number} onClick={()=>setPage(number)}>{number}</Button>)}<Button variant="outline" disabled={page===reference.slideCount} onClick={()=>setPage(page+1)}>Próximo</Button></nav>;
  const slide=<div className="overflow-hidden rounded-lg border bg-white shadow-sm" data-maceio-preview={page}><MaceioReportSlide page={page} selection={selection} data={data} monetaryPolicy={monetaryPolicy} pricePolicy={pricePolicy}/></div>;
  return <section className="space-y-4 min-w-0" aria-label="Prévia dos slides Maceió">
