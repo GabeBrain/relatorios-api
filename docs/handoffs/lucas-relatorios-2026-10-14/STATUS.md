@@ -1,5 +1,11 @@
 # Estado do handoff
 
+## 23/11/2026 — Maceió: exportação editável mensal e trimestral
+
+Lucas confirmou Maceió (não ADEMI-PR) e autorizou push ao concluir. Base main limpa `a08fd296`, origin único, fetch 0/0. Código `276a69dc` integra botão PPTX na prévia, exige geração concluída no mesmo recorte, mantém 82/87 páginas e usa conversor DrawingML compartilhado sem alterar outros consumidores. Textos/células/formas editáveis, imagens da referência substituíveis; gráficos sem workbook. Worker recebe whitelist sem chave de sessão, notas/customXml preservam avisos e competência real. BrainLoadingState/tempo/progresso reais, cancelamento, descarte por revisão e retry de assets.
+
+[Contrato e evidências](../../features/relatorios-institucionais/maceio/EXPORTACAO_PPTX_2026-11-23.md): 311 casos únicos aprovados, lint/tipos/build, downloads Edge desktop claro/celular escuro; PowerPoint abriu e renderizou 169 páginas, alterou valor de tabela e preservou após salvar/reabrir cópia das duas edições. Imobiliário sintético, CAGED real verificado; sem token pessoal para nova geração autenticada, sem homologação dos números ou deploy observado. Publicação Git autorizada nesta sessão; sem escrita Monday.
+
 ## 23/11/2026 — Maceió: varredura integral das duas edições
 
 Lucas solicitou revisão completa; escopo exclusivo Maceió confirmado. Base main limpa `4d7c4e6b`, origin único atualizado por fetch (0/0). Código `00c42855` corrige unidades IVV, títulos/arte residual, classificação histórica/quatro ou mais/Super Luxo, validação dos contribuintes, isolamento cadastral com CSV e limites temporais CAGED. [Evidências detalhadas](../../features/relatorios-institucionais/maceio/VARREDURA_COMPLETA_2026-11-23.md).

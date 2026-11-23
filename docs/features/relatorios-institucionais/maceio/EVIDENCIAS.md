@@ -1,5 +1,9 @@
 # Evidências — Panorama Maceió / SINDUSCON-AL
 
+## 23/11/2026 — PPTX editável mensal e trimestral
+
+Código `276a69dc`; [contrato, ensaios e limites](EXPORTACAO_PPTX_2026-11-23.md). Downloads reais 82/87 páginas, objetos DrawingML e auditoria; PowerPoint abriu/renderizou 169 páginas e conservou alteração numérica após salvar/reabrir cópias das duas edições. 311 casos únicos aprovados, lint/tipos/build; interface desktop claro/celular escuro com espera lenta, cancelamento, erro HTTP e retry. Imobiliário sintético/CAGED real; geração autenticada do usuário e deploy não observados. Push autorizado expressamente por Lucas.
+
 ## 17/11/2026 — CAGED MTE, incluindo fonte antiga
 
 [Entrega, contratos, hashes e limites](CAGED_INTEGRACAO_2026-11-17.md). Pilotos reais de setembro/2026 e dezembro/2019; quatro totais de setembro conciliados com XLSX MTE.123testes Maceió,6Python,4Edge,3rota,9regressões do proxy aplicando patch em cópia temporária.144cenários visuais+24revisões setoriais e12cenários da página real com CAGED sintético/lento. Tipos/lint/build no fechamento. Código local, sem bootstrap histórico completo, ativação remota ou geração autenticada. Sem push/Monday. Teste lento não adiciona atraso em produção; nota metodológica de 2020 permanece fora do gráfico original.

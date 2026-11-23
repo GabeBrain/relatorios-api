@@ -2,6 +2,11 @@
 
 Registro de fatos comprovados, hipóteses e decisões. Atualizado a cada entrega.
 
+## 23/11/2026 — PPTX editável nas duas edições
+
+- **D49 — Objetos editáveis (DET):** Lucas confirmou Maceió mensal/trimestral e autorizou envio ao concluir. Exportar 82/87 páginas na sequência original usando o conversor DrawingML compartilhado, sem capturar a lâmina calculada. Textos, células e elementos vetoriais editáveis; artes/fotos rasterizadas permanecem imagens substituíveis. Gráficos por formas, sem workbook vinculado; Tahoma requerida. Não alterar motores paralelos.
+- **D50 — Mesma geração e avisos preservados (DET):** exigir geração concluída do mesmo período/recorte; sem nova API de mercado. Worker recebe whitelist sem chave de sessão e produz apenas diagnóstico agregado. Notas por página conservam fonte, pendência, cobertura e competência real; auditoria customXml separada de CSV identificado. Cancelamento/troca de geração impedem download antigo; falhas de asset permitem retry. [Contrato e validação](EXPORTACAO_PPTX_2026-11-23.md).
+
 ## 23/11/2026 — Varredura integral mensal e trimestral
 
 - **D45 — Validação conforme contribuição (DET):** estoque zero não exige preço/área nos indicadores de estoque; capacidade positiva continua exigindo os campos próprios. Categoria sem oferta válida conhecida tem preço nulo e aviso, sem inventar zero. Ausência de base válida continua indisponível.

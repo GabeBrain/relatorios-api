@@ -814,6 +814,16 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 2026-11-23 — Maceió: exportação PowerPoint editável mensal e trimestral — Lucas / Codex
+
+- **Ambiente/funcionalidade:** `/rebrain/relatorios-institucionais/maceio`, botão na prévia das duas edições.
+- **O quê/por quê:** download PPTX de 82/87 páginas com dados da geração, textos/células/formas editáveis e artes substituíveis. Conversor DrawingML existente preservado para Fortaleza/SP; sem nova consulta de mercado. Worker sem token, notas e auditoria agregada conservam pendências/cobertura/competência. Cancelamento, descarte por revisão, retry de imagem e BrainLoadingState existentes.
+- **Arquivos:** módulo Maceió e [contrato/evidências](../features/relatorios-institucionais/maceio/EXPORTACAO_PPTX_2026-11-23.md), decisões frontend, PLAN e STATUS do handoff.
+- **Commits:** `276a69dc` (código/testes); documentação nesta entrega.
+- **Monday:** [DESAFIO — Estudos Entidades e Institucionais](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`. Sem escrita Monday.
+- **Validação:** 311 casos únicos aprovados, lint/tipos/build; downloads reais no Edge em desktop claro/celular escuro com espera lenta/cancelamento/erro/retry. PowerPoint abriu/renderizou as 169 páginas e preservou edição de valor após salvar/reabrir cópia de ambas as edições; amostras visuais conferidas. Dados imobiliários sintéticos/CAGED real, sem token pessoal para regenerar números reais.
+- **Impacto em Etapas/Pendências:** PPTX implementado e envio autorizado por Lucas ao concluir; observar deploy e conferir geração real permanece necessário, sem homologação presumida. PDF permanece separado.
+
 ### 2026-11-23 — Maceió: varredura completa mensal e trimestral — Lucas / Codex
 
 - **Ambiente/funcionalidade:** `/rebrain/relatorios-institucionais/maceio`, 82 posições mensais e 87 trimestrais.
@@ -2115,6 +2125,8 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 
 ## 2. Etapas
 
+- **23/11 — Maceió, PowerPoint editável:** concluído em `276a69dc`, 82/87 páginas, downloads e edição/salvamento/reabertura comprovados no PowerPoint; [evidências](../features/relatorios-institucionais/maceio/EXPORTACAO_PPTX_2026-11-23.md). Envio autorizado, dados reais ainda sujeitos à conferência.
+
 - **23/11 — Maceió, varredura completa:** concluída localmente em `00c42855`; 169 posições, 298 testes e 338 visitas de navegador. [Evidências](../features/relatorios-institucionais/maceio/VARREDURA_COMPLETA_2026-11-23.md). Motores paralelos preservados.
 
 - **23/11 — Maceió:** correção compartilhada para períodos fechados concluída localmente em `579e0a89`, incluindo23/22/36causas recebidas, avisos/CSV, negativos, INCC e CAGEDcom referência explícita.264testes e12cenários visuais aprovados. Publicação e conferência imobiliária real após atualização ainda pendentes; não confundir esses marcos com homologação.
@@ -2292,6 +2304,8 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 ---
 
 ## 3. Pendências
+
+- **23/11 — Maceió, após exportação editável:** observar atualização Lovable e gerar PPTX mensal/trimestral com os dados autenticados da mesma prévia; conferir JSON/CSV pareados e homologar com analista. Exportação já implementada/testada em `276a69dc`, não fica mais pendente de desenvolvimento; gráficos são formas editáveis, imagens da referência continuam substituíveis. PDF separado. [Limites do ensaio](../features/relatorios-institucionais/maceio/EXPORTACAO_PPTX_2026-11-23.md).
 
 - **23/11 — Maceió, após varredura:** autorizar envio das correções, observar publicação e gerar JSON/CSV pareados com API real. Não declarar os dados imobiliários homologados a partir das fixtures; ausência real de fechamento/fonte continua explícita. Correções locais e limites em [varredura](../features/relatorios-institucionais/maceio/VARREDURA_COMPLETA_2026-11-23.md).
 
