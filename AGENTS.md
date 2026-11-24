@@ -1,5 +1,7 @@
 # AGENTS.md
 
+Carregamento dos relatórios: referência visual executável é `shared/ReportGenerationPanel.tsx`, extraído do painel efetivo SP institucional. Novos modelos reutilizam banner compacto/cartões responsivos por `ReportLoading`; não recriam lista própria ou logo grande. Modelo 03 reúne critérios e ressalvas em Insights do analista e no diagnóstico JSON.
+
 <!-- PROTOCOLO-SESSAO v3 -->
 ## Protocolo de sessão
 

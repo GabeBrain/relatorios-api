@@ -1,5 +1,11 @@
 # Estado do handoff
 
+## 24/11/2026 — Insights Modelo03 e correção da referência de carregamento
+
+Fechamento: Lucas autorizou o push após finalizar. 90 testes/seis arquivos, tipos, lint/build e sete cenários de navegador sintético aprovados (seis shell + Modelo03 geração/insights/exportações); configuração03 idêntica por hash. Publicação Git não comprova homologação dos dados em produção.
+
+Base `4f64d690`, main, origin único atualizado0/0 antes do fechamento. Codex/Lucas: painel efetivo SP extraído para `ReportGenerationPanel`, com adaptadores nos quatro relatórios; preservada configuração03. Insights03 lazy reúne critérios e sinalizações por página, também no JSON. Itajaí/Navegantes refs66–68: setembro tem825 vendas detalhadas versus827 municipais (Alto99/101); manter detalhe observado e agregado, com ressalva comum a todas as cidades. Derivação de lançamento ainda exige reconciliação. Tipos/build e regressões automatizadas; navegador offline sintético, sem geração autenticada ou homologação. [Registro](../../features/relatorios-institucionais/modelo-03/INSIGHTS_2026-11-24.md). Sem push nesta rodada sem autorização nova.
+
 ## 24/11/2026 — Shell comum e política global dos próximos modelos
 
 Base main limpa `98c4b432`, origin único atualizado por fetch0/0. Lucas pediu controles de slides como Maceió nos quatro relatórios e carregamento com animação SP, preservando formulário Modelo03. Implementados `shared/ReportSlideControls.tsx`, `ReportLoading.tsx` e `standard-families.ts`; quatro consumidores migrados. SP deixa botões com títulos extensos;03 ganha navegação numérica/ampliação com paridade de páginas físicas; filtros/seleção03 idênticos por SHA256. Objetos e helper únicos preservam de-para confirmado e categorias brutas; nenhum novo motor01/02 foi criado nesta rodada.

@@ -18,8 +18,10 @@ describe('Contrato compartilhado dos relatórios institucionais',()=>{
  });
  it('mostra somente números nos botões, com título completo no tooltip',()=>{render(<ReportSlideNavigation slides={slides} value={1} onChange={()=>{}}/>);expect(screen.getAllByRole('button').map(b=>b.textContent)).toEqual(['Anterior','1','3','8','Próximo']);expect(screen.getByTitle('Slide 3 · Indicadores')).toHaveTextContent('3');});
  it('mantém animação/tempo/cancelamento na região do relatório, inclusive durante pausa',()=>{
-  vi.useFakeTimers();vi.setSystemTime(new Date('2026-11-24T15:00:00Z'));const cancel=vi.fn();render(<ReportLoading title="Consultar fontes" description="Aguardando resposta da API" startedAt={Date.now()-65000}><button onClick={cancel}>Cancelar consulta</button></ReportLoading>);
-  expect(screen.getByRole('region',{name:'Carregamento do relatório'})).toHaveAttribute('aria-busy','true');expect(screen.getByLabelText('Tempo de processamento: 1:05')).toBeVisible();fireEvent.click(screen.getByRole('button',{name:'Cancelar consulta'}));expect(cancel).toHaveBeenCalledOnce();
+  vi.useFakeTimers();vi.setSystemTime(new Date('2026-11-24T15:00:00Z'));const cancel=vi.fn();render(<ReportLoading title="Consultar fontes" description="Aguardando resposta da API" startedAt={Date.now()-65000} onCancel={cancel}/>);
+  expect(screen.getByRole('region',{name:'Carregamento do relatório'})).toHaveAttribute('aria-busy','true');expect(screen.getByLabelText('1:05 decorridos')).toBeVisible();fireEvent.click(screen.getByRole('button',{name:'Cancelar consulta'}));expect(cancel).toHaveBeenCalledOnce();
+  expect(screen.getByRole('list',{name:'Andamento das etapas'})).toHaveClass('md:grid-cols-2');expect(screen.getByRole('heading',{name:'Gerando seu relatório'})).toBeVisible();
+  expect(document.querySelector('img')).toHaveClass('h-7');expect(document.querySelector('.backdrop-blur-sm')).toBeNull();
  });
  it('mantém a mesma equivalência nos motores existentes, sem misturar padrões desconhecidos',()=>{
   expect(SP_SEGMENT_RULE.groups).toEqual(REPORT_STANDARD_FAMILIES);const raw=Object.values(REPORT_STANDARD_FAMILIES).flat();expect(new Set(raw).size).toBe(7);expect([...FORTALEZA_STANDARDS].sort()).toEqual([...raw].sort());

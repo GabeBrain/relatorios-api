@@ -1,9 +1,10 @@
-import {useEffect,useRef,type ComponentProps} from 'react';
-import {BrainLoadingState} from '@/components/feedback/BrainLoadingState';
+import {useEffect,useRef} from 'react';
+import {ReportGenerationPanel,type ReportGenerationStep} from './ReportGenerationPanel';
 
-/** SP Institutional loading identity, contained in the report page for every model. */
-export function ReportLoading({label='Carregamento do relatório',reveal=true,...props}:Omit<ComponentProps<typeof BrainLoadingState>,'variant'|'className'>&{label?:string;reveal?:boolean}){
- const panel=useRef<HTMLElement>(null);
+/** Use the actual SP generation panel from preflight through the final source. */
+export function ReportLoading({label='Carregamento do relatório',reveal=true,title,description,startedAt,steps,onCancel,cancelLabel='Cancelar consulta',progress}:{label?:string;reveal?:boolean;title:string;description?:string;startedAt?:number|null;steps?:readonly ReportGenerationStep[];onCancel?:()=>void;cancelLabel?:string;progress?:{completed:number;total:number;unit:string}}){
+ const panel=useRef<HTMLDivElement>(null);
  useEffect(()=>{if(reveal&&typeof panel.current?.scrollIntoView==='function')panel.current.scrollIntoView({block:'start'});},[reveal]);
- return <section ref={panel} aria-label={label} aria-busy="true" className="relative overflow-hidden rounded-xl border bg-card"><BrainLoadingState {...props} variant="overlay" className="relative z-10 min-h-[26rem] py-8"/></section>;
+ const current=steps??[{id:'current',title,status:'running' as const,message:description,work:progress}];
+ return <div ref={panel}><ReportGenerationPanel label={label} title="Gerando seu relatório" steps={current} running startedAt={startedAt} description={description} onCancel={onCancel} cancelLabel={cancelLabel}/></div>;
 }

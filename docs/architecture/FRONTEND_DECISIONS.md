@@ -275,3 +275,6 @@ Não use para changelog de feature; mudanças funcionais continuam nos documento
 ## 02/11/2026 — Estimativas: entrega e análise separadas na mesma sessão
 
 Página de dados, sem novo primitive/token. Previsões é a vista padrão com filtros explícitos que definem a planilha; Análise detalhada reutiliza snapshot/runtime/cache e preserva estado exploratório separado, desmontando gráficos quando inativa. Reaproveitados Select/Button/Dialog, ExportPreview e identidade Brain. ExportContent/useExportPlan compartilham revisão modal e inline; layout persiste na sessão, snapshot novo reinicia. Comparação/backtest não alteram arquivo principal. Fonte e evidências: plano essencial seção14.9; validado localmente em1440/768/390 claro/escuro, sem publicação desta versão.
+# 24/11/2026 — Painel efetivo SP e insights Modelo 03
+
+O carregamento compartilhado deve reutilizar `ReportGenerationPanel`, extraído do painel de geração SP: banner compacto e cartões responsivos em duas colunas. `ReportLoading` adapta os motores sem listas próprias. Substitui a interpretação anterior que mantinha o logo grande. Modelo 03 ganha insights sob demanda com critérios, cobertura, ambiguidades e divergências ligados às páginas físicas; sem coleta adicional. Formulário de configuração preservado. Detalhes: `docs/features/relatorios-institucionais/modelo-03/INSIGHTS_2026-11-24.md`.

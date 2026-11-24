@@ -95,9 +95,9 @@ describe('Geração automática SP institucional', () => {
   });
   it('cancela a coleta inicial e permite retomar',async()=>{
     access.apiMode='pending';render(<SpInstitutionalPage/>);generate();
-    const dialog=await screen.findByRole('region',{name:'Carregamento do relatório'});
+    const dialog=await screen.findByRole('region',{name:'Etapas de geração'});
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
-    expect(within(dialog).getByText(/Etapa 1 de 8/)).toBeInTheDocument();
+    expect(within(dialog).getByText(/0 de 8 etapas processadas/)).toBeInTheDocument();
     fireEvent.click(within(dialog).getByRole('button',{name:'Cancelar geração'}));
     expect(access.aborted).toBe(true);expect(screen.getByText('Geração interrompida')).toBeInTheDocument();
     access.apiMode='success';fireEvent.click(screen.getByRole('button',{name:'Retomar geração'}));await finished();
@@ -127,7 +127,7 @@ describe('Geração automática SP institucional', () => {
     fireEvent.click(screen.getByText('Trocar UF'));expect(screen.queryByRole('article')).not.toBeInTheDocument();
     expect(screen.queryByRole('region',{name:'Etapas de geração'})).not.toBeInTheDocument();
     fireEvent.click(screen.getByText('Escolher capital'));access.apiMode='pending';fireEvent.click(screen.getByRole('button',{name:'Gerar relatório'}));
-    await screen.findByRole('region',{name:'Carregamento do relatório'});access.token='';view.rerender(<SpInstitutionalPage/>);
-    await waitFor(()=>expect(screen.queryByRole('region',{name:'Carregamento do relatório'})).not.toBeInTheDocument());expect(access.aborted).toBe(true);
+    await screen.findByRole('region',{name:'Etapas de geração'});access.token='';view.rerender(<SpInstitutionalPage/>);
+    await waitFor(()=>expect(screen.queryByRole('region',{name:'Etapas de geração'})).not.toBeInTheDocument());expect(access.aborted).toBe(true);
   });
 });

@@ -97,7 +97,12 @@ export function createCalculator(s:Selection,sources:Source[],indices:Readonly<R
   for(const m of expectedObservations(src,a,b)){
    const frame=snapshot(city,'Vertical',m),start=shift(m,1-cadence),metric=d.role==='sales'?'sales':'releases',expected=temporal(city,metric,start,m);let derived=false;
    const values=frame.map(r=>{let v=metric==='sales'?r.sales:r.launches;if(v===null&&metric==='releases'){v=r.release>=start&&r.release<=m?r.qty:0;derived=true;}if(v===null||!Number.isSafeInteger(v)||metric==='releases'&&v<0)throw new Error('Fluxo histórico por tipologia ausente ou inválido.');return {...r,stock:v};});
-   if(sum(values.map(r=>r.stock))!==expected)throw new Error(`${city}, ${m}: fluxo detalhado não reconciliado ao municipal.`);if(derived)warnings.add('Lançamentos sem fluxo explícito: capacidade histórica da coorte do período pesquisado, reconciliada ao total municipal.');rows.push(...values);
+   const actual=sum(values.map(r=>r.stock));
+   if(actual!==expected){
+    if(derived)throw new CoverageError(`${city}, ${m}: lançamentos derivados ${actual} versus municipal ${expected}; não há reconciliação para comprovar a derivação.`);
+    warnings.add(`${city}, ${m}: ${metric==='sales'?'vendas':'lançamentos'} detalhados ${actual} versus municipal ${expected} (diferença ${actual-expected}). Este quadro usa o fluxo detalhado observado; série municipal preservada, sem redistribuir a diferença entre categorias.`);
+   }
+   if(derived)warnings.add('Lançamentos sem fluxo explícito: capacidade histórica da coorte do período pesquisado, reconciliada ao total municipal.');rows.push(...values);
   }return rows;
  }
  function evaluate(d:Definition):Slide {

@@ -1,4 +1,3 @@
-import {ReportLoading} from '../shared/ReportLoading';
 import { useState } from 'react';
 import { FileChartColumn,Play,Layers,CalendarDays } from 'lucide-react';
 import { Alert,AlertDescription,AlertTitle } from '@/components/ui/alert';
@@ -30,10 +29,8 @@ export default function SpInstitutionalPage() {
   const supported=geo.uf==='SP'&&sameCity(geo.city);
   const ready=scope.strictReady&&scope.hasToken&&!scope.isLoading&&!scope.error&&supported;
   const state=generation.state,report=ready?state?.report:null,running=state?.phase==='running';
-  const active=state?.steps.find(step=>step.status==='running');
-  const initialLoading=Boolean(running&&!report);
   const periods=spPeriodOptions();
-  const work=active?.work,percent=work&&work.total>0?Math.round(work.completed/work.total*100):null;
+
   return <div className="mx-auto max-w-6xl space-y-6 p-4 sm:p-6">
     <header className="space-y-3"><p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Relatórios institucionais</p><div className="flex items-center gap-3"><span className="rounded-xl bg-primary/10 p-3 text-primary"><FileChartColumn aria-hidden="true" className="h-7 w-7"/></span><div><h1 className="text-2xl font-semibold">{SP_INSTITUTIONAL.label}</h1><p className="text-sm text-muted-foreground">Do período selecionado ao relatório, em uma geração automática.</p></div></div><div className="flex flex-wrap gap-x-5 gap-y-2 text-sm text-muted-foreground"><span className="flex items-center gap-1.5"><Layers className="h-4 w-4" aria-hidden="true"/>8 etapas automáticas · 85 slides</span><span className="flex items-center gap-1.5"><CalendarDays className="h-4 w-4" aria-hidden="true"/>Trimestre completo ou parcial, conforme os meses disponíveis</span></div></header>
     <section aria-label="Seleção do estudo" className="space-y-5 rounded-xl border bg-card p-4 sm:p-6">
@@ -46,8 +43,8 @@ export default function SpInstitutionalPage() {
       <p className="text-xs text-muted-foreground">Uma nova geração consulta a disponibilidade atual. Se houver um ou dois meses, o relatório será identificado como parcial; com três meses, usará o trimestre completo.</p>
     </section>
     {!state&&<section aria-label="Como a geração funciona" className="rounded-xl border border-dashed bg-card/50 p-5 sm:p-6"><h2 className="font-semibold">Um clique, do início ao fim</h2><p className="mt-1 text-sm text-muted-foreground">Acompanhe o avanço de cada etapa sem precisar abrir slides ou acionar consultas separadas.</p><ol className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">{SP_GENERATION_STEPS.map((step,index)=><li key={step.id} className="flex items-start gap-2 text-sm"><span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-semibold text-muted-foreground">{index+1}</span><span>{step.title}</span></li>)}</ol></section>}
-    {state&&!initialLoading&&<SpGenerationPanel state={state} onCancel={generation.cancel} onRetry={()=>{if(ready)void generation.retry();}}/>}
+    {state&&<SpGenerationPanel state={state} onCancel={generation.cancel} onRetry={()=>{if(ready)void generation.retry();}}/>}
     {report&&state&&<section aria-label="Resultado do estudo" className="space-y-4"><div><h2 className="text-xl font-semibold">São Paulo / SP · {report.quarter}</h2><p className="text-sm text-muted-foreground">{spPeriodLabel(report)}{running?' · geração em andamento':''}</p></div>{!running&&<SpDiagnosticExport report={report}/>}{running?<SpAnalystInsights report={report} state={state}/>:<Tabs defaultValue={isSpMunicipalPreview(report)?'report':'insights'}><TabsList className="mb-4"><TabsTrigger value="report" disabled={!isSpMunicipalPreview(report)}>Relatório</TabsTrigger><TabsTrigger value="insights">Insights do analista</TabsTrigger></TabsList><TabsContent value="report">{isSpMunicipalPreview(report)&&<SpReportPages report={report}/>}</TabsContent><TabsContent value="insights"><SpAnalystInsights report={report} state={state}/></TabsContent></Tabs>}</section>}
-    {initialLoading&&<ReportLoading title={active?`Etapa ${SP_GENERATION_STEPS.findIndex(step=>step.id===active.id)+1} de ${SP_GENERATION_STEPS.length} · ${SP_GENERATION_STEPS.find(step=>step.id===active.id)!.title}`:'Identificar o período disponível'} description={percent===null?active?.message: `${work!.completed} de ${work!.total} ${work!.unit} consultadas · ${percent}%`} startedAt={state?.startedAt}><Button className="mt-4" variant="outline" onClick={generation.cancel}>Cancelar geração</Button></ReportLoading>}
+
   </div>;
 }

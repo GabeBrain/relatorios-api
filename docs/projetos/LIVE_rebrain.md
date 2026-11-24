@@ -837,6 +837,15 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 24/11/2026 — Modelo 03: insights, fluxos Itajaí e painel SP efetivo
+
+- **Autor/origem:** Codex a pedido de Lucas; base `4f64d690`, entrega local na main.
+- **Monday:** [DESAFIO — Estudos Entidades e Institucionais](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`.
+- **Mudança:** aba Insights do analista com critérios, INCC-DI, agrupamento confirmado, cobertura, divergências e ambiguidades; atalhos às páginas físicas e mesma análise no JSON, sem nova coleta. Três bloqueios Itajaí/Navegantes (refs66–68) vinham de 825 vendas detalhadas versus827 municipais em setembro/2026, diferença2 no Alto. Quadros usam fluxo observado e ressalva, preservando agregado; lançamentos derivados continuam exigindo reconciliação. Regra comum para todas as cidades03.
+- **Interface:** extraído o painel efetivo SP para `ReportGenerationPanel`, banner compacto e cartões em duas colunas; quatro motores consomem implementação comum. Formulário Modelo03 preservado.
+- **Verificação:** tipos/build aprovados; regressões de cálculo, insights e shell; navegador sintético verifica carregamento/cancelamento/navegação SP/Fortaleza/Maceió. Sem geração autenticada nova ou homologação em produção. [Detalhes e limites](../features/relatorios-institucionais/modelo-03/INSIGHTS_2026-11-24.md).
+
+
 ### 24/11/2026 — Contrato visual único dos relatórios e equivalência global de padrões — Codex/Lucas
 
 - **Pedido/base:** main limpa `98c4b432`, origin único atualizado por fetch0/0. Lucas pediu navegação/numeração/ampliação de SP/Fortaleza/Modelo03 no padrão Maceió; animação de carregamento de Fortaleza/Maceió/Modelo03 no padrão SP; registro obrigatório para Modelos01/02 e próximos relatórios. Explicitou preservar a configuração do Modelo03.
@@ -2197,6 +2206,8 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 
 ## 2. Etapas
 
+- **24/11 — Relatórios automáticos:** insights Modelo03 e painel efetivo SP implementados localmente; divergências de fluxo detalhado preservadas com ressalva. Geração nova e conferência do analista ainda necessárias após publicação.
+
 - **24/11 — Relatórios, interface comum:** navegação/modal Maceió e carregamento SP centralizados nos quatro motores; equivalência global em código/documentação obrigatória para01/02. Configuração03 preservada. Validação offline aprovada, sem homologação de novos números.
 
 - **24/11 — Modelo03, diagnóstico/geografia:** causas dos23bloqueios tratadas no motor comum e interpretação dos16estudos conferida.16quadros reproduzidos com agregados reais;7dependem de nova geração cadastral autenticada. Envio autorizado ao terminar validação; não confundir teste sintético com homologação.
@@ -2388,6 +2399,8 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 ---
 
 ## 3. Pendências
+
+- **24/11 — Modelo03:** publicar somente com autorização; conferir novo JSON Itajaí/Navegantes e demais cidades após gerar novamente. Base parcial/ressalvas e editoriais não equivalem à homologação. Nenhum ajuste manual artificial de unidades.
 
 - **24/11 — Interface comum dos relatórios:** autorizar envio e conferir frontend atualizado. Novos01/02 devem consumir contrato compartilhado; não duplicar navegação/loader ou pedir reconfirmação da equivalência das quatro famílias. Preservar referências dos slides e filtros próprios.
 

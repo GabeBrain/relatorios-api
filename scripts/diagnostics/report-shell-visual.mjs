@@ -12,10 +12,10 @@ try{
   await context.route('**/*',route=>new URL(route.request().url()).origin===base?route.continue():route.abort());
   await page.goto(`${base}/rebrain/relatorios-institucionais/modelo-03`);await page.getByRole('heading',{name:'Modelo 03',exact:true}).waitFor();await page.evaluate(dark=>document.documentElement.classList.toggle('dark',dark),mobile);
   const mount=loading=>page.evaluate(async({kind,loading})=>(await import('/scripts/diagnostics/report-shell-fixtures.tsx')).mount(kind,loading),{kind,loading});
-  await mount(true);await page.getByText(`Consultando fontes · ${kind}`,{exact:true}).waitFor();await page.waitForTimeout(700);
-  const region=page.getByRole('region',{name:'Carregamento do relatório',exact:true});assert.ok(await region.isVisible());
-  assert.equal(await region.getByRole('status').evaluate(el=>getComputedStyle(el).position),'relative');assert.ok(await region.getByText(/1:0[5-9] decorridos/).isVisible());
-  await page.screenshot({path:resolve(folder,`${kind}-${mobile}-loading.png`),fullPage:true});await page.getByRole('button',{name:'Cancelar consulta',exact:true}).click();assert.equal(await page.locator('[data-cancelled="true"]').count(),1);
+  await mount(true);await page.getByRole('heading',{name:'Gerando seu relatório',exact:true}).waitFor();await page.waitForTimeout(700);
+  const region=page.getByRole('region',{name:kind==='sp'?'Etapas de geração':'Carregamento do relatório',exact:true});assert.ok(await region.isVisible());
+  assert.ok(await region.locator('ol').evaluate(el=>el.classList.contains('md:grid-cols-2')));assert.ok(await region.locator('img').evaluate(el=>el.getBoundingClientRect().height<=28));assert.ok(await region.locator('[aria-label$="decorridos"]').isVisible());
+  await page.screenshot({path:resolve(folder,`${kind}-${mobile}-loading.png`),fullPage:true});await page.getByRole('button',{name:kind==='sp'?'Cancelar geração':'Cancelar consulta',exact:true}).click();assert.equal(await page.locator('[data-cancelled="true"]').count(),1);
   await mount(false);const nav=page.getByRole('navigation').filter({has:page.getByRole('button',{name:'Anterior',exact:true})});await nav.waitFor();
   assert.equal(await nav.getByRole('button',{name:'Anterior',exact:true}).isDisabled(),true);await nav.getByRole('button',{name:'2',exact:true}).click();assert.equal(await nav.getByRole('button',{name:'2',exact:true}).getAttribute('aria-pressed'),'true');
   await page.getByRole('button',{name:'Ampliar slides',exact:true}).click();const dialog=page.getByRole('dialog');await dialog.waitFor();await dialog.getByRole('button',{name:'Próximo',exact:true}).click();assert.equal(await dialog.getByRole('button',{name:'3',exact:true}).getAttribute('aria-current'),'page');

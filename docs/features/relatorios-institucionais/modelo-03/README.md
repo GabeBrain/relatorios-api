@@ -91,3 +91,6 @@ PPTX compartilha a mesma renderização da prévia e conversor DrawingML existen
 - Ficam para evolução: 45 indicadores externos, conteúdo prospectivo/equipe, logos/fotos específicos das outras entidades, conferência metodológica e primeira geração real. Não vender as 39 posições editoriais como 39 indicadores homologados.
 
 **Monday:** [DESAFIO — Estudos Entidades e Institucionais](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`. Referência documental; nenhuma escrita no Monday.
+# Atualização 24/11 — insights e conferência de fluxos
+
+Consultar [Insights e divergências Itajaí/Navegantes](INSIGHTS_2026-11-24.md): aba do analista, metadados JSON e política comum de detalhamento versus agregado, sem distribuição artificial de diferenças.

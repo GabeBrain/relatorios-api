@@ -4,6 +4,8 @@ Decisão de Lucas,24/11/2026. Obrigatória para SP institucional, Fortaleza, Mac
 
 ## Interface da ferramenta
 
+Referência de carregamento confirmada em 24/11: o painel efetivo de geração do SP foi extraído para `shared/ReportGenerationPanel.tsx`. Usar esse painel (diretamente ou via `ReportLoading`): banner Brain compacto e cartões em duas colunas no desktop, tempo real, progresso e cancelamento. Não copiar lista própria nem o antigo logo grande. O adaptador SP também consome a mesma implementação. [Evidências e insights Modelo 03](modelo-03/INSIGHTS_2026-11-24.md).
+
 O conteúdo de cada relatório mantém sua referência, marca, gráficos e recorte. Os controles da ferramenta são comuns, pois todos pertencem ao mesmo sistema/menu.
 
 - **Referência de navegação: Maceió.** Botões numéricos compactos, Anterior/Próximo, número ativo destacado, linha “Slide N · título” e botão “Ampliar slides”. Modal com mesma largura/altura, navegação e posição preservada. Tooltip mantém título completo sem colocar85títulos longos em botões diferentes. Sequência disponível é respeitada mesmo com lacunas. No Modelo03 os botões representam páginas físicas, incluindo continuações; posição original permanece no diagnóstico/detalhes.

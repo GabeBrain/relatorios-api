@@ -16,6 +16,17 @@ function quarterly(sources:Source[],city:string){for(const src of sources.filter
  else src.rows=src.rows.filter(r=>Number(String(r.period).slice(5,7))%3===0).map(r=>({...r,releases_in_period:3,liquid_sales:3,vgv_release:1500000,vgv_liquid_sales:1500000}));
 }}
 describe('Modelo 03 · regressões do diagnóstico Curitiba 3T2026 e recortes dos originais',()=>{
+ it('mantém bloqueio da derivação de lançamentos quando a capacidade não reconcilia com a API',()=>{
+  const sources=fixture(),detail=sources.find(src=>src.city==='Curitiba'&&src.metric==='details'&&src.segment==='Vertical')!;
+  detail.rows[0].release_date='2026-06-01';for(const r of detail.rows[0].typologies_history as Row[])r.releases_in_period=null;
+  const slide=createCalculator(selection,sources).evaluate(definition(54));expect(slide.status).toBe('available');expect(slide.warnings.join()).toContain('não há reconciliação para comprovar');expect(slide.tables[0].rows[0].values.every(v=>v===null)).toBe(true);
+ });
+ it.each([66,67,68])('preserva fluxo detalhado divergente e a cidade parceira sem inventar categorias no slide %s',page=>{
+  const s={...selection,city:'Itajaí',uf:'SC',rmCities:['SC|Navegantes'],position:3},sources=fixture(s),detail=sources.find(src=>src.city==='Itajaí'&&src.metric==='details'&&src.segment==='Vertical')!;
+  const rows=detail.rows[0].typologies_history as Row[];rows.find(r=>r.period==='2026-09-01'&&r.typology_id===1)!.sold_in_period=-1;
+  const c=createCalculator(s,sources),slide=c.evaluate(definition(page));expect(slide.status).toBe('available');expect(slide.tables.map(t=>t.unit)).toEqual(['Itajaí','Navegantes']);expect(slide.tables[0].rows.at(-1)?.values[0]).toBe(4);expect(slide.tables[1].rows.at(-1)?.values[0]).toBe(6);expect(slide.warnings.join()).toContain('diferença -2');
+  expect(c.evaluate(definition(61)).tables[0].rows.at(-1)?.values).toEqual([6,6]);
+ });
  it.each([['Compacto','Compactos'],['Econômico','MCMV'],['Standard','Médio Padrão'],['Médio','Médio Padrão'],['Médio-Alto','Médio Padrão'],['Alto','Luxo'],['Luxo','Luxo']])('agrupa %s em %s sem perder unidades', (input,output)=>expect(standardFamily(input)).toBe(output));
  it.each(['quarterly','semiannual'] as const)('aceita Curitiba mensal e RM trimestral na edição %s sem inventar meses zero',periodicity=>{
   const s={...selection,periodicity,position:periodicity==='quarterly'?3:1},sources=fixture(s);quarterly(sources,'Araucária');

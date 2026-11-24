@@ -63,7 +63,7 @@ export default function MaceioInstitutionalPage() {
     </section>
     {scope.isLoading || busy ? <>
     {scope.isLoading && <ReportLoading label="Carregamento do relatório Maceió" reveal={false} title="Conferindo municípios autorizados" description="Aguarde a confirmação do seu acesso ao catálogo de cidades." startedAt={loadingStart.current} />}
-    {querying && market.state && <ReportLoading label="Carregamento do relatório Maceió" title="Consultando fontes do relatório" startedAt={market.state.startedAt} description={market.state.waitingForApi?'Aguardando resposta da API — retomada automática após a pausa':market.state.message}><MaceioGenerationPanel state={market.state} compact /><Button className="mt-4" variant="outline" onClick={market.cancel}>Cancelar consulta</Button></ReportLoading>}
+    {querying&&market.state&&<ReportLoading label="Carregamento do relatório Maceió" title="Consultando fontes do relatório" startedAt={market.state.startedAt} description={market.state.waitingForApi?'Aguardando resposta da API — retomada automática após a pausa':market.state.message} steps={market.state.steps.map(step=>({...step,message:step.status==='running'?market.state!.message:undefined}))} onCancel={market.cancel}/>}
     </> : <>
     {market.state && !querying && <MaceioGenerationPanel state={market.state} />}
     {market.state?.phase === 'cancelled' && <p role="status" className="text-sm text-muted-foreground">{market.state.message}</p>}
