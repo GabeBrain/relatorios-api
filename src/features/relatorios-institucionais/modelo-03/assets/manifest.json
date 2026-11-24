@@ -1,0 +1,62 @@
+{
+  "sourceId": "1cLd59MFqyICd7A7j9B-ZcUhot0W3O-xl",
+  "sourcePeriod": "2T2026",
+  "inspectedAt": "2026-11-24",
+  "artworksAreReplaceableImages": true,
+  "assets": [
+    {
+      "file": "cover-curitiba.jpg",
+      "bytes": 549672,
+      "sha256": "cac6cd61541174c8bd84a9716985252b46cea804d9a1eefb79f5ee81832d99f1",
+      "referencePage": 1
+    },
+    {
+      "file": "editorial-156.png",
+      "bytes": 560762,
+      "sha256": "58810a679228e89e11b59cd1084b6aba55ca84d8672396484e717313e68b9fd5",
+      "referencePage": 156
+    },
+    {
+      "file": "editorial-157.png",
+      "bytes": 941531,
+      "sha256": "231b9c479745ecfd2c47f7602ac2dba261decc767ea6c7acabb0145b1154bee9",
+      "referencePage": 157
+    },
+    {
+      "file": "editorial-158.png",
+      "bytes": 827665,
+      "sha256": "78bb8c5c7c77cdcd3a178f22a5afd56f59e87ea0dcf53a8acc1f663e46f0b291",
+      "referencePage": 158
+    },
+    {
+      "file": "editorial-2.png",
+      "bytes": 356032,
+      "sha256": "a2794ec82726a60bc76f2b19bca627940c04cd5b43aa7719207e5c702beeebab",
+      "referencePage": 2
+    },
+    {
+      "file": "editorial-3.png",
+      "bytes": 707772,
+      "sha256": "1abb4f7f1da66560a7cc41e8e736eb28af9571bb53e95a50c8ce5521d529db03",
+      "referencePage": 3
+    },
+    {
+      "file": "editorial-4.png",
+      "bytes": 796346,
+      "sha256": "a57a902171a55dbe87232a1dc2cd170679ede32a3f155ac0f249e2b2ef5690ca",
+      "referencePage": 4
+    },
+    {
+      "file": "editorial-5.png",
+      "bytes": 482093,
+      "sha256": "bb5e1c077e372a43221a134a54b18ab0f06305b00efec536cbc24f8f5169dd52",
+      "referencePage": 5
+    },
+    {
+      "file": "editorial-6.png",
+      "bytes": 658118,
+      "sha256": "556cc9352d2e3bdafebdfb11570f226c9a29c900f198f29d6c529deb9de0c905",
+      "referencePage": 6
+    }
+  ]
+}

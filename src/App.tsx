@@ -42,6 +42,7 @@ const SpInstitutionalPage = lazy(() => import('./features/relatorios-institucion
 const FortalezaInstitutionalPage = lazy(() => import('./features/relatorios-institucionais/fortaleza/FortalezaInstitutionalPage'));
 // Maceió: acesso somente por rota nesta fase da implantação; sem item em menu, busca ou início.
 const MaceioInstitutionalPage = lazy(() => import('./features/relatorios-institucionais/maceio/MaceioInstitutionalPage'));
+const Modelo03Page = lazy(() => import('./features/relatorios-institucionais/modelo-03/Modelo03Page'));
 const EmpresasEmpregadosPage = lazy(() => import('./features/empresas-empregados/pages/EmpresasEmpregadosPage.tsx'));
 const SindusconCuritibaPage = lazy(() => import('./features/sinduscon-curitiba/pages/SindusconCuritibaPage.tsx'));
 const EstimativasPage = lazy(() => import('./features/estimativas-vendas/EstimativasPage.tsx'));
@@ -99,6 +100,7 @@ const App = () => (
                 <Route path="/rebrain/relatorios-institucionais/sp" element={<Suspense fallback={<div className="p-6"><BrainLoadingState variant="page" title="Carregando SP institucional" /></div>}><SpInstitutionalPage /></Suspense>} />
                 <Route path="/rebrain/relatorios-institucionais/fortaleza" element={<FortalezaInstitutionalPage />} />
                 <Route path="/rebrain/relatorios-institucionais/maceio" element={<MaceioInstitutionalPage />} />
+                <Route path="/rebrain/relatorios-institucionais/modelo-03" element={<Modelo03Page />} />
                 <Route
                   path="/rebrain/aelo"
                   element={(

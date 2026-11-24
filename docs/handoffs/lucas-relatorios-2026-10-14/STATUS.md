@@ -1,5 +1,13 @@
 # Estado do handoff
 
+## 24/11/2026 — Modelo 03: primeira implementação do gerador comum
+
+Lucas autorizou desenvolver o molde ADEMI-PR, mantendo Maceió pronto sem migração. Confirmou INCC-DI e RM por checkbox/seleção múltipla; pediu três periodicidades, entidade, competência, cidade, etapas/% e JSON/CSV/PPTX. Main limpa `ac0d45c3`, origin único atualizado por fetch 0/0. Drive acessível: 16 originais baixados/lidos, recortes categorizados; capa/contracapa e mapas relevantes renderizados no PowerPoint. Sem token pessoal de script confirmado para ensaio imobiliário real.
+
+[Contrato e evidências](../../features/relatorios-institucionais/modelo-03/README.md): rota lazy `/rebrain/relatorios-institucionais/modelo-03`, sem menu, GeoApiScopeEngine, RM inclusive interestadual excluindo principal, 58 posições de indicadores + 39 editoriais antes da supressão de RM/paginação. API histórica/municipal, cálculos em worker, INCC-DI e fontes pendentes explícitas, progresso/cancelamento/429. Diagnóstico completo agregado, CSV de todos os quadros/fontes e PPTX com texto/vetores editáveis e imagens substituíveis. Não presume que o Excel mensal ADEMI-PR seja apresentação mensal Modelo 3.
+
+32 testes, lint/tipos/build e sete cenários Edge sintéticos aprovados, cobrindo as três edições e estados inválidos. Arquivos JSON/CSV/PPTX efetivamente baixados/lidos. PowerPoint abriu 103 páginas da fixture e preservou edição de título após salvar/reabrir cópia. Não houve API imobiliária autenticada, revisão visual integral de 103 páginas, homologação ou deploy observado. Falta autorizar envio, primeiro recorte real, conferência metodológica/MCMV e evolução de fontes externas/editorial/identidade das demais entidades. Sem alterações no motor Maceió e sem escrita Monday.
+
 ## 23/11/2026 — Maceió: exportação editável mensal e trimestral
 
 Lucas confirmou Maceió (não ADEMI-PR) e autorizou push ao concluir. Base main limpa `a08fd296`, origin único, fetch 0/0. Código `276a69dc` integra botão PPTX na prévia, exige geração concluída no mesmo recorte, mantém 82/87 páginas e usa conversor DrawingML compartilhado sem alterar outros consumidores. Textos/células/formas editáveis, imagens da referência substituíveis; gráficos sem workbook. Worker recebe whitelist sem chave de sessão, notas/customXml preservam avisos e competência real. BrainLoadingState/tempo/progresso reais, cancelamento, descarte por revisão e retry de assets.

@@ -4,6 +4,8 @@
 
 ## Onde trabalhar
 
+**Modelo 03 — 24/11/2026:** [gerador comum, recortes dos 16 projetos e evidências](modelo-03/README.md). Rota oculta com três periodicidades, entidade e RM selecionável; INCC-DI, 58 contratos de indicadores, JSON/CSV/PPTX. Implementação/testes locais, sem geração imobiliária autenticada ou publicação. Maceió existente preservado.
+
 **Maceió — continuação21–40,16/11:** [fontes, composições e limites](maceio/SLIDES_21_40_2026-11-16.md). Prévia1–40dos modelos82/87; MCMV22/33separado, rankings/tipologias reconciliados, VGL/VGVcom índice explícito e oferta no fechamento. CAGED adiado por Lucas (BigQuery do setor já conectado ao Rebrain, informação do usuário).58testes,320casos de slides e8de página interceptada. Sem coleta autenticada/homologação/exportação nova; próximo41–60.
 
 **Maceió — primeiros20slides,16/11:** [prévia visual, fontes e limites](maceio/SLIDES_01_20_2026-11-16.md). Mensal/trimestral com navegação e arte original; cadastro e histórico de lançamentos independentes do balanço curto. CAGED9–14pendente,21em diante/exportação ainda em implantação.51testes,160casos visuais e8cenários de página com API interceptada; sem geração autenticada ou homologação.

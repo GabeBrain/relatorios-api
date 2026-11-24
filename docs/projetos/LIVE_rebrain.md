@@ -837,6 +837,15 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 24/11/2026 — Modelo 03: gerador por entidade, período e recorte — Codex/Lucas
+
+- **Pedido/base:** Lucas autorizou iniciar o molde ADEMI-PR com os recursos disponíveis, manter Maceió e publicar somente quando autorizado. Main limpa `ac0d45c3`, origin único, fetch sem atraso/avanço. INCC-DI confirmado; intenção de compra excluída. [Contrato, recortes e evidências](../features/relatorios-institucionais/modelo-03/README.md).
+- **Entrega:** rota lazy `/rebrain/relatorios-institucionais/modelo-03`, sem menu/Home. Mensal/trimestral/semestral, competência/ano, entidade ou nome próprio, UF/cidade pelo GeoApiScopeEngine. RM opcional com múltiplos municípios autorizados, inclusive outra UF, sem repetir a principal. Catálogo dos 16 originais: oito cidades únicas, seis com RM e dois pares; sugestões conferidas e seleção explícita.
+- **Motor/arquivos:** 58 posições de indicadores e 39 editoriais antes dos ajustes de RM/paginação; 45 indicadores externos e 16 de intenção fora da primeira versão. Fontes municipais/históricas, INCC-DI, validação por indicador, worker, etapas com porcentagem real e pausa/cancelamento 429. JSON/CSV agregados completos e PPTX editável pela mesma prévia, com notas/auditoria e artes substituíveis. Sem números fixos, sem reaproveitar cadastro atual como fotografia e sem alterar motores existentes.
+- **Validação:** 32 testes, lint/tipos/build aprovados; sete cenários Edge sintéticos, três periodicidades, estados de acesso/erro/vazio, 429/cancelamento e downloads. PowerPoint abriu 103 páginas e preservou edição de texto após salvar/reabrir cópia. Padrões BrainLoadingState/Select/Command/Progress/conversor DrawingML reutilizados; sidebar móvel existente estendida apenas à rota nova. Não houve geração imobiliária autenticada nem homologação numérica.
+- **Etapas/pendências:** primeira implementação local; envio depende de autorização. Primeira geração real deve conferir cobertura/MCMV/divergências e regras de ponderação; fontes externas, textos prospectivos/equipe e fotos/logos dos demais destinos seguem pendentes. Capa Curitiba usa original, demais combinações usam identidade textual neutra, sem marca/foto de outra entidade. Sem escrita Monday.
+- **Monday:** [DESAFIO — Estudos Entidades e Institucionais](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`.
+
 ### 2026-11-23 — Maceió: exportação PowerPoint editável mensal e trimestral — Lucas / Codex
 
 - **Ambiente/funcionalidade:** `/rebrain/relatorios-institucionais/maceio`, botão na prévia das duas edições.
@@ -2148,6 +2157,8 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 
 ## 2. Etapas
 
+- **24/11 — Modelo 03:** base comum implementada localmente, rota oculta, três periodicidades, RM configurável, 58 contratos de indicadores, JSON/CSV/PPTX; validação sintética aprovada. [Estado e limites](../features/relatorios-institucionais/modelo-03/README.md). Não substitui Maceió.
+
 - **23/11 — Maceió, PowerPoint editável:** concluído em `276a69dc`, 82/87 páginas, downloads e edição/salvamento/reabertura comprovados no PowerPoint; [evidências](../features/relatorios-institucionais/maceio/EXPORTACAO_PPTX_2026-11-23.md). Envio autorizado, dados reais ainda sujeitos à conferência.
 
 - **23/11 — Maceió, varredura completa:** concluída localmente em `00c42855`; 169 posições, 298 testes e 338 visitas de navegador. [Evidências](../features/relatorios-institucionais/maceio/VARREDURA_COMPLETA_2026-11-23.md). Motores paralelos preservados.
@@ -2327,6 +2338,8 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 ---
 
 ## 3. Pendências
+
+- **24/11 — Modelo 03:** autorizar envio, publicar frontend e executar primeiro recorte real. Conferir cobertura histórica, identificação MCMV e divergências municipais/detalhadas; completar fontes externas, conteúdo editorial e identidade específica das demais entidades. Sem afirmar 58 indicadores reais homologados a partir de fixture.
 
 - **23/11 — Maceió, após exportação editável:** observar atualização Lovable e gerar PPTX mensal/trimestral com os dados autenticados da mesma prévia; conferir JSON/CSV pareados e homologar com analista. Exportação já implementada/testada em `276a69dc`, não fica mais pendente de desenvolvimento; gráficos são formas editáveis, imagens da referência continuam substituíveis. PDF separado. [Limites do ensaio](../features/relatorios-institucionais/maceio/EXPORTACAO_PPTX_2026-11-23.md).
 
