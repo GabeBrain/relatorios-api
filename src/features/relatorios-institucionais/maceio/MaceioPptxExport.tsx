@@ -1,4 +1,4 @@
-import {useEffect,useRef,useState,type ReactNode} from 'react';
+import {useEffect,useMemo,useRef,useState,type ReactNode} from 'react';
 import {createPortal} from 'react-dom';
 import {Button} from '@/components/ui/button';
 import {BrainLoadingState} from '@/components/feedback/BrainLoadingState';
@@ -45,6 +45,8 @@ export default function MaceioPptxExport({selection,generation,renderSlide,revis
    }finally{if(active.current===job){if(job.controller.signal.aborted)setMessage('Exportação cancelada. Você pode iniciar novamente.');active.current=null;setJob(null);}}
   })();
  },[job]);
+ // Built once per job: progress updates must not re-render (and recompute) every offscreen slide.
+ const exportDeck=useMemo(()=>job?createPortal(<div ref={deck} aria-hidden="true" style={{position:'fixed',left:-3000,top:0,width:1280,pointerEvents:'none',zIndex:-1}}>{Array.from({length:job.count},(_,i)=><div key={i} data-maceio-export-slide={i+1} style={{width:1280,height:720,position:'relative',overflow:'hidden'}}>{job.render(i+1)}</div>)}</div>,document.body):null,[job]);
  const count=maceioReference(selection.periodicity).slideCount,blueprint=generation?.blueprint;
  const ready=generation?.phase==='done'&&!!generation.intro&&!!blueprint&&blueprint.period.end===maceioPeriod(selection).end&&blueprint.reference.slideCount===count&&Object.keys(selection).every(key=>blueprint.selection[key as keyof MaceioSelection]===selection[key as keyof MaceioSelection])&&maceioPeriodIsClosed(selection);
  const start=()=>{
@@ -59,6 +61,6 @@ export default function MaceioPptxExport({selection,generation,renderSlide,revis
   {!ready&&!job&&<p className="text-sm text-muted-foreground">Conclua uma geração deste período para liberar o download.</p>}
   {job&&<><BrainLoadingState variant="operation" title={`${stage} · ${progress} de ${job.count} páginas`} startedAt={job.startedAt}/><Button variant="outline" onClick={()=>job.controller.abort()}>Cancelar exportação</Button></>}
   {error&&<p role="alert" className="text-sm text-destructive">{error}</p>}{message&&<p role="status" className="text-sm">{message}</p>}
-  {job&&createPortal(<div ref={deck} aria-hidden="true" style={{position:'fixed',left:-3000,top:0,width:1280,pointerEvents:'none',zIndex:-1}}>{Array.from({length:job.count},(_,i)=><div key={i} data-maceio-export-slide={i+1} style={{width:1280,height:720,position:'relative',overflow:'hidden'}}>{job.render(i+1)}</div>)}</div>,document.body)}
+  {exportDeck}
  </section>;
 }

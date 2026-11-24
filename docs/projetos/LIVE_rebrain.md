@@ -1,5 +1,12 @@
 # Rebrain (Plataforma) — Documento Vivo
 
+## 24/11/2026 — Maceió: PPTX editável sem re-render do deck a cada página — Claude/Lucas
+
+- **Problema:** mesmo após `e189b279`, exportação real seguia em ~15–20s por página (5 de 87 em 1:15). A correção do cache não era a causa principal. Causa real: `MaceioPptxExport` criava o deck oculto dentro do render, então cada `setProgress` re-renderizava as 87 lâminas e recalculava todos os gráficos com os dados da geração.
+- **Entrega:** deck memoizado por exportação (`useMemo(...,[job])`), mesmo padrão já usado em `FortalezaPptxExport`. Sem mudança de conteúdo, ordem, auditoria ou cancelamento.
+- **Validação:** benchmark local no Chromium com o componente real (botão, worker, progresso), trimestral com 87 páginas e fixtures de mercado, restante e CAGED: de 110s para 8,4s no total. O re-render de um deck inteiro custa ~1,2s mesmo com fixture, e com dados reais o custo cresce. `tsc`, eslint e testes Maceió aprovados (308/309 na suíte completa: `sweep-regression` estourou 5s só sob carga e passa 34/34 isolado, sem relação com o arquivo alterado). **Não verificado:** tempo na geração real do Lovable.
+- **Monday:** [Panorama Maceió / SINDUSCON](https://brain381753.monday.com/boards/18398638577/pulses/13149406169) — `13149406169`.
+
 ## 24/11/2026 — Maceió: PPTX editável reaproveita as artes em cache — Claude/Lucas
 
 - **Problema:** export editável de Maceió levava ~20s por página (relato: 16 de 87 em 5:39), enquanto os demais relatórios fecham 80–90 páginas em ~2 min. Causa: `imageData` buscava cada arte com `cache:'reload'`, baixando de novo os ~17 MB de PNG que o deck oculto já estava carregando, uma página por vez.
