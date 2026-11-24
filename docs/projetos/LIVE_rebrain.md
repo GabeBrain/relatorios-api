@@ -1,6 +1,6 @@
 # Rebrain (Plataforma) — Documento Vivo
 
-## 24/11/2026 — Maceió: PPTX editável reaproveita as artes em cache — Claude/Diego
+## 24/11/2026 — Maceió: PPTX editável reaproveita as artes em cache — Claude/Lucas
 
 - **Problema:** export editável de Maceió levava ~20s por página (relato: 16 de 87 em 5:39), enquanto os demais relatórios fecham 80–90 páginas em ~2 min. Causa: `imageData` buscava cada arte com `cache:'reload'`, baixando de novo os ~17 MB de PNG que o deck oculto já estava carregando, uma página por vez.
 - **Entrega:** a arte passa a vir do cache HTTP; só uma resposta com falha é repetida com `cache:'reload'` na mesma tentativa (a intenção original de não reaproveitar falha cacheada se mantém). `src/features/relatorios-institucionais/maceio/pptx-export.ts` e teste correspondente.
