@@ -1,3 +1,4 @@
+import {ReportLoading} from '../shared/ReportLoading';
 import { FortalezaDiagnosticExport } from './FortalezaDiagnosticExport';
 import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { FileChartColumn, Layers } from 'lucide-react';
@@ -85,11 +86,11 @@ export default function FortalezaInstitutionalPage() {
       {!ready && !scope.isLoading && !scope.error && <p className="text-sm text-muted-foreground">Faça login com acesso aos cinco municípios do relatório para continuar.</p>}
       {error && <Alert variant="destructive"><AlertTitle>Preparação interrompida</AlertTitle><AlertDescription>{error}<Button className="mt-3 block" variant="outline" disabled={!ready} onClick={() => { void prepare(); }}>Tentar preparar novamente</Button></AlertDescription></Alert>}
     </section>
-    {scope.isLoading || busy ? <section aria-label="Carregamento do relatório Fortaleza" aria-busy="true" className="relative min-h-[48rem] overflow-hidden rounded-xl border bg-card">
-    {scope.isLoading && <BrainLoadingState variant="overlay" className="absolute z-10 justify-start overflow-y-auto py-8" title="Conferindo municípios autorizados" description="Aguarde a confirmação do seu acesso ao catálogo de cidades." startedAt={loadingStart.current} />}
-    {running && <BrainLoadingState variant="overlay" className="absolute z-10 justify-start overflow-y-auto py-8" title="Organizando páginas do estudo" startedAt={startedAt} description={`${progress.completed} de ${progress.total || reference.slideCount} páginas organizadas`}><Button className="mt-4" variant="outline" onClick={() => { controller.current?.abort(); setRunning(false); }}>Cancelar preparação</Button></BrainLoadingState>}
-    {querying && <BrainLoadingState variant="overlay" className="absolute z-10 justify-start overflow-y-auto py-8" title={periodicity === 'monthly' ? 'Consultando fontes do relatório mensal' : 'Consultando núcleo residencial vertical'} startedAt={market.state.startedAt} description={market.state.message}><FortalezaGenerationPanel state={market.state} compact /><Button className="mt-4" variant="outline" onClick={market.cancel}>Cancelar consulta</Button></BrainLoadingState>}
-    </section> : <>
+    {scope.isLoading || busy ? <>
+    {scope.isLoading && <ReportLoading label="Carregamento do relatório Fortaleza" reveal={false} title="Conferindo municípios autorizados" description="Aguarde a confirmação do seu acesso ao catálogo de cidades." startedAt={loadingStart.current} />}
+    {running && <ReportLoading label="Carregamento do relatório Fortaleza" title="Organizando páginas do estudo" startedAt={startedAt} description={`${progress.completed} de ${progress.total || reference.slideCount} páginas organizadas`}><Button className="mt-4" variant="outline" onClick={() => { controller.current?.abort(); setRunning(false); }}>Cancelar preparação</Button></ReportLoading>}
+    {querying && <ReportLoading label="Carregamento do relatório Fortaleza" title={periodicity === 'monthly' ? 'Consultando fontes do relatório mensal' : 'Consultando núcleo residencial vertical'} startedAt={market.state.startedAt} description={market.state.message}><FortalezaGenerationPanel state={market.state} compact /><Button className="mt-4" variant="outline" onClick={market.cancel}>Cancelar consulta</Button></ReportLoading>}
+    </> : <>
     {market.state && !querying && <FortalezaGenerationPanel state={market.state} />}
     {market.state?.phase === 'cancelled' && <p role="status" className="text-sm text-muted-foreground">{market.state.message}</p>}
     {market.state?.phase === 'error' && <Alert variant="destructive"><AlertTitle>Consulta não concluída</AlertTitle><AlertDescription>{market.state.message}<Button className="mt-3 block" variant="outline" disabled={!ready || busy} onClick={() => { void market.consult(); }}>Tentar consultar novamente</Button></AlertDescription></Alert>}

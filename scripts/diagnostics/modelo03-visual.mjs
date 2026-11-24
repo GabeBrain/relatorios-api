@@ -48,7 +48,7 @@ try{
    await page.locator('[data-modelo03-slide="1"]').screenshot({path:resolve(folder,`cover-${scenario.width}-${scenario.dark}.png`)});
    await page.getByRole('button',{name:'Gerar relatório',exact:true}).click();await page.getByText('Consultando fontes do Modelo 03',{exact:true}).waitFor();
    const bounds=await page.getByRole('status').filter({hasText:'Consultando fontes do Modelo 03'}).evaluate(el=>{const r=el.getBoundingClientRect(),main=el.closest('main')?.getBoundingClientRect();return {position:getComputedStyle(el).position,left:r.left,right:r.right,mainLeft:main?.left??0,mainRight:main?.right??innerWidth};});
-   assert.equal(bounds.position,'absolute');assert.ok(bounds.left>=bounds.mainLeft&&bounds.right<=bounds.mainRight+1);
+   assert.equal(bounds.position,'relative');assert.ok(bounds.left>=bounds.mainLeft&&bounds.right<=bounds.mainRight+1);
    const loading=page.getByRole('region',{name:'Carregamento do relatório Modelo 03',exact:true});
    assert.ok(await loading.isVisible());assert.equal(await loading.locator('li[aria-current="step"]').count(),1);
    assert.equal(await page.locator('[data-modelo03-loading-viewport]').count(),0);
@@ -58,8 +58,9 @@ try{
    }else{
     await page.screenshot({path:resolve(folder,`loading-${scenario.width}-${scenario.dark}.png`),fullPage:true});
     await page.getByRole('heading',{name:'Diagnóstico da geração',exact:true}).waitFor({timeout:120000});assert.ok(await page.getByText('58 com dados disponíveis',{exact:false}).isVisible());assert.ok(await page.getByText('0 aguardando fonte',{exact:false}).isVisible());
-    await page.locator('#modelo03-page').click();await page.getByRole('option',{name:/Empreendimentos verticais lançados$/}).first().click();
+    await page.getByTitle(/Slide \d+ · Empreendimentos verticais lançados$/).click();
     await page.locator('[data-modelo03-slide="46"]').screenshot({path:resolve(folder,`slide-${scenario.width}-${scenario.dark}-${scenario.periodicity}.png`)});await page.screenshot({path:resolve(folder,`chart-${scenario.width}-${scenario.dark}-${scenario.periodicity}.png`),fullPage:true});
+    await page.getByRole('button',{name:'Ampliar slides',exact:true}).click();const dialog=page.getByRole('dialog');await dialog.waitFor();await dialog.getByRole('button',{name:'Próximo',exact:true}).click();await dialog.getByRole('button',{name:'Anterior',exact:true}).click();assert.ok(await dialog.locator('[data-modelo03-slide="46"]').isVisible());await page.keyboard.press('Escape');await dialog.waitFor({state:'hidden'});
     if(scenario.exports){
      for(const [label,extension] of [['Baixar diagnóstico JSON','json'],['Baixar conferência CSV','csv'],['Baixar PPTX editável','pptx']]){
       const waiting=page.waitForEvent('download',{timeout:120000});await page.getByRole('button',{name:label,exact:true}).click();const file=await waiting,path=resolve(folder,`modelo03.${extension}`);await file.saveAs(path);

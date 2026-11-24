@@ -1,3 +1,11 @@
+## 24/11/2026 — Contrato único da ferramenta de relatórios automáticos
+
+**Decisão de Lucas:** navegação/numeração/ampliação de SP institucional, Fortaleza e Modelo03 seguem Maceió; carregamento de Fortaleza, Maceió e Modelo03 segue a animação/identidade do SP institucional. Conteúdo do relatório pode ter marca/referência própria, mas o shell da mesma ferramenta/menu não muda de sistema visual. A configuração de entidade/cidade/RM/período do Modelo03 deve permanecer intacta.
+
+Reutilizar `ReportSlideControls.tsx` (botões numéricos, Anterior/Próximo, título, modal) e `ReportLoading.tsx` (BrainLoadingState do SP em região da página, sem cobrir menu). Nova variação por relatório exige decisão explícita, não cópia local. APIs/cálculos/exportações/editores específicos preservados. Obrigatório para futuras inclusões dos modelos01/02 e relatórios posteriores. [Contrato permanente](../features/relatorios-institucionais/PADRAO_COMPARTILHADO.md).
+
+**Padrões globais confirmados:** Compactos=Compacto; MCMV=Econômico; MédioPadrão=Standard/Médio/Médio-Alto; Luxo=Alto/Luxo. Implementação única em `shared/standard-families.ts`. Não reconfirmar por cidade/modelo nem duplicar listas divergentes. Quadros que pedem sete padrões brutos conservam essa granularidade; o agrupamento em quatro famílias usa este contrato. Categoria desconhecida não é silenciosamente descartada.
+
 ## 23/11/2026 — Maceió: download PowerPoint editável
 
 Reutilizados Button, BrainLoadingState de operação, portal temporário e conversor DrawingML compartilhado. Ação na prévia mensal/trimestral exige geração concluída no mesmo recorte; informa edição por objetos e imagens substituíveis. Worker prepara auditoria sem chave de sessão; progresso por páginas convertidas e cronômetro real, cancelamento disponível. Mudança de geração cancela e impede arquivo obsoleto, erro mantém retry e portal é descartado. Sem nova rota/primitive/token visual ou coleta de mercado; bibliotecas PPTX sob demanda. [Contrato e evidências](../features/relatorios-institucionais/maceio/EXPORTACAO_PPTX_2026-11-23.md).

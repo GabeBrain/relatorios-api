@@ -1,3 +1,4 @@
+import {ReportLoading} from '../shared/ReportLoading';
 import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { FileChartColumn } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -60,10 +61,10 @@ export default function MaceioInstitutionalPage() {
       <div className="flex flex-wrap items-center gap-3"><Button disabled={!ready || busy} onClick={() => { void market.consult(); }}>Gerar relatório</Button></div>
       {!accessReady && !scope.isLoading && !scope.error && <p className="text-sm text-muted-foreground">Faça login com acesso aos {studyCities.length} municípios da edição para continuar.</p>}
     </section>
-    {scope.isLoading || busy ? <section aria-label="Carregamento do relatório Maceió" aria-busy="true" className="relative min-h-[32rem] overflow-hidden rounded-xl border bg-card">
-    {scope.isLoading && <BrainLoadingState variant="overlay" className="absolute z-10 justify-start overflow-y-auto py-8" title="Conferindo municípios autorizados" description="Aguarde a confirmação do seu acesso ao catálogo de cidades." startedAt={loadingStart.current} />}
-    {querying && market.state && <BrainLoadingState variant="overlay" className="absolute z-10 justify-start overflow-y-auto py-8" title="Consultando fontes do relatório" startedAt={market.state.startedAt} description={market.state.waitingForApi?'Aguardando resposta da API — retomada automática após a pausa':market.state.message}><MaceioGenerationPanel state={market.state} compact /><Button className="mt-4" variant="outline" onClick={market.cancel}>Cancelar consulta</Button></BrainLoadingState>}
-    </section> : <>
+    {scope.isLoading || busy ? <>
+    {scope.isLoading && <ReportLoading label="Carregamento do relatório Maceió" reveal={false} title="Conferindo municípios autorizados" description="Aguarde a confirmação do seu acesso ao catálogo de cidades." startedAt={loadingStart.current} />}
+    {querying && market.state && <ReportLoading label="Carregamento do relatório Maceió" title="Consultando fontes do relatório" startedAt={market.state.startedAt} description={market.state.waitingForApi?'Aguardando resposta da API — retomada automática após a pausa':market.state.message}><MaceioGenerationPanel state={market.state} compact /><Button className="mt-4" variant="outline" onClick={market.cancel}>Cancelar consulta</Button></ReportLoading>}
+    </> : <>
     {market.state && !querying && <MaceioGenerationPanel state={market.state} />}
     {market.state?.phase === 'cancelled' && <p role="status" className="text-sm text-muted-foreground">{market.state.message}</p>}
     {market.state?.phase === 'error' && <Alert variant="destructive"><AlertTitle>Consulta não concluída</AlertTitle><AlertDescription>{market.state.message}<Button className="mt-3 block" variant="outline" disabled={!ready || busy} onClick={() => { void market.consult(); }}>Tentar consultar novamente</Button></AlertDescription></Alert>}

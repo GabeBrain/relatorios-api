@@ -60,7 +60,7 @@ describe('SP — revisão para testes práticos',()=>{
     vi.stubEnv('VITE_MAPBOX_ACCESS_TOKEN','');
     render(<SpReportPages report={baseline()}/>);
     expect(screen.getByRole('region',{name:'Checklist dos 85 slides'})).toHaveTextContent('85 slides organizados');
-    fireEvent.click(screen.getByRole('button',{name:'82. Equipe técnica nominal e fotos'}));
+    fireEvent.click(screen.getByTitle('Slide 82 · Equipe técnica nominal e fotos'));
     fireEvent.click(screen.getByRole('button',{name:'Ampliar slides'}));
     expect(within(screen.getByRole('dialog')).getByRole('note')).toHaveTextContent('edição de referência 2T2026');
     expect(screen.getByRole('article')).not.toHaveTextContent('Checklist');

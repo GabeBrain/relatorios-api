@@ -1,14 +1,10 @@
+import {REPORT_STANDARD_FAMILIES} from '../shared/standard-families';
 import { isSpMunicipalPreview, type SpDistribution, type SpHistoryMetric, type SpPreview } from './model';
 
-/** Confirmed by Lucas on 2026-10-15 for this SP institutional report only. */
+/** SP confirmation 2026-10-15; shared across report models by Lucas on 2026-11-24. */
 export const SP_SEGMENT_RULE = {
   id: 'sp-institucional-segmentos-v1', confirmedBy: 'Lucas', confirmedOn: '2026-10-15',
-  groups: {
-    Compactos: ['Compacto'],
-    MCMV: ['Econômico'],
-    'Médio Padrão': ['Standard', 'Médio', 'Médio-Alto'],
-    Luxo: ['Alto', 'Luxo'],
-  },
+  groups: REPORT_STANDARD_FAMILIES,
 } as const;
 export const SP_DETAIL_PAGES = Object.keys(SP_SEGMENT_RULE.groups).flatMap(segment => (['launches', 'sales', 'stock'] as SpHistoryMetric[]).map(metric => ({ segment, metric, title: `${{ launches: 'Lançamentos', sales: 'Vendas', stock: 'Oferta' }[metric]} · ${segment}` })));
 export const SP_API_PATTERNS = ['Alto', 'Compacto', 'Econômico', 'Luxo', 'Médio', 'Médio-Alto', 'Standard'] as const;

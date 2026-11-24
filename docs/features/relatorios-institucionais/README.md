@@ -4,6 +4,8 @@
 
 ## Onde trabalhar
 
+**Contrato obrigatório para todos os modelos:** [interface compartilhada e equivalência dos padrões](PADRAO_COMPARTILHADO.md), confirmado por Lucas em24/11/2026. Navegação/numeração/modal como Maceió; animação de carregamento como SP institucional; componentes e classificação únicos em `shared/`. Aplica-se também à próxima inclusão dos modelos01/02. Não pedir novamente o de-para por cidade.
+
 **Modelo 03 — 24/11/2026:** [gerador comum, recortes dos 16 projetos e evidências](modelo-03/README.md). Rota oculta com três periodicidades, entidade e RM selecionável; INCC-DI, 58 contratos de indicadores, JSON/CSV/PPTX. Implementação/testes locais, sem geração imobiliária autenticada ou publicação. Maceió existente preservado.
 
 **Maceió — continuação21–40,16/11:** [fontes, composições e limites](maceio/SLIDES_21_40_2026-11-16.md). Prévia1–40dos modelos82/87; MCMV22/33separado, rankings/tipologias reconciliados, VGL/VGVcom índice explícito e oferta no fechamento. CAGED adiado por Lucas (BigQuery do setor já conectado ao Rebrain, informação do usuário).58testes,320casos de slides e8de página interceptada. Sem coleta autenticada/homologação/exportação nova; próximo41–60.

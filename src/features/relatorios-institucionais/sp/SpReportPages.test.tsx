@@ -16,7 +16,7 @@ import { buildSpTypologyHistory } from './typology-history';
 
 afterEach(cleanup);
 const current = () => buildSpTemporalPreview(recordedInput(), '3T2026');
-const open = (number: number) => fireEvent.click(screen.getByRole('button', { name: `${number}. ${SP_ORIGINAL_SLIDES[number - 1].title}` }));
+const open = (number: number) => fireEvent.click(screen.getByTitle(`Slide ${number} · ${SP_ORIGINAL_SLIDES[number-1].title}`));
 function reportWithTrends() {
   const report = current();
   const buildings = [2021, 2022, 2023, 2024, 2025, 2026].flatMap(year => ['Compacto', 'Econômico', 'Standard', 'Luxo'].map((standard, index) => ({ building_id: `${year}-${index}`, city: 'São Paulo', state: 'SP', building_type: 'Vertical', release_date: `${year}-07-01`, standard })));
@@ -26,7 +26,7 @@ describe('SP — estrutura original e dez slides de lançamentos', () => {
   it('preserva as 85 posições e todos os títulos originais, sem inserir complementos', () => {
     render(<SpReportPages report={current()} />);
     expect(SP_ORIGINAL_SLIDES).toHaveLength(85);
-    expect(within(screen.getByRole('navigation', { name: 'Navegação dos slides originais' })).getAllByRole('button').map(button => button.textContent)).toEqual(SP_ORIGINAL_SLIDES.map(item => `${item.number}. ${item.title}`));
+    expect(within(screen.getByRole('navigation', { name: 'Navegação dos slides originais' })).getAllByRole('button').map(button => button.textContent)).toEqual(['Anterior',...SP_ORIGINAL_SLIDES.map(item=>String(item.number)),'Próximo']);
     open(2); expect(screen.getByRole('img', { name: 'Sobre este relatório' })).toBeInTheDocument();
     expect(screen.getByRole('article')).toHaveTextContent('São Paulo capital');
     open(6); expect(screen.getByRole('img', { name: 'Sumário original' })).toBeInTheDocument();
@@ -71,7 +71,7 @@ describe('SP — estrutura original e dez slides de lançamentos', () => {
     open(46); expect(screen.getByRole('article')).toHaveTextContent('124.706');
     fireEvent.click(screen.getByRole('button', { name: 'Ampliar slides' }));
     expect(screen.getByRole('dialog')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: `46. ${SP_ORIGINAL_SLIDES[45].title}` })).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByTitle(`Slide 46 · ${SP_ORIGINAL_SLIDES[45].title}`)).toHaveAttribute('aria-pressed', 'true');
   });
   it('não monta o relatório com dados municipais bloqueados', () => {
     render(<SpReportPages report={{ ...current(), status: 'incomplete' }} />);

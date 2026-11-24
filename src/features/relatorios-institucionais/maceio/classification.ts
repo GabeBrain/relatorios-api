@@ -1,3 +1,4 @@
+import {reportStandardFamily} from '../shared/standard-families';
 import { marketMonth, normalizeMarketText, type MarketRow } from './market';
 
 /** Explicit bedroom counts; four or more share the report's final bucket. */
@@ -11,10 +12,7 @@ export function maceioBedroomIndex(value:unknown):number|null {
 
 /** Grouping explicitly confirmed by Lucas on 17/11/2026, for both editions. */
 export function maceioPatternFamily(value: unknown): string | null {
-  const raw = normalizeMarketText(value);
-  return ({ compacto: 'Compactos', compactos: 'Compactos', economico: 'MCMV', mcmv: 'MCMV',
-    standard: 'Médio Padrão', medio: 'Médio Padrão', 'medio-alto': 'Médio Padrão', 'medio padrao': 'Médio Padrão',
-    alto: 'Luxo', luxo: 'Luxo' } as Record<string, string>)[raw] ?? null;
+  return reportStandardFamily(value);
 }
 
 export const MACEIO_PRODUCT_FIELDS = ['building_subtype', 'subtype', 'product_type', 'horizontal_type', 'work', 'standard'] as const;

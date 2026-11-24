@@ -80,7 +80,7 @@ describe('Geração automática SP institucional', () => {
     expect(access.neighborhoodCalls).toBe(1);
     expect(document.querySelectorAll('[data-status="waiting"],[data-status="running"]')).toHaveLength(0);
     expect(screen.queryByRole('button',{name:/Conferir detalhamentos/})).not.toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button',{name:'53. Evolução R$/m², média geral'}));
+    fireEvent.click(screen.getByTitle('Slide 53 · Evolução R$/m², média geral'));
     expect(access.neighborhoodCalls).toBe(1);
     fireEvent.click(screen.getByRole('button',{name:'Gerar relatório'}));await finished();
     expect(access.neighborhoodCalls).toBe(2);

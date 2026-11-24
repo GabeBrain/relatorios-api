@@ -1,5 +1,11 @@
 # Estado do handoff
 
+## 24/11/2026 — Shell comum e política global dos próximos modelos
+
+Base main limpa `98c4b432`, origin único atualizado por fetch0/0. Lucas pediu controles de slides como Maceió nos quatro relatórios e carregamento com animação SP, preservando formulário Modelo03. Implementados `shared/ReportSlideControls.tsx`, `ReportLoading.tsx` e `standard-families.ts`; quatro consumidores migrados. SP deixa botões com títulos extensos;03 ganha navegação numérica/ampliação com paridade de páginas físicas; filtros/seleção03 idênticos por SHA256. Objetos e helper únicos preservam de-para confirmado e categorias brutas; nenhum novo motor01/02 foi criado nesta rodada.
+
+120testes/10arquivos/build aprovados;13cenários Edge offline/sintéticos (6componentes SP/Fortaleza/Maceió e7Modelo03), modal/navegação/carregamento/cancelamento, três periodicidades, vazio/erro/429 e downloads JSON/CSV/PPTX; capturas inspecionadas. Lint e tipos aprovados. [Contrato obrigatório para próximos modelos](../../features/relatorios-institucionais/PADRAO_COMPARTILHADO.md) registrado também em AGENTS/decisões frontend. Sem coleta imobiliária autenticada nova, deploy ou escrita Monday. Entrega local; autorização anterior de envio correspondia à rodada `98c4b432` já concluída.
+
 ## 24/11/2026 — Modelo03: diagnóstico Curitiba e geografia dos16originais
 
 Base main limpa `fb8cfbf7`, origin único atualizado fetch0/0. Lucas enviou JSON Curitiba3T2026 (23pendentes,99fontes completas), pediu corrigir motor comum para todas as cidades, confirmou4famílias e autorizou push ao terminar. Também pediu conferir recortes dos16originais: pares Itajaí/Navegantes e Penha/Piçarras nominalmente separados, Joinville/Araquari combinado/preços também por cidade, Belém nominal, demais locais/RM conforme referências. Fonte trimestral não exige dados mensais; detalhe inconsistente é isolado com base parcial explícita, zeros somente confirmados, IVV com valores da API e delta preservados. Cadastro de periodicidade não substitui catálogo autorizado.

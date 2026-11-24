@@ -59,7 +59,7 @@ describe('SP — correções da comparação dos85slides',()=>{
   });
   it('índice e divisórias navegam na página e expõem os destinos para o PPTX',()=>{
     render(<SpReportPages report={buildSpTemporalPreview(recordedInput(),'3T2026')}/>);
-    fireEvent.click(screen.getByRole('button',{name:'6. Sumário e navegação'}));
+    fireEvent.click(screen.getByTitle('Slide 6 · Sumário e navegação'));
     expect(screen.getByRole('article').querySelectorAll('[data-sp-target-slide]')).toHaveLength(9);
     fireEvent.click(within(screen.getByRole('article')).getByRole('button',{name:'Ir para 12. lançamentos verticais'}));
     expect(screen.getByRole('article')).toHaveAttribute('aria-label','Slide 12: Divisória: lançamentos verticais');

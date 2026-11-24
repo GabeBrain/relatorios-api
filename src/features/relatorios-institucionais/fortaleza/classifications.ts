@@ -1,5 +1,6 @@
+import {REPORT_STANDARD_FAMILIES} from '../shared/standard-families';
 import { normalizeMarketText } from './market';
-export const FORTALEZA_STANDARDS = ['Econômico','Compacto','Standard','Médio','Médio-Alto','Alto','Luxo'] as const;
+export const FORTALEZA_STANDARDS = [...REPORT_STANDARD_FAMILIES.MCMV,...REPORT_STANDARD_FAMILIES.Compactos,...REPORT_STANDARD_FAMILIES['Médio Padrão'],...REPORT_STANDARD_FAMILIES.Luxo] as const;
 const socioeconomic=new Set(FORTALEZA_STANDARDS.map(normalizeMarketText));
 const houses=new Set(['condominio de casas/sobrados','condominio de casas e sobrados','condominio de casas','casas em condominio','casas em condominio fechado']);
 export type MonthlyProduct='vertical'|'houses'|'lots'|'commercial'|'excluded'|'unknown';

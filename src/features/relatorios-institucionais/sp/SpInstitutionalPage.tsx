@@ -1,3 +1,4 @@
+import {ReportLoading} from '../shared/ReportLoading';
 import { useState } from 'react';
 import { FileChartColumn,Play,Layers,CalendarDays } from 'lucide-react';
 import { Alert,AlertDescription,AlertTitle } from '@/components/ui/alert';
@@ -47,9 +48,6 @@ export default function SpInstitutionalPage() {
     {!state&&<section aria-label="Como a geração funciona" className="rounded-xl border border-dashed bg-card/50 p-5 sm:p-6"><h2 className="font-semibold">Um clique, do início ao fim</h2><p className="mt-1 text-sm text-muted-foreground">Acompanhe o avanço de cada etapa sem precisar abrir slides ou acionar consultas separadas.</p><ol className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">{SP_GENERATION_STEPS.map((step,index)=><li key={step.id} className="flex items-start gap-2 text-sm"><span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-semibold text-muted-foreground">{index+1}</span><span>{step.title}</span></li>)}</ol></section>}
     {state&&!initialLoading&&<SpGenerationPanel state={state} onCancel={generation.cancel} onRetry={()=>{if(ready)void generation.retry();}}/>}
     {report&&state&&<section aria-label="Resultado do estudo" className="space-y-4"><div><h2 className="text-xl font-semibold">São Paulo / SP · {report.quarter}</h2><p className="text-sm text-muted-foreground">{spPeriodLabel(report)}{running?' · geração em andamento':''}</p></div>{!running&&<SpDiagnosticExport report={report}/>}{running?<SpAnalystInsights report={report} state={state}/>:<Tabs defaultValue={isSpMunicipalPreview(report)?'report':'insights'}><TabsList className="mb-4"><TabsTrigger value="report" disabled={!isSpMunicipalPreview(report)}>Relatório</TabsTrigger><TabsTrigger value="insights">Insights do analista</TabsTrigger></TabsList><TabsContent value="report">{isSpMunicipalPreview(report)&&<SpReportPages report={report}/>}</TabsContent><TabsContent value="insights"><SpAnalystInsights report={report} state={state}/></TabsContent></Tabs>}</section>}
-    {initialLoading&&<section aria-label="Carregamento do relatório" aria-busy="true" className="relative min-h-[26rem] overflow-hidden rounded-xl border bg-card">
-      <BrainLoadingState variant="overlay" className="absolute z-10" title="Etapa 1 de 8 · Identificar o período disponível" description={percent===null?active?.message: `${work!.completed} de ${work!.total} ${work!.unit} consultadas · ${percent}%`} startedAt={state?.startedAt}/>
-      <div className="absolute bottom-6 left-1/2 z-20 -translate-x-1/2"><Button variant="outline" onClick={generation.cancel}>Cancelar geração</Button></div>
-    </section>}
+    {initialLoading&&<ReportLoading title={active?`Etapa ${SP_GENERATION_STEPS.findIndex(step=>step.id===active.id)+1} de ${SP_GENERATION_STEPS.length} · ${SP_GENERATION_STEPS.find(step=>step.id===active.id)!.title}`:'Identificar o período disponível'} description={percent===null?active?.message: `${work!.completed} de ${work!.total} ${work!.unit} consultadas · ${percent}%`} startedAt={state?.startedAt}><Button className="mt-4" variant="outline" onClick={generation.cancel}>Cancelar geração</Button></ReportLoading>}
   </div>;
 }

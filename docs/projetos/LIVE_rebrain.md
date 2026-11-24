@@ -837,6 +837,14 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 24/11/2026 — Contrato visual único dos relatórios e equivalência global de padrões — Codex/Lucas
+
+- **Pedido/base:** main limpa `98c4b432`, origin único atualizado por fetch0/0. Lucas pediu navegação/numeração/ampliação de SP/Fortaleza/Modelo03 no padrão Maceió; animação de carregamento de Fortaleza/Maceió/Modelo03 no padrão SP; registro obrigatório para Modelos01/02 e próximos relatórios. Explicitou preservar a configuração do Modelo03.
+- **Interface:** `shared/ReportSlideControls.tsx` centraliza botões numéricos compactos/Anterior/Próximo, título/ativo e modal. Os quatro relatórios consomem os mesmos controles, mantendo editores, review, slides e exportações próprios. Modelo03 deixa o seletor de página por títulos e ganha ampliação; botões acompanham páginas físicas/continuações. `shared/ReportLoading.tsx` usa a animação Brain do SP dentro da página, sem cobrir menu; etapas/tempo/cancelamento reais mantidos, sem duplicar loader local. Configuração Modelo03 verificada idêntica por SHA256 `b5729bd71401e22133daca2e8e35dbf260b8590f5d233bf7738904faa570af02` no trecho de formulário.
+- **Regra permanente:** módulo único `standard-families.ts`: Compactos=Compacto; MCMV=Econômico; MédioPadrão=Standard/Médio/Médio-Alto; Luxo=Alto/Luxo. SP usa objeto comum; Fortaleza deriva os sete padrões; Maceió/Modelo03 delegam família ao helper. Detalhamento bruto e categorias desconhecidas preservados. Registrado em AGENTS e [decisão de design](../architecture/FRONTEND_DECISIONS.md), com [contrato obrigatório](../features/relatorios-institucionais/PADRAO_COMPARTILHADO.md); não reconfirmar por cidade.
+- **Validação:**120testes/10arquivos, build aprovado. Seis cenários Edge dos componentes reais SP/Fortaleza/Maceió (desktop claro/celular escuro) verificaram navegação, ampliação, retorno à mesma posição, carregamento lento e cancelamento; sete cenários Modelo03 verificaram três periodicidades, sucesso/vazio/erro/sem token/429, nova navegação/modal e downloads JSON/CSV/PPTX. Capturas inspecionadas. Fixtures interceptadas/offline, sem nova API imobiliária autenticada nem deploy observado. Lint e tipos aprovados.
+- **Monday:** [DESAFIO — Estudos Entidades e Institucionais](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`. Sem escrita. Esta nova entrega aguarda autorização de envio.
+
 ### 24/11/2026 — Modelo 03: causas dos23bloqueios Curitiba e geografia dos16estudos — Codex/Lucas
 
 - **Base/pedido:** main limpa `fb8cfbf7`, origin único com fetch0/0. JSON Curitiba3T2026 com35disponíveis/23pendentes/39editoriais e99fontes completas. Lucas pediu correções comuns a todas as cidades/edições, confirmou agrupamento em4famílias e autorizou push ao concluir. Durante a rodada, pediu conferência dos16originais para distinguir cidades parceiras/RM/total combinado.
@@ -2189,6 +2197,8 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 
 ## 2. Etapas
 
+- **24/11 — Relatórios, interface comum:** navegação/modal Maceió e carregamento SP centralizados nos quatro motores; equivalência global em código/documentação obrigatória para01/02. Configuração03 preservada. Validação offline aprovada, sem homologação de novos números.
+
 - **24/11 — Modelo03, diagnóstico/geografia:** causas dos23bloqueios tratadas no motor comum e interpretação dos16estudos conferida.16quadros reproduzidos com agregados reais;7dependem de nova geração cadastral autenticada. Envio autorizado ao terminar validação; não confundir teste sintético com homologação.
 
 - **24/11 — Modelo 03, carregamento:** alinhamento visual ao painel já usado em SP/Fortaleza/Maceió concluído e validado localmente; substitui o portal da rodada anterior, sem alterar coleta/cálculos.
@@ -2378,6 +2388,8 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 ---
 
 ## 3. Pendências
+
+- **24/11 — Interface comum dos relatórios:** autorizar envio e conferir frontend atualizado. Novos01/02 devem consumir contrato compartilhado; não duplicar navegação/loader ou pedir reconfirmação da equivalência das quatro famílias. Preservar referências dos slides e filtros próprios.
 
 - **24/11 — Modelo03, após esta rodada:** publicar/frontend atualizado e gerar novamente Curitiba3T2026 para conferir os7quadros detalhados com cadastros reais, preços/capacidades e base parcial indicada. Conferir também estudo de cidades parceiras; material comum adapta, não reproduz todas as posições de cada original. Autorização de push já concedida nesta sessão.
 

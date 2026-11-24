@@ -234,6 +234,16 @@ Sempre que alterar qualquer comportamento, regra, prompt, schema, migração, ex
 
 Use uma nova seção de versão no documento live quando regras forem adicionadas, removidas, renomeadas, reclassificadas entre determinísticas e IA/LLM, ou quando o fluxo de análise mudar.
 
+## Relatórios institucionais — contrato comum de interface e padrões (Lucas, 24/11/2026)
+
+SP institucional, Fortaleza, Maceió e Modelo 03 pertencem à mesma ferramenta. Modelos 01/02 e próximos relatórios devem reutilizar os componentes de `src/features/relatorios-institucionais/shared/`:
+
+- `ReportSlideControls.tsx`: navegação numérica como Maceió, Anterior/Próximo, slide ativo, título e ampliação comum. Títulos completos ficam no tooltip; numeração física acompanha prévia/exportação, sem renumerar o material de origem internamente.
+- `ReportLoading.tsx`: animação/identidade do SP institucional via BrainLoadingState, contida na página do relatório, sem cobrir menu lateral. Etapas/percentuais/tempo reais e cancelamento permanecem; não criar outra animação por modelo.
+- `standard-families.ts`: equivalência global confirmada: **Compactos = Compacto; MCMV = Econômico; Médio Padrão = Standard, Médio e Médio-Alto; Luxo = Alto e Luxo**. Não pedir reconfirmação por cidade/novo relatório. Preservar padrões brutos quando o quadro pede esse detalhamento; categorias desconhecidas não são descartadas nem atribuídas arbitrariamente.
+
+A identidade visual do conteúdo dos slides e os filtros específicos de cada modelo podem variar. A configuração de entidade/cidade/RM/período do Modelo 03 foi explicitamente preservada por Lucas. Leia também `docs/features/relatorios-institucionais/PADRAO_COMPARTILHADO.md` e a decisão de24/11 em `docs/architecture/FRONTEND_DECISIONS.md` antes de implementar novo modelo.
+
 ## Slide Maker
 
 Sempre que alterar o comportamento do agente do **Slide Maker** (prompt em `gcp/slide-maker-agent/src/prompt.ts`, ferramentas `brain`, `lib/lint_pptx.py` ou a base em `docs/features/slide-maker/base-conhecimento/`), suba `VERSAO_PROMPT` em `src/prompt.ts` e registre a nova versão em:
