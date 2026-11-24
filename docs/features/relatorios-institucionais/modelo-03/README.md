@@ -42,6 +42,14 @@ Carregamento de consulta e exportação reutiliza `BrainLoadingState` em um port
 
 ## Estrutura e cálculos
 
+### Coleta concorrente limitada — 24/11/2026
+
+Lucas relatou Curitiba/RM ainda carregando após 12 minutos e pediu aceleração para **todas as cidades do Modelo 03**, sem remover fontes. O coletor anterior aguardava cada resposta antes de iniciar a próxima: Curitiba + dez municípios exige 99 fontes, além das páginas. Agora há duas filas de fontes independentes, com um único portão de início a cada 500 ms. As páginas de cada fonte continuam sequenciais, todas as validações de paginação permanecem, e a saída conserva a ordem determinística original. Não há cache novo nem redução da cobertura histórica.
+
+429 cria pausa compartilhada respeitando Retry-After (60s quando ausente). Nenhuma fila inicia nova chamada durante a pausa; chamadas já em voo podem terminar. O aviso permanece enquanto há pausa pendente. Cancelar aborta ambas as filas; 401/403 interrompe a coleta e cancela pares, sem continuar credencial inválida. Progresso agrega páginas em andamento e fontes concluídas, sem usar a posição da última fonte como total.
+
+34 testes Modelo 03 aprovados, incluindo Curitiba/mensal, Natal/trimestral e Teresina/semestral com latência simulada de 1s: nove fontes em 5s versus 9s seriais, máximo duas requisições em voo e intervalo global mínimo de 500ms. Verificados Retry-After compartilhado, cancelamento de duas requisições e manutenção da ordem/fontes/páginas. Lint/build aprovados e cenário Edge trimestral sintético reexecutado, com 58 indicadores disponíveis e downloads JSON/CSV/PPTX lidos. Isto mede implementação controlada, não a duração real da API. Sem credencial pessoal para diagnosticar a latência da execução relatada pelo usuário. O novo comportamento exige frontend atualizado e nova geração; não acelera retroativamente uma consulta já iniciada no código anterior.
+
 `blueprint.ts` define 58 posições de indicadores e 39 institucionais/editoriais (97 antes de suprimir RM não selecionada). Excluídos intenção de compra 9–24 e 45 posições de fontes externas. O número de páginas físicas é dinâmico: quadros de territórios distintos e tabelas longas podem exigir continuação; nenhuma linha é truncada. JSON relaciona posição, página original e páginas físicas. Fixture capital+RM gera 103 páginas, não 158.
 
 As 58 posições abrangem lançamentos, vendas líquidas, estoque, IVV, preços, distribuição/áreas, idade de oferta, capacidade e VGV, nos segmentos vertical, horizontal e comercial. Fonte municipal: `temporal-analysis-city/{releases,sales,stock}`, por padrão/tipologia. Fonte detalhada: `POST /public-api/v2/building-with-history-internal` por segmento.

@@ -1,5 +1,9 @@
 # Estado do handoff
 
+## 24/11/2026 — Modelo 03: duas fontes em voo, válidas para todas as cidades
+
+Main limpa `5d2d5199`, origin único, fetch 0/0. Lucas relatou consulta Curitiba/RM >12min e explicitou melhoria para todas as cidades do Modelo 03. Coletor comum passa a duas filas com início global a cada500ms, páginas sequenciais, todas as fontes e cobertura mantidas. 429 pausa ambas as filas com Retry-After/aviso; cancelamento/401/403 interrompem pares. Ordem determinística e progresso agregado. 34 testes Modelo 03/lint aprovados; simulações de três cidades/periodicidades: nove fontes de1s em5s contra9s seriais. Sem token pessoal para medir o caso real; não prometer esse ganho em produção. [Contrato](../../features/relatorios-institucionais/modelo-03/README.md). Ajuste local, envio ainda não autorizado, nenhuma escrita Monday.
+
 ## 24/11/2026 — Modelo 03: RM automática e carregamento dentro do relatório
 
 Base main limpa `764b85e6`, origin único com fetch 0/0. Lucas pediu recorte padrão editável e menu lateral livre no carregamento. Defaults dos originais complementados pela Lista de cidades monitoradas: Curitiba com dez municípios ADEMI-PR e Teresina por entidade, incluindo Timon/MA (inferência explicitada, vínculo RIDE verificado). Somente membros regionais cadastrados e autorizados entram; ausências da referência são visíveis. Validação antes da coleta, troca de principal limpa escolhas antigas, restauração do padrão disponível. Consulta/exportação com BrainLoadingState dentro do main visível, acompanhando sidebar/rolagem.

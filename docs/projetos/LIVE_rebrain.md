@@ -837,6 +837,14 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 24/11/2026 — Modelo 03: acelerar coleta para qualquer cidade/RM — Codex/Lucas
+
+- **Pedido:** Curitiba/RM após 12 minutos sem finalizar; aplicar melhoria a todas as cidades do motor comum, não apenas Curitiba.
+- **Base:** main limpa `5d2d5199`, origin único, fetch 0/0. Nenhum push autorizado para esta nova entrega.
+- **Alteração:** duas fontes simultâneas, páginas sequenciais por fonte, inícios compartilhados a cada 500ms. Mantidas todas as fontes e cobertura histórica, sem novo cache. Pausa 429 compartilhada, aviso persistente, Retry-After, cancelamento dos pares e parada em 401/403. Progresso agregado conserva ordem estável na saída.
+- **Validação:** 34 testes Modelo 03 e lint aprovados; simulação em Curitiba mensal, Natal trimestral e Teresina semestral: nove fontes de 1s em 5s versus 9s seriais, máximo duas em voo e espaçamento mínimo de 500ms. Sem token imobiliário real para medir a latência relatada ou prometer prazo de geração. [Contrato/evidências](../features/relatorios-institucionais/modelo-03/README.md).
+- **Monday:** [DESAFIO — Estudos Entidades e Institucionais](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`. Sem escrita.
+
 ### 24/11/2026 — Modelo 03: recorte regional automático e carregamento restrito ao relatório — Codex/Lucas
 
 - **Pedido:** pré-selecionar RM dos estudos de referência, permitir edição pelo analista e preservar menu lateral durante consultas/exportações.
@@ -2166,6 +2174,8 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 
 ## 2. Etapas
 
+- **24/11 — Modelo 03, desempenho:** coleta concorrente limitada implementada para qualquer seleção; intervalo e pausa global preservados. Recortes automáticos/overlay já publicados em `5d2d5199`; esta aceleração permanece separada/local.
+
 - **24/11 — Modelo 03, ajuste do recorte:** pré-seleção regional editável e carregamento restrito ao main concluídos/testados localmente. Implementação inicial `764b85e6` já no origin; novo ajuste aguarda envio.
 
 - **24/11 — Modelo 03:** base comum implementada localmente, rota oculta, três periodicidades, RM configurável, 58 contratos de indicadores, JSON/CSV/PPTX; validação sintética aprovada. [Estado e limites](../features/relatorios-institucionais/modelo-03/README.md). Não substitui Maceió.
@@ -2349,6 +2359,8 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 ---
 
 ## 3. Pendências
+
+- **24/11 — Modelo 03, desempenho:** autorizar envio e medir nova geração autenticada após atualizar frontend. Sem ETA real confirmado; latência remota e 429 continuam podendo prolongar a consulta. Execução iniciada no bundle anterior não recebe a mudança automaticamente.
 
 - **24/11 — Modelo 03, recortes:** autorizar envio deste ajuste e conferir primeira geração autenticada. Padrão Teresina inferido da lista monitorada por entidade; confirmar eventual diferença histórica de edição com o analista. Opções adicionais exigem vínculo regional verificado; o catálogo autorizado isoladamente não prova pertencer à RM.
 
