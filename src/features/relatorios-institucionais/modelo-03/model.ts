@@ -66,3 +66,6 @@ export function regionalDefaults(uf:string,city:string,catalog:Record<string,str
  return options.filter(o=>p?.suggestions.some(v=>{const l=location(v,p.uf);return `${l.uf}|${norm(l.city)}`===`${location(o.value,uf).uf}|${norm(location(o.value,uf).city)}`;})).map(o=>o.value);
 }
 export function regionalMissing(uf:string,city:string,catalog:Record<string,string[]>|null){const p=regionalPreset(uf,city);return p?.suggestions.filter(v=>{const l=location(v,p.uf);return !(catalog?.[l.uf]??[]).some(c=>norm(c)===norm(l.city));}).map(v=>rmLabel(v,p.uf))??[];}
+export const isPairStudy=(s:Selection)=>s.includeRm&&regionalPreset(s.uf,s.city)?.regional==='pair';
+export function geographyMode(s:Selection){if(!s.includeRm)return 'city';const preset=regionalPreset(s.uf,s.city);return preset?.regional==='pair'?'paired-cities':preset?.id==='joinville'?'combined-cities':preset?.id==='belem'?'named-cities':'city-and-rm';}
+export const studyLabel=(s:Selection)=>['paired-cities','combined-cities','named-cities'].includes(geographyMode(s))?[s.city,...s.rmCities.map(v=>location(v,s.uf).city)].join(' e '):s.includeRm?`${s.city} + RM`:s.city;

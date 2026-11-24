@@ -837,6 +837,14 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 24/11/2026 — Modelo 03: causas dos23bloqueios Curitiba e geografia dos16estudos — Codex/Lucas
+
+- **Base/pedido:** main limpa `fb8cfbf7`, origin único com fetch0/0. JSON Curitiba3T2026 com35disponíveis/23pendentes/39editoriais e99fontes completas. Lucas pediu correções comuns a todas as cidades/edições, confirmou agrupamento em4famílias e autorizou push ao concluir. Durante a rodada, pediu conferência dos16originais para distinguir cidades parceiras/RM/total combinado.
+- **Motor comum:** calendário de pesquisa por cidade, fonte derivada da lista monitorada (357municípios) sem substituir autorização GeoApiScopeEngine. Fotografias/fluxos trimestrais não exigem meses inventados; ausências ficam sem valor, zero somente confirmado em histórico completo. Registro inconsistente isolado do quadro com aviso/base parcial; duplicata conflitante não conserva arbitrariamente primeira versão. Preços atuais não preenchem histórico. IVV preserva fórmula e valores da API, registrando ajuste de base. Famílias confirmadas: Compacto→Compactos, Econômico→MCMV, Standard/Médio/Médio-Alto→MédioPadrão, Alto/Luxo→Luxo.
+- **Geografia:** Itajaí/Navegantes e Penha/Piçarras são comparados pelo nome, com duas séries no quadro por ano; Joinville tem total combinado com Araquari/preços também separados; Belém compara municípios nominalmente; demais escopos locais/RM preservados e documentados. Detalhes conjuntos de Teresina e bairros de Natal respeitam títulos dos originais. Nomes residuais em caches de gráficos não são importados como recorte.
+- **Evidência:**73testes Modelo03/lint aprovados; replay dos16quadros de agregados do JSON real concluído. Os7quadros detalhados (posições51–54,58,59,81 no JSON) têm regressões de fotografia incompleta, mas não puderam ser recalculados com cadastros reais ausentes no diagnóstico. Edge sintético Curitiba desktop e Itajaí desktop/celular com JSON/CSV/PPTX baixados/lidos; capturas inspecionadas. Não declarar nova geração autenticada nem23/23homologados. [Decisões, fontes, limites](../features/relatorios-institucionais/modelo-03/CORRECOES_2026-11-24.md). Build final aprovado.
+- **Monday:** [DESAFIO — Estudos Entidades e Institucionais](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`. Sem escrita.
+
 ### 24/11/2026 — Modelo 03: alinhar apresentação do carregamento aos relatórios existentes — Codex/Lucas
 
 - **Pedido:** remover divergência visual do Modelo03 em relação a SP institucional/Fortaleza/Maceió. Base main limpa `43065484`, origin único atualizado por fetch0/0.
@@ -2181,6 +2189,8 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 
 ## 2. Etapas
 
+- **24/11 — Modelo03, diagnóstico/geografia:** causas dos23bloqueios tratadas no motor comum e interpretação dos16estudos conferida.16quadros reproduzidos com agregados reais;7dependem de nova geração cadastral autenticada. Envio autorizado ao terminar validação; não confundir teste sintético com homologação.
+
 - **24/11 — Modelo 03, carregamento:** alinhamento visual ao painel já usado em SP/Fortaleza/Maceió concluído e validado localmente; substitui o portal da rodada anterior, sem alterar coleta/cálculos.
 
 - **24/11 — Modelo 03, desempenho:** coleta concorrente limitada implementada para qualquer seleção; intervalo e pausa global preservados. Recortes automáticos/overlay já publicados em `5d2d5199`; esta aceleração permanece separada/local.
@@ -2368,6 +2378,8 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 ---
 
 ## 3. Pendências
+
+- **24/11 — Modelo03, após esta rodada:** publicar/frontend atualizado e gerar novamente Curitiba3T2026 para conferir os7quadros detalhados com cadastros reais, preços/capacidades e base parcial indicada. Conferir também estudo de cidades parceiras; material comum adapta, não reproduz todas as posições de cada original. Autorização de push já concedida nesta sessão.
 
 - **24/11 — Modelo 03, visual:** autorizar envio do alinhamento de carregamento após validação local; confirmar a apresentação no frontend atualizado. Aceleração já enviada em `43065484` permanece intacta.
 

@@ -4,18 +4,19 @@ import {resolve} from 'node:path';
 import {mkdir,writeFile,readFile} from 'node:fs/promises';
 import assert from 'node:assert/strict';
 import {unzipSync,strFromU8} from 'fflate';
-const base='http://127.0.0.1:4223',folder=resolve('.local-inputs/relatorios-lucas/modelo-03/visual-2026-11-24');await mkdir(folder,{recursive:true});
+const paired=process.argv.includes('--paired');
+const base='http://127.0.0.1:4223',folder=resolve('.local-inputs/relatorios-lucas/modelo-03',`visual-2026-11-24${paired?'-paired':''}`);await mkdir(folder,{recursive:true});
 const server=spawn(process.execPath,[resolve('scripts/diagnostics/report-preview-server.mjs'),'4223'],{windowsHide:true,stdio:'ignore'});let browser;const results=[],errors=[];
 try{
  let ready=false;for(let i=0;i<80&&!ready;i++){try{ready=(await fetch(base)).ok;}catch{}if(!ready)await new Promise(r=>setTimeout(r,250));}assert.ok(ready);browser=await chromium.launch({channel:'msedge',headless:true});
- for(const scenario of [{width:1440,dark:false,periodicity:'quarterly',exports:true},{width:390,dark:true,periodicity:'monthly'},{width:1440,dark:true,periodicity:'semiannual'},{width:390,dark:false,state:'error'},{width:1440,dark:false,state:'empty'},{width:390,dark:true,state:'no-token'},{width:1440,dark:true,state:'429'}].filter(s=>!process.argv.includes('--export-only')||s.exports)){
+ for(const scenario of [{width:1440,dark:false,periodicity:'quarterly',exports:true},{width:390,dark:true,periodicity:'monthly'},{width:1440,dark:true,periodicity:'semiannual'},{width:390,dark:false,state:'error'},{width:1440,dark:false,state:'empty'},{width:390,dark:true,state:'no-token'},{width:1440,dark:true,state:'429'}].filter(s=>(!process.argv.includes('--export-only')||s.exports)&&(!paired||s.exports||s.periodicity==='monthly'))){
   const context=await browser.newContext({viewport:{width:scenario.width,height:1000},acceptDownloads:true});let fixture=[],heavy=0,rateLimited=false;
   if(scenario.state!=='no-token')await context.addInitScript(()=>localStorage.setItem('brain-auth',JSON.stringify({state:{token:'synthetic-only',email:'fixture@example.invalid',issuedAt:Date.now(),expiresAt:Date.now()+3600000},version:0})));
   await context.route('**/*',async route=>{
    const url=new URL(route.request().url());if(url.hostname==='127.0.0.1')return route.continue();
    if(url.pathname==='/public-api/monitored-cities'){
     await new Promise(r=>setTimeout(r,400));if(scenario.state==='error')return route.fulfill({status:503,body:'unavailable'});
-    return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({data:scenario.state==='empty'?[]:[{city:'Curitiba',state:'PR'},{city:'Araucária',state:'PR'},{city:'Londrina',state:'PR'},{city:'Timon',state:'MA'}],links:{next:null}})});
+    return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({data:scenario.state==='empty'?[]:[{city:'Curitiba',state:'PR'},{city:'Araucária',state:'PR'},{city:'Londrina',state:'PR'},{city:'Timon',state:'MA'},{city:'Itajaí',state:'SC'},{city:'Navegantes',state:'SC'}],links:{next:null}})});
    }
    if(!['geobrain.com.br','app.geobrain.com.br'].includes(url.hostname))return route.abort();heavy++;
    if(scenario.state==='429'&&!rateLimited){rateLimited=true;return route.fulfill({status:429,headers:{'Retry-After':'60'},body:'limit'});}
@@ -33,17 +34,17 @@ try{
    assert.ok(await page.getByRole('button',{name:'Gerar relatório',exact:true}).isDisabled());assert.equal(heavy,0);
   }else{
    await page.getByText('Carregando municípios autorizados',{exact:true}).waitFor({state:'hidden'});
-   await page.locator('#modelo03-preset').click();await page.getByRole('option',{name:'Curitiba · ADEMI-PR',exact:true}).click();
+   await page.locator('#modelo03-preset').click();await page.getByRole('option',{name:paired?'Itajaí · SINDUSCON Itajaí':'Curitiba · ADEMI-PR',exact:true}).click();
    await page.getByRole('button',{name:'1 municípios selecionados',exact:true}).click();
    assert.equal(await page.getByRole('option',{name:'Londrina / PR',exact:false}).count(),0);
    assert.equal(await page.getByRole('option',{name:'Timon / MA',exact:false}).count(),0);
-   await page.getByRole('option',{name:'Araucária / PR',exact:false}).click();await page.keyboard.press('Escape');
-   assert.equal(await page.getByRole('button',{name:'Araucária / PR ×',exact:true}).count(),0);
+   await page.getByRole('option',{name:paired?'Navegantes / SC':'Araucária / PR',exact:false}).click();await page.keyboard.press('Escape');
+   assert.equal(await page.getByRole('button',{name:paired?'Navegantes / SC ×':'Araucária / PR ×',exact:true}).count(),0);
    await page.getByRole('button',{name:'Restaurar recorte da referência',exact:true}).click();
-   assert.ok(await page.getByRole('button',{name:'Araucária / PR ×',exact:true}).isVisible());
+   assert.ok(await page.getByRole('button',{name:paired?'Navegantes / SC ×':'Araucária / PR ×',exact:true}).isVisible());
    if(scenario.periodicity&&scenario.periodicity!=='quarterly'){await page.locator('#modelo03-periodicity').click();await page.getByRole('option',{name:scenario.periodicity==='monthly'?'Mensal':'Semestral',exact:true}).click();}
    await page.locator('#modelo03-position').click();await page.getByRole('option',{name:scenario.periodicity==='monthly'?'junho':scenario.periodicity==='semiannual'?'1º semestre':'2º trimestre',exact:true}).click();
-   fixture=await page.evaluate(async periodicity=>{const {fixture,selection}=await import('/src/features/relatorios-institucionais/modelo-03/__tests__/fixture.ts');return fixture({...selection,periodicity:periodicity??'quarterly',position:periodicity==='monthly'?6:periodicity==='semiannual'?1:2});},scenario.periodicity);
+   fixture=await page.evaluate(async ({periodicity,paired})=>{const {fixture,selection}=await import('/src/features/relatorios-institucionais/modelo-03/__tests__/fixture.ts');return fixture({...selection,...paired?{city:'Itajaí',uf:'SC',rmCities:['SC|Navegantes']}: {},periodicity:periodicity??'quarterly',position:periodicity==='monthly'?6:periodicity==='semiannual'?1:2});},{periodicity:scenario.periodicity,paired});
    await page.locator('[data-modelo03-slide="1"]').screenshot({path:resolve(folder,`cover-${scenario.width}-${scenario.dark}.png`)});
    await page.getByRole('button',{name:'Gerar relatório',exact:true}).click();await page.getByText('Consultando fontes do Modelo 03',{exact:true}).waitFor();
    const bounds=await page.getByRole('status').filter({hasText:'Consultando fontes do Modelo 03'}).evaluate(el=>{const r=el.getBoundingClientRect(),main=el.closest('main')?.getBoundingClientRect();return {position:getComputedStyle(el).position,left:r.left,right:r.right,mainLeft:main?.left??0,mainRight:main?.right??innerWidth};});

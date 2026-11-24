@@ -1,0 +1,1434 @@
+{
+  "source": "https://docs.google.com/spreadsheets/d/1FGRGa_PB47CJwGBhww5owleHCp0b8pkE/edit",
+  "retrievedAt": "2026-11-24",
+  "cities": {
+    "SP|São Paulo": {
+      "months": 1,
+      "since": "2013-01"
+    },
+    "PR|Curitiba": {
+      "months": 1,
+      "since": "2008-09"
+    },
+    "SC|Florianópolis": {
+      "months": 1,
+      "since": "2019-06"
+    },
+    "SC|Itajaí": {
+      "months": 3,
+      "since": "2020-12"
+    },
+    "SC|Balneário Camboriú": {
+      "months": 3,
+      "since": "2020-03"
+    },
+    "SC|Itapema": {
+      "months": 3,
+      "since": "2020-09"
+    },
+    "SC|Porto Belo": {
+      "months": 3,
+      "since": "2021-06"
+    },
+    "SC|Biguaçu": {
+      "months": 3,
+      "since": "2021-03"
+    },
+    "SP|Guarulhos": {
+      "months": 3,
+      "since": "2012-12"
+    },
+    "SP|Indaiatuba": {
+      "months": 1,
+      "since": "2017-12"
+    },
+    "SP|Mogi das Cruzes": {
+      "months": 3,
+      "since": "2021-03"
+    },
+    "SC|Palhoça": {
+      "months": 3,
+      "since": "2020-03"
+    },
+    "SC|São José": {
+      "months": 3,
+      "since": "2020-03"
+    },
+    "SP|Barueri": {
+      "months": 3,
+      "since": "2021-03"
+    },
+    "SP|Campinas": {
+      "months": 1,
+      "since": "2017-12"
+    },
+    "SC|Chapecó": {
+      "months": 3,
+      "since": "2024-03"
+    },
+    "SP|Cotia": {
+      "months": 3,
+      "since": "2017-12"
+    },
+    "SP|Diadema": {
+      "months": 3,
+      "since": "2020-12"
+    },
+    "SP|Embu das Artes": {
+      "months": 3,
+      "since": "2025-09"
+    },
+    "SP|Hortolândia": {
+      "months": 3,
+      "since": "2017-12"
+    },
+    "SP|Itapevi": {
+      "months": 3,
+      "since": "2020-12"
+    },
+    "SP|Itaquaquecetuba": {
+      "months": 3,
+      "since": "2024-03"
+    },
+    "SP|Jacareí": {
+      "months": 3,
+      "since": "2024-09"
+    },
+    "SP|Mauá": {
+      "months": 3,
+      "since": "2021-03"
+    },
+    "SC|Navegantes": {
+      "months": 3,
+      "since": "2021-06"
+    },
+    "SP|Osasco": {
+      "months": 3,
+      "since": "2018-06"
+    },
+    "SP|Santana de Parnaíba": {
+      "months": 3,
+      "since": "2021-03"
+    },
+    "SP|Santo André": {
+      "months": 3,
+      "since": "2017-03"
+    },
+    "SP|São Bernardo do Campo": {
+      "months": 3,
+      "since": "2014-12"
+    },
+    "SP|São Caetano do Sul": {
+      "months": 3,
+      "since": "2019-03"
+    },
+    "SP|São José dos Campos": {
+      "months": 3,
+      "since": "2020-12"
+    },
+    "SP|Sumaré": {
+      "months": 3,
+      "since": "2021-12"
+    },
+    "SP|Suzano": {
+      "months": 3,
+      "since": "2024-03"
+    },
+    "SP|Valinhos": {
+      "months": 3,
+      "since": "2021-12"
+    },
+    "SP|Vargem Grande Paulista": {
+      "months": 3,
+      "since": "2020-12"
+    },
+    "SC|Araquari": {
+      "months": 3,
+      "since": "2020-03"
+    },
+    "SC|Balneário Piçarras": {
+      "months": 3,
+      "since": "2022-03"
+    },
+    "SC|Barra Velha": {
+      "months": 3,
+      "since": "2024-03"
+    },
+    "SC|Blumenau": {
+      "months": 3,
+      "since": "2019-06"
+    },
+    "SC|Bombinhas": {
+      "months": 3,
+      "since": "2021-06"
+    },
+    "SP|Caçapava": {
+      "months": 3,
+      "since": "2017-12"
+    },
+    "SC|Camboriú": {
+      "months": 3,
+      "since": "2021-03"
+    },
+    "SP|Caraguatatuba": {
+      "months": 3,
+      "since": "2024-03"
+    },
+    "SC|Concórdia": {
+      "months": 3,
+      "since": "2024-03"
+    },
+    "SC|Criciúma": {
+      "months": 3,
+      "since": "2024-03"
+    },
+    "SC|Gaspar": {
+      "months": 3,
+      "since": "2024-09"
+    },
+    "SC|Itapoá": {
+      "months": 3,
+      "since": "2024-09"
+    },
+    "SC|Jaraguá do Sul": {
+      "months": 3,
+      "since": "2021-03"
+    },
+    "SC|Joinville": {
+      "months": 1,
+      "since": "2018-06"
+    },
+    "SC|Penha": {
+      "months": 3,
+      "since": "2023-06"
+    },
+    "SP|São José do Rio Preto": {
+      "months": 1,
+      "since": "2017-12"
+    },
+    "SP|Sorocaba": {
+      "months": 1,
+      "since": "2017-12"
+    },
+    "SP|Taubaté": {
+      "months": 3,
+      "since": "2017-12"
+    },
+    "SC|Tijucas": {
+      "months": 3,
+      "since": "2021-06"
+    },
+    "SC|Tubarão": {
+      "months": 3,
+      "since": "2024-03"
+    },
+    "SP|Americana": {
+      "months": 3,
+      "since": "2020-12"
+    },
+    "SP|Araçatuba": {
+      "months": 3,
+      "since": "2017-12"
+    },
+    "SP|Araçoiaba da Serra": {
+      "months": 1,
+      "since": "2024-03"
+    },
+    "SP|Araraquara": {
+      "months": 3,
+      "since": "2017-12"
+    },
+    "SP|Araras": {
+      "months": 3,
+      "since": "2017-12"
+    },
+    "SP|Assis": {
+      "months": 3,
+      "since": "2017-12"
+    },
+    "SP|Atibaia": {
+      "months": 3,
+      "since": "2024-03"
+    },
+    "SP|Bady Bassitt": {
+      "months": 3,
+      "since": "2017-12"
+    },
+    "SP|Barra Bonita": {
+      "months": 3,
+      "since": "2017-12"
+    },
+    "SP|Barretos": {
+      "months": 3,
+      "since": "2017-12"
+    },
+    "SP|Batatais": {
+      "months": 3,
+      "since": "2017-12"
+    },
+    "SP|Bauru": {
+      "months": 3,
+      "since": "2017-12"
+    },
+    "SP|Bertioga": {
+      "months": 3,
+      "since": "2026-03"
+    },
+    "SP|Birigui": {
+      "months": 3,
+      "since": "2017-12"
+    },
+    "SP|Boituva": {
+      "months": 3,
+      "since": "2017-12"
+    },
+    "SP|Bragança Paulista": {
+      "months": 3,
+      "since": "2017-12"
+    },
+    "SP|Catanduva": {
+      "months": 3,
+      "since": "2017-12"
+    },
+    "SP|Conchal": {
+      "months": 3,
+      "since": "2017-12"
+    },
+    "SP|Cravinhos": {
+      "months": 3,
+      "since": "2025-03"
+    },
+    "SP|Dracena": {
+      "months": 3,
+      "since": "2017-12"
+    },
+    "SP|Fernandópolis": {
+      "months": 3,
+      "since": "2017-12"
+    },
+    "SP|Franca": {
+      "months": 3,
+      "since": "2017-12"
+    },
+    "SP|Guaíra": {
+      "months": 3,
+      "since": "2017-12"
+    },
+    "SP|Guariba": {
+      "months": 3,
+      "since": "2017-12"
+    },
+    "SP|Guarujá": {
+      "months": 3,
+      "since": "2021-03"
+    },
+    "SP|Ibitinga": {
+      "months": 3,
+      "since": "2017-12"
+    },
+    "SP|Itapetininga": {
+      "months": 3,
+      "since": "2017-12"
+    },
+    "SP|Itapeva": {
+      "months": 3,
+      "since": "2017-12"
+    },
+    "SP|Itapira": {
+      "months": 3,
+      "since": "2017-12"
+    },
+    "SP|Itápolis": {
+      "months": 3,
+      "since": "2017-12"
+    },
+    "SP|Itatiba": {
+      "months": 3,
+      "since": "2023-12"
+    },
+    "SP|Itu": {
+      "months": 3,
+      "since": "2017-06"
+    },
+    "SP|Itupeva": {
+      "months": 3,
+      "since": "2021-03"
+    },
+    "SP|Jaú": {
+      "months": 3,
+      "since": "2017-12"
+    },
+    "SP|Jundiaí": {
+      "months": 3,
+      "since": "2017-12"
+    },
+    "SP|Leme": {
+      "months": 3,
+      "since": "2017-12"
+    },
+    "SP|Limeira": {
+      "months": 3,
+      "since": "2021-03"
+    },
+    "SP|Lins": {
+      "months": 3,
+      "since": "2017-12"
+    },
+    "SP|Lorena": {
+      "months": 3,
+      "since": "2024-03"
+    },
+    "SP|Louveira": {
+      "months": 3,
+      "since": "2022-09"
+    },
+    "SP|Marília": {
+      "months": 3,
+      "since": "2017-12"
+    },
+    "SP|Matão": {
+      "months": 3,
+      "since": "2017-12"
+    },
+    "SP|Mirassol": {
+      "months": 3,
+      "since": "2017-12"
+    },
+    "SP|Mococa": {
+      "months": 3,
+      "since": "2017-12"
+    },
+    "SP|Mogi Guaçu": {
+      "months": 3,
+      "since": "2017-12"
+    },
+    "SP|Mogi Mirim": {
+      "months": 3,
+      "since": "2017-12"
+    },
+    "SP|Monte Alto": {
+      "months": 3,
+      "since": "2017-12"
+    },
+    "SP|Monte Mor": {
+      "months": 3,
+      "since": "2017-12"
+    },
+    "SP|Nova Odessa": {
+      "months": 3,
+      "since": "2017-12"
+    },
+    "SP|Novo Horizonte": {
+      "months": 3,
+      "since": "2017-12"
+    },
+    "SP|Paulínia": {
+      "months": 3,
+      "since": "2022-09"
+    },
+    "SP|Penápolis": {
+      "months": 3,
+      "since": "2017-12"
+    },
+    "SP|Pindamonhangaba": {
+      "months": 3,
+      "since": "2025-09"
+    },
+    "SP|Piracicaba": {
+      "months": 3,
+      "since": "2017-12"
+    },
+    "SP|Pirassununga": {
+      "months": 3,
+      "since": "2017-12"
+    },
+    "SP|Pitangueiras": {
+      "months": 3,
+      "since": "2017-12"
+    },
+    "SP|Praia Grande": {
+      "months": 3,
+      "since": "2020-12"
+    },
+    "SP|Presidente Epitácio": {
+      "months": 3,
+      "since": "2017-12"
+    },
+    "SP|Presidente Prudente": {
+      "months": 3,
+      "since": "2017-12"
+    },
+    "SP|Ribeirão Preto": {
+      "months": 1,
+      "since": "2017-12"
+    },
+    "SP|Rio Claro": {
+      "months": 3,
+      "since": "2022-09"
+    },
+    "SP|Salto": {
+      "months": 3,
+      "since": "2017-12"
+    },
+    "SP|Santa Bárbara d'Oeste": {
+      "months": 3,
+      "since": "2017-12"
+    },
+    "SP|Santa Fé do Sul": {
+      "months": 3,
+      "since": "2017-12"
+    },
+    "SP|Santos": {
+      "months": 3,
+      "since": "2020-06"
+    },
+    "SP|São Carlos": {
+      "months": 3,
+      "since": "2021-12"
+    },
+    "SP|São João da Boa Vista": {
+      "months": 3,
+      "since": "2017-12"
+    },
+    "SP|São Manuel": {
+      "months": 3,
+      "since": "2017-12"
+    },
+    "SP|São Vicente": {
+      "months": 3,
+      "since": "2021-03"
+    },
+    "SP|Serrana": {
+      "months": 3,
+      "since": "2017-12"
+    },
+    "SP|Sertãozinho": {
+      "months": 3,
+      "since": "2017-12"
+    },
+    "SP|Taquaritinga": {
+      "months": 3,
+      "since": "2017-12"
+    },
+    "SP|Tatuí": {
+      "months": 3,
+      "since": "2017-12"
+    },
+    "SP|Vinhedo": {
+      "months": 3,
+      "since": "2022-09"
+    },
+    "SP|Votorantim": {
+      "months": 1,
+      "since": "2021-12"
+    },
+    "SP|Votuporanga": {
+      "months": 3,
+      "since": "2017-12"
+    },
+    "PR|Almirante Tamandaré": {
+      "months": 3,
+      "since": "2020-06"
+    },
+    "PR|Araucária": {
+      "months": 3,
+      "since": "2019-03"
+    },
+    "PR|Campina Grande do Sul": {
+      "months": 3,
+      "since": "2020-06"
+    },
+    "PR|Campo Largo": {
+      "months": 3,
+      "since": "2020-06"
+    },
+    "PR|Campo Magro": {
+      "months": 3,
+      "since": "2021-03"
+    },
+    "PR|Colombo": {
+      "months": 3,
+      "since": "2020-06"
+    },
+    "PR|Fazenda Rio Grande": {
+      "months": 3,
+      "since": "2019-06"
+    },
+    "CE|Fortaleza": {
+      "months": 1,
+      "since": "2021-09"
+    },
+    "PR|Pinhais": {
+      "months": 3,
+      "since": "2020-06"
+    },
+    "PR|Piraquara": {
+      "months": 3,
+      "since": "2020-06"
+    },
+    "PR|São José dos Pinhais": {
+      "months": 3,
+      "since": "2019-12"
+    },
+    "PR|Maringá": {
+      "months": 3,
+      "since": "2019-06"
+    },
+    "RJ|Rio de Janeiro": {
+      "months": 1,
+      "since": "2021-09"
+    },
+    "PR|Londrina": {
+      "months": 3,
+      "since": "2019-06"
+    },
+    "MG|Belo Horizonte": {
+      "months": 1,
+      "since": "2016-01"
+    },
+    "PR|Cascavel": {
+      "months": 3,
+      "since": "2014-12"
+    },
+    "PR|Foz do Iguaçu": {
+      "months": 3,
+      "since": "2019-03"
+    },
+    "PE|Ipojuca": {
+      "months": 3,
+      "since": "2019-12"
+    },
+    "PR|Marialva": {
+      "months": 3,
+      "since": "2025-09"
+    },
+    "PE|Recife": {
+      "months": 1,
+      "since": "2020-06"
+    },
+    "PR|Sarandi": {
+      "months": 3,
+      "since": "2025-03"
+    },
+    "PE|Tamandaré": {
+      "months": 3,
+      "since": "2022-03"
+    },
+    "PR|Toledo": {
+      "months": 3,
+      "since": "2016-03"
+    },
+    "CE|Aquiraz": {
+      "months": 1,
+      "since": "2020-09"
+    },
+    "PE|Cabo de Santo Agostinho": {
+      "months": 3,
+      "since": "2019-12"
+    },
+    "PE|Camaragibe": {
+      "months": 3,
+      "since": "2019-12"
+    },
+    "PR|Cambé": {
+      "months": 3,
+      "since": "2018-09"
+    },
+    "CE|Caucaia": {
+      "months": 1,
+      "since": "2020-09"
+    },
+    "CE|Eusébio": {
+      "months": 1,
+      "since": "2020-09"
+    },
+    "PR|Francisco Beltrão": {
+      "months": 3,
+      "since": "2019-12"
+    },
+    "PR|Guarapuava": {
+      "months": 3,
+      "since": "2015-12"
+    },
+    "PE|Igarassu": {
+      "months": 3,
+      "since": "2019-12"
+    },
+    "CE|Itaitinga": {
+      "months": 3,
+      "since": "2020-09"
+    },
+    "PE|Jaboatão dos Guararapes": {
+      "months": 1,
+      "since": "2019-12"
+    },
+    "CE|Maracanaú": {
+      "months": 1,
+      "since": "2020-12"
+    },
+    "CE|Maranguape": {
+      "months": 3,
+      "since": "2023-09"
+    },
+    "PE|Olinda": {
+      "months": 1,
+      "since": "2020-06"
+    },
+    "CE|Pacatuba": {
+      "months": 3,
+      "since": "2023-09"
+    },
+    "PR|Paranaguá": {
+      "months": 3,
+      "since": "2018-09"
+    },
+    "PE|Paulista": {
+      "months": 1,
+      "since": "2019-12"
+    },
+    "PR|Ponta Grossa": {
+      "months": 3,
+      "since": "2018-12"
+    },
+    "PE|São Lourenço da Mata": {
+      "months": 3,
+      "since": "2019-12"
+    },
+    "MG|Araguari": {
+      "months": 3,
+      "since": "2021-06"
+    },
+    "MG|Betim": {
+      "months": 3,
+      "since": "2019-03"
+    },
+    "MG|Contagem": {
+      "months": 3,
+      "since": "2016-09"
+    },
+    "GO|Goiânia": {
+      "months": 1,
+      "since": "2018-01"
+    },
+    "RJ|Niterói": {
+      "months": 3,
+      "since": "2021-03"
+    },
+    "MG|Nova Lima": {
+      "months": 1,
+      "since": "2016-01"
+    },
+    "BA|Salvador": {
+      "months": 1,
+      "since": "2020-04"
+    },
+    "MG|Vespasiano": {
+      "months": 3,
+      "since": "2019-12"
+    },
+    "DF|Brasília": {
+      "months": 3,
+      "since": "2020-03"
+    },
+    "BA|Camaçari": {
+      "months": 1,
+      "since": "2021-03"
+    },
+    "PE|Caruaru": {
+      "months": 3,
+      "since": "2022-09"
+    },
+    "MG|Ibirité": {
+      "months": 3,
+      "since": "2016-09"
+    },
+    "MG|Igarapé": {
+      "months": 3,
+      "since": "2022-06"
+    },
+    "MG|Lagoa Santa": {
+      "months": 3,
+      "since": "2019-12"
+    },
+    "BA|Lauro de Freitas": {
+      "months": 1,
+      "since": "2021-03"
+    },
+    "BA|Mata de São João": {
+      "months": 1,
+      "since": "2021-06"
+    },
+    "MG|Mateus Leme": {
+      "months": 3,
+      "since": "2022-06"
+    },
+    "MG|Matozinhos": {
+      "months": 3,
+      "since": "2022-06"
+    },
+    "MG|Pedro Leopoldo": {
+      "months": 3,
+      "since": "2022-06"
+    },
+    "PE|Petrolina": {
+      "months": 3,
+      "since": "2022-09"
+    },
+    "MG|Raposos": {
+      "months": 3,
+      "since": "2020-06"
+    },
+    "MG|Ribeirão das Neves": {
+      "months": 3,
+      "since": "2019-12"
+    },
+    "MG|Santa Luzia": {
+      "months": 3,
+      "since": "2016-09"
+    },
+    "MG|São José da Lapa": {
+      "months": 3,
+      "since": "2019-12"
+    },
+    "MG|Sarzedo": {
+      "months": 3,
+      "since": "2019-12"
+    },
+    "BA|Simões Filho": {
+      "months": 1,
+      "since": "2021-12"
+    },
+    "ES|Vila Velha": {
+      "months": 1,
+      "since": "2021-09"
+    },
+    "ES|Vitória": {
+      "months": 1,
+      "since": "2021-09"
+    },
+    "CE|Barbalha": {
+      "months": 3,
+      "since": "2020-09"
+    },
+    "AL|Barra de São Miguel": {
+      "months": 1,
+      "since": "2018-06"
+    },
+    "AL|Coqueiro Seco": {
+      "months": 1,
+      "since": "2020-06"
+    },
+    "RJ|Duque de Caxias": {
+      "months": 3,
+      "since": "2021-03"
+    },
+    "BA|Feira de Santana": {
+      "months": 3,
+      "since": "2021-06"
+    },
+    "ES|Guarapari": {
+      "months": 3,
+      "since": "2026-05"
+    },
+    "AL|Japaratinga": {
+      "months": 3,
+      "since": "2022-12"
+    },
+    "PB|João Pessoa": {
+      "months": 3,
+      "since": "2019-09"
+    },
+    "CE|Juazeiro do Norte": {
+      "months": 3,
+      "since": "2020-12"
+    },
+    "AL|Maceió": {
+      "months": 1,
+      "since": "2018-06"
+    },
+    "AL|Maragogi": {
+      "months": 3,
+      "since": "2022-12"
+    },
+    "AL|Marechal Deodoro": {
+      "months": 1,
+      "since": "2018-06"
+    },
+    "RJ|Nova Iguaçu": {
+      "months": 3,
+      "since": "2021-03"
+    },
+    "AL|Paripueira": {
+      "months": 1,
+      "since": "2019-09"
+    },
+    "AL|Pilar": {
+      "months": 1,
+      "since": "2019-09"
+    },
+    "RS|Porto Alegre": {
+      "months": 1,
+      "since": "2017-01"
+    },
+    "AL|Rio Largo": {
+      "months": 1,
+      "since": "2018-06"
+    },
+    "RJ|São Gonçalo": {
+      "months": 3,
+      "since": "2024-03"
+    },
+    "MA|São Luís": {
+      "months": 3,
+      "since": "2018-03"
+    },
+    "AL|São Miguel dos Milagres": {
+      "months": 3,
+      "since": "2022-12"
+    },
+    "ES|Serra": {
+      "months": 3,
+      "since": "2021-09"
+    },
+    "CE|Sobral": {
+      "months": 3,
+      "since": "2023-09"
+    },
+    "PI|Teresina": {
+      "months": 3,
+      "since": "2019-06"
+    },
+    "MG|Uberlândia": {
+      "months": 1,
+      "since": "2020-12"
+    },
+    "PI|Altos": {
+      "months": 3,
+      "since": "2021-12"
+    },
+    "RS|Alvorada": {
+      "months": 3,
+      "since": "2022-06"
+    },
+    "GO|Aparecida de Goiânia": {
+      "months": 1,
+      "since": "2018-01"
+    },
+    "SE|Aracaju": {
+      "months": 3,
+      "since": "2020-12"
+    },
+    "SE|Barra dos Coqueiros": {
+      "months": 3,
+      "since": "2020-12"
+    },
+    "PB|Bayeux": {
+      "months": 3,
+      "since": "2019-09"
+    },
+    "RS|Bom Retiro do Sul": {
+      "months": 3,
+      "since": "2025-06"
+    },
+    "PB|Cabedelo": {
+      "months": 3,
+      "since": "2019-09"
+    },
+    "RS|Cachoeirinha": {
+      "months": 3,
+      "since": "2019-12"
+    },
+    "PB|Campina Grande": {
+      "months": 3,
+      "since": "2019-03"
+    },
+    "RJ|Campos dos Goytacazes": {
+      "months": 3,
+      "since": "2023-06"
+    },
+    "RS|Canela": {
+      "months": 3,
+      "since": "2023-06"
+    },
+    "RS|Canoas": {
+      "months": 3,
+      "since": "2019-12"
+    },
+    "RS|Capão da Canoa": {
+      "months": 3,
+      "since": "2024-03"
+    },
+    "ES|Cariacica": {
+      "months": 3,
+      "since": "2021-09"
+    },
+    "MA|Caxias": {
+      "months": 3,
+      "since": "2025-09"
+    },
+    "RS|Caxias do Sul": {
+      "months": 3,
+      "since": "2021-03"
+    },
+    "PB|Conde": {
+      "months": 3,
+      "since": "2019-09"
+    },
+    "MT|Cuiabá": {
+      "months": 3,
+      "since": "2018-03"
+    },
+    "PI|Demerval Lobão": {
+      "months": 3,
+      "since": "2021-12"
+    },
+    "RS|Eldorado do Sul": {
+      "months": 3,
+      "since": "2020-03"
+    },
+    "RS|Esteio": {
+      "months": 3,
+      "since": "2020-06"
+    },
+    "RS|Estrela": {
+      "months": 3,
+      "since": "2025-06"
+    },
+    "RN|Extremoz": {
+      "months": 3,
+      "since": "2021-03"
+    },
+    "PB|Fagundes": {
+      "months": 3,
+      "since": "2022-12"
+    },
+    "RS|Gramado": {
+      "months": 3,
+      "since": "2023-06"
+    },
+    "RS|Gravataí": {
+      "months": 3,
+      "since": "2019-12"
+    },
+    "RS|Guaíba": {
+      "months": 3,
+      "since": "2019-12"
+    },
+    "BA|Ilhéus": {
+      "months": 3,
+      "since": "2025-09"
+    },
+    "MA|Imperatriz": {
+      "months": 3,
+      "since": "2016-12"
+    },
+    "PI|José de Freitas": {
+      "months": 3,
+      "since": "2021-03"
+    },
+    "BA|Juazeiro": {
+      "months": 3,
+      "since": "2022-09"
+    },
+    "PB|Lagoa Seca": {
+      "months": 3,
+      "since": "2022-09"
+    },
+    "RS|Lajeado": {
+      "months": 3,
+      "since": "2025-06"
+    },
+    "RN|Macaíba": {
+      "months": 3,
+      "since": "2021-03"
+    },
+    "PB|Massaranduba": {
+      "months": 3,
+      "since": "2020-03"
+    },
+    "RN|Mossoró": {
+      "months": 3,
+      "since": "2025-03"
+    },
+    "RN|Natal": {
+      "months": 3,
+      "since": "2020-06"
+    },
+    "RN|Nísia Floresta": {
+      "months": 3,
+      "since": "2025-09"
+    },
+    "SE|Nossa Senhora do Socorro": {
+      "months": 3,
+      "since": "2023-09"
+    },
+    "RS|Novo Hamburgo": {
+      "months": 3,
+      "since": "2019-12"
+    },
+    "MA|Paço do Lumiar": {
+      "months": 3,
+      "since": "2018-06"
+    },
+    "PI|Parnaíba": {
+      "months": 3,
+      "since": "2023-09"
+    },
+    "RN|Parnamirim": {
+      "months": 3,
+      "since": "2020-12"
+    },
+    "RS|Passo Fundo": {
+      "months": 3,
+      "since": "2019-12"
+    },
+    "RS|Pelotas": {
+      "months": 3,
+      "since": "2021-03"
+    },
+    "PI|Picos": {
+      "months": 3,
+      "since": "2025-09"
+    },
+    "BA|Porto Seguro": {
+      "months": 3,
+      "since": "2025-09"
+    },
+    "PB|Queimadas": {
+      "months": 3,
+      "since": "2020-09"
+    },
+    "MA|Raposa": {
+      "months": 3,
+      "since": "2021-03"
+    },
+    "RS|Rio Grande": {
+      "months": 3,
+      "since": "2021-03"
+    },
+    "GO|Rio Verde": {
+      "months": 3,
+      "since": "2023-12"
+    },
+    "RS|Santa Cruz do Sul": {
+      "months": 3,
+      "since": "2025-06"
+    },
+    "RS|Santa Maria": {
+      "months": 3,
+      "since": "2019-12"
+    },
+    "PB|Santa Rita": {
+      "months": 3,
+      "since": "2021-12"
+    },
+    "RS|Santa Rosa": {
+      "months": 3,
+      "since": "2025-06"
+    },
+    "SE|São Cristóvão": {
+      "months": 3,
+      "since": "2023-09"
+    },
+    "RN|São Gonçalo do Amarante": {
+      "months": 3,
+      "since": "2021-03"
+    },
+    "MA|São José de Ribamar": {
+      "months": 3,
+      "since": "2018-06"
+    },
+    "RS|São Leopoldo": {
+      "months": 3,
+      "since": "2019-12"
+    },
+    "RS|Taquari": {
+      "months": 3,
+      "since": "2025-06"
+    },
+    "RS|Teutônia": {
+      "months": 3,
+      "since": "2025-06"
+    },
+    "RN|Tibau": {
+      "months": 3,
+      "since": "2025-03"
+    },
+    "MA|Timon": {
+      "months": 3,
+      "since": "2019-12"
+    },
+    "RS|Torres": {
+      "months": 3,
+      "since": "2024-03"
+    },
+    "RS|Tramandaí": {
+      "months": 3,
+      "since": "2025-06"
+    },
+    "MG|Uberaba": {
+      "months": 3,
+      "since": "2021-12"
+    },
+    "PI|União": {
+      "months": 3,
+      "since": "2022-03"
+    },
+    "RS|Viamão": {
+      "months": 3,
+      "since": "2019-12"
+    },
+    "ES|Viana": {
+      "months": 3,
+      "since": "2021-09"
+    },
+    "BA|Vitória da Conquista": {
+      "months": 3,
+      "since": "2020-09"
+    },
+    "RS|Xangri-lá": {
+      "months": 3,
+      "since": "2024-03"
+    },
+    "GO|Abadia de Goiás": {
+      "months": 3,
+      "since": "2017-12"
+    },
+    "GO|Anápolis": {
+      "months": 3,
+      "since": "2020-12"
+    },
+    "GO|Aragoiânia": {
+      "months": 3,
+      "since": "2017-12"
+    },
+    "MG|Araxá": {
+      "months": 3,
+      "since": "2022-06"
+    },
+    "MG|Barbacena": {
+      "months": 3,
+      "since": "2022-06"
+    },
+    "GO|Bela Vista de Goiás": {
+      "months": 3,
+      "since": "2017-12"
+    },
+    "GO|Bonfinópolis": {
+      "months": 3,
+      "since": "2017-12"
+    },
+    "GO|Brazabrantes": {
+      "months": 3,
+      "since": "2017-12"
+    },
+    "GO|Caldazinha": {
+      "months": 3,
+      "since": "2017-12"
+    },
+    "GO|Caturaí": {
+      "months": 3,
+      "since": "2017-12"
+    },
+    "MG|Divinópolis": {
+      "months": 3,
+      "since": "2022-06"
+    },
+    "GO|Goianápolis": {
+      "months": 3,
+      "since": "2017-12"
+    },
+    "GO|Goianira": {
+      "months": 3,
+      "since": "2017-12"
+    },
+    "MG|Governador Valadares": {
+      "months": 3,
+      "since": "2022-06"
+    },
+    "GO|Guapó": {
+      "months": 3,
+      "since": "2017-12"
+    },
+    "GO|Hidrolândia": {
+      "months": 3,
+      "since": "2017-12"
+    },
+    "GO|Inhumas": {
+      "months": 3,
+      "since": "2017-12"
+    },
+    "MG|Ipatinga": {
+      "months": 3,
+      "since": "2022-06"
+    },
+    "MG|Juiz de Fora": {
+      "months": 3,
+      "since": "2021-12"
+    },
+    "MT|Lucas do Rio Verde": {
+      "months": 3,
+      "since": "2024-03"
+    },
+    "RJ|Macaé": {
+      "months": 3,
+      "since": "2024-06"
+    },
+    "MG|Montes Claros": {
+      "months": 3,
+      "since": "2022-06"
+    },
+    "GO|Nerópolis": {
+      "months": 3,
+      "since": "2017-12"
+    },
+    "GO|Nova Veneza": {
+      "months": 3,
+      "since": "2017-12"
+    },
+    "MG|Patos de Minas": {
+      "months": 3,
+      "since": "2022-06"
+    },
+    "RJ|Petrópolis": {
+      "months": 3,
+      "since": "2022-03"
+    },
+    "MG|Poços de Caldas": {
+      "months": 3,
+      "since": "2022-06"
+    },
+    "MG|Pouso Alegre": {
+      "months": 3,
+      "since": "2022-06"
+    },
+    "RJ|Resende": {
+      "months": 3,
+      "since": "2021-03"
+    },
+    "MT|Rondonópolis": {
+      "months": 3,
+      "since": "2025-09"
+    },
+    "GO|Santo Antônio de Goiás": {
+      "months": 3,
+      "since": "2017-12"
+    },
+    "GO|Senador Canedo": {
+      "months": 3,
+      "since": "2017-12"
+    },
+    "MT|Sinop": {
+      "months": 3,
+      "since": "2021-03"
+    },
+    "MT|Sorriso": {
+      "months": 3,
+      "since": "2023-12"
+    },
+    "GO|Terezópolis de Goiás": {
+      "months": 3,
+      "since": "2017-12"
+    },
+    "GO|Trindade": {
+      "months": 3,
+      "since": "2017-12"
+    },
+    "MG|Varginha": {
+      "months": 3,
+      "since": "2022-06"
+    },
+    "MT|Várzea Grande": {
+      "months": 3,
+      "since": "2018-03"
+    },
+    "MG|Viçosa": {
+      "months": 3,
+      "since": "2022-06"
+    },
+    "RJ|Volta Redonda": {
+      "months": 3,
+      "since": "2022-03"
+    },
+    "PA|Ananindeua": {
+      "months": 3,
+      "since": "2018-03"
+    },
+    "TO|Araguaína": {
+      "months": 3,
+      "since": "2025-09"
+    },
+    "PA|Belém": {
+      "months": 3,
+      "since": "2015-09"
+    },
+    "RR|Boa Vista": {
+      "months": 3,
+      "since": "2022-06"
+    },
+    "MS|Campo Grande": {
+      "months": 3,
+      "since": "2020-06"
+    },
+    "PA|Castanhal": {
+      "months": 3,
+      "since": "2025-09"
+    },
+    "MS|Dourados": {
+      "months": 3,
+      "since": "2025-03"
+    },
+    "AM|Iranduba": {
+      "months": 1,
+      "since": "2016-12"
+    },
+    "RO|Ji-Paraná": {
+      "months": 3,
+      "since": "2025-09"
+    },
+    "AP|Macapá": {
+      "months": 3,
+      "since": "2022-06"
+    },
+    "AM|Manaus": {
+      "months": 1,
+      "since": "2016-12"
+    },
+    "PA|Marabá": {
+      "months": 3,
+      "since": "2024-12"
+    },
+    "PA|Marituba": {
+      "months": 3,
+      "since": "2024-12"
+    },
+    "TO|Palmas": {
+      "months": 3,
+      "since": "2020-03"
+    },
+    "PA|Parauapebas": {
+      "months": 3,
+      "since": "2025-09"
+    },
+    "TO|Porto Nacional": {
+      "months": 3,
+      "since": "2020-03"
+    },
+    "RO|Porto Velho": {
+      "months": 3,
+      "since": "2021-03"
+    },
+    "AC|Rio Branco": {
+      "months": 3,
+      "since": "2021-06"
+    },
+    "PA|Salinópolis": {
+      "months": 3,
+      "since": "2024-12"
+    },
+    "PA|Santarém": {
+      "months": 3,
+      "since": "2018-03"
+    }
+  }
+}

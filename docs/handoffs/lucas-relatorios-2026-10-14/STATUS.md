@@ -1,5 +1,11 @@
 # Estado do handoff
 
+## 24/11/2026 — Modelo03: diagnóstico Curitiba e geografia dos16originais
+
+Base main limpa `fb8cfbf7`, origin único atualizado fetch0/0. Lucas enviou JSON Curitiba3T2026 (23pendentes,99fontes completas), pediu corrigir motor comum para todas as cidades, confirmou4famílias e autorizou push ao terminar. Também pediu conferir recortes dos16originais: pares Itajaí/Navegantes e Penha/Piçarras nominalmente separados, Joinville/Araquari combinado/preços também por cidade, Belém nominal, demais locais/RM conforme referências. Fonte trimestral não exige dados mensais; detalhe inconsistente é isolado com base parcial explícita, zeros somente confirmados, IVV com valores da API e delta preservados. Cadastro de periodicidade não substitui catálogo autorizado.
+
+73testes/lint aprovados;16quadros de agregados do JSON real reproduzidos;7detalhados corrigidos e cobertos por regressões, ainda sem cadastros reais exportados para conferir resultados. Edge sintético Curitiba desktop e Itajaí desktop/celular, downloads JSON/CSV/PPTX lidos, capturas inspecionadas. Build final aprovado. [Registro completo](../../features/relatorios-institucionais/modelo-03/CORRECOES_2026-11-24.md). Sem API pessoal nova nem homologação numérica; sem escrita Monday. Push autorizado nesta rodada.
+
 ## 24/11/2026 — Modelo 03: carregamento visual no padrão dos demais relatórios
 
 Main limpa `43065484`, origin único com fetch0/0. Lucas pediu mesma apresentação de SP institucional/Fortaleza/Maceió. Substituído portal que cobria o main por painel dentro da página, logo/etapas no topo, linhas numeradas com estado/percentual/barra fina e destaque ativo conforme Maceió. Prévia oculta durante a consulta; painel entra em vista; menu livre. Exportação com operation inline como os pares. Reutiliza BrainLoadingState e primitives existentes, sem mudar coleta concorrente/cálculos. Lint/build e sete cenários visuais Edge sintéticos aprovados; capturas desktop/celular inspecionadas, JSON/CSV/PPTX baixados/lidos. Sem API real nova, push ou escrita Monday.
