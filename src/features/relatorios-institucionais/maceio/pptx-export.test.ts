@@ -47,9 +47,12 @@ describe('Maceió PPTX editável',()=>{
   const {slides,options}=setup(),url='/assets/reference.png';
   slides[0].querySelector('svg')!.insertAdjacentHTML('afterbegin',`<image href="${url}" width="1280" height="720"/>`);
   const png=Uint8Array.from(atob('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aO3sAAAAASUVORK5CYII='),char=>char.charCodeAt(0));
-  const request=vi.fn().mockResolvedValueOnce({ok:false}).mockResolvedValue({ok:true,blob:async()=>new DomBlob([png],{type:'image/png'})});vi.stubGlobal('fetch',request);
+  const request=vi.fn().mockResolvedValueOnce({ok:false}).mockResolvedValueOnce({ok:false}).mockResolvedValueOnce({ok:false}).mockResolvedValue({ok:true,blob:async()=>new DomBlob([png],{type:'image/png'})});vi.stubGlobal('fetch',request);
+  // Cached failure and network retry both fail: the export rejects and keeps the original URL.
   await expect(buildMaceioPptx(slides,options)).rejects.toThrow('Tente exportar novamente');expect(slides[0].querySelector('image')!.getAttribute('href')).toBe(url);
+  expect(request).toHaveBeenNthCalledWith(1,url,{signal:options.signal});expect(request).toHaveBeenNthCalledWith(2,url,{signal:options.signal,cache:'reload'});
+  // A cached failure is retried from the network in the same attempt, so it cannot poison the export.
   const blob=await buildMaceioPptx(slides,options),files=unzipSync(new Uint8Array(await blob.arrayBuffer()));
-  expect(request).toHaveBeenLastCalledWith(url,{signal:options.signal,cache:'reload'});expect(strFromU8(files['ppt/slides/slide1.xml'])).toContain('<p:pic>');expect(slides[0].querySelector('image')!.getAttribute('href')).toBe(url);expect(capture).not.toHaveBeenCalled();
+  expect(request).toHaveBeenCalledTimes(4);expect(request).toHaveBeenNthCalledWith(3,url,{signal:options.signal});expect(request).toHaveBeenLastCalledWith(url,{signal:options.signal,cache:'reload'});expect(strFromU8(files['ppt/slides/slide1.xml'])).toContain('<p:pic>');expect(slides[0].querySelector('image')!.getAttribute('href')).toBe(url);expect(capture).not.toHaveBeenCalled();
  });
 });

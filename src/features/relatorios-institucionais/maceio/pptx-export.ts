@@ -19,9 +19,21 @@ function waitAsset(task:Promise<unknown>,signal:AbortSignal){
  });
 }
 
+/**
+ * Reuses the bytes the offscreen deck is already downloading (HTTP cache). Bypassing the cache on
+ * every artwork re-downloaded ~17 MB behind the deck's own requests and made the first pages take
+ * minutes on slow connections. Only a failed cached response is retried from the network, so a
+ * cached failure still cannot poison a new attempt.
+ */
+async function fetchArtwork(url:string,signal:AbortSignal){
+ try{const cached=await fetch(url,{signal});if(cached.ok)return cached;}
+ catch(cause){if(signal.aborted)throw cause;}
+ check(signal);return fetch(url,{signal,cache:'reload'});
+}
+
 async function imageData(url:string,signal:AbortSignal){
  if(url.startsWith('data:'))return url;
- const response=await fetch(url,{signal,cache:'reload'});check(signal);
+ const response=await fetchArtwork(url,signal);check(signal);
  if(!response.ok)throw new Error('Não foi possível carregar uma imagem do relatório. Tente exportar novamente.');
  const blob=await response.blob();check(signal);
  return new Promise<string>((resolve,reject)=>{

@@ -1,5 +1,13 @@
 # Rebrain (Plataforma) — Documento Vivo
 
+## 24/11/2026 — Maceió: PPTX editável reaproveita as artes em cache — Claude/Diego
+
+- **Problema:** export editável de Maceió levava ~20s por página (relato: 16 de 87 em 5:39), enquanto os demais relatórios fecham 80–90 páginas em ~2 min. Causa: `imageData` buscava cada arte com `cache:'reload'`, baixando de novo os ~17 MB de PNG que o deck oculto já estava carregando, uma página por vez.
+- **Entrega:** a arte passa a vir do cache HTTP; só uma resposta com falha é repetida com `cache:'reload'` na mesma tentativa (a intenção original de não reaproveitar falha cacheada se mantém). `src/features/relatorios-institucionais/maceio/pptx-export.ts` e teste correspondente.
+- **Validação:** benchmark local no Chromium (Vite + fixture mensal, 82 páginas, rede limitada a 10 Mbps, cache limpo): 41s → 23s no total; páginas 2+ caíram de 2–5s para 0,1–0,3s. Sem rede limitada, ~7s. Suíte Maceió 309 testes e `tsc` limpos. **Não verificado:** geração real no Lovable com dados autenticados — confirmar o tempo na próxima exportação.
+- **Pendências:** ~5s finais vêm de `patchNativePptx` recompactando PNGs (`zipSync` nível 6, código compartilhado); otimizar só se ainda incomodar.
+- **Monday:** [Panorama Maceió / SINDUSCON](https://brain381753.monday.com/boards/18398638577/pulses/13149406169) — `13149406169`.
+
 ## 19/11/2026 — Fortaleza: Sem oferta no gráfico e média regional válida — Codex/Lucas
 
 - **Evidência/decisão:** JSONoutubro(2) confirmaMaracanaúsemoferta de casas (5observações zero, sem erros). Aquiraz26/Caucaia169/Eusébio299=494unidades. Lucas autorizou liberar a regra e publicar comBeiraMar. [Contrato](../features/relatorios-institucionais/fortaleza/DECISOES.md). Main1commitlocal (`abd78164`) sobreorigin`c40757dd`, sem atraso após fetch, árvore limpa antes do ajuste.
