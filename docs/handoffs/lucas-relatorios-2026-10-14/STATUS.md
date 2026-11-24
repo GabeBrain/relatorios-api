@@ -1,5 +1,9 @@
 # Estado do handoff
 
+## 24/11/2026 — Capas omitidas e contrato de locação pendente
+
+Codex/Lucas: removidas temporariamente do Modelo03 as capas25/39/100; preservada122 de locação e IDs de referência.94 posições com RM/88 sem RM.67 testes aprovados; sem alteração dos indicadores. Lucas pediu integrar locação via GeoBrain; referência local confirma quadros123–126, mas contrato de locação não consta no OpenAPI instalado nem foi encontrado no código. Solicitado endpoint/tela ao Lucas; implementação de locação pendente dessa informação, sem declarar pronta. Base `7971eb24`, um commit já local na abertura, origin único atualizado sem divergência; sem push desta rodada.
+
 ## 24/11/2026 — JSON detalha registros de vendas inválidos
 
 Codex/Lucas, base `d3ceeaa0`, origin único atualizado0/0/main limpa na abertura. `sources[].salesFieldDiagnostics` acrescenta motivos, valores escalares, IDs/nome do empreendimento, tipologia, mês e vizinhos históricos apenas nas anomalias do período selecionado. Até100 amostras/fonte, contagens totais e omissões explícitas; sem payload completo/endereço/auth.26 testes aprovados, sem nova coleta autenticada. Nenhuma regra de cálculo alterada. Necessário gerar novamente Uberlândia após publicação autorizada para obter a causa bruta dos quatro registros. Entrega local aguardando autorização de push.

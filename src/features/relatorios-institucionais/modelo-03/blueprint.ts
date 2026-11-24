@@ -18,6 +18,9 @@ export const DATA_DEFINITIONS:Definition[]=[
  d(138,'Oferta horizontal por tipo · RM','capacity',{segment:'Horizontal',group:'product',rmOnly:true}),d(139,'Oferta horizontal por ano de lançamento · RM','capacity',{segment:'Horizontal',group:'year',rmOnly:true}),d(140,'Preço por m² horizontal por tipo · RM','meter',{segment:'Horizontal',group:'product',rmOnly:true}),d(142,'VGV ofertado e disponível · RM','vgv',{rmOnly:true,group:'product'}),
 ];
 const editorial:Record<number,string>={1:'Panorama do mercado imobiliário',2:'Grupo Brain',3:'Sobre a Brain',4:'Geobrain · inteligência imobiliária',5:'Soluções Brain',6:'Plataforma Geobrain',7:'Recorte do estudo',25:'Conjuntura econômica e funding',39:'O mercado imobiliário no período',45:'Lançamentos',60:'Vendas',71:'Oferta final',75:'Velocidade de vendas',79:'Evolução dos preços',85:'Preços por tipologia e padrão',90:'Mercado residencial atual',100:'Short stay',122:'Mercado de locação',127:'Comparativo novos e usados',129:'Mercado residencial horizontal',133:'Mercado comercial',137:'Mercado horizontal · RM',141:'Análise de VGV · RM',143:'Perspectivas do mercado',154:'Consultores do estudo',155:'Equipe técnica',156:'Imprensa',157:'Consultoria Brain',158:'Brain · Contato'};
+// Temporarily omit section covers requested by Lucas; reference page IDs stay stable.
+export const OMITTED_COVER_PAGES=[25,39,100] as const;
+for(const page of OMITTED_COVER_PAGES)delete editorial[page];
 for(let p=144;p<=153;p++)editorial[p]=`Perspectivas · análise ${p-143}`;
 export const DEFINITIONS:Definition[]=[...DATA_DEFINITIONS,...Object.entries(editorial).map(([p,title])=>({sourcePage:Number(p),title,kind:'editorial' as const}))].sort((a,b)=>a.sourcePage-b.sourcePage);
 export const EXTERNAL_PAGES=[8,...Array.from({length:13},(_,i)=>26+i),...Array.from({length:5},(_,i)=>40+i),...Array.from({length:21},(_,i)=>101+i),123,124,125,126,128];

@@ -67,7 +67,7 @@ try{
       const waiting=page.waitForEvent('download',{timeout:120000});await page.getByRole('button',{name:label,exact:true}).click();const file=await waiting,path=resolve(folder,`modelo03.${extension}`);await file.saveAs(path);
       if(extension==='json'){const audit=JSON.parse(await readFile(path,'utf8'));assert.equal(audit.summary.available,58);assert.equal(audit.summary.waitingSource,0);assert.equal(audit.criteria.monetarySeries,'INCC-DI');assert.ok(!JSON.stringify(audit).includes('Private project name'));results.push({download:extension,positions:audit.summary.total});}
       if(extension==='csv'){const csv=await readFile(path,'utf8');assert.ok(csv.includes('fonte-agregada'));assert.ok(!csv.includes('Private project name'));}
-      if(extension==='pptx'){const files=unzipSync(new Uint8Array(await readFile(path))),slides=Object.keys(files).filter(n=>/^ppt\/slides\/slide\d+\.xml$/.test(n));assert.ok(slides.length>=97);assert.ok(files['customXml/modelo03-audit.xml']);const editable=strFromU8(files['ppt/slides/slide1.xml']);assert.ok(editable.includes('PANORAMA'));results.push({download:extension,pages:slides.length});}
+      if(extension==='pptx'){const files=unzipSync(new Uint8Array(await readFile(path))),slides=Object.keys(files).filter(n=>/^ppt\/slides\/slide\d+\.xml$/.test(n));assert.ok(slides.length>=94);assert.ok(files['customXml/modelo03-audit.xml']);const editable=strFromU8(files['ppt/slides/slide1.xml']);assert.ok(editable.includes('PANORAMA'));results.push({download:extension,pages:slides.length});}
       await page.getByText('Arquivo gerado. Download iniciado.',{exact:true}).waitFor();
      }
     }

@@ -837,6 +837,14 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 24/11/2026 — Modelo03: retirada temporária de capas e investigação de locação
+
+- **Autor/origem:** Codex/Lucas; base `7971eb24`, um commit anterior local, origin atualizado por fetch; sem divergência.
+- **Monday:** [DESAFIO — Estudos Entidades e Institucionais](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`.
+- **Mudança:** omitidas as capas originais25 (Conjuntura econômica e funding),39 (O mercado imobiliário no período) e100 (Short stay), preservando IDs de referência e geração compartilhada da prévia/PPTX/JSON. Com RM:94 posições,58 indicadores e36 editoriais; sem RM88 posições. Capa122 de locação mantida.
+- **Locação:** Lucas informou origem em endpoint GeoBrain e autorizou integração. Referência ADEMI-PR local confirma123–126 (introdução, bairros, tipologia, oferta/preço/área). Catálogo `src/assets/openapi/api-geobrain.json` contém apenas building/temporal/monitored-cities/auth, sem locação; busca no código e pesquisa pública não localizaram contrato. Perguntado nome/URL do endpoint ou tela ao Lucas. Integração ainda não implementada, sem inventar chamadas/campos ou substituir por venda.
+- **Validação:**67 testes de geração/correções aprovados; checagem de tipos no fechamento. Conferência headless confirma capas ausentes e locação mantida, sem ensaio autenticado ou inspeção visual nova.
+
 ### 24/11/2026 — Modelo03: identificação das vendas inválidas no JSON
 
 - **Autor/origem:** Codex a pedido de Lucas; base `d3ceeaa0` na main, origin atualizado0/0, árvore limpa na abertura.
@@ -2214,6 +2222,8 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 
 ## 2. Etapas
 
+- **24/11 — Modelo03:** três capas temporariamente omitidas em todas as cidades; inclusão da locação autorizada e em investigação de contrato.
+
 - **24/11 — Diagnóstico Modelo03:** identificação e motivo de vendas inválidas implementados no JSON comum a todas as cidades; cálculos e bloqueios preservados.
 
 - **24/11 — Relatórios automáticos:** insights Modelo03 e painel efetivo SP implementados localmente; divergências de fluxo detalhado preservadas com ressalva. Geração nova e conferência do analista ainda necessárias após publicação.
@@ -2409,6 +2419,8 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 ---
 
 ## 3. Pendências
+
+- **24/11 — Locação Modelo03:** confirmar URL/contrato GeoBrain de locação por bairro, tipologia e oferta/preço/área; verificar filtros geográficos, competência disponível, paginação e autenticidade antes da integração. Pedido de informação enviado a Lucas; não implementado no catálogo atual.
 
 - **24/11 — Uberlândia:** após envio autorizado, gerar novamente e baixar JSON para identificar os quatro registros e distinguir nulo/vazio/campo ausente/formato inválido. Diagnóstico da resposta não comprova a causa no cadastro GeoBrain.
 
