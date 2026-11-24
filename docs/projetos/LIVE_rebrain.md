@@ -837,6 +837,14 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 24/11/2026 — Modelo03: identificação das vendas inválidas no JSON
+
+- **Autor/origem:** Codex a pedido de Lucas; base `d3ceeaa0` na main, origin atualizado0/0, árvore limpa na abertura.
+- **Monday:** [DESAFIO — Estudos Entidades e Institucionais](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`.
+- **Mudança:** `sources[].salesFieldDiagnostics` identifica registros de vendas ausentes/inválidos do período selecionado: empreendimento ID/nome, tipologia ID, mês, padrão, campo, valor escalar/tipo e motivo (campo ausente, nulo, indefinido, vazio, tipo inválido, não numérico/não finito, fora da precisão segura, fracionário). Vendas negativas inteiras seguem válidas. Observações anterior/seguinte são contexto, sem imputação nem mudança dos cálculos. Limite100 amostras por fonte, total/motivos/omitidos explícitos. Não exporta objetos brutos, endereço ou autenticação; cadastro identificado somente nas anomalias.
+- **Evidência:** JSON Uberlândia3T2026 fornecido mostra quatro registros sem venda válida (Econômico agosto2, Standard setembro2), mas o arquivo anterior não permite identificar motivo bruto. Nova exportação exige nova geração com a versão atualizada. Não houve consulta imobiliária autenticada nesta sessão.
+- **Validação:** 26 testes em dois arquivos aprovados; motivos, vizinhos, recorte, omissões, preservação de zero/negativos e regressão de exportação. Tipos/lint verificados antes do fechamento.
+
 ### 24/11/2026 — Modelo 03: insights, fluxos Itajaí e painel SP efetivo
 
 - **Autor/origem:** Codex a pedido de Lucas; base `4f64d690`, entrega local na main.
@@ -2206,6 +2214,8 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 
 ## 2. Etapas
 
+- **24/11 — Diagnóstico Modelo03:** identificação e motivo de vendas inválidas implementados no JSON comum a todas as cidades; cálculos e bloqueios preservados.
+
 - **24/11 — Relatórios automáticos:** insights Modelo03 e painel efetivo SP implementados localmente; divergências de fluxo detalhado preservadas com ressalva. Geração nova e conferência do analista ainda necessárias após publicação.
 
 - **24/11 — Relatórios, interface comum:** navegação/modal Maceió e carregamento SP centralizados nos quatro motores; equivalência global em código/documentação obrigatória para01/02. Configuração03 preservada. Validação offline aprovada, sem homologação de novos números.
@@ -2399,6 +2409,8 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 ---
 
 ## 3. Pendências
+
+- **24/11 — Uberlândia:** após envio autorizado, gerar novamente e baixar JSON para identificar os quatro registros e distinguir nulo/vazio/campo ausente/formato inválido. Diagnóstico da resposta não comprova a causa no cadastro GeoBrain.
 
 - **24/11 — Modelo03:** publicar somente com autorização; conferir novo JSON Itajaí/Navegantes e demais cidades após gerar novamente. Base parcial/ressalvas e editoriais não equivalem à homologação. Nenhum ajuste manual artificial de unidades.
 

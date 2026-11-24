@@ -1,5 +1,9 @@
 # Estado do handoff
 
+## 24/11/2026 — JSON detalha registros de vendas inválidos
+
+Codex/Lucas, base `d3ceeaa0`, origin único atualizado0/0/main limpa na abertura. `sources[].salesFieldDiagnostics` acrescenta motivos, valores escalares, IDs/nome do empreendimento, tipologia, mês e vizinhos históricos apenas nas anomalias do período selecionado. Até100 amostras/fonte, contagens totais e omissões explícitas; sem payload completo/endereço/auth.26 testes aprovados, sem nova coleta autenticada. Nenhuma regra de cálculo alterada. Necessário gerar novamente Uberlândia após publicação autorizada para obter a causa bruta dos quatro registros. Entrega local aguardando autorização de push.
+
 ## 24/11/2026 — Insights Modelo03 e correção da referência de carregamento
 
 Fechamento: Lucas autorizou o push após finalizar. 90 testes/seis arquivos, tipos, lint/build e sete cenários de navegador sintético aprovados (seis shell + Modelo03 geração/insights/exportações); configuração03 idêntica por hash. Publicação Git não comprova homologação dos dados em produção.
