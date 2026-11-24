@@ -34,13 +34,20 @@ try{
   }else{
    await page.getByText('Carregando municípios autorizados',{exact:true}).waitFor({state:'hidden'});
    await page.locator('#modelo03-preset').click();await page.getByRole('option',{name:'Curitiba · ADEMI-PR',exact:true}).click();
-   await page.getByRole('button',{name:'Selecionar municípios da RM',exact:true}).click();await page.getByRole('option',{name:'Araucária / PR',exact:false}).click();await page.keyboard.press('Escape');
+   await page.getByRole('button',{name:'1 municípios selecionados',exact:true}).click();
+   assert.equal(await page.getByRole('option',{name:'Londrina / PR',exact:false}).count(),0);
+   assert.equal(await page.getByRole('option',{name:'Timon / MA',exact:false}).count(),0);
+   await page.getByRole('option',{name:'Araucária / PR',exact:false}).click();await page.keyboard.press('Escape');
+   assert.equal(await page.getByRole('button',{name:'Araucária / PR ×',exact:true}).count(),0);
+   await page.getByRole('button',{name:'Restaurar recorte da referência',exact:true}).click();
    assert.ok(await page.getByRole('button',{name:'Araucária / PR ×',exact:true}).isVisible());
    if(scenario.periodicity&&scenario.periodicity!=='quarterly'){await page.locator('#modelo03-periodicity').click();await page.getByRole('option',{name:scenario.periodicity==='monthly'?'Mensal':'Semestral',exact:true}).click();}
    await page.locator('#modelo03-position').click();await page.getByRole('option',{name:scenario.periodicity==='monthly'?'junho':scenario.periodicity==='semiannual'?'1º semestre':'2º trimestre',exact:true}).click();
    fixture=await page.evaluate(async periodicity=>{const {fixture,selection}=await import('/src/features/relatorios-institucionais/modelo-03/__tests__/fixture.ts');return fixture({...selection,periodicity:periodicity??'quarterly',position:periodicity==='monthly'?6:periodicity==='semiannual'?1:2});},scenario.periodicity);
    await page.locator('[data-modelo03-slide="1"]').screenshot({path:resolve(folder,`cover-${scenario.width}-${scenario.dark}.png`)});
    await page.getByRole('button',{name:'Gerar relatório',exact:true}).click();await page.getByText('Consultando fontes do Modelo 03',{exact:true}).waitFor();
+   const bounds=await page.getByRole('status').filter({hasText:'Consultando fontes do Modelo 03'}).evaluate(el=>{const r=el.getBoundingClientRect(),main=el.closest('main')?.getBoundingClientRect();return {position:getComputedStyle(el).position,left:r.left,right:r.right,mainLeft:main?.left??0,mainRight:main?.right??innerWidth};});
+   assert.equal(bounds.position,'absolute');assert.ok(bounds.left>=bounds.mainLeft&&bounds.right<=bounds.mainRight+1);
    if(scenario.state==='429'){
     await page.getByText('Aguardando resposta da API · retomada automática',{exact:true}).waitFor();await page.screenshot({path:resolve(folder,'429.png'),fullPage:true});await page.getByRole('button',{name:'Cancelar consulta',exact:true}).click();await page.getByText('Consulta cancelada. Você pode gerar novamente.').waitFor();
    }else{

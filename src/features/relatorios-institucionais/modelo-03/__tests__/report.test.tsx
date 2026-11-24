@@ -2,7 +2,7 @@ import {describe,it,expect} from 'vitest';
 import {renderToStaticMarkup} from 'react-dom/server';
 import {calculateSlides,createCalculator} from '../calculate';
 import {diagnostic,conferenceCsv} from '../diagnostic';
-import {period,periodIssue,scopeIssue,PRESETS,selectionKey} from '../model';
+import {period,periodIssue,scopeIssue,PRESETS,selectionKey,regionalOptions,regionalDefaults,regionalMissing} from '../model';
 import {DATA_DEFINITIONS,DEFINITIONS,DEFINITIONS_FOR} from '../blueprint';
 import {presentationPages} from '../presentation';
 import {ReportSlide} from '../ReportSlide';
@@ -10,6 +10,28 @@ import type {Report} from '../types';
 import {selection,fixture} from './fixture';
 function report():Report{const sources=fixture();return {schema:'modelo-03-report-v1',selection,key:selectionKey(selection),startedAt:'2026-11-24T12:00:00Z',finishedAt:'2026-11-24T12:01:00Z',sources,slides:calculateSlides(selection,sources),errors:[],origin:'Geobrain API',homologated:false};}
 describe('Modelo 03 · recortes, períodos e integridade',()=>{
+ it('pré-seleciona os dez municípios ADEMI-PR autorizados e permite ampliar dentro da RMC',()=>{
+  const cities=PRESETS.find(p=>p.id==='curitiba')!.suggestions,catalog={PR:['Curitiba',...cities,'Quatro Barras','Londrina'],MA:['Timon']};
+  expect(regionalDefaults('PR','Curitiba',catalog)).toHaveLength(10);
+  expect(regionalOptions('PR','Curitiba',catalog).map(o=>o.value)).toContain('PR|Quatro Barras');
+  expect(regionalOptions('PR','Curitiba',catalog).map(o=>o.value)).not.toContain('PR|Londrina');
+  expect(regionalOptions('PR','Curitiba',catalog).map(o=>o.value)).not.toContain('MA|Timon');
+  expect(scopeIssue({...selection,rmCities:['PR|Londrina']},catalog)).toContain('recorte regional');
+ });
+ it('explicita municípios da referência sem acesso e nunca inventa RM pela UF',()=>{
+  expect(regionalDefaults('PR','Curitiba',{PR:['Curitiba','Araucária']})).toEqual(['PR|Araucária']);
+  expect(regionalMissing('PR','Curitiba',{PR:['Curitiba','Araucária']})).toHaveLength(9);
+  expect(regionalOptions('PR','Londrina',{PR:['Londrina','Curitiba']})).toEqual([]);
+ });
+ it('mantém os recortes regionais e os pares dos originais, com Timon na referência de Teresina',()=>{
+  for(const p of PRESETS.filter(p=>p.regional!=='city')){
+   const catalog:Record<string,string[]>={[p.uf]:[p.city]};
+   for(const v of p.suggestions){const [uf,city]=v.includes('|')?v.split('|'):[p.uf,v];(catalog[uf]??=[]).push(city);}
+   expect(regionalDefaults(p.uf,p.city,catalog)).toHaveLength(p.suggestions.length);
+   expect(scopeIssue({...selection,uf:p.uf,city:p.city,rmCities:regionalDefaults(p.uf,p.city,catalog)},catalog)).toBeNull();
+  }
+  expect(regionalDefaults('PI','Teresina',{PI:['Teresina'],MA:['Timon']})).toEqual(['MA|Timon']);
+ });
  it('preserva as 58 posições de indicadores e 39 editoriais da referência',()=>{expect(DATA_DEFINITIONS).toHaveLength(58);expect(DEFINITIONS).toHaveLength(97);expect(PRESETS).toHaveLength(16);expect(new Set(DEFINITIONS.map(d=>d.sourcePage)).size).toBe(97);expect(DEFINITIONS.some(d=>d.sourcePage>=9&&d.sourcePage<=24)).toBe(false);});
  it.each([['monthly',5,'2026-05','2026-05'],['quarterly',2,'2026-04','2026-06'],['semiannual',1,'2026-01','2026-06']] as const)('calcula janela %s', (periodicity,position,start,end)=>{expect(period({...selection,periodicity,position})).toMatchObject({start,end});});
  it('bloqueia competências abertas, inválidas e recortes sem acesso',()=>{expect(periodIssue({...selection,position:4},new Date('2026-11-24T12:00:00Z'))).toBeTruthy();expect(periodIssue({...selection,position:5})).toBeTruthy();expect(scopeIssue(selection,{PR:['Curitiba']})).toBeTruthy();expect(scopeIssue({...selection,rmCities:['PR|Curitiba']},{PR:['Curitiba']})).toBeTruthy();expect(scopeIssue({...selection,includeRm:false},null)).toBeTruthy();});

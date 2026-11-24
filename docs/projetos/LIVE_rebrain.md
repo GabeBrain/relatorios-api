@@ -837,6 +837,15 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 24/11/2026 — Modelo 03: recorte regional automático e carregamento restrito ao relatório — Codex/Lucas
+
+- **Pedido:** pré-selecionar RM dos estudos de referência, permitir edição pelo analista e preservar menu lateral durante consultas/exportações.
+- **Base:** main `764b85e6`, origin único, fetch 0/0 e árvore limpa. Implementação anterior já publicada no Git; esta correção permanece local sem autorização de push.
+- **Entrega:** padrões regionais cruzados com catálogo autorizado e validação na coleta. Curitiba recebe dez municípios ADEMI-PR; Teresina recebe recorte monitorado por entidade com Timon/MA, identificado como inferência documental. Demais RMs/pares preservam recortes dos originais. Municípios da referência sem acesso aparecem em aviso; principal nunca entra novamente na RM. Filtro por cidade principal impede opções alheias à região. Remover/reincluir/restaurar não dispara consulta pesada.
+- **Interface:** `ReportLoading` reutiliza BrainLoadingState/progresso real/cancelamento; portal acompanha área visível do main e resize da sidebar, sem bloquear menu nem cortar logo pela rolagem. Aplica-se também à exportação.
+- **Evidência:** 35 testes, lint e build aprovados; sete cenários Edge com API sintética, desktop/celular, claro/escuro, três periodicidades, erro/vazio/sem token/429 cancelável. JSON/CSV/PPTX baixados e lidos. Capturas do carregamento inspecionadas. Não houve geração com token imobiliário real nem homologação de números. [Contrato e fontes](../features/relatorios-institucionais/modelo-03/README.md).
+- **Monday:** [DESAFIO — Estudos Entidades e Institucionais](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`. Sem escrita no Monday.
+
 ### 24/11/2026 — Modelo 03: gerador por entidade, período e recorte — Codex/Lucas
 
 - **Pedido/base:** Lucas autorizou iniciar o molde ADEMI-PR com os recursos disponíveis, manter Maceió e publicar somente quando autorizado. Main limpa `ac0d45c3`, origin único, fetch sem atraso/avanço. INCC-DI confirmado; intenção de compra excluída. [Contrato, recortes e evidências](../features/relatorios-institucionais/modelo-03/README.md).
@@ -2157,6 +2166,8 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 
 ## 2. Etapas
 
+- **24/11 — Modelo 03, ajuste do recorte:** pré-seleção regional editável e carregamento restrito ao main concluídos/testados localmente. Implementação inicial `764b85e6` já no origin; novo ajuste aguarda envio.
+
 - **24/11 — Modelo 03:** base comum implementada localmente, rota oculta, três periodicidades, RM configurável, 58 contratos de indicadores, JSON/CSV/PPTX; validação sintética aprovada. [Estado e limites](../features/relatorios-institucionais/modelo-03/README.md). Não substitui Maceió.
 
 - **23/11 — Maceió, PowerPoint editável:** concluído em `276a69dc`, 82/87 páginas, downloads e edição/salvamento/reabertura comprovados no PowerPoint; [evidências](../features/relatorios-institucionais/maceio/EXPORTACAO_PPTX_2026-11-23.md). Envio autorizado, dados reais ainda sujeitos à conferência.
@@ -2338,6 +2349,8 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 ---
 
 ## 3. Pendências
+
+- **24/11 — Modelo 03, recortes:** autorizar envio deste ajuste e conferir primeira geração autenticada. Padrão Teresina inferido da lista monitorada por entidade; confirmar eventual diferença histórica de edição com o analista. Opções adicionais exigem vínculo regional verificado; o catálogo autorizado isoladamente não prova pertencer à RM.
 
 - **24/11 — Modelo 03:** autorizar envio, publicar frontend e executar primeiro recorte real. Conferir cobertura histórica, identificação MCMV e divergências municipais/detalhadas; completar fontes externas, conteúdo editorial e identidade específica das demais entidades. Sem afirmar 58 indicadores reais homologados a partir de fixture.
 

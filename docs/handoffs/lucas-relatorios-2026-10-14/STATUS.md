@@ -1,5 +1,11 @@
 # Estado do handoff
 
+## 24/11/2026 — Modelo 03: RM automática e carregamento dentro do relatório
+
+Base main limpa `764b85e6`, origin único com fetch 0/0. Lucas pediu recorte padrão editável e menu lateral livre no carregamento. Defaults dos originais complementados pela Lista de cidades monitoradas: Curitiba com dez municípios ADEMI-PR e Teresina por entidade, incluindo Timon/MA (inferência explicitada, vínculo RIDE verificado). Somente membros regionais cadastrados e autorizados entram; ausências da referência são visíveis. Validação antes da coleta, troca de principal limpa escolhas antigas, restauração do padrão disponível. Consulta/exportação com BrainLoadingState dentro do main visível, acompanhando sidebar/rolagem.
+
+35 testes, lint e build aprovados. Sete cenários Edge sintéticos: três periodicidades, desktop/celular, temas, erro/vazio/sem token e 429 cancelável; menu fora do overlay, remoção/restauração RM, downloads JSON/CSV/PPTX lidos. Capturas inspecionadas. Sem token pessoal para coleta imobiliária real; não afirmar homologação numérica/deploy. [Contrato e fontes](../../features/relatorios-institucionais/modelo-03/README.md). Alteração local, sem push autorizado e sem escrita Monday.
+
 ## 24/11/2026 — Modelo 03: primeira implementação do gerador comum
 
 Lucas autorizou desenvolver o molde ADEMI-PR, mantendo Maceió pronto sem migração. Confirmou INCC-DI e RM por checkbox/seleção múltipla; pediu três periodicidades, entidade, competência, cidade, etapas/% e JSON/CSV/PPTX. Main limpa `ac0d45c3`, origin único atualizado por fetch 0/0. Drive acessível: 16 originais baixados/lidos, recortes categorizados; capa/contracapa e mapas relevantes renderizados no PowerPoint. Sem token pessoal de script confirmado para ensaio imobiliário real.

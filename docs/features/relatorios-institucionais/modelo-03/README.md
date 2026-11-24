@@ -22,9 +22,23 @@ Lucas autorizou iniciar os slides com recursos disponíveis, configuração mens
 | Cidade e RM | Curitiba, Joinville, São Luís, Belém, Natal, Teresina |
 | Duas cidades, sem assumir toda a RM oficial | Itajaí/Navegantes; Penha/Balneário Piçarras |
 
-Belém: slides 7–9 confirmam Ananindeua e Marituba além da principal. Natal: slide 8 nomeia Extremoz, São Gonçalo do Amarante, Macaíba, Parnamirim e Nísia Floresta. São Luís: mapa renderizado do slide 9 delimita São José de Ribamar, Paço do Lumiar e Raposa além da principal. Joinville: quadros nomeiam Joinville e Araquari; não se presumem municípios adicionais. Curitiba e Teresina confirmam RM, mas não foi obtida uma lista exata de municípios a partir do material inspecionado; exigem seleção explícita.
+Belém: slides 7–9 confirmam Ananindeua e Marituba além da principal. Natal: slide 8 nomeia Extremoz, São Gonçalo do Amarante, Macaíba, Parnamirim e Nísia Floresta. São Luís: mapa renderizado do slide 9 delimita São José de Ribamar, Paço do Lumiar e Raposa além da principal. Joinville: quadros nomeiam Joinville e Araquari.
 
-O catálogo é de **recortes de estudo**, não de regiões metropolitanas legais. “Incluir região metropolitana” abre seleção múltipla do catálogo autorizado, inclusive outra UF. A faixa RM exclui a cidade principal e soma somente as escolhas do usuário. As sugestões dos originais exigem clique e apenas municípios autorizados entram; não há inclusão silenciosa. Os dois pares podem usar a cidade parceira na faixa RM do molde comum, com o recorte registrado.
+O catálogo é de **recortes de estudo**, não de regiões metropolitanas legais. Ao selecionar a referência ou uma cidade principal com estudo regional cadastrado, o recorte é preenchido automaticamente, cruzado com o catálogo autorizado. O analista pode retirar/reincluir cidades e restaurar o padrão; a lista oferece somente membros regionais cadastrados, nunca todas as cidades da UF ou do token. A mesma validação protege a coleta. A faixa RM exclui a principal. Trocar cidade limpa o recorte antigo e aplica o novo. Os pares usam a parceira na faixa RM do molde, sem presumir toda uma região legal. Relatórios de cidade única continuam sem RM automática.
+
+### Complemento de fontes — 24/11/2026
+
+[Lista de cidades monitoradas](https://docs.google.com/spreadsheets/d/1FGRGa_PB47CJwGBhww5owleHCp0b8pkE/edit), cruzada com entidade e originais:
+
+- **Curitiba/ADEMI-PR:** Almirante Tamandaré, Araucária, Campina Grande do Sul, Campo Largo, Campo Magro, Colombo, Fazenda Rio Grande, Pinhais, Piraquara e São José dos Pinhais, todos PR.
+- **Teresina:** Altos, Demerval Lobão, José de Freitas e União/PI; Timon/MA. O PPTX confirma RM sem enumerá-la no texto: este padrão é inferido da lista monitorada vinculada ao SINDUSCON Teresina, não uma enumeração extraída do deck. Timon é associado pela entidade, pois o campo regional da planilha o atribui erroneamente a São Luís. A pertença à RIDE é confirmada pelo [Decreto 10.129/2019](https://www2.camara.leg.br/legin/fed/decret/2019/decreto-10129-25-novembro-2019-789462-normaatualizada-pe.html).
+- Joinville: Araquari; São Luís: São José de Ribamar, Paço do Lumiar e Raposa; Belém: Ananindeua e Marituba; Natal: Extremoz, São Gonçalo do Amarante, Macaíba, Parnamirim e Nísia Floresta. Pares: Navegantes para Itajaí e Balneário Piçarras para Penha.
+
+Municípios da referência sem acesso são listados explicitamente e não entram no cálculo. Há opções adicionais cadastradas para Curitiba (demais integrantes da [RMC/AMEP](https://www.amep.pr.gov.br/Pagina/Sobre-RM-de-Curitiba)) e Belém (Castanhal, lista monitorada); não são selecionadas por padrão. Não se importam automaticamente vínculos errôneos da planilha (Imperatriz/Timon → São Luís, Araguari → Belo Horizonte). Novas opções regionais exigem vínculo verificado, além do acesso da API.
+
+Carregamento de consulta e exportação reutiliza `BrainLoadingState` em um portal limitado ao retângulo visível do `main`, acompanhando redimensionamento da sidebar/viewport e rolagem. Logo, etapas, percentuais reais e cancelamento permanecem; o menu não é coberto. Em telas baixas o painel pode rolar.
+
+**Validação deste ajuste:** 35 testes/4 arquivos (29 Modelo 03 + 1 catálogo + 5 layout), lint e build aprovados. Sete cenários do script `scripts/diagnostics/modelo03-visual.mjs` novamente aprovados, com pré-seleção, retirada/restauração, exclusão de Londrina/Timon no seletor Curitiba, limites do overlay dentro do main, três periodicidades, estados inválidos e 429 cancelado. Downloads JSON/CSV/PPTX lidos; capturas desktop claro/celular escuro inspecionadas. API interceptada sintética, sem nova coleta autenticada. Os 32 testes abaixo descrevem a entrega inicial, não esta rodada.
 
 ## Estrutura e cálculos
 

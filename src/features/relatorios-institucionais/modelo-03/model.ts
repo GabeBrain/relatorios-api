@@ -23,6 +23,7 @@ export function scopeIssue(s:Selection, catalog:Record<string,string[]>|null):st
   const cities=selectedCities(s).map(c=>location(c,s.uf));
   if(s.includeRm&&!s.rmCities.length)return 'Selecione ao menos um município para a RM.';
   if(new Set(cities.map(c=>`${c.uf}|${norm(c.city)}`)).size!==cities.length)return 'A RM não pode repetir municípios nem incluir a cidade principal.';
+  if(s.includeRm&&s.rmCities.some(value=>!regionalOptions(s.uf,s.city,catalog).some(option=>option.value===`${location(value,s.uf).uf}|${location(value,s.uf).city}`)))return 'Há município fora do recorte regional da cidade principal.';
   if(cities.some(c=>!(catalog[c.uf]??[]).includes(c.city)))return 'Há município fora do catálogo autorizado.';
   return null;
 }
@@ -32,7 +33,7 @@ export interface Preset {id:string;city:string;uf:string;entity:string;regional:
 export const PRESETS:Preset[]=[
   {id:'uberlandia',city:'Uberlândia',uf:'MG',entity:'SINDUSCON-TAP',regional:'city',suggestions:[],sourceId:'1qO1ztgff1M9eRdPCUzkRp3UMPZuKGQTV',evidence:'Título e séries: Uberlândia; sem faixa RM local.'},
   {id:'rio',city:'Rio de Janeiro',uf:'RJ',entity:'ADEMI-RJ',regional:'city',suggestions:[],sourceId:'16dxFXoKUX6H_5Dd3mOU-QxBrnvKf84YQ',evidence:'Título e séries locais: Rio de Janeiro.'},
-  {id:'curitiba',city:'Curitiba',uf:'PR',entity:'ADEMI-PR',regional:'rm',suggestions:[],sourceId:'1cLd59MFqyICd7A7j9B-ZcUhot0W3O-xl',evidence:'Slide 8 e séries separam Curitiba/RM; lista municipal não confirmada no texto.'},
+  {id:'curitiba',city:'Curitiba',uf:'PR',entity:'ADEMI-PR',regional:'rm',suggestions:['Almirante Tamandaré','Araucária','Campina Grande do Sul','Campo Largo','Campo Magro','Colombo','Fazenda Rio Grande','Pinhais','Piraquara','São José dos Pinhais'],sourceId:'1cLd59MFqyICd7A7j9B-ZcUhot0W3O-xl',evidence:'Curitiba/RM: dez municípios na Lista de cidades monitoradas (ADEMI-PR).'},
   {id:'joinville',city:'Joinville',uf:'SC',entity:'SINDUSCON Joinville',regional:'rm',suggestions:['Araquari'],sourceId:'16o5Hu3Zw_-nKPEFjZIlp7A8XQ9vj01Bu',evidence:'Capa Joinville/RM e quadros Joinville e Araquari; conferir outros municípios antes de incluir.'},
   {id:'niteroi',city:'Niterói',uf:'RJ',entity:'ADEMI Niterói',regional:'city',suggestions:[],sourceId:'1OzOxyn5vY7TliVjct3SSQHGvW3wY-_1C',evidence:'Original apresenta zonas Central, Sul e Oceânica de Niterói, não uma RM municipal.'},
   {id:'rio-verde',city:'Rio Verde',uf:'GO',entity:'ADEMI Rio Verde',regional:'city',suggestions:[],sourceId:'16JzAUEdKEzCtOCoYq8SbUo3AqAM9Y7bf',evidence:'Censo local Rio Verde. Menções a outras RMs pertencem ao bloco nacional.'},
@@ -45,5 +46,23 @@ export const PRESETS:Preset[]=[
   {id:'belem',city:'Belém',uf:'PA',entity:'SINDUSCON-PA',regional:'rm',suggestions:['Ananindeua','Marituba'],sourceId:'13wceyMoIYL96Rzu1R27zDQYKKTQ5-jer',evidence:'Slides 7–9 confirmam Belém, Ananindeua e Marituba.'},
   {id:'natal',city:'Natal',uf:'RN',entity:'SINDUSCON-RN',regional:'rm',suggestions:['Extremoz','São Gonçalo do Amarante','Macaíba','Parnamirim','Nísia Floresta'],sourceId:'1TXNxpbiSMZOewvUBxGHy2A_8SrwzCiWz',evidence:'Slide 8 nomeia Natal e os cinco municípios sugeridos.'},
   {id:'boa-vista',city:'Boa Vista',uf:'RR',entity:'SINDUSCON-RR',regional:'city',suggestions:[],sourceId:'1Kat9I4AxKCSEnwG_J9XCXSM8cQLrJ2f4',evidence:'Estudo de Boa Vista; nenhum conjunto RM local confirmado.'},
-  {id:'teresina',city:'Teresina',uf:'PI',entity:'SINDUSCON Teresina',regional:'rm',suggestions:[],sourceId:'12quCLgU77xHvtw19FN9kv9iIJOZNBvCl',evidence:'Capa e título Teresina/RM; municípios exatos não confirmados. Seleção inicial limitada à mesma UF.'},
+  {id:'teresina',city:'Teresina',uf:'PI',entity:'SINDUSCON Teresina',regional:'rm',suggestions:['Altos','Demerval Lobão','José de Freitas','União','MA|Timon'],sourceId:'12quCLgU77xHvtw19FN9kv9iIJOZNBvCl',evidence:'Teresina/RM: recorte monitorado SINDUSCON Teresina, incluindo Timon/MA; vínculo conferido na RIDE.'},
 ];
+
+/** Study defaults come from the original decks and the monitored-cities workbook.
+ * Geographic membership is curated separately: never infer it from UF alone.
+ */
+export const REGIONAL_SOURCE='https://docs.google.com/spreadsheets/d/1FGRGa_PB47CJwGBhww5owleHCp0b8pkE/edit';
+const curitibaExtra=['Adrianópolis','Agudos do Sul','Balsa Nova','Bocaiúva do Sul','Campo do Tenente','Cerro Azul','Contenda','Doutor Ulysses','Itaperuçu','Lapa','Mandirituba','Piên','Quatro Barras','Rio Branco do Sul','Rio Negro','Quitandinha','Tijucas do Sul','Tunas do Paraná'];
+export function regionalPreset(uf:string,city:string){return PRESETS.find(p=>p.regional!=='city'&&p.uf===uf&&norm(p.city)===norm(city));}
+export function regionalOptions(uf:string,city:string,catalog:Record<string,string[]>|null){
+ const p=regionalPreset(uf,city);if(!p)return [];
+ // Legal RMC additionally permits authorized municipalities outside the monitored study default.
+ const members=[...p.suggestions,...p.id==='curitiba'?curitibaExtra:[],...p.id==='belem'?['Castanhal']:[]];
+ return members.flatMap(value=>{const l=location(value,p.uf),authorized=(catalog?.[l.uf]??[]).find(c=>norm(c)===norm(l.city));return authorized&&!(l.uf===uf&&norm(authorized)===norm(city))?[{value:`${l.uf}|${authorized}`,label:`${authorized} / ${l.uf}`}]:[];}).sort((a,b)=>a.label.localeCompare(b.label,'pt-BR'));
+}
+export function regionalDefaults(uf:string,city:string,catalog:Record<string,string[]>|null){
+ const p=regionalPreset(uf,city),options=regionalOptions(uf,city,catalog);
+ return options.filter(o=>p?.suggestions.some(v=>{const l=location(v,p.uf);return `${l.uf}|${norm(l.city)}`===`${location(o.value,uf).uf}|${norm(location(o.value,uf).city)}`;})).map(o=>o.value);
+}
+export function regionalMissing(uf:string,city:string,catalog:Record<string,string[]>|null){const p=regionalPreset(uf,city);return p?.suggestions.filter(v=>{const l=location(v,p.uf);return !(catalog?.[l.uf]??[]).some(c=>norm(c)===norm(l.city));}).map(v=>rmLabel(v,p.uf))??[];}

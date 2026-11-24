@@ -1,8 +1,8 @@
+import {ReportLoading} from './ReportLoading';
 import {useEffect,useMemo,useRef,useState} from 'react';
 import {createPortal} from 'react-dom';
 import {Button} from '@/components/ui/button';
 import {Progress} from '@/components/ui/progress';
-import {BrainLoadingState} from '@/components/feedback/BrainLoadingState';
 import {addNativePptxSlide,patchNativePptx,type NativePatch} from '../shared/native-pptx';
 import {embedReportPptxAudit} from '../shared/pptx-audit';
 import {ReportSlide} from './ReportSlide';
@@ -46,5 +46,5 @@ export default function Exports({report}:{report:Report}){
  },[job]);
  const start=(kind:'json'|'csv'|'pptx')=>{if(active.current)return;const next={kind,controller:new AbortController(),report,startedAt:Date.now()};active.current=next;setError('');setNotice('');setValue(0);setJob(next);};
  const count=presentationPages(report.slides).length;
- return <section className="space-y-3 rounded-xl border bg-card p-4" aria-label="Exportação do Modelo 03"><h2 className="font-semibold">Arquivos desta geração</h2><div className="flex flex-wrap gap-2"><Button variant="outline" disabled={!!job} onClick={()=>start('json')}>Baixar diagnóstico JSON</Button><Button variant="outline" disabled={!!job} onClick={()=>start('csv')}>Baixar conferência CSV</Button><Button disabled={!!job} onClick={()=>start('pptx')}>Baixar PPTX editável</Button></div><p className="text-sm text-muted-foreground">{count} páginas na prévia e no PowerPoint. Textos, células e gráficos vetoriais editáveis; artes institucionais são imagens substituíveis. JSON e CSV incluem os indicadores, cobertura, categorias e pendências.</p>{job&&<BrainLoadingState variant="overlay" title={`Preparando ${job.kind.toUpperCase()} · ${value}%`} startedAt={job.startedAt}><Progress value={value} aria-valuenow={value} className="mt-4 w-64 bg-muted"/><Button variant="outline" className="mt-4" onClick={()=>job.controller.abort()}>Cancelar exportação</Button></BrainLoadingState>}{error&&<p role="alert" className="text-sm text-destructive">{error}</p>}{notice&&<p role="status" className="text-sm">{notice}</p>}{portal}</section>;
+ return <section className="space-y-3 rounded-xl border bg-card p-4" aria-label="Exportação do Modelo 03"><h2 className="font-semibold">Arquivos desta geração</h2><div className="flex flex-wrap gap-2"><Button variant="outline" disabled={!!job} onClick={()=>start('json')}>Baixar diagnóstico JSON</Button><Button variant="outline" disabled={!!job} onClick={()=>start('csv')}>Baixar conferência CSV</Button><Button disabled={!!job} onClick={()=>start('pptx')}>Baixar PPTX editável</Button></div><p className="text-sm text-muted-foreground">{count} páginas na prévia e no PowerPoint. Textos, células e gráficos vetoriais editáveis; artes institucionais são imagens substituíveis. JSON e CSV incluem os indicadores, cobertura, categorias e pendências.</p>{job&&<ReportLoading title={`Preparando ${job.kind.toUpperCase()} · ${value}%`} startedAt={job.startedAt}><Progress value={value} aria-valuenow={value} className="mt-4 w-64 bg-muted"/><Button variant="outline" className="mt-4" onClick={()=>job.controller.abort()}>Cancelar exportação</Button></ReportLoading>}{error&&<p role="alert" className="text-sm text-destructive">{error}</p>}{notice&&<p role="status" className="text-sm">{notice}</p>}{portal}</section>;
 }
