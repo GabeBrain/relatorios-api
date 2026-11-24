@@ -48,6 +48,10 @@ try{
    await page.getByRole('button',{name:'Gerar relatório',exact:true}).click();await page.getByText('Consultando fontes do Modelo 03',{exact:true}).waitFor();
    const bounds=await page.getByRole('status').filter({hasText:'Consultando fontes do Modelo 03'}).evaluate(el=>{const r=el.getBoundingClientRect(),main=el.closest('main')?.getBoundingClientRect();return {position:getComputedStyle(el).position,left:r.left,right:r.right,mainLeft:main?.left??0,mainRight:main?.right??innerWidth};});
    assert.equal(bounds.position,'absolute');assert.ok(bounds.left>=bounds.mainLeft&&bounds.right<=bounds.mainRight+1);
+   const loading=page.getByRole('region',{name:'Carregamento do relatório Modelo 03',exact:true});
+   assert.ok(await loading.isVisible());assert.equal(await loading.locator('li[aria-current="step"]').count(),1);
+   assert.equal(await page.locator('[data-modelo03-loading-viewport]').count(),0);
+   assert.equal(await page.locator('[data-modelo03-slide]').count(),0);
    if(scenario.state==='429'){
     await page.getByText('Aguardando resposta da API · retomada automática',{exact:true}).waitFor();await page.screenshot({path:resolve(folder,'429.png'),fullPage:true});await page.getByRole('button',{name:'Cancelar consulta',exact:true}).click();await page.getByText('Consulta cancelada. Você pode gerar novamente.').waitFor();
    }else{

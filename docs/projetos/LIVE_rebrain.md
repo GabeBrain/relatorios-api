@@ -837,6 +837,13 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 24/11/2026 — Modelo 03: alinhar apresentação do carregamento aos relatórios existentes — Codex/Lucas
+
+- **Pedido:** remover divergência visual do Modelo03 em relação a SP institucional/Fortaleza/Maceió. Base main limpa `43065484`, origin único atualizado por fetch0/0.
+- **Alteração:** `ReportLoading` passa de portal sobre main a painel na página, seguindo a estrutura já usada em Fortaleza/Maceió (`relative`, card com borda, overlay absoluto e conteúdo no topo). Prévia oculta durante consulta, painel entra em vista, menu/configuração fora da camada. Etapas numeradas com status textual, percentual, barra fina e destaque da ativa conforme Maceió. Exportações com BrainLoadingState operation inline, preservando progresso/cancelamento. Coletor/ritmo/429 mantidos.
+- **Verificação:** lint/build aprovados e sete cenários Edge sintéticos concluídos (três periodicidades, desktop/celular, claro/escuro, vazio/erro/sem token/429 cancelável). Conferidos painel na página sem portal, etapa ativa única, prévia oculta durante consulta, menu livre, JSON/CSV/PPTX baixados/lidos. Capturas desktop/celular inspecionadas. Sem alteração de cálculos ou chamada autenticada nova. [Contrato](../features/relatorios-institucionais/modelo-03/README.md). Envio não autorizado nesta rodada.
+- **Monday:** [DESAFIO — Estudos Entidades e Institucionais](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`. Sem escrita.
+
 ### 24/11/2026 — Modelo 03: acelerar coleta para qualquer cidade/RM — Codex/Lucas
 
 - **Pedido:** Curitiba/RM após 12 minutos sem finalizar; aplicar melhoria a todas as cidades do motor comum, não apenas Curitiba.
@@ -2174,6 +2181,8 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 
 ## 2. Etapas
 
+- **24/11 — Modelo 03, carregamento:** alinhamento visual ao painel já usado em SP/Fortaleza/Maceió concluído e validado localmente; substitui o portal da rodada anterior, sem alterar coleta/cálculos.
+
 - **24/11 — Modelo 03, desempenho:** coleta concorrente limitada implementada para qualquer seleção; intervalo e pausa global preservados. Recortes automáticos/overlay já publicados em `5d2d5199`; esta aceleração permanece separada/local.
 
 - **24/11 — Modelo 03, ajuste do recorte:** pré-seleção regional editável e carregamento restrito ao main concluídos/testados localmente. Implementação inicial `764b85e6` já no origin; novo ajuste aguarda envio.
@@ -2359,6 +2368,8 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 ---
 
 ## 3. Pendências
+
+- **24/11 — Modelo 03, visual:** autorizar envio do alinhamento de carregamento após validação local; confirmar a apresentação no frontend atualizado. Aceleração já enviada em `43065484` permanece intacta.
 
 - **24/11 — Modelo 03, desempenho:** autorizar envio e medir nova geração autenticada após atualizar frontend. Sem ETA real confirmado; latência remota e 429 continuam podendo prolongar a consulta. Execução iniciada no bundle anterior não recebe a mudança automaticamente.
 
