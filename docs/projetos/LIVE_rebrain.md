@@ -1,5 +1,13 @@
 # Rebrain (Plataforma) — Documento Vivo
 
+## 24/11/2026 — Maceió: acesso pelo menu para homologação — Claude/Lucas
+
+- **Pedido:** liberar Maceió no menu (antes só pela rota) para o analista testar e homologar.
+- **Entrega:** item `Sinduscon — Maceió` em *Relatórios Automatizados*, logo após Fortaleza, apontando para `/rebrain/relatorios-institucionais/maceio`. Rota, página e o selo "Em implantação" sem alteração. O card da Home não foi adicionado (fora do pedido).
+- **Validação:** `tsc` e testes de layout. Não verificado no navegador autenticado.
+- **Pendências:** homologação metodológica pelo analista.
+- **Monday:** [Panorama Maceió / SINDUSCON](https://brain381753.monday.com/boards/18398638577/pulses/13149406169) — `13149406169`.
+
 ## 24/11/2026 — Maceió: PPTX editável sem re-render do deck a cada página — Claude/Lucas
 
 - **Problema:** mesmo após `e189b279`, exportação real seguia em ~15–20s por página (5 de 87 em 1:15). A correção do cache não era a causa principal. Causa real: `MaceioPptxExport` criava o deck oculto dentro do render, então cada `setProgress` re-renderizava as 87 lâminas e recalculava todos os gráficos com os dados da geração.

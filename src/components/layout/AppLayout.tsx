@@ -74,6 +74,7 @@ const NAV_GROUPS: NavGroup[] = [
           { path: '/rebrain/panorama-secovi-fiergs', label: 'Panorama de Mercado', icon: <BarChart2 className="h-4 w-4" />, standbyLabel: '(Secovi/FIERGS)' },
           { path: '/rebrain/relatorios-institucionais/sp', label: 'SP Institucional', icon: <BarChart2 className="h-4 w-4" /> },
           { path: '/rebrain/relatorios-institucionais/fortaleza', label: 'Sinduscon — Fortaleza', icon: <BarChart2 className="h-4 w-4" /> },
+          { path: '/rebrain/relatorios-institucionais/maceio', label: 'Sinduscon — Maceió', icon: <BarChart2 className="h-4 w-4" /> },
         ],
       },
       { path: '/rebrain/validacao-fechamento', label: 'Validação do Fechamento', icon: <ClipboardList className="h-4 w-4" /> },
