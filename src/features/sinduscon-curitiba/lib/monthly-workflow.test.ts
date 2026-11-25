@@ -76,6 +76,18 @@ describe('processMonthlyWorkflow', () => {
     expect(sectorChart.getElementsByTagNameNS('*', 'max')).toHaveLength(0);
     expect(Buffer.from(after['xl/styles.xml']).equals(Buffer.from(before['xl/styles.xml']))).toBe(true);
     for (const path of Object.keys(before).filter((path) => /^(xl\/media\/|xl\/drawings\/)/.test(path))) expect(Buffer.from(after[path]).equals(Buffer.from(before[path]))).toBe(true);
+    for (let index = 2; index <= 9; index += 1) {
+      const xml = new DOMParser().parseFromString(strFromU8(after[`xl/worksheets/sheet${index}.xml`]), 'application/xml');
+      const setup = xml.getElementsByTagNameNS('*', 'pageSetup')[0];
+      expect(setup.getAttribute('fitToWidth')).toBe('1');
+      expect(setup.getAttribute('fitToHeight')).toBe('1');
+      expect(setup.hasAttribute('scale')).toBe(false);
+      expect(xml.getElementsByTagNameNS('*', 'pageSetUpPr')[0].getAttribute('fitToPage')).toBe('1');
+      expect(xml.getElementsByTagNameNS('*', 'rowBreaks')).toHaveLength(0);
+      expect(xml.getElementsByTagNameNS('*', 'colBreaks')).toHaveLength(0);
+    }
+    const definedNames = (bytes: Uint8Array) => Array.from(new DOMParser().parseFromString(strFromU8(bytes), 'application/xml').getElementsByTagNameNS('*', 'definedName')).filter((node) => node.getAttribute('name') === '_xlnm.Print_Area').map((node) => node.textContent);
+    expect(definedNames(after['xl/workbook.xml'])).toEqual(definedNames(before['xl/workbook.xml']));
     const zones = new DOMParser().parseFromString(strFromU8(after['xl/worksheets/sheet4.xml']), 'application/xml');
     const se = Array.from(zones.getElementsByTagNameNS('*', 'col')).find((node) => node.getAttribute('min') === '9' && node.getAttribute('max') === '9');
     expect(Number(se?.getAttribute('width'))).toBeGreaterThan(7.5);

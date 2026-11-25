@@ -26,7 +26,7 @@ export async function compileSindusconPdf(
   const [report, cover, map] = await Promise.all([
     PDFDocument.load(reportPdf), PDFDocument.load(coverPdf), PDFDocument.load(mapPdf),
   ]);
-  if (report.getPageCount() !== 8) throw new Error(`O PDF exportado do Excel deve conter exatamente 8 páginas. O arquivo enviado possui ${report.getPageCount()}.`);
+  if (report.getPageCount() !== 8) throw new Error(`O PDF exportado do Excel deve conter exatamente 8 páginas. O arquivo enviado possui ${report.getPageCount()}. Gere novamente o relatório Excel e exporte as oito abas, ajustando cada aba a uma página completa. Não exclua páginas extras: elas podem conter dados.`);
   if (cover.getPageCount() !== 1 || map.getPageCount() !== 1) throw new Error('Os modelos internos de capa ou mapa estão inválidos.');
 
   const output = await PDFDocument.create();

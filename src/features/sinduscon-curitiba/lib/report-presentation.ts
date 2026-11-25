@@ -71,6 +71,31 @@ function fitNumericColumns(files: Record<string, Uint8Array>, workbook: XLSX.Wor
       replacement.setAttribute('width', String(width)); replacement.setAttribute('customWidth', '1');
       replacement.removeAttribute('bestFit');
     }
+    // Wider numeric columns must not spill into a second printed page. The report
+    // contract is eight sheets, one page each; keep the template's print areas.
+    let sheetProperties = ooxml.elements(document, 'sheetPr')[0];
+    if (!sheetProperties) {
+      sheetProperties = document.createElementNS(SHEET_NS, 'sheetPr');
+      document.documentElement.insertBefore(sheetProperties, document.documentElement.firstChild);
+    }
+    let setupProperties = ooxml.elements(sheetProperties, 'pageSetUpPr')[0];
+    if (!setupProperties) {
+      setupProperties = document.createElementNS(SHEET_NS, 'pageSetUpPr');
+      sheetProperties.appendChild(setupProperties);
+    }
+    setupProperties.setAttribute('fitToPage', '1');
+    setupProperties.setAttribute('autoPageBreaks', '0');
+    let pageSetup = ooxml.elements(document, 'pageSetup')[0];
+    if (!pageSetup) {
+      pageSetup = document.createElementNS(SHEET_NS, 'pageSetup');
+      const following = new Set(['headerFooter', 'rowBreaks', 'colBreaks', 'customProperties', 'cellWatches', 'ignoredErrors', 'smartTags', 'drawing', 'legacyDrawing', 'legacyDrawingHF', 'picture', 'oleObjects', 'controls', 'webPublishItems', 'tableParts', 'extLst']);
+      const next = Array.from(document.documentElement.children).find((node) => following.has(node.localName));
+      document.documentElement.insertBefore(pageSetup, next ?? null);
+    }
+    pageSetup.removeAttribute('scale');
+    pageSetup.setAttribute('fitToWidth', '1');
+    pageSetup.setAttribute('fitToHeight', '1');
+    for (const tag of ['rowBreaks', 'colBreaks']) for (const breaks of ooxml.elements(document, tag)) breaks.remove();
     files[path] = strToU8(new XMLSerializer().serializeToString(document));
   }
 }

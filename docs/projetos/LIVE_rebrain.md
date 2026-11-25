@@ -837,6 +837,16 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 25/11/2026 — Curitiba: impressão acompanha a ampliação automática das colunas — Codex/Lucas
+
+- **Ambiente/funcionalidade:** `/rebrain/sinduscon-curitiba` — exportação Excel→PDF dos dois modelos. Base `31a20548`, main/origin 0/0 após fetch; árvore limpa na abertura.
+- **Evidência:** PDF Liberados setembro/2026 do reteste contém dez páginas sem capa/mapa. Páginas 2 e 5 são faixas da direita de duas abas, com totais e partes dos gráficos. A ampliação anterior das colunas manteve a escala fixa de impressão do modelo, causando transbordamento; não se devem excluir essas páginas.
+- **Correção:** impressão de cada aba ajustada a uma página de largura/altura (`fitToPage`, `fitToWidth`, `fitToHeight`), retirando escala fixa/quebras manuais conflitantes; áreas de impressão, margens, papel, orientação, fontes, dados e colunas proporcionais preservados. Erro de contagem orienta regenerar Excel e reexportar, sem descartar páginas. O compilador continua exigindo oito páginas de conteúdo.
+- **Validação/limites:** quatro regressões dirigidas aprovadas, incluindo os dois modelos reais e todas as oito abas. Conferência headless das configurações e preservação; impressão nativa/novo PDF da analista ainda necessários. [Evidências e regra](../features/sinduscon-curitiba/FEEDBACK_2026-11-25.md).
+- **Fechamento técnico:** 20 testes dirigidos no total (quatro de geração/impressão e 16 de compilação/separadores), TypeScript, ESLint dirigido e `git diff --check` aprovados. Sem regenerar o PDF do cliente.
+- **Etapas/Pendências:** implementação local; publicar com autorização, gerar novo Excel e exportar novamente. O PDF de dez páginas existente não é corrigido pelo reenvio. Sem push/deploy/Monday nesta rodada.
+- **Monday:** —
+
 ### 25/11/2026 — Curitiba: competência dinâmica, colunas proporcionais e conferência da exportação — Codex/Lucas
 
 - **Ambiente/funcionalidade:** `/rebrain/sinduscon-curitiba` — relatórios Liberados e Concluídos. Base `d3ceeaa0`, main/origin único 0/0 após fetch, árvore limpa na abertura.
@@ -2217,6 +2227,8 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 
 ## 2. Etapas
 
+- **25/11 — Curitiba, reteste de impressão:** corrigida localmente a interação entre largura proporcional e escala fixa; oito abas configuradas para uma página cada, preservando o conteúdo. Conferência nativa da analista pendente.
+
 - **25/11 — Sinduscon Curitiba:** competência dinâmica, janela histórica de 13 meses, largura proporcional e validação dos separadores implementadas localmente. Homologação da analista após publicação autorizada; não confundir inspeção OOXML/browser com impressão nativa verificada.
 
 - **24/11 — Relatórios automáticos:** insights Modelo03 e painel efetivo SP implementados localmente; divergências de fluxo detalhado preservadas com ressalva. Geração nova e conferência do analista ainda necessárias após publicação.
@@ -2412,6 +2424,8 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 ---
 
 ## 3. Pendências
+
+- **25/11 — Curitiba, paginação:** enviar a correção com autorização; após atualização, gerar novo Excel de Liberados/Concluídos e exportar as oito abas novamente. Não remover as páginas excedentes do PDF recebido, pois contêm totais/gráficos transbordados. Conferir oito páginas completas, legibilidade e separadores antes da compilação final.
 
 - **25/11 — Sinduscon Curitiba:** autorizar envio, confirmar frontend atualizado e regenerar os dois modelos pelo sistema; conferir SE sem `#####`, anos, janela de 13 meses, barra XIX e capa. Configurar separadores brasileiros no programa que exporta o Excel; a compilação identifica vírgula nos milhares e orienta reexportação. Conferir paginação/layout nativo com a analista.
 

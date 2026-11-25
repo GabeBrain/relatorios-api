@@ -8,7 +8,7 @@ export async function validatePdfNumberFormat(buffer: ArrayBuffer) {
   const task = pdfjs.getDocument({ data: buffer.slice(0) });
   try {
     const document = await task.promise;
-    if (document.numPages !== 8) throw new Error(`O PDF exportado do Excel deve conter exatamente 8 páginas. O arquivo enviado possui ${document.numPages}.`);
+    if (document.numPages !== 8) throw new Error(`O PDF exportado do Excel deve conter exatamente 8 páginas. O arquivo enviado possui ${document.numPages}. Gere novamente o relatório Excel e exporte as oito abas, ajustando cada aba a uma página completa. Não exclua páginas extras: elas podem conter dados.`);
     const pages: number[] = [];
     for (let index = 1; index <= document.numPages; index += 1) {
       const page = await document.getPage(index);
