@@ -10,6 +10,7 @@ import {
   type TabulationOutput,
 } from './lib/monthly-workflow';
 import { compileSindusconPdf, type CompiledPdf } from './lib/pdf-compiler';
+import { validatePdfNumberFormat } from './lib/pdf-number-format';
 
 export async function processSindusconFile(file: File, kind: ReportKind): Promise<{ report: ProcessedReport; blob: Blob; fileName: string }> {
   const buffer = await file.arrayBuffer();
@@ -49,5 +50,6 @@ export async function createSindusconFinalPdf(file: File, kind: ReportKind, mont
     file.arrayBuffer(),
   ]);
   if (!coverResponse.ok || !mapResponse.ok || !fontResponse.ok) throw new Error('Os modelos internos da capa ou do mapa não estão disponíveis.');
+  await validatePdfNumberFormat(reportPdf);
   return compileSindusconPdf(reportPdf, await coverResponse.arrayBuffer(), await mapResponse.arrayBuffer(), await fontResponse.arrayBuffer(), kind, month, year);
 }

@@ -837,6 +837,17 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 25/11/2026 — Curitiba: competência dinâmica, colunas proporcionais e conferência da exportação — Codex/Lucas
+
+- **Ambiente/funcionalidade:** `/rebrain/sinduscon-curitiba` — relatórios Liberados e Concluídos. Base `d3ceeaa0`, main/origin único 0/0 após fetch, árvore limpa na abertura.
+- **Pedido:** corrigir o sistema para a analista testar, sem regenerar entregáveis manualmente. Lucas confirmou ano variável, janela histórica de 13 meses (set/25–set/26, por exemplo), ajuste proporcional automático das colunas e somente o acento de “concluídos” na capa.
+- **Entrega:** títulos/datas/totais anuais seguem a competência, inclusive novos anos; referências/caches/eixo do gráfico histórico seguem os 13 meses; áreas por setor e série histórica usam escala automática. Colunas crescem conforme números formatados/fontes/negrito, preservando valores/fórmulas/arte. Capa conserva a tipografia original e recebe o acento.
+- **Separadores:** configuração regional da exportação Excel→PDF é externa; a tela orienta decimal vírgula/milhar ponto e a compilação detecta milhares com vírgula, informa páginas e pede reexportação. Não afirma converter automaticamente os separadores do Excel.
+- **Evidência/limites:** PDFs reais e Excel de Concluídos confirmam as causas; SE é 137440.88044117647 na origem, exibido 137.441. Edge headless verificou recusa do PDF real com vírgulas, aceitação brasileira, erro/recuperação/sucesso/download de dez páginas e celular escuro; captura da capa inspecionada. Exportação Excel/COM não concluiu; layout nativo e geração completa com a base da analista permanecem para homologação. [Contrato e validação](../features/sinduscon-curitiba/FEEDBACK_2026-11-25.md).
+- **Etapas/Pendências:** implementação local; conferir publicação e gerar novamente Liberados/Concluídos no sistema. Reutilizados Alert/Card/Select/Button e carregamento Brain existentes. Sem push/deploy/Monday nesta entrega.
+- **Validação final:** 33 testes em quatro arquivos, tipos, lint dirigido e build de produção aprovados; `git diff --check` limpo. Casos pesados de modelos reais cedem o event loop entre testes para evitar timeout RPC do Vitest, sem relaxar asserções.
+- **Monday:** —
+
 ### 24/11/2026 — Modelo 03: insights, fluxos Itajaí e painel SP efetivo
 
 - **Autor/origem:** Codex a pedido de Lucas; base `4f64d690`, entrega local na main.
@@ -2206,6 +2217,8 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 
 ## 2. Etapas
 
+- **25/11 — Sinduscon Curitiba:** competência dinâmica, janela histórica de 13 meses, largura proporcional e validação dos separadores implementadas localmente. Homologação da analista após publicação autorizada; não confundir inspeção OOXML/browser com impressão nativa verificada.
+
 - **24/11 — Relatórios automáticos:** insights Modelo03 e painel efetivo SP implementados localmente; divergências de fluxo detalhado preservadas com ressalva. Geração nova e conferência do analista ainda necessárias após publicação.
 
 - **24/11 — Relatórios, interface comum:** navegação/modal Maceió e carregamento SP centralizados nos quatro motores; equivalência global em código/documentação obrigatória para01/02. Configuração03 preservada. Validação offline aprovada, sem homologação de novos números.
@@ -2399,6 +2412,8 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 ---
 
 ## 3. Pendências
+
+- **25/11 — Sinduscon Curitiba:** autorizar envio, confirmar frontend atualizado e regenerar os dois modelos pelo sistema; conferir SE sem `#####`, anos, janela de 13 meses, barra XIX e capa. Configurar separadores brasileiros no programa que exporta o Excel; a compilação identifica vírgula nos milhares e orienta reexportação. Conferir paginação/layout nativo com a analista.
 
 - **24/11 — Modelo03:** publicar somente com autorização; conferir novo JSON Itajaí/Navegantes e demais cidades após gerar novamente. Base parcial/ressalvas e editoriais não equivalem à homologação. Nenhum ajuste manual artificial de unidades.
 
