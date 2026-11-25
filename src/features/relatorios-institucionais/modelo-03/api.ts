@@ -45,10 +45,12 @@ export async function collect(s:Selection,catalog:Record<string,string[]>|null,o
     if(data.meta?.total!==undefined){if(!Number.isSafeInteger(data.meta.total)||data.meta.total<0||expected!==undefined&&expected!==data.meta.total)throw new SourceError('Paginação com total inconsistente.');expected=data.meta.total;}
     if(data.meta?.current_page!==undefined&&data.meta.current_page!==page)throw new SourceError('A API repetiu ou pulou uma página.');
     if(data.meta?.last_page!==undefined){if(!Number.isSafeInteger(data.meta.last_page)||data.meta.last_page<1||last!==undefined&&last!==data.meta.last_page)throw new SourceError('Última página inconsistente.');last=data.meta.last_page;}
+    if(last!==undefined&&page>last)throw new SourceError('Página recebida após a última página informada.');
     for(const row of data.data){if(!row||typeof row!=='object'||Array.isArray(row)||row.city!=null&&norm(row.city)!==norm(task.city)||row.state!=null&&norm(row.state)!==norm(task.uf)||row.building_type!=null&&norm(row.building_type)!==norm(task.segment))throw new SourceError('A API retornou um registro fora do recorte solicitado.');}
     source.rows.push(...data.data);
     if(last){pageProgress.set(index,page/last);onProgress({stage:'sources',completed:count(),total:tasks.length,message:`${task.city} · ${task.segment} · página ${page} de ${last}`,waiting:false});}
     const next=data.links?.next;if(next){const url=new URL(next,endpoint);if(url.origin!==new URL(endpoint).origin||url.pathname!==new URL(endpoint).pathname||Number(url.searchParams.get('page'))!==page+1)throw new SourceError('Próxima página fora do endpoint ou sequência esperada.');}
+    if(next&&last!==undefined&&page>=last)throw new SourceError('Paginação contraditória: há próxima página após o término informado.');
     const more=next!=null&&next!==''||last!==undefined&&page<last;
     if(more&&!data.data.length)throw new SourceError('Página vazia antes da conclusão da fonte.');
     if(!more){if(expected!==undefined&&expected!==source.rows.length)throw new SourceError('Quantidade recebida difere do total informado.');if(last===undefined&&next===undefined&&data.data.length>=100)throw new SourceError('Falta metadado para confirmar paginação completa.');source.complete=true;break;}

@@ -1,5 +1,9 @@
 # Modelo 03 — gerador comum
 
+## Varredura de 25/11/2026
+
+[Achados, correções e limites](VARREDURA_2026-11-25.md): isolamento de fonte ausente por território, status de quadro sem valores, fontes falhas rastreáveis, RM desativada, cadência histórica e paginação contraditória. As45posições externas têm inventário nos Insights/JSON/CSV. Lucas confirmou o bloco **novos x usados**(128); contrato do lado de usados ainda não confirmado — documentação online403, manual/catálogo acessíveis não o documentam. Não declarar inexistência do endpoint nem integração pronta.
+
 ## Entrega inicial — 24/11/2026, Codex/Lucas
 
 Rota provisória: `/rebrain/relatorios-institucionais/modelo-03`. Lazy, sem item de menu, Home ou Command Palette. Não substitui Maceió nem altera seus cálculos, referências ou exportações.
@@ -58,7 +62,7 @@ As 58 posições abrangem lançamentos, vendas líquidas, estoque, IVV, preços,
 
 - Catálogo via `GeoApiScopeEngine` e seletor compartilhado. Sem IBGE como alternativa. Sem acesso válido ou período encerrado, nenhuma chamada pesada.
 - Histórico solicitado desde o maior entre 2021 e ano selecionado menos cinco; competências efetivamente necessárias são exigidas pelo indicador. Paginação confere sequência, total, última página e host; falhas não viram fonte completa.
-- Uma chamada por vez, intervalo mínimo de 500 ms entre inícios. 429 pausa até `Retry-After` ou 60 segundos e repete a mesma página; pode cancelar. 401/403 interrompem sem repetir credencial. Falhas transitórias têm tentativas limitadas.
+- Até duas fontes em voo, intervalo global mínimo de 500 ms entre inícios. 429 pausa até `Retry-After` ou 60 segundos e repete a mesma página; pode cancelar. 401/403 interrompem sem repetir credencial. Falhas transitórias têm tentativas limitadas.
 - Quantidades somadas no mês/trimestre/semestre respeitando a frequência da pesquisa municipal, sem exigir meses intermediários de fonte trimestral. Estoque é fotografia final; comparações anuais e12meses têm janelas explícitas. IVV usa vendas/(estoque anterior+lançamentos), registrando diferenças contra o estoque final sem reescrever a API; denominador vazio produz `null`, não0%. Ausência não comprovada fica sem valor, não zero.
 - Preços individuais históricos ponderados pelo estoque positivo; não usar preço/estoque cadastral atual como substituto. Zero estoque não gera preço zero. Campos contribuintes ausentes bloqueiam o respectivo quadro.
 - VGV de fluxo: valor nominal mensal × INCC-DI do fechamento ÷ índice do mês, antes da soma e conversão para milhões. Índice ausente bloqueia valores afetados; não reutilizar base anterior. Série existente de Fortaleza é somente fonte de índices, sem herdar política de Fortaleza.

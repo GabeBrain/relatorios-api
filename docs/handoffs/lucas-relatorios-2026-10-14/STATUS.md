@@ -1,5 +1,11 @@
 # Estado do handoff
 
+## 25/11/2026 — Varredura Modelo03 e fontes não integradas
+
+Codex/Lucas, base `296d12dd`, main/origin único0/0após fetch, árvore limpa antes da implementação. Corrigidos isolamento de fonte ausente, status inteiramente sem valores, rastreabilidade, RM desativada, cadência histórica e paginação contraditória. Inventário das45posições externas nos Insights/JSON/CSV; não são indicadores integrados.
+
+101testes/5arquivos,48combinações sintéticas, tipos/lint/build e sete cenários de navegador+quatro de fontes ausentes aprovados; exportações repetidas para conferir o inventário. Configuração03 preservada. Drive acessível para original/manual1.02; documentação online403 inclusive no Edge. Lucas confirmou novos x usados; falta contrato autorizado do lado de usados, sem afirmar inexistência do endpoint. Sem geração imobiliária autenticada/deploy observado/push/Monday. [Registro e limites](../../features/relatorios-institucionais/modelo-03/VARREDURA_2026-11-25.md).
+
 ## 24/11/2026 — Insights Modelo03 e correção da referência de carregamento
 
 Fechamento: Lucas autorizou o push após finalizar. 90 testes/seis arquivos, tipos, lint/build e sete cenários de navegador sintético aprovados (seis shell + Modelo03 geração/insights/exportações); configuração03 idêntica por hash. Publicação Git não comprova homologação dos dados em produção.

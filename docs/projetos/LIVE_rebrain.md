@@ -837,6 +837,16 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 25/11/2026 — Modelo03: varredura dos16recortes e fontes ausentes — Codex/Lucas
+
+- **Ambiente/funcionalidade:** `/rebrain/relatorios-institucionais/modelo-03`. Base `296d12dd`, main/origin único0/0após fetch, árvore limpa na abertura.
+- **Correções:** fonte municipal ausente isolada por território/célula, preservando a parte válida; fontes falhas em `sourceKeys`; quadro inteiramente sem valores por falta de cobertura/preço/reconciliação vira pendente, com tabelas nulas no diagnóstico e arte sem sobreposição. RM desativada respeitada, cadência inferida limitada ao corte histórico e paginação contraditória recusada.
+- **Inventário:**45posições externas nos Insights/JSON/CSV:1geografia/consumo,13economia/funding,5alvarás,21short stay,4locação,1novos x usados. Separadas de falhasHTTP e dos58indicadores existentes; sem inventar endpoint/dado.
+- **Pedido específico:** Lucas confirmou novos x usados(ref128). Original/manual1.02lidos noDrive; catálogoOpenAPI não documenta o lado de usados. Documentação online403em consulta direta eEdge; contrato atual não confirmado, sem alegar inexistência do endpoint. [Achados, fontes e limites](../features/relatorios-institucionais/modelo-03/VARREDURA_2026-11-25.md).
+- **Validação:**101testes/5arquivos,16recortes×3periodicidades sintéticos, tipos/lint/build; sete cenários de página e quatro de fontes ausentes emdesktopclaro/celularescuro, cancelamento/429/erro/vazio/sem token eJSON/CSV/PPTXlidos. Exportação repetida para conferir inventário; capturas inspecionadas. Configuração e carregamento compartilhado preservados. Sem nova geração imobiliária autenticada/homologação.
+- **Etapas/Pendências:** implementação local; publicar com autorização e conferir nova geração real. Confirmar endpoint/esquema de usados e integrar fontes externas com contratos, sem preencher ausência comzero. Sem push/deploy/Monday nesta rodada.
+- **Monday:** [DESAFIO — Estudos Entidades e Institucionais](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`.
+
 ### 25/11/2026 — Curitiba: impressão acompanha a ampliação automática das colunas — Codex/Lucas
 
 - **Ambiente/funcionalidade:** `/rebrain/sinduscon-curitiba` — exportação Excel→PDF dos dois modelos. Base `31a20548`, main/origin 0/0 após fetch; árvore limpa na abertura.
@@ -2227,6 +2237,8 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 
 ## 2. Etapas
 
+- **25/11 — Modelo03, varredura:** cobertura/disponibilidade/cadência e inventário das45posições externas concluídos/testados localmente nos16recortes/3periodicidades com fontes sintéticas. Endpoint de usados/homologação real pendentes.
+
 - **25/11 — Curitiba, reteste de impressão:** corrigida localmente a interação entre largura proporcional e escala fixa; oito abas configuradas para uma página cada, preservando o conteúdo. Conferência nativa da analista pendente.
 
 - **25/11 — Sinduscon Curitiba:** competência dinâmica, janela histórica de 13 meses, largura proporcional e validação dos separadores implementadas localmente. Homologação da analista após publicação autorizada; não confundir inspeção OOXML/browser com impressão nativa verificada.
@@ -2424,6 +2436,8 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 ---
 
 ## 3. Pendências
+
+- **25/11 — Modelo03, após varredura:** autorizar envio, conferir frontend e obterJSON/CSV/PPTXda mesma geração real. Confirmar contrato autorizado de usados pararef128(documentação online403); locação/shortstay/macroeconomia/alvarás/consumo do inventário não estão integrados.101regressões sintéticas não comprovam cobertura real dos16recortes.
 
 - **25/11 — Curitiba, paginação:** enviar a correção com autorização; após atualização, gerar novo Excel de Liberados/Concluídos e exportar as oito abas novamente. Não remover as páginas excedentes do PDF recebido, pois contêm totais/gráficos transbordados. Conferir oito páginas completas, legibilidade e separadores antes da compilação final.
 

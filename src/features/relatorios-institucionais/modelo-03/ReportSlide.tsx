@@ -27,7 +27,7 @@ export function ReportSlide({page,selection}:{page:PresentationPage;selection:Se
    {n===155&&<text x="64" y="425" fontSize="24" fill={foreground}>Equipe responsável · {selection.entity}</text>}
   </>}
   {!editorial&&slide.status!=='available'&&<><text x="64" y="320" fontSize="29" fill={GREEN}>Aguardando fonte para este indicador</text><text x="64" y="368" fontSize="18" fill="#555555">Consulte os detalhes e o diagnóstico desta geração.</text></>}
-  {table&&!editorial&&chart&&<>
+  {table&&!editorial&&slide.status==='available'&&chart&&<>
    <text x="64" y="216" fontSize="18" fill="#555555">{table.unit}</text>
    <line x1="90" y1="485" x2="1190" y2="485" stroke="#cccccc"/>
    {!slide.definition.group&&table.columns.map((_,j)=><polyline key={j} points={table.rows.map((r,i)=>`${100+i*1080/Math.max(1,table.rows.length-1)},${475-Number(r.values[j])/max*220}`).join(' ')} fill="none" stroke={j?'#b8c99e':GREEN} strokeWidth="4"/>)}
@@ -35,7 +35,7 @@ export function ReportSlide({page,selection}:{page:PresentationPage;selection:Se
    {table.columns.map((col,i)=><g key={col}><rect x={80+i*380} y="532" width="14" height="14" fill={i?'#b8c99e':GREEN}/><text x={104+i*380} y="545" fontSize="17" fill="#444444">{col}</text></g>)}
    {page.supplement&&<><rect x="64" y="566" width="1152" height="46" fill="#e4ead9"/><text x="80" y="595" fontSize="14" fill="#333333">Variação sobre o período anterior</text>{page.supplement.rows[0].values.map((v,i)=><text key={i} x={620+i*300} y="595" textAnchor="middle" fontSize="18" fontWeight="700" fill="#333333">{page.supplement!.columns[i]}: {fmt(v,'percent')}</text>)}</>}
   </>}
-  {table&&(!editorial||n===7)&&!chart&&<>
+  {table&&(slide.status==='available'||n===7)&&!chart&&<>
    <text x="64" y="211" fontSize="17" fill="#555555">{table.unit}</text>
    <rect x="64" y="230" width="1152" height="44" fill={GREEN}/>
    {['Categoria',...table.columns].map((col,j)=><text key={j} x={j?64+320+(j-.5)*832/table.columns.length:82} y="257" textAnchor={j?'middle':'start'} fontSize={Math.max(10,Math.min(17,110/table.columns.length))} fontWeight="700" fill="#ffffff">{col.length>29?col.slice(0,27)+'…':col}</text>)}

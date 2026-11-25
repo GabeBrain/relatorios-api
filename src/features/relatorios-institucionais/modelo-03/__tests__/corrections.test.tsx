@@ -19,7 +19,7 @@ describe('Modelo 03 · regressões do diagnóstico Curitiba 3T2026 e recortes do
  it('mantém bloqueio da derivação de lançamentos quando a capacidade não reconcilia com a API',()=>{
   const sources=fixture(),detail=sources.find(src=>src.city==='Curitiba'&&src.metric==='details'&&src.segment==='Vertical')!;
   detail.rows[0].release_date='2026-06-01';for(const r of detail.rows[0].typologies_history as Row[])r.releases_in_period=null;
-  const slide=createCalculator(selection,sources).evaluate(definition(54));expect(slide.status).toBe('available');expect(slide.warnings.join()).toContain('não há reconciliação para comprovar');expect(slide.tables[0].rows[0].values.every(v=>v===null)).toBe(true);
+  const slide=createCalculator(selection,sources).evaluate(definition(54));expect(slide.status).toBe('waiting-source');expect(slide.warnings.join()).toContain('não há reconciliação para comprovar');expect(slide.tables[0].rows[0].values.every(v=>v===null)).toBe(true);
  });
  it.each([66,67,68])('preserva fluxo detalhado divergente e a cidade parceira sem inventar categorias no slide %s',page=>{
   const s={...selection,city:'Itajaí',uf:'SC',rmCities:['SC|Navegantes'],position:3},sources=fixture(s),detail=sources.find(src=>src.city==='Itajaí'&&src.metric==='details'&&src.segment==='Vertical')!;
