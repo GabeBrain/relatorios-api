@@ -2,7 +2,7 @@
 
 ## 26/11/2026 — Institucionais Imprensa: correção editorial do antigo Modelo 02
 
-Sessão abriu na main limpa, origin único, fetch concluído e dois commits locais desde 26/11. Usuário pediu executar o plano, confirmou validação sintética e aprovou conteúdo institucional para 3T2026. Matrizes de 280 posições, artes/ordem regionais, gráficos nativos com Editar Dados, lacunas preservadas também no XLSX embutido, tabelas/insights/CSV e nova rota com alias implementados. Tipos/lint/build e 158 testes dirigidos aprovados. [Execução, evidências e limites](../../features/relatorios-institucionais/modelo-02/EXECUCAO_2026-11-26.md). Nesta mesma sessão, pedido separado de push Curitiba atendido com `1be0da71`; correção Imprensa teve posteriormente autorização explícita para push assim que commitada. Sem coleta imobiliária autenticada nem escrita Monday.
+Sessão abriu na main limpa, origin único, fetch concluído e dois commits locais desde 26/11. Usuário pediu executar o plano, confirmou validação sintética e aprovou conteúdo institucional para 3T2026. Matrizes de 280 posições, artes/ordem regionais, gráficos nativos com Editar Dados, lacunas preservadas também no XLSX embutido, tabelas/insights/CSV e nova rota com alias implementados. Tipos/lint/build e 158 testes dirigidos aprovados. [Execução, evidências e limites](../../features/relatorios-institucionais/modelo-02/EXECUCAO_2026-11-26.md). Nesta mesma sessão, pedido separado de push Curitiba atendido com `1be0da71`; correção Imprensa em `02bc4ebf` teve posteriormente autorização explícita para push assim que commitada. Sem coleta imobiliária autenticada nem escrita Monday.
 
 ## 26/11/2026 — Curitiba: 13 meses e rótulos em português
 
