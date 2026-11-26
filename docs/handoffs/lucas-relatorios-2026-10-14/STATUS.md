@@ -1,5 +1,9 @@
 # Estado do handoff
 
+## 26/11/2026 — Curitiba: PDF real e fonte sem ponto
+
+Após `64ba470a`, Lucas forneceu PDF/XLSX Liberados setembro/2026. O PDF possui fontes parciais Arial sem ponto no mapa. Correção usa fonte auxiliar só no separador, com compensação de avanço e restauração da fonte. PDF.js real/Edge passou; PyMuPDF confirmou oito páginas,18.685caracteres,753separadores alterados e0ponto de deslocamento dos dígitos; capturas inspecionadas.47testes/lint aprovados; build/compilação final no fechamento. Não alterar XLSX nem publicar sem autorização. [Registro](../../features/sinduscon-curitiba/SEPARADORES_AUTOMATICOS_2026-11-26.md).
+
 ## 26/11/2026 — Sinduscon Curitiba: correção automática de separadores PDF
 
 Pedido específico de Lucas sobrepõe a exclusão histórica de Curitiba do escopo inicial deste handoff. Base `e186be95`, main/origin único atualizado0/0, árvore limpa na abertura. Normalização vetorial americana → brasileira antes de validar/compilar, preservando texto e páginas, sem rasterização.43 testes Curitiba e teste adicional de formulário aprovados; tipos/lint e Edge headless/PDF.js com documento sintético de oito páginas aprovados. PDF real não fornecido; publicação requer autorização. [Registro e limites](../../features/sinduscon-curitiba/SEPARADORES_AUTOMATICOS_2026-11-26.md).

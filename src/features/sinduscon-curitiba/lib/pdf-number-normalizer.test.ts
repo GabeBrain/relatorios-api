@@ -74,4 +74,32 @@ describe('normalização de separadores no PDF', () => {
     const rewritten = objects.lookup(PDFName.of('Numbers')) as PDFRawStream;
     expect(new TextDecoder().decode(decodePDFRawStream(rewritten).decode())).toContain('<312E3233342E3536372C3839> Tj');
   });
+
+  async function punctuationSubset(operator: 'Tj' | 'TJ', bold = false) {
+    const pdf = await PDFDocument.create();
+    const page = pdf.addPage([595, 842]);
+    const cmap = pdf.context.flateStream('2 beginbfrange\n<0030> <0039> <0030>\n<002C> <002C> <002C>\nendbfrange');
+    const font = pdf.context.obj({ Type: 'Font', Subtype: 'Type0', BaseFont: bold ? 'Subset+Arial-BoldMT' : 'Subset+ArialMT', Encoding: 'Identity-H',
+      ToUnicode: pdf.context.register(cmap), DescendantFonts: [pdf.context.register(pdf.context.obj({ Type: 'Font', Subtype: 'CIDFontType2', DW: 556, W: [44, [250]] }))] });
+    page.node.set(PDFName.of('Resources'), pdf.context.obj({ Font: { Original: pdf.context.register(font) } }));
+    const text = operator === 'TJ' ? '[<003100330037002C> -42 <003400340031>] TJ' : '<003100330037002C003400340031> Tj';
+    page.node.addContentStream(pdf.context.register(pdf.context.flateStream(`BT /Original 12 Tf 30 700 Td ${text} <0039> Tj ET`)));
+    return (await pdf.save()).buffer as ArrayBuffer;
+  }
+
+  it.each(['Tj', 'TJ'] as const)('usa pontuação auxiliar quando o subset não contém ponto (%s)', async operator => {
+    const { text } = await streams(await normalizePdfNumberFormat(await punctuationSubset(operator)));
+    expect(text).toMatch(/\/BrainNumberRegular[^ ]* 12 Tf <2e> Tj \[28\] TJ \/Original 12 Tf/);
+    expect(text).toContain('<003100330037> Tj');
+    expect(text).not.toContain('002C');
+    expect(text).toContain('<0039> Tj'); // Original font is restored for the next value.
+    if (operator === 'TJ') expect(text).toContain('[-42] TJ');
+  });
+
+  it('preserva a distinção negrito e é idempotente com fonte auxiliar', async () => {
+    const once = await normalizePdfNumberFormat(await punctuationSubset('TJ', true));
+    const first = (await streams(once)).text;
+    expect(first).toMatch(/\/BrainNumberBold[^ ]* 12 Tf/);
+    expect((await streams(await normalizePdfNumberFormat(once))).text).toBe(first);
+  });
 });

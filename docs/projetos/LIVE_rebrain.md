@@ -837,6 +837,14 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 26/11/2026 — Sinduscon Curitiba: reteste real de fontes PDF sem ponto — Codex/Lucas
+
+- **Evidência:** após `64ba470a`, Lucas enviou novo erro e PDF/XLSX reais de Liberados setembro/2026. Fontes Arial/Arial Bold Type0 parciais do Excel não incluem ponto no ToUnicode; o caminho anterior exigia que a pontuação já existisse. Base main/origin único atualizado0/0, árvore limpa.
+- **Correção:** fonte auxiliar regular/negrito só para o separador ausente, restaurando fonte original e compensando avanço pelas métricas CID. Sem rasterizar, cobrir valores ou mudar dígitos; preservados ajustes TJ, textos e página. [Contrato/evidências](../features/sinduscon-curitiba/SEPARADORES_AUTOMATICOS_2026-11-26.md).
+- **Validação:** PDF real passou normalização/PDF.js no Edge headless; oito páginas e18.685caracteres conferidos independentemente: apenas753separadores mudaram, deslocamento dos dígitos0ponto. Capturas reais inspecionadas.47testes Curitiba e lint aprovados; build/compilação final no fechamento. XLSX preservado.
+- **Etapas/pendências:** segunda correção local, publicar mediante autorização e conferir reteste da analista. Sem deploy ou escrita Monday.
+- **Monday:** —
+
 ### 26/11/2026 — Sinduscon Curitiba: separadores corrigidos no próprio PDF — Codex/Lucas
 
 - **Pedido:** analista continua bloqueada por milhares com vírgula; Lucas autorizou conversão automática. Base `e186be95`, main/origin único atualizado0/0, árvore limpa na abertura.
@@ -2293,6 +2301,8 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 
 ## 2. Etapas
 
+- **26/11 — Sinduscon Curitiba/fontes parciais:** reteste real coberto por pontuação auxiliar com avanço compensado; oito páginas verificadas sem deslocar dígitos. Publicação desta segunda correção pendente.
+
 - **26/11 — Sinduscon Curitiba/PDF:** separadores americanos normalizados no texto vetorial antes da compilação; testes e renderização sintética verificados, aguardando publicação autorizada.
 
 - **26/11 — Locação Modelo03:** método POST corrigido no motor comum apósHTTP405 real; aguardando publicação autorizada e nova geração autenticada.
@@ -2505,6 +2515,8 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 ---
 
 ## 3. Pendências
+
+- **26/11 — Sinduscon Curitiba/fontes parciais:** autorizar publicação da segunda correção e confirmar reteste; PDF real fornecido já passou a validação local no navegador, superando a ausência de arquivo registrada na primeira entrega.
 
 - **26/11 — Sinduscon Curitiba/PDF:** publicar normalização automática mediante autorização e conferir arquivo real da analista; fontes ou textos sem mapeamento seguro continuam sujeitos a reexportação.
 

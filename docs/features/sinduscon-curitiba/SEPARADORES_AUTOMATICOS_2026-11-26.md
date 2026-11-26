@@ -1,5 +1,15 @@
 # Sinduscon Curitiba — separadores automáticos no PDF
 
+## Reteste real — fonte parcial sem ponto
+
+Após publicar `64ba470a`, Lucas forneceu `Feedback Liberado SETEMBRO 2026.pdf` (603.236 bytes, oito páginas) e o XLSX correspondente. O erro específico veio de fontes Arial/Arial Bold Type0 com ToUnicode parcial, sem o ponto necessário para substituir a vírgula de milhar. A primeira entrega não cobria esse caso.
+
+Agora o motor usa Helvetica/Helvetica Bold auxiliar **somente para o sinal ausente**, restaura a fonte original imediatamente e compensa o avanço pelo `/W` e `/DW` da fonte CID original. Arrays TJ preservam seus ajustes. Não substitui dígitos, nomes, estilos do restante do texto ou páginas por imagem. Fontes com pontuação disponível continuam no caminho original. Encodings sem métricas seguras ainda não são presumidos.
+
+Verificação do arquivo real no Edge headless: normalização e validação PDF.js das oito páginas aprovadas. Comparação independente PyMuPDF dos **18.685 caracteres**: apenas **753 separadores** alterados; contagem de caracteres e dimensões preservadas; deslocamento máximo de origem dos dígitos = **0 ponto** nas oito páginas. Páginas1/7/8 renderizadas; tabelas e gráfico das páginas7/8 inspecionados visualmente. Artefatos ignorados `.local-inputs/curitiba-real-{normalized,final}.pdf`, `curitiba-real-number-verification.json` e capturas `curitiba-real-page-*-after.png`.
+
+47 testes Curitiba aprovados, incluindo fontes parciais, Tj/TJ, negrito, compensação de largura e idempotência. Lint, tipos e build de produção aprovados. Fluxo completo `createSindusconFinalPdf` no Edge compilou o PDF real com capa/mapa: dez páginas finais. O XLSX fornecido não foi alterado. Sem push autorizado para esta segunda correção e sem deploy observado.
+
 26/11/2026 · Codex/Lucas · base `e186be95`.
 
 Lucas relatou que o bloqueio por milhares com vírgula persistia mesmo após ajustar o Excel e autorizou correção automática no PDF. Esta decisão substitui a exigência de reexportar por separador descrita em `FEEDBACK_2026-11-25.md`.
