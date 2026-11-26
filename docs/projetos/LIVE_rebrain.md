@@ -837,6 +837,16 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 26/11/2026 — Modelo02: implantação dos institucionais regionais — Codex/Lucas
+
+- **Pedido:** Lucas autorizou iniciar cinco regiões apenas por rota, trimestral, com região/trimestre/ano e confirmou mês automático no encerramento. Mapas finais somente nas capitais de cada UF, com continuações quando necessário. Base `07c09ad4`, origin único atualizado0/0/main limpa na abertura.
+- **Entrega:** rota lazy `/rebrain/relatorios-institucionais/modelo-02`, sem menu/Home/busca; capas das cinco referências4T2025 com competência editável. Núcleo quantitativo regional: destaques, lançamentos/vendas/estoque, VGL/VGV/INCC-DI, padrões/tipologias/UF, preços e rankings. Catálogo GeoApiScopeEngine, cinco fontes verticais por cidade, duas filas/500ms/pausa429/cancelar. UFs/cobertura/ausências explícitas; nenhum número antigo copiado. [Contrato, referências e limites](../features/relatorios-institucionais/modelo-02/README.md).
+- **Mapas:** todas as capitais do recorte, sem RM; estoque histórico positivo e coordenadas cadastrais, com até60pontos/continuação e subdivisão por extensão geográfica. Sem descartar ou mover pontos; conta coordenadas ausentes e cadastros excluídos. Fonte auxiliar de mapa Mapbox já existente; indisponibilidade explícita. Município declarado pelaAPI, sem validação poligonal ou garantia de coordenada histórica.
+- **Interface/arquivos:** `ReportLoading`/painelSP e controlesMaceió, Insights, JSON agregado completo, CSV com conferência de localizações e PPTX DrawingML editável/diagnóstico embutido. Worker cancelável, descarte ao trocar seleção/token, menu móvel recolhido. Apenas exposição aditiva de helpers no motor03; regras/formulário preservados. Não é réplica integral das52–66páginas: população/cases/equipe/números institucionais antigos ficam fora desta versão.
+- **Validação:**142testes integrados/12arquivos aprovados e26testes02no fechamento após casos de enquadramento/cobertura. Sete cenários Edge com sucesso, celular/temas, erro/vazio/mercado sem oferta/sem token e429/cancelar; exports baixados e lidos,36páginas no cenárioSul/65empreendimentos com dois mapasCuritiba. Chamada real da base cartográficaHTTP200 e ensaio de ruas reais/PPTX aprovados, com enquadramento largo inspecionado. Mercado sintético interceptado, sem nova coleta autenticada/homologação ou deploy observado. Tipos/lint/build aprovados.
+- **Etapas/pendências:** implantação inicial local; publicar só após autorização, conferir geração real por região e homologar recortes/métodos com analistas. Integrar população/artes/editoriais atualizadas se necessário; desempenho real da região inteira ainda não medido. Sem escrita Monday.
+- **Monday:** [DESAFIO — Estudos Entidades e Institucionais](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`.
+
 ### 26/11/2026 — Sinduscon Curitiba: reteste real de fontes PDF sem ponto — Codex/Lucas
 
 - **Evidência:** após `64ba470a`, Lucas enviou novo erro e PDF/XLSX reais de Liberados setembro/2026. Fontes Arial/Arial Bold Type0 parciais do Excel não incluem ponto no ToUnicode; o caminho anterior exigia que a pontuação já existisse. Base main/origin único atualizado0/0, árvore limpa.
@@ -946,7 +956,7 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 - **Pedido/base:** main limpa `98c4b432`, origin único atualizado por fetch0/0. Lucas pediu navegação/numeração/ampliação de SP/Fortaleza/Modelo03 no padrão Maceió; animação de carregamento de Fortaleza/Maceió/Modelo03 no padrão SP; registro obrigatório para Modelos01/02 e próximos relatórios. Explicitou preservar a configuração do Modelo03.
 - **Interface:** `shared/ReportSlideControls.tsx` centraliza botões numéricos compactos/Anterior/Próximo, título/ativo e modal. Os quatro relatórios consomem os mesmos controles, mantendo editores, review, slides e exportações próprios. Modelo03 deixa o seletor de página por títulos e ganha ampliação; botões acompanham páginas físicas/continuações. `shared/ReportLoading.tsx` usa a animação Brain do SP dentro da página, sem cobrir menu; etapas/tempo/cancelamento reais mantidos, sem duplicar loader local. Configuração Modelo03 verificada idêntica por SHA256 `b5729bd71401e22133daca2e8e35dbf260b8590f5d233bf7738904faa570af02` no trecho de formulário.
 - **Regra permanente:** módulo único `standard-families.ts`: Compactos=Compacto; MCMV=Econômico; MédioPadrão=Standard/Médio/Médio-Alto; Luxo=Alto/Luxo. SP usa objeto comum; Fortaleza deriva os sete padrões; Maceió/Modelo03 delegam família ao helper. Detalhamento bruto e categorias desconhecidas preservados. Registrado em AGENTS e [decisão de design](../architecture/FRONTEND_DECISIONS.md), com [contrato obrigatório](../features/relatorios-institucionais/PADRAO_COMPARTILHADO.md); não reconfirmar por cidade.
-- **Validação:**120testes/10arquivos, build aprovado. Seis cenários Edge dos componentes reais SP/Fortaleza/Maceió (desktop claro/celular escuro) verificaram navegação, ampliação, retorno à mesma posição, carregamento lento e cancelamento; sete cenários Modelo03 verificaram três periodicidades, sucesso/vazio/erro/sem token/429, nova navegação/modal e downloads JSON/CSV/PPTX. Capturas inspecionadas. Fixtures interceptadas/offline, sem nova API imobiliária autenticada nem deploy observado. Lint e tipos aprovados.
+- **Validação:**120testes/10arquivos, build aprovado. Sete cenários Edge dos componentes reais SP/Fortaleza/Maceió (desktop claro/celular escuro) verificaram navegação, ampliação, retorno à mesma posição, carregamento lento e cancelamento; sete cenários Modelo03 verificaram três periodicidades, sucesso/vazio/erro/sem token/429, nova navegação/modal e downloads JSON/CSV/PPTX. Capturas inspecionadas. Fixtures interceptadas/offline, sem nova API imobiliária autenticada nem deploy observado. Lint e tipos aprovados.
 - **Monday:** [DESAFIO — Estudos Entidades e Institucionais](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`. Sem escrita. Esta nova entrega aguarda autorização de envio.
 
 ### 24/11/2026 — Modelo 03: causas dos23bloqueios Curitiba e geografia dos16estudos — Codex/Lucas
@@ -2301,6 +2311,8 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 
 ## 2. Etapas
 
+- **26/11 — Modelo02 regional:** primeira versão apenas por rota, configuração trimestral/mês automático, núcleo quantitativo e mapas por capital com continuações, exports/Insights compartilhados. Verificações locais aprovadas; publicação e geração autenticada/homologação pendentes.
+
 - **26/11 — Sinduscon Curitiba/fontes parciais:** reteste real coberto por pontuação auxiliar com avanço compensado; oito páginas verificadas sem deslocar dígitos. Publicação desta segunda correção pendente.
 
 - **26/11 — Sinduscon Curitiba/PDF:** separadores americanos normalizados no texto vetorial antes da compilação; testes e renderização sintética verificados, aguardando publicação autorizada.
@@ -2515,6 +2527,8 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 ---
 
 ## 3. Pendências
+
+- **26/11 — Modelo02 regional:** autorizar publicação e conferir API real das cinco regiões; homologar recorte de municípios monitorados, valores, mapas/coordenadas e métricas. População/cobertura populacional e editoriais atualizados não integrados nesta primeira versão. Sem promessa de duração autenticada ou réplica integral dos originais.
 
 - **26/11 — Sinduscon Curitiba/fontes parciais:** autorizar publicação da segunda correção e confirmar reteste; PDF real fornecido já passou a validação local no navegador, superando a ausência de arquivo registrada na primeira entrega.
 

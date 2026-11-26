@@ -1,0 +1,37 @@
+[
+  {
+    "region": "sul",
+    "source": "BRAIN-Panorama-Sul_4T2025_VAP_26fev_10h43.pptx",
+    "part": "ppt/media/image6.jpg",
+    "sha256": "79494a8a804feee49afb235fefa220174573f87063cde76cf016804d4da5f6e2",
+    "usage": "Fundo da capa original; titulos e competencia sao textos editaveis."
+  },
+  {
+    "region": "sudeste",
+    "source": "BRAIN-Panorama-Regiao-Sudeste_4T2025_VAP_20FEV_17H25.pptx",
+    "part": "ppt/media/image6.jpg",
+    "sha256": "ac95bc47cb8010994270f3c26e94a56f402e0beddd1a9a5169240859e6e07ccb",
+    "usage": "Fundo da capa original; titulos e competencia sao textos editaveis."
+  },
+  {
+    "region": "nordeste",
+    "source": "BRAIN-Panorama-Nordeste_4T2025_VAP_25fev_16h30.pptx",
+    "part": "ppt/media/image6.jpg",
+    "sha256": "2f6bc8a74a328b07749da3c33bcce48276a4cbaf38a8274cd8f9c9f83ca9f2fa",
+    "usage": "Fundo da capa original; titulos e competencia sao textos editaveis."
+  },
+  {
+    "region": "norte",
+    "source": "BRAIN-Panorama-Regiao-Norte_4T2025_VAP_20fev_17h20.pptx",
+    "part": "ppt/media/image6.jpg",
+    "sha256": "78f05faf6bf95bc5f62e586123d78941ace454ecae7481576441ff3880770a7a",
+    "usage": "Fundo da capa original; titulos e competencia sao textos editaveis."
+  },
+  {
+    "region": "centro-oeste",
+    "source": "BRAIN-Panorama-Regiao-Centro_Oeste_4T2025_VAP_20fev_17h15.pptx",
+    "part": "ppt/media/image6.jpg",
+    "sha256": "14c96ed292bc3c2fc536943cfc72339a03a0b9f3d23f22b06e09b119a83cca99",
+    "usage": "Fundo da capa original; titulos e competencia sao textos editaveis."
+  }
+]

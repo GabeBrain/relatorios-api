@@ -278,3 +278,7 @@ Página de dados, sem novo primitive/token. Previsões é a vista padrão com fi
 # 24/11/2026 — Painel efetivo SP e insights Modelo 03
 
 O carregamento compartilhado deve reutilizar `ReportGenerationPanel`, extraído do painel de geração SP: banner compacto e cartões responsivos em duas colunas. `ReportLoading` adapta os motores sem listas próprias. Substitui a interpretação anterior que mantinha o logo grande. Modelo 03 ganha insights sob demanda com critérios, cobertura, ambiguidades e divergências ligados às páginas físicas; sem coleta adicional. Formulário de configuração preservado. Detalhes: `docs/features/relatorios-institucionais/modelo-03/INSIGHTS_2026-11-24.md`.
+
+## 26/11/2026 — Modelo02: adaptador regional do catálogo geográfico
+
+Lucas pediu seleção de região do Brasil, trimestre/ano e mês automático de encerramento, sem escolher uma cidade principal. A rota lazy `/rebrain/relatorios-institucionais/modelo-02` usa `useGeoApiScope` para catálogo paginado/autorizado e deriva os municípios das UFs de cada região; o seletor regional substitui os controles individuais UF/cidade neste formulário. Cada consulta pesada ainda recebe UF e município validados no catálogo, sem fallback IBGE. O formulário do03permanece intacto. UFs sem acesso são explícitas e os mapas usam apenas capitais com acesso, sem substituir por RM. Reutilizados loading efetivo SP, navegação Maceió, primitives e exportador nativo existentes; nenhuma animação ou primitive novo. [Contrato e evidências](../features/relatorios-institucionais/modelo-02/README.md).

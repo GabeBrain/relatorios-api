@@ -43,6 +43,7 @@ const FortalezaInstitutionalPage = lazy(() => import('./features/relatorios-inst
 // Maceió: acesso somente por rota nesta fase da implantação; sem item em menu, busca ou início.
 const MaceioInstitutionalPage = lazy(() => import('./features/relatorios-institucionais/maceio/MaceioInstitutionalPage'));
 const Modelo03Page = lazy(() => import('./features/relatorios-institucionais/modelo-03/Modelo03Page'));
+const Modelo02Page = lazy(() => import('./features/relatorios-institucionais/modelo-02/Modelo02Page'));
 const EmpresasEmpregadosPage = lazy(() => import('./features/empresas-empregados/pages/EmpresasEmpregadosPage.tsx'));
 const SindusconCuritibaPage = lazy(() => import('./features/sinduscon-curitiba/pages/SindusconCuritibaPage.tsx'));
 const EstimativasPage = lazy(() => import('./features/estimativas-vendas/EstimativasPage.tsx'));
@@ -101,6 +102,7 @@ const App = () => (
                 <Route path="/rebrain/relatorios-institucionais/fortaleza" element={<FortalezaInstitutionalPage />} />
                 <Route path="/rebrain/relatorios-institucionais/maceio" element={<MaceioInstitutionalPage />} />
                 <Route path="/rebrain/relatorios-institucionais/modelo-03" element={<Modelo03Page />} />
+                <Route path="/rebrain/relatorios-institucionais/modelo-02" element={<Modelo02Page />} />
                 <Route
                   path="/rebrain/aelo"
                   element={(

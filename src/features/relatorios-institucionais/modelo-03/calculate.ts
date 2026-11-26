@@ -173,6 +173,6 @@ export function createCalculator(s:Selection,sources:Source[],indices:Readonly<R
   }catch(error){result.status='waiting-source';result.issue=error instanceof Error?error.message:'Não foi possível calcular este slide.';result.tables=[];}
   result.sourceKeys=[...used];result.warnings=[...warnings];return result;
  }
- return {evaluate,snapshot};
+ return {evaluate,snapshot,temporal,notices:()=>[...warnings]};
 }
 export function calculateSlides(s:Selection,sources:Source[]){const c=createCalculator(s,sources);return DEFINITIONS_FOR(s.includeRm).map(d=>c.evaluate(d));}

@@ -1,5 +1,9 @@
 # Estado do handoff
 
+## 26/11/2026 — Modelo02 institucional regional iniciado
+
+Lucas pediu cinco regiões apenas por rota, trimestral, e confirmou mês automático de fechamento. Base `07c09ad4`, main/origin único0/0após fetch, árvore limpa. Implantados catálogo autorizado por região/UF, núcleo quantitativo reaproveitando helpers históricos03sem mudar suas regras, capas originais, mapas exclusivamente por capital com continuações, loadingSP/navegaçãoMaceió, Insights/JSON/CSV/PPTX editável e worker cancelável.142testes integrados aprovados e26testes02no fechamento após enquadramento/cobertura; sete cenários Edge/exports aprovados. Mapbox real respondeuHTTP200, com ruas ePPTXconferidos; sem coleta imobiliária autenticada/homologação. [Contrato completo](../../features/relatorios-institucionais/modelo-02/README.md). Sem menu, backend novo ou publicação sem autorização.
+
 ## 26/11/2026 — Curitiba: PDF real e fonte sem ponto
 
 Após `64ba470a`, Lucas forneceu PDF/XLSX Liberados setembro/2026. O PDF possui fontes parciais Arial sem ponto no mapa. Correção usa fonte auxiliar só no separador, com compensação de avanço e restauração da fonte. PDF.js real/Edge passou; PyMuPDF confirmou oito páginas,18.685caracteres,753separadores alterados e0ponto de deslocamento dos dígitos; capturas inspecionadas.47testes/lint aprovados; build/compilação final no fechamento. Não alterar XLSX nem publicar sem autorização. [Registro](../../features/sinduscon-curitiba/SEPARADORES_AUTOMATICOS_2026-11-26.md).
@@ -321,7 +325,7 @@ Correção visual no gerador: mapas49–53/71 e IVV54/72 (mensal45/46) com títu
 
 Lucas/Codex. Main limpa na abertura; origin único; fetch mostrou dois commits remotos, incorporados por fast-forward até `36981733` (Corretor/Slide Maker, sem alterações Fortaleza). Diagnóstico recebido do usuário registra8/64/17 e zero históricos municipais/detalhados: `report.metrics` nulo pulava as55consultas. Correção desacopla os históricos do núcleo, preservando todas as guardas e avisos. [Causa, evidência e limites](../../features/relatorios-institucionais/fortaleza/COLETA_TRIMESTRAL_64_SLIDES_2026-11-16.md).
 
-289testes e seis cenários Edge com API interceptada aprovados; tipos/lint/build conferidos no fechamento. Navegador conectado indisponível (pipe nativo e browser host ausentes), sem nova coleta autenticada. Arquivo bruto do usuário preservado; cópia em `.local-inputs`, fixture versionada somente com agregados/avisos/hash. Nova geração real2T2026 necessária para observar45fontes municipais+10detalhadas. Sem escrita Monday, credenciais ou mudanças nos outros projetos.
+289testes e sete cenários Edge com API interceptada aprovados; tipos/lint/build conferidos no fechamento. Navegador conectado indisponível (pipe nativo e browser host ausentes), sem nova coleta autenticada. Arquivo bruto do usuário preservado; cópia em `.local-inputs`, fixture versionada somente com agregados/avisos/hash. Nova geração real2T2026 necessária para observar45fontes municipais+10detalhadas. Sem escrita Monday, credenciais ou mudanças nos outros projetos.
 
 ## 13/11/2026 — Push autorizado e segunda revisão dos dois relatórios
 

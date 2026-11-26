@@ -1,0 +1,70 @@
+import {chromium} from '@playwright/test';
+import {spawn} from 'node:child_process';
+import {resolve} from 'node:path';
+import {mkdir,writeFile,readFile} from 'node:fs/promises';
+import {unzipSync,strFromU8} from 'fflate';
+import assert from 'node:assert/strict';
+const realBasemap=process.argv.includes('--real-basemap');
+const base='http://127.0.0.1:4228',folder=resolve(`.local-inputs/relatorios-lucas/modelo-02/visual-2026-11-26${realBasemap?'-real-basemap':''}`);await mkdir(folder,{recursive:true});
+const server=spawn(process.execPath,[resolve('scripts/diagnostics/report-preview-server.mjs'),'4228'],{windowsHide:true,stdio:'ignore'});let browser;const results=[],errors=[];
+try{
+ let ready=false;for(let i=0;i<80&&!ready;i++){try{ready=(await fetch(base)).ok;}catch{}if(!ready)await new Promise(r=>setTimeout(r,250));}assert.ok(ready);browser=await chromium.launch({channel:'msedge',headless:true});
+ const scenarios=[{region:'sul',label:'Sul',width:1440,dark:false,exports:true},{region:'norte',label:'Norte',width:390,dark:true},{region:'sul',label:'Sul',width:1440,dark:false,state:'empty-market'},{region:'sul',label:'Sul',width:390,dark:false,state:'error'},{region:'sul',label:'Sul',width:1440,dark:true,state:'empty'},{region:'sul',label:'Sul',width:390,dark:true,state:'no-token'},{region:'sul',label:'Sul',width:1440,dark:true,state:'429'}].filter(s=>!process.argv.includes('--export-only')||s.exports);
+ for(const scenario of scenarios){
+  const context=await browser.newContext({viewport:{width:scenario.width,height:1000},acceptDownloads:true});let fixture=[],heavy=0,rateLimited=false;
+  if(scenario.state!=='no-token')await context.addInitScript(()=>localStorage.setItem('brain-auth',JSON.stringify({state:{token:'synthetic-only',email:'fixture@example.invalid',issuedAt:Date.now(),expiresAt:Date.now()+3600000},version:0})));
+  const catalog=scenario.region==='norte'?{AC:['Rio Branco'],AP:['Macapá'],AM:['Manaus'],PA:['Belém'],RO:['Porto Velho'],RR:['Boa Vista'],TO:['Palmas']}:{PR:['Curitiba','Pinhais'],SC:['Florianópolis'],RS:['Porto Alegre'],SP:['São Paulo']};
+  await context.route('**/*',async route=>{
+   const url=new URL(route.request().url());if(url.hostname==='127.0.0.1')return route.continue();
+   if(realBasemap&&url.hostname==='api.mapbox.com')return route.continue();
+   if(url.pathname==='/public-api/monitored-cities'){
+    await new Promise(r=>setTimeout(r,400));if(scenario.state==='error')return route.fulfill({status:503,body:'unavailable'});
+    return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({data:scenario.state==='empty'?[]:Object.entries(catalog).flatMap(([state,cities])=>cities.map(city=>({city,state}))),links:{next:null}})});
+   }
+   if(!['geobrain.com.br','app.geobrain.com.br'].includes(url.hostname))return route.abort();heavy++;
+   if(scenario.state==='429'&&!rateLimited){rateLimited=true;return route.fulfill({status:429,headers:{'Retry-After':'60'},body:'limit'});}
+   await new Promise(r=>setTimeout(r,550));
+   const metric=url.pathname.endsWith('building-with-history-internal')?'details':url.pathname.split('/').at(-1),city=url.searchParams.get('city'),uf=url.searchParams.get('uf'),group=url.searchParams.get('group_by')??'Empreendimento';
+   assert.ok(!url.pathname.includes('rent-resale'));assert.notEqual(uf,'SP');const source=fixture.find(s=>s.city===city&&s.uf===uf&&s.metric===metric&&s.group===group);assert.ok(source,`${city}/${uf}/${metric}/${group}`);
+   let rows=source.rows;if(metric!=='details'){const a=url.searchParams.get('start_period').slice(0,7),b=url.searchParams.get('end_period').slice(0,7);rows=rows.filter(r=>r.period.slice(0,7)>=a&&r.period.slice(0,7)<=b);}
+   const page=Number(url.searchParams.get('page')??1);return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({data:rows.slice((page-1)*100,page*100),meta:{current_page:page,last_page:Math.max(1,Math.ceil(rows.length/100)),total:rows.length}})});
+  });
+  const page=await context.newPage();page.on('pageerror',e=>errors.push(e.message));await page.goto(`${base}/rebrain/relatorios-institucionais/modelo-02`);await page.evaluate(dark=>document.documentElement.classList.toggle('dark',dark),scenario.dark);await page.getByRole('heading',{name:'Modelo 02',exact:true}).waitFor();
+  assert.equal(await page.getByRole('link',{name:/Modelo 02/}).count(),0);
+  if(scenario.state==='error'){await page.getByRole('heading',{name:'Não foi possível carregar os municípios'}).waitFor();assert.equal(heavy,0);}
+  else if(scenario.state==='empty'){await page.getByText('Seu acesso não retornou municípios monitorados.',{exact:true}).waitFor();assert.equal(heavy,0);}
+  else if(scenario.state==='no-token'){await page.getByText('Faça login no Geobrain para carregar as regiões disponíveis.').waitFor();assert.equal(heavy,0);}
+  else{
+   await page.getByText('Carregando municípios autorizados',{exact:true}).waitFor({state:'hidden'});await page.locator('#modelo02-region').click();await page.getByRole('option',{name:scenario.label,exact:true}).click();
+   await page.locator('#modelo02-quarter').click();await page.getByRole('option',{name:'3º trimestre',exact:true}).click();assert.equal(await page.locator('#modelo02-month').inputValue(),'setembro');assert.equal(await page.locator('#modelo02-month').getAttribute('readonly'),'');
+   fixture=await page.evaluate(async({region,catalog,large})=>{const {fixture,selection}=await import('/src/features/relatorios-institucionais/modelo-02/__tests__/fixture.ts');const data=fixture({...selection,region},catalog);if(large){const source=data.find(s=>s.city==='Curitiba'&&s.metric==='details'),row=source.rows[0];source.rows=Array.from({length:65},(_,i)=>({...structuredClone(row),building_id:`synthetic-${i}`,name:`Projeto de teste ${i}`,latitude:-25.5+i*.001,longitude:-49.3+i*.001}));}return data;},{region:scenario.region,catalog,large:!!scenario.exports});
+   if(scenario.state==='empty-market')fixture.forEach(source=>{source.rows=[];});
+   await page.getByRole('button',{name:'Gerar relatório',exact:true}).click();const loading=page.getByRole('region',{name:'Carregamento do Modelo 02',exact:true});await loading.waitFor();const bounds=await loading.evaluate(el=>{const r=el.getBoundingClientRect(),m=el.closest('main').getBoundingClientRect();return {left:r.left,right:r.right,mainLeft:m.left,mainRight:m.right};});assert.ok(bounds.left>=bounds.mainLeft&&bounds.right<=bounds.mainRight+1);assert.equal(await loading.locator('li[aria-current="step"]').count(),1);
+   if(scenario.state==='429'){await page.getByText('Aguardando resposta da API · retomada automática',{exact:true}).first().waitFor();await page.screenshot({path:resolve(folder,'429.png'),fullPage:true});await page.getByRole('button',{name:'Cancelar consulta',exact:true}).click();await page.getByText('Consulta cancelada. Você pode gerar novamente.').waitFor();}
+   else{
+    await page.screenshot({path:resolve(folder,`loading-${scenario.region}-${scenario.width}.png`),fullPage:true});
+    await page.getByRole('heading',{name:'Diagnóstico da geração',exact:true}).waitFor({timeout:180000}).catch(async error=>{console.log(await page.locator('body').innerText());throw error;});assert.ok(await page.getByText('0 aguardando fonte',{exact:false}).isVisible());
+    await page.locator('[data-modelo02-slide="cover"]').screenshot({path:resolve(folder,`cover-${scenario.region}.png`)});await page.getByTitle(/Slide \d+ · Unidades lançadas por trimestre$/).click();await page.screenshot({path:resolve(folder,`chart-${scenario.region}-${scenario.width}.png`),fullPage:true});
+    await page.getByRole('button',{name:'Ampliar slides',exact:true}).click();await page.getByRole('dialog').waitFor();await page.getByRole('dialog').getByRole('button',{name:'Próximo',exact:true}).click();await page.keyboard.press('Escape');
+    await page.getByTitle(new RegExp(`Slide \\d+ · Localização dos empreendimentos · ${scenario.region==='sul'?'Curitiba':'Rio Branco'}`)).first().click();await page.locator('[data-map-loading="true"]').waitFor({state:'hidden',timeout:25000});if(realBasemap)assert.equal(await page.getByText('Base cartográfica parcialmente indisponível.',{exact:false}).count(),0);await page.screenshot({path:resolve(folder,`map-${scenario.region}-${scenario.width}.png`),fullPage:true});
+    if(scenario.exports){
+     assert.ok(await page.getByTitle(/Slide \d+ · Localização dos empreendimentos · Curitiba · 2\/2/).isVisible());
+     await page.getByRole('tab',{name:'Insights do analista',exact:true}).click();await page.getByRole('heading',{name:'Critérios utilizados',exact:true}).waitFor();await page.screenshot({path:resolve(folder,'insights.png'),fullPage:true});await page.getByRole('button',{name:'Abrir slide',exact:true}).first().click();
+     let audit;
+     for(const [label,extension] of [['Baixar diagnóstico JSON','json'],['Baixar conferência CSV','csv'],['Baixar PPTX editável','pptx']]){
+      const waiting=page.waitForEvent('download',{timeout:180000});await page.getByRole('button',{name:label,exact:true}).click();const download=await waiting,path=resolve(folder,`modelo02.${extension}`);await download.saveAs(path);const bytes=await readFile(path);
+      if(extension==='json'){audit=JSON.parse(bytes.toString('utf8'));assert.equal(audit.schema,'modelo-02-diagnostic-v1');assert.equal(audit.summary.waiting,0);assert.equal(audit.selection.month,9);assert.equal(audit.scope.cities.length,4);assert.ok(!bytes.toString('utf8').includes('PRIVATE_NAME_DO_NOT_EXPORT'));assert.equal(audit.slides.filter(s=>s.map?.city.city==='Curitiba').length,2);}
+      if(extension==='csv'){assert.ok(bytes.toString('utf8').includes('Projeto de teste 64'));assert.ok(bytes.toString('utf8').includes('agregado'));}
+      if(extension==='pptx'){const files=unzipSync(bytes),slides=Object.keys(files).filter(k=>/^ppt\/slides\/slide\d+\.xml$/.test(k));assert.equal(slides.length,audit.summary.pages);assert.ok(files['customXml/modelo02-audit.xml']);assert.ok(strFromU8(files['ppt/slides/slide1.xml']).includes('TRIMESTRE/2026'));const mapPage=audit.pages.find(p=>p.id==='map-PR-1').page;const xml=strFromU8(files[`ppt/slides/slide${mapPage}.xml`]);assert.ok((xml.match(/<a:custGeom>/g)??[]).length>=60,'Map points must remain editable native geometry');results.push({download:extension,pages:slides.length});}
+      await page.getByText('Arquivo gerado. Download iniciado.',{exact:true}).waitFor();
+     }
+     await page.evaluate(()=>Object.defineProperty(document.fonts,'ready',{configurable:true,get:()=>new Promise(()=>{})}));
+     await page.getByRole('button',{name:'Baixar PPTX editável',exact:true}).click();await page.getByRole('button',{name:'Cancelar exportação',exact:true}).click();await page.getByText('Exportação cancelada.',{exact:true}).waitFor();assert.ok(await page.getByRole('button',{name:'Baixar PPTX editável',exact:true}).isEnabled());await page.evaluate(()=>Reflect.deleteProperty(document.fonts,'ready'));
+    }
+    const calls=heavy;await page.locator('#modelo02-year').click();await page.getByRole('option',{name:'2025',exact:true}).click();assert.equal(await page.getByRole('heading',{name:'Diagnóstico da geração',exact:true}).count(),0);assert.equal(heavy,calls);
+   }
+  }
+  assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));await page.screenshot({path:resolve(folder,`page-${scenario.region}-${scenario.width}-${scenario.state??'success'}.png`),fullPage:true});results.push({...scenario,heavy});await context.close();console.log(JSON.stringify({scenario,heavy}));
+ }
+ assert.deepEqual(errors,[]);await writeFile(resolve(folder,'results.json'),JSON.stringify({source:'synthetic intercepted API; not authenticated market data',results,errors},null,2));console.log('All Modelo 02 browser scenarios passed');
+}finally{await browser?.close();server.kill();}

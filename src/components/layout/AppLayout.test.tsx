@@ -11,6 +11,10 @@ beforeEach(() => localStorage.clear());
 afterEach(cleanup);
 
 describe('marca do menu lateral', () => {
+  it('mantém Modelo 02 apenas por rota com menu móvel recolhido', () => {
+    const media=vi.spyOn(window,'matchMedia').mockImplementation(() => ({matches:true,addEventListener:vi.fn(),removeEventListener:vi.fn()} as unknown as MediaQueryList));
+    try {render(<MemoryRouter initialEntries={['/rebrain/relatorios-institucionais/modelo-02']}><AppLayout><p>Modelo 02</p></AppLayout></MemoryRouter>);expect(screen.getByRole('button',{name:'Expandir menu'})).toHaveAttribute('aria-expanded','false');fireEvent.click(screen.getByRole('button',{name:'Expandir menu'}));expect(screen.queryByRole('link',{name:/Modelo 02/})).toBeNull();expect(screen.getByRole('complementary')).toHaveClass('fixed');} finally {media.mockRestore();}
+  });
   it('disponibiliza Modelo 03 no menu e preserva o menu sobreposto no celular', () => {
     const media=vi.spyOn(window,'matchMedia').mockImplementation(() => ({matches:true,addEventListener:vi.fn(),removeEventListener:vi.fn()} as unknown as MediaQueryList));
     try {
