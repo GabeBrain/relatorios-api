@@ -21,16 +21,14 @@ export function MapContent({data}:{data:MapData}){
    {!token&&Array.from({length:6},(_,i)=><g key={i} stroke="#b7c1b1" strokeWidth="1"><line x1={i*plan.columns*256/5} x2={i*plan.columns*256/5} y1="0" y2={plan.rows*256}/><line x1="0" x2={plan.columns*256} y1={i*plan.rows*256/5} y2={i*plan.rows*256/5}/></g>)}
    {data.points.map(p=>{const {x,y}=pointAt(p.latitude,p.longitude);return <g key={p.id}><path d={`M${x} ${y} C${x-12} ${y-16} ${x-12} ${y-27} ${x} ${y-27} C${x+12} ${y-27} ${x+12} ${y-16} ${x} ${y}Z`} fill={mapPriceBand(p.meter).color} stroke="white" strokeWidth="1"><title>{p.name} · {p.stock} unidades · {p.family} · {mapPriceBand(p.meter).label}</title></path><circle cx={x} cy={y-18} r="3" fill="#333"/></g>;})}
   </svg>:<text x="500" y="415" textAnchor="middle" fontSize="24" fill="#476039">Sem empreendimentos geocodificados nesta fotografia.</text>}
-  <rect x="930" y="385" width="330" height="290" rx="8" fill="white" opacity=".95"/>
-  <rect x="30" y="25" width="650" height="64" rx="8" fill="#577832"/>
-  <text x="50" y="64" fontSize="24" fontWeight="700" fill="white">Localização dos empreendimentos · {data.city.city}</text>
-  <text x="950" y="415" fontSize="20" fontWeight="700" fill="#3b512b">Faixas de R$/m²</text>
-  {bands.map((band,i)=><g key={band.label}><circle cx="961" cy={445+i*20} r="7" fill={band.color}/><text x="979" y={451+i*20} fontSize="14" fill="#333">{band.label}</text></g>)}
-  <text x="970" y="570" fontSize="15" fill="#333">Neste slide: {data.points.length}</text>
-  <text x="970" y="594" fontSize="15" fill="#333">Localizados: {data.locatedProjects}/{data.totalProjects}</text>
-  <text x="970" y="618" fontSize="15" fill="#333">Sem coordenadas: {data.missingCoordinates}</text>
-  <text x="970" y="642" fontSize="14" fill="#333">Excluídos do histórico: {data.excludedProjects}</text>
-  <text x="970" y="666" fontSize="15" fill="#333">Continuação {data.part}/{data.parts}</text>
+  {/* Original composition: mustard title badge top-left, "RANGE POR R$/M²" legend bottom-right. */}
+  <rect x="0" y="14" width="312" height="102" rx="22" fill="#b8930c"/>
+  {['LOCALIZAÇÃO DOS','EMPREENDIMENTOS',`${data.city.city.toLocaleUpperCase('pt-BR')}${data.parts>1?` (${data.part}/${data.parts})`:''}`].map((line,i)=><text key={i} x="160" y={46+i*30} textAnchor="middle" fontSize={line.length>18?19:23} fontWeight="700" fill="#ffffff">{line}</text>)}
+  <rect x="1022" y={490-(bands.length-5)*32} width="228" height={46+bands.length*32} fill="#ffffff" opacity=".96" stroke="#d9d9d9"/>
+  <rect x="1022" y={490-(bands.length-5)*32} width="228" height="34" fill="#d9d9d9"/>
+  <text x="1136" y={513-(bands.length-5)*32} textAnchor="middle" fontSize="15" fontWeight="700" fill="#262626">RANGE POR R$/M²</text>
+  {bands.map((band,i)=>{const y=544-(bands.length-5)*32+i*32;return <g key={band.label}><path d={`M1046 ${y+8} C1040 ${y} 1040 ${y-8} 1046 ${y-8} C1052 ${y-8} 1052 ${y} 1046 ${y+8}Z`} fill={band.color}/><text x="1064" y={y+4} fontSize="15" fill="#262626">{band.label}</text></g>;})}
+  <text x="1250" y="706" textAnchor="end" fontSize="11" fill="#555">{data.points.length} neste slide · localizados {data.locatedProjects}/{data.totalProjects} · sem coordenadas {data.missingCoordinates} · excluídos {data.excludedProjects}</text>
   <text x="30" y="706" fontSize="12" fill="#555">{!token?'Base cartográfica indisponível; posições preservadas na grade geográfica.':failed.size?'Base cartográfica parcialmente indisponível. © Mapbox · © OpenStreetMap contributors.':'© Mapbox · © OpenStreetMap contributors.'}</text>
   {loading&&<foreignObject x="50" y="103" width="450" height="70"><div className="rounded-md border bg-background p-2"><BrainLoadingState variant="field" title="Carregando base cartográfica" startedAt={startedAt}/></div></foreignObject>}
  </g>;

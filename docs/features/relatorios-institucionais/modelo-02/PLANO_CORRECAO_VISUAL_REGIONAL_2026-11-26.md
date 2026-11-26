@@ -1,6 +1,6 @@
 # Institucionais Imprensa — correção visual e editorial das cinco regiões
 
-26/11/2026 · Autor: Codex, a pedido do usuário · **Estado: EM IMPLEMENTAÇÃO (26/11, Claude): famílias P0 e parte das P1 implementadas nas cinco regiões; revisão de 7 famílias P1 e aceite com dados reais pendentes. Ver §8.**
+26/11/2026 · Autor: Codex, a pedido do usuário · **Estado: IMPLEMENTADA (26/11, Claude): todas as famílias das §3 nas cinco regiões, conferidas com dados sintéticos no PowerPoint. Aceite com saídas reais pendente, a cargo do usuário. Ver §8.**
 
 Este documento substitui a leitura de que a publicação anterior resolveu a fidelidade visual. O usuário apontou diferenças na geração real, incluindo população ausente, títulos sobrepostos, falta de setas e colchetes, rótulos mal posicionados e gráficos com lacunas. O pedido desta rodada é documentar a correção; não executar nem publicar mudanças de produto.
 
@@ -219,7 +219,13 @@ Implementado no código compartilhado, portanto vale para **Sul, Sudeste, Nordes
 | Resumo geral | Implementada | Lead em negrito no estilo do original; zero = "estabilidade"; sem base = "sem base comparável"; caracterização da oferta por família. |
 | Composição por padrão | Parcial | Ordem fixa Compactos, MCMV, Médio Padrão, Luxo, depois as desconhecidas; contraste dos rótulos. Revisão visual fina pendente. |
 | Rankings | Implementada | Títulos do original (`Unidades lançadas \| Luxo \| Jan–Set/2026`, `Maior R$/m² médio \| 3T2026`), Top 10 em uma página, barras de cima para baixo com rótulo interno, pizza com "Outros" e rótulo de cidade + %. Lista completa no CSV. |
-| Quadros por estado, comparação L/V/E, oferta padrão/tipologia, preço m², mapa por UF, mapas das capitais, institucional | Não revisadas | Só os títulos foram ajustados. |
+| Quadros por estado (24/30) | Implementada (2ª rodada) | Nomes completos dos estados em ordem alfabética, cabeçalhos com janelas equivalentes (`Variação (%) 2T26 X 3T26`, `Jan–Set/25 X Jan–Set/26`), acumulados em negrito, total em cinza e frase gerada pela variação acumulada (`stateSentence`; estado sem base é nomeado, nunca inferido). |
+| Lançamentos, vendas e estoque (32) | Implementada (2ª rodada) | Barras agrupadas (antes empilhadas) com rótulo interno, mesmo trimestre um ano antes × atual; painel com legenda "3T2025 X 3T2026" e ícone/cor/% por indicador; "Sem base comparável" quando falta base. |
+| Oferta por padrão/tipologia (34–37) | Implementada (2ª rodada) | Cabeçalho "Padrão/ Estado" ou "Tipologia/ Estado", estados por extenso, "Total Sul", coluna "Part. Total Sul (%)" com contorno, total geral em cinza, cabeçalho amarelo nas participações por UF e destaque calculado. Tipologias numéricas viram "N dormitórios". **Omitida a coluna "Faixa de valores (R$)":** é definição datada do 4T2025 (teto MCMV) e não tem fonte atual confirmada. |
+| Preço por m² (38 e capitais NE) | Implementada (2ª rodada) | Barras com valor interno sem decimais, linha da média simultânea com valor na ponta, desvio por barra com seta verde/vermelha (`DeviationMarks`, sobre o gráfico nativo, mesma geometria). Legenda passou a ser camada editável. Desvio = em relação à média simultânea, não valorização anual. |
+| Comparação por UF (39) | Implementada (2ª rodada) | Seis faixas e legenda do original (+ "Sem base comparável" quando houver), título "Lançamentos x vendas x oferta - 2025 x 2026", legendas por mapa com as janelas equivalentes e selo. Até 4 UFs: valor com ▲/▼ no mapa; acima disso (Nordeste, Norte), sigla no mapa e valores em lista abaixo, para não sobrepor. |
+| Mapas das capitais (44–49) | Implementada (2ª rodada) | Selo mostarda em caixa alta e legenda "RANGE POR R$/M²" do original. Pontos, faixas e continuações já seguiam o original; as contagens de cobertura foram para o rodapé. O QR code "Saiba mais" do original não foi reproduzido (ativo datado). |
+| Institucional/encerramento (50–53) | Checado | Sem alteração; artes aprovadas preservadas e contracapa no final. |
 | Disponível parcial | Implementada | `slide.coverage`; `summary.partial`/`partialIds` no JSON; aviso na página e na ressalva do slide. |
 
 Correção compartilhada: `native-pptx.ts` passa a centralizar verticalmente as células de tabela (`tcPr anchor="ctr"`) e aceita uma camada pintada depois dos gráficos nativos (`deferSelector`), sem alterar o comportamento padrão dos demais relatórios.

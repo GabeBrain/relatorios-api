@@ -13,6 +13,17 @@ const titleMonth=(m:string)=>MONTHS[Number(m)-1].charAt(0)+MONTHS[Number(m)-1].s
 /** Accumulated label: the full year only when the window really is January–December. */
 export const accumulatedLabel=(year:number,endMonth:string,upper=false)=>endMonth==='12'?String(year):`${upper?'JAN':'Jan'}–${upper?MONTHS[Number(endMonth)-1]:titleMonth(endMonth)}/${year}`;
 type Dir=ReturnType<typeof direction>;
+const TABLE_GREEN='#5b7536';
+const listNames=(names:string[])=>names.length>1?`${names.slice(0,-1).join(', ')} e ${names.at(-1)}`:names[0]??'';
+/** "Por estado" sentence from the accumulated variation; states without base are named, never inferred. */
+export function stateSentence(rows:{name:string;value:number|null}[],noun:string,basis:string){
+ const by=(d:Dir)=>rows.filter(r=>direction(r.value)===d).map(r=>r.name),up=by('up'),down=by('down'),flat=by('flat'),none=by(null);
+ if(rows.length&&up.length===rows.length)return `Todos os estados apresentaram aumento em ${noun} na comparação ${basis}.`;
+ if(rows.length&&down.length===rows.length)return `Todos os estados apresentaram queda em ${noun} na comparação ${basis}.`;
+ const parts=[up.length?`aumento em ${listNames(up)}`:'',down.length?`queda em ${listNames(down)}`:'',flat.length?`estabilidade em ${listNames(flat)}`:''].filter(Boolean);
+ const text=parts.length?`${noun.charAt(0).toUpperCase()+noun.slice(1)}: ${parts.join('; ')}, na comparação ${basis}.`:`${noun.charAt(0).toUpperCase()+noun.slice(1)} sem base comparável ${basis}.`;
+ return none.length&&parts.length?`${text} Sem base comparável: ${listNames(none)}.`:text;
+}
 const NOUN={up:'aumento',down:'queda',flat:'estabilidade'} as const,VERB={up:'avançam',down:'recuam',flat:'ficam estáveis'} as const;
 const pairPhrase=(r:Dir,s:Dir)=>r&&s?(r===s?`${NOUN[r]} nos lançamentos e nas vendas`:`${NOUN[r]} nos lançamentos e ${NOUN[s]} nas vendas`):r?`${NOUN[r]} nos lançamentos; vendas sem base comparável`:s?`${NOUN[s]} nas vendas; lançamentos sem base comparável`:null;
 /** Deterministic news-style headline and bullets; only valid comparisons speak, gaps never imply a trend. */
@@ -140,15 +151,20 @@ export function calculateReport(selection:Selection,cities:City[],missingUfs:str
  add('summary-prices','Resumo geral · preços e segmentos',[],provenance('details','Empreendimento'),'institutional');slides.at(-1)!.presentation={kind:'narrative',paragraphs:[`Preço médio privativo: ${f(weightedMeter(cities),'R$/m²')}, ponderado pelas unidades em oferta na fotografia de fechamento.`,`VGV vendido: ${f(aggregate(cities,'sales',p.start,p.end,'Padrão',true),'R$ milhões')}, corrigidos pelo INCC-DI do fechamento.`,`MCMV: ${f(aggregate(cities,'releases',p.start,p.end,'Padrão',false,r=>family(r.group,'MCMV')))} lançadas no trimestre. Enquadramento pela equivalência editorial dos padrões.`]};
  add('meter-states','Preço por m² privativo geral (R$/m²) - Residencial vertical',[table(['R$/m² atual','R$/m² ano anterior','Variação (%)','Oferta atual'],ufs.map(uf=>{const scope=cities.filter(c=>c.uf===uf),now=weightedMeter(scope),before=weightedMeter(scope,shift(p.end,-12));return {label:uf,values:[now,before,variation(now,before),aggregate(scope,'stock',p.end,p.end)]};}),['money','money','percent','count'],'Médias ponderadas pelas unidades em oferta no fechamento')],provenance('details','Empreendimento'),'data','Preço nominal do histórico da competência, ponderado pelo estoque. Sem atualização por preço cadastral ou média simples entre municípios.');
  const priceSlide=slides.at(-1)!,priceTable=priceSlide.tables[0],regionMeter=weightedMeter(cities);
- priceSlide.presentation={kind:'columns',charts:[{...panel('columns',table(['Preço médio UF','Preço médio regional'],priceTable.rows.map(row=>({label:row.label,values:[row.values[0],regionMeter]})),['money','money'],'R$/m² · fotografia do fechamento'),['#3f5727','#ffcf00']),lineSeries:[1]}]};
+ /** Original price family: bars with internal values, simultaneous mean line, deviation marks over each bar. */
+ const priceColumns=(rows:{label:string;value:number|null}[],mean:number|null,names:[string,string],unit:string)=>{
+  const peak=Math.max(1,...rows.map(r=>r.value??0),mean??0);
+  return {kind:'columns' as const,deviation:{mean,label:names[1]},charts:[{...panel('columns',table(names,rows.map(r=>({label:r.label,values:[r.value,mean]})),['money','money'],unit),['#335224','#ffc000'],{x:150,y:215,w:1000,h:345}),lineSeries:[1],scaleMax:peak*1.32,gapPct:rows.length>5?45:160,labelDigits:0,labelInside:true}]};
+ };
+ priceSlide.presentation=priceColumns(priceTable.rows.map(row=>({label:statePopulation(row.label)?.name??row.label,value:row.values[0] as number|null})),regionMeter,['Preço médio estado',`Preço médio Região ${region.label}`],'R$/m² · fotografia do fechamento');
  if(selection.region==='nordeste'){
   const capitals=region.capitals.map(([uf,name])=>cities.find(c=>c.uf===uf&&norm(c.city)===norm(name))),complete=capitals.every(Boolean),scope=capitals.filter((c):c is City=>!!c),mean=complete?weightedMeter(scope):null;
   if(!complete)warnings.add('Preço médio das capitais: capital ausente no catálogo autorizado. Média conjunta mantida sem valor, sem substituição por RM ou municípios restantes.');
   const rows=region.capitals.map(([uf,name],i)=>{const c=capitals[i];return {label:`${name}/${uf}`,values:[c?weightedMeter([c]):null,mean,c?variation(weightedMeter([c]),mean):null,c?temporal(c,'stock',p.end,p.end):null]};}).sort((a,b)=>(b.values[0]??-Infinity)-(a.values[0]??-Infinity));
   add('meter-capitals','Preço médio por m² privativo · capitais do Nordeste',[table(['Preço médio capital','Preço médio das capitais','Desvio da média (%)','Oferta final'],rows,['money','money','percent','count'],'Fotografia do fechamento · somente capitais')],provenance('details','Empreendimento',scope));
-  slides.at(-1)!.presentation={kind:'columns',charts:[{...panel('columns',table(['Preço médio capital','Preço médio das capitais'],rows.map(r=>({...r,values:r.values.slice(0,2)})),['money','money'],'R$/m² · somente capitais'),['#3f5727','#ffcf00']),lineSeries:[1]}],annotation:'Desvio da média das capitais (%): '+rows.map(r=>`${r.label}: ${f(r.values[2] as number|null,'%')}`).join('; ')};
+  slides.at(-1)!.presentation=priceColumns(rows.map(r=>({label:r.label,value:r.values[0] as number|null})),mean,['Preço médio capital','Preço médio das capitais'],'R$/m² · somente capitais');
  }
- add('annual-state-comparison','Lançamentos, vendas e oferta · comparação anual',[table(['Lançamentos atual','Lançamentos anterior','Vendas atual','Vendas anterior','Estoque atual','Estoque anterior'],ufs.map(uf=>{const scope=cities.filter(c=>c.uf===uf);return {label:uf,values:[aggregate(scope,'releases',`${selection.year}-01`,p.end),aggregate(scope,'releases',`${selection.year-1}-01`,shift(p.end,-12)),aggregate(scope,'sales',`${selection.year}-01`,p.end),aggregate(scope,'sales',`${selection.year-1}-01`,shift(p.end,-12)),aggregate(scope,'stock',p.end,p.end),aggregate(scope,'stock',shift(p.end,-12),shift(p.end,-12))]};}),Array(6).fill('count'),'Acumulado até o mês de encerramento; estoque no fechamento')],[...provenance('releases'),...provenance('sales'),...provenance('stock')]);
+ add('annual-state-comparison',`Lançamentos x vendas x oferta - ${selection.year-1} x ${selection.year}`,[table(['Lançamentos atual','Lançamentos anterior','Vendas atual','Vendas anterior','Estoque atual','Estoque anterior'],ufs.map(uf=>{const scope=cities.filter(c=>c.uf===uf);return {label:uf,values:[aggregate(scope,'releases',`${selection.year}-01`,p.end),aggregate(scope,'releases',`${selection.year-1}-01`,shift(p.end,-12)),aggregate(scope,'sales',`${selection.year}-01`,p.end),aggregate(scope,'sales',`${selection.year-1}-01`,shift(p.end,-12)),aggregate(scope,'stock',p.end,p.end),aggregate(scope,'stock',shift(p.end,-12),shift(p.end,-12))]};}),Array(6).fill('count'),'Acumulado até o mês de encerramento; estoque no fechamento')],[...provenance('releases'),...provenance('sales'),...provenance('stock')]);
  for(const label of ['Luxo','MCMV']){
   const rows=cities.map(c=>({label:rankingCity(c),values:[temporal(c,'releases',`${selection.year}-01`,p.end,'Padrão',false,r=>family(r.group,label))]})).sort((a,b)=>(b.values[0]??-Infinity)-(a.values[0]??-Infinity));
   add(`ranking-${label}`,`Unidades lançadas | ${label} | ${accumulatedLabel(selection.year,p.end.slice(5))}`,[table(['Unidades'],rows,['count'],`Acumulado de janeiro ao fechamento do ${cur} · Top 10 no slide; todos os municípios na conferência CSV`)],provenance('releases'));
@@ -196,8 +212,37 @@ export function calculateReport(selection:Selection,cities:City[],missingUfs:str
     slide.tables.push(pie);slide.presentation.charts![0].box={x:64,y:205,w:780,h:420};slide.presentation.charts!.push({...panel('pie',pie,pie.rows.map((_,i)=>i===RANKING_TOP?'#3b5e27':['#4f5779','#ef6144','#66a043','#ffc000','#33939b','#3a3a3a','#2f3349','#9b2b16','#806000','#71898c'][i%10]),{x:900,y:250,w:310,h:310}),firstPageOnly:true});
    }
   }
-  if(slide.id==='comparison')slide.presentation={kind:'columns',charts:[{...panel('columns',{...slide.tables[0],rows:slide.tables[0].rows.filter((_,i)=>i===slide.tables[0].rows.length-5||i===slide.tables[0].rows.length-1)}),stacked:true}]};
-  if(slide.id==='annual-state-comparison')slide.presentation={kind:'state-comparison',displayTable:slide.tables[0],annotation:`Acumulado janeiro–${p.end.slice(5)} nos dois anos; oferta no fechamento. Cinza = comparação indisponível.`};
+  if(slide.id==='comparison'){
+   // Original: clustered bars for the same quarter one year apart + one indicator per series.
+   const rows=slide.tables[0].rows,pair=rows.filter((_,i)=>i===rows.length-5||i===rows.length-1);
+   slide.presentation={kind:'comparison',caption:pair.length===2?`${pair[0].label} X ${pair[1].label}`:cur,indicators:slide.tables[0].columns.map((label,j)=>({label:label==='Vendas líquidas'?'Vendas':label==='Oferta final'?'Estoque':label,value:pair.length===2?variation(pair[1].values[j] as number|null,pair[0].values[j] as number|null):null})),charts:[{...panel('columns',{...slide.tables[0],columns:['Lançamentos','Vendas','Estoque'],rows:pair},['#335224','#ef6144','#ffc000'],{x:150,y:200,w:540,h:340}),labelInside:true}]};
+  }
+  if(slide.id==='annual-state-comparison'){
+   const end=p.end.slice(5),flows=`${accumulatedLabel(selection.year-1,end)} x ${accumulatedLabel(selection.year,end)}`;
+   slide.presentation={kind:'state-comparison',badge:'RESIDENCIAL VERTICAL',displayTable:slide.tables[0],captions:[['Lançamentos',flows],['Vendas',flows],['Oferta',`${annualRef} x ${cur}`]],note:`Lançamentos e vendas: acumulado de janeiro ao mês de fechamento nos dois anos. Oferta: fotografia do fechamento.`};
+  }
+  if(slide.id==='releases-states'||slide.id==='sales-states'){
+   // Original "Por estado": full state names, equivalent windows in the headers, bold accumulated, grey total.
+   const t=slide.tables[0],count=t.columns.length-5,end=p.end.slice(5),short=(label:string)=>label.replace(/T20(\d\d)$/,'T$1'),acc=end==='12'?`${selection.year-1} X ${selection.year}`:`${accumulatedLabel(selection.year-1,end)} X ${accumulatedLabel(selection.year,end)}`.replace(/\/20(\d\d)/g,'/$1');
+   const columns=[...t.columns.slice(0,count),accumulatedLabel(selection.year-1,end),accumulatedLabel(selection.year,end),`Variação (%) ${short(quarterLabel(shift(p.end,-3)))} X ${short(cur)}`,`Variação (%) ${short(annualRef)} X ${short(cur)}`,`Variação (%) ${acc}`];
+   const named=t.rows.filter(r=>r.label!=='Total').map(r=>({...r,label:statePopulation(r.label)?.name??r.label})).sort((a,b)=>a.label.localeCompare(b.label,'pt-BR'));
+   const display=table(columns,[...named,...t.rows.filter(r=>r.label==='Total')],t.formats,t.unit);
+   const noun=slide.id==='releases-states'?'lançamentos':'vendas',basis=end==='12'?'com o ano anterior':`entre ${accumulatedLabel(selection.year-1,end)} e ${accumulatedLabel(selection.year,end)}`;
+   slide.presentation={kind:'state-table',displayTable:display,emphasisColumns:[count,count+1],bullets:[stateSentence(named.map(r=>({name:r.label,value:r.values[count+4] as number|null})),noun,basis)]};
+  }
+  if(slide.id.startsWith('stock-')){
+   const states=slide.id.endsWith('-states'),dimension=slide.id.includes('Tipologia')?'Tipologia':'Padrão',source=slide.presentation!.displayTable!;
+   const header=(c:string)=>c==='Total'?`Total ${region.label}`:c==='Participação (%)'||c==='Região'?`Part. Total ${region.label} (%)`:statePopulation(c)?.name??c;
+   // API returns bedroom counts as bare numbers; the originals read "2 dormitórios".
+   const typology=(label:string)=>dimension==='Tipologia'&&/^\d+$/.test(label.trim())?`${label.trim()} dormitório${Number(label)===1?'':'s'}`:label;
+   const rows=source.rows.map(r=>r.label==='Total'?{...r,label:'Total geral'}:{...r,label:typology(r.label)}),display={...source,columns:source.columns.map(header),rows};
+   const body=rows.filter(r=>r.label!=='Total geral'),share=(r:Table['rows'][number])=>r.values.at(-1) as number|null,ranked=[...body].filter(r=>typeof share(r)==='number').sort((a,b)=>share(b)!-share(a)!);
+   const stateNames=source.columns.slice(0,ufs.length).map(uf=>statePopulation(uf)?.name??uf);
+   const callout=states?(ranked.length?`Maior participação por estado: ${stateNames.map((name,j)=>{const top=[...body].filter(r=>typeof r.values[j]==='number').sort((a,b)=>(b.values[j] as number)-(a.values[j] as number))[0];return top?`${top.label} em ${name} (${formatValue(top.values[j],'percent')})`:null;}).filter(Boolean).join('; ')}.`:undefined)
+    :dimension==='Padrão'?(ranked.length>=2?`Padrão ${ranked[0].label} e ${ranked[1].label} representam ${formatValue(share(ranked[0]),'percent')} e ${formatValue(share(ranked[1]),'percent')} da oferta final da região ${region.label}`:undefined)
+    :(ranked.length?`Maior participação geral: ${ranked[0].label} (${formatValue(share(ranked[0]),'percent')})`:undefined);
+   slide.presentation={kind:'share-table',displayTable:display,headerColor:states?'#ffc000':TABLE_GREEN,callout,calloutPlacement:states?'bottom':dimension==='Padrão'?'top':'right',emphasisColumns:[display.columns.length-1]};
+  }
   if(slide.id.startsWith('highlights-')){
    const original=slide.tables[0],current=original.rows[0]?.values as (number|null)[],previous=original.rows[1]?.values as (number|null)[],annual=original.rows[2]?.values as (number|null)[];
    const filter=slide.id==='highlights-MCMV'?(r:Record<string,unknown>)=>family(r.group,'MCMV'):slide.id==='highlights-Luxo'?(r:Record<string,unknown>)=>family(r.group,'Luxo'):undefined;
@@ -214,7 +259,6 @@ export function calculateReport(selection:Selection,cities:City[],missingUfs:str
  }
  // Partial availability: a flow/stock cell without source is not the same as a complete series.
  for(const slide of slides)if(slide.status==='available'&&slide.kind==='data'){const missing=slide.tables.reduce((n,t)=>n+t.rows.reduce((m,r)=>m+r.values.filter((v,j)=>v===null&&(t.formats[j]==='count'||t.formats[j]==='decimal')).length,0),0);slide.coverage=missing?'partial':'complete';if(missing)slide.warnings.push(`Disponível parcial: ${missing} célula(s) de fluxo/estoque sem valor de fonte; mantidas em branco, sem zero.`);}
- const pricePanel=slides.find(s=>s.id==='meter-states')!;pricePanel.presentation!.annotation='Desvio da média regional (%): '+pricePanel.tables[0].rows.map(row=>`${row.label}: ${f(variation(row.values[0] as number|null,regionMeter),'%')}`).join('; ');
  const ordered=editorialSequence(selection,slides);
  return {schema:'modelo-02-report-v1',selection,cities,missingUfs,startedAt,finishedAt:new Date().toISOString(),sources,slides:ordered,homologated:false};
 }

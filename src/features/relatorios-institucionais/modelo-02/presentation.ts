@@ -2,14 +2,26 @@ import manifest from './reference-manifest.json';
 import {norm,type Selection} from './model';
 import type {Slide,Table} from './types';
 
-export type PresentationKind='table'|'cities'|'columns'|'stacked-area'|'bars'|'narrative'|'institutional'|'state-comparison'|'highlights';
+export type PresentationKind='table'|'cities'|'columns'|'stacked-area'|'bars'|'narrative'|'institutional'|'state-comparison'|'highlights'|'state-table'|'share-table'|'comparison';
 export interface ChartPanel {kind:'columns'|'stacked-area'|'bars'|'pie';table:Table;colors:string[];box:{x:number;y:number;w:number;h:number};percent?:boolean;title?:string;lineSeries?:number[];stacked?:boolean;firstPageOnly?:boolean;
  /** Fixed value scale + gap: the PPTX plot area and the SVG preview/annotations share one geometry. */
- scaleMax?:number;gapPct?:number;labelDigits?:number}
+ scaleMax?:number;gapPct?:number;labelDigits?:number;
+ /** Data labels centred inside the bars (contrast applied per series in the PPTX). */
+ labelInside?:boolean}
 /** Comparisons drawn over the quarterly family; computed from the same cells as CSV/JSON. */
 export interface Trend {annual:number|null;quarter:number|null;accumulated:number|null;annualLabel:string;quarterLabel:string;accumulatedLabel:string}
 export interface HighlightRow {label:string;values:(number|null)[]}
-export interface Presentation {kind:PresentationKind;rowsPerPage?:number;displayTable?:Table;annotation?:string;charts?:ChartPanel[];paragraphs?:string[];asset?:string;trend?:Trend;headline?:string;bullets?:string[];note?:string}
+export interface Indicator {label:string;value:number|null}
+export interface Presentation {kind:PresentationKind;rowsPerPage?:number;displayTable?:Table;annotation?:string;charts?:ChartPanel[];paragraphs?:string[];asset?:string;trend?:Trend;headline?:string;bullets?:string[];note?:string;
+ /** Comparison panel (L/V/E): caption + one indicator per series. */
+ caption?:string;indicators?:Indicator[];
+ /** Share tables: header colour, bordered participation column and data-derived callout. */
+ headerColor?:string;callout?:string;calloutPlacement?:'top'|'right'|'bottom';emphasisColumns?:number[];
+ /** Price columns: deviation of each bar from the simultaneous mean drawn over the chart. */
+ deviation?:{mean:number|null;label:string};
+ /** Map comparison: caption per map (metric + equivalent windows). */
+ captions?:string[][];badge?:string}
+export const STATE_COLORS={up:'#2f5222',down:'#e00000'};
 export const regionalReference=(s:Selection)=>manifest[s.region as keyof typeof manifest];
 export const INSTITUTIONAL_APPROVAL={approvedOn:'2026-11-26',edition:'3T2026',sourceEdition:'4T2025',scope:'Números institucionais, contatos e composição da equipe aprovados pelo usuário nesta sessão.'};
 export const institutionalApproved=(s:Selection)=>(s.year===2026&&s.quarter===3)||(s.year===2025&&s.quarter===4);

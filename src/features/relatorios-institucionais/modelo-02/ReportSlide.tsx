@@ -7,6 +7,7 @@ import {formatValue,plainPercent,direction} from './format';
 import {StateComparison} from './StateComparison';
 import {NativeTable} from './NativeTable';
 import {TrendMarks} from './TrendMarks';
+import {StateTable,ShareTable,ComparisonPanel,DeviationMarks} from './TableFamilies';
 import {sectionLines,HIGHLIGHT_COLORS,cityChunkHeight,type CityChunk} from './presentation';
 import {textWidth,wrapByWidth} from './text-metrics';
 import {POPULATION_LABEL} from './population';
@@ -58,6 +59,10 @@ function Cities({columns,coverage}:{columns:CityChunk[][];coverage?:Table}){
  })}</g>;})}</g>;
 }
 
+function Badge({text,color}:{text:string;color:string}){
+ const width=textWidth(text,20,true)+56;
+ return <g><rect x={1240-width} y="52" width={width} height="48" rx="24" fill={color}/><text x={1240-width/2} y="83" textAnchor="middle" fontSize="20" fontWeight="700" fill="#ffffff">{text}</text></g>;
+}
 function Arrow({x,y,up}:{x:number;y:number;up:boolean}){
  const s=up?-1:1;
  return <polygon points={`${x},${y+17*s} ${x+15},${y+2*s} ${x+7},${y+2*s} ${x+7},${y-17*s} ${x-7},${y-17*s} ${x-7},${y+2*s} ${x-15},${y+2*s}`} fill={up?'#6aa040':'#ff0000'}/>;
@@ -65,13 +70,13 @@ function Arrow({x,y,up}:{x:number;y:number;up:boolean}){
 /** Original highlights: family badge, compact comparison table with editable arrows, data-derived headline. */
 function Highlights({slide,table}:{slide:Slide;table:Table}){
  const color=HIGHLIGHT_COLORS[slide.id]??TABLE_GREEN,badge=slide.id==='highlights-MCMV'?'RESIDENCIAL VERTICAL MCMV':slide.id==='highlights-Luxo'?'RESIDENCIAL VERTICAL LUXO':'RESIDENCIAL VERTICAL';
- const badgeWidth=textWidth(badge,20,true)+56,widths=[322,240,200],x=258,y=270,h=50;
+ const widths=[322,240,200],x=258,y=270,h=50;
  const cells=[[{text:'',fill:color},...table.columns.map(c=>({text:c.toLocaleUpperCase('pt-BR'),fill:color,color:'#ffffff',bold:true,size:21}))],...table.rows.map(r=>[{text:r.label,fill:'#d9d9d9',bold:true,size:r.label.length>18?17:21,color:'#262626'},...r.values.map(v=>({text:plainPercent(v as number|null),fill:'#ffffff',size:21,align:'right' as const,padding:[8,76] as [number,number]}))])];
  const presentation=slide.presentation,headline=presentation?.headline?wrapByWidth(presentation.headline,21,1000,true):[];
  let line=532+headline.length*28+14;
  const bullets=(presentation?.bullets??[]).flatMap((bullet,i)=>wrapByWidth(bullet,19,1020).map((text,k,all)=>{const at=line;line+=k===all.length-1?40:27;return <g key={`b${i}-${k}`}>{k===0&&<text x="150" y={at} fontSize="19" fill="#262626">•</text>}<text x="172" y={at} fontSize="19" fill="#262626">{text}</text></g>;}));
  return <g>
-  <rect x={1240-badgeWidth} y="52" width={badgeWidth} height="48" rx="24" fill={color}/><text x={1240-badgeWidth/2} y="83" textAnchor="middle" fontSize="20" fontWeight="700" fill="#ffffff">{badge}</text>
+  <Badge text={badge} color={color}/>
   <NativeTable x={x} y={y} widths={widths} heights={[h,h,h,h]} cells={cells} label="Comparativos de lançamentos e vendas"/>
   {table.rows.map((r,i)=>r.values.map((v,j)=>{const d=direction(v as number|null);return d==='up'||d==='down'?<Arrow key={`${i}-${j}`} x={x+widths.slice(0,j+2).reduce((a,b)=>a+b,0)-40} y={y+h*(i+1)+h/2} up={d==='up'}/>:null;}))}
   {headline.map((text,i)=><text key={`h${i}`} x="150" y={532+i*28} fontSize="21" fontWeight="700" fill={DARK}>{text}</text>)}
@@ -113,13 +118,16 @@ export function ReportSlide({page,selection,exporting=false}:{page:PhysicalPage;
   {cover?<><image href={covers[`./assets/cover-${selection.region}.jpg`]} width="1280" height="720"/><image href={logo} x="510" y="472" width="260" height="260"/><text x="632" y="174" textAnchor="middle" fontSize="24" fill="white">{selection.quarter}º TRIMESTRE/{selection.year}</text>{['Mercado','Imobiliário da',`Região ${region?.label??''}`].map((line,i)=><text key={line} x="606" y={290+i*57} fontSize={line.length>17?36:44} fontWeight="700" fill="#476039">{line}</text>)}</>:<>
    {art&&(section||institution)?<image href={art} width="1280" height="720"/>:<><path d="M0 0 H120 V20 Q100 50 70 50 H0Z" fill={GREEN}/><path d="M1280 694 H1180 Q1150 694 1140 720 H1280Z" fill={GREEN}/></>}
    {section?<Section slide={slide} selection={selection} art={art}/>:slide.kind==='map'&&slide.map&&slide.status==='available'?<MapContent key={slide.id} data={slide.map}/>:closing&&art?<image href={art} width="1280" height="720"/>:closing?<><rect width="1280" height="720" fill={DARK}/><image href={logo} x="400" y="190" width="480" height="380"/></>:institution&&art?null:<>
-    <SlideTitle title={`${slide.title}${parts>1?` (${part}/${parts})`:''}`} maxWidth={highlights?820:1150}/>
+    <SlideTitle title={`${slide.title}${parts>1?` (${part}/${parts})`:''}`} maxWidth={highlights||presentation?.badge||presentation?.calloutPlacement==='top'?820:1150}/>
     {cities&&<text x="1216" y="138" textAnchor="end" fontSize="12" fill="#555">População: {POPULATION_LABEL}</text>}
     {slide.status==='waiting-source'&&<><text x="64" y="330" fontSize="26" fill={GREEN}>Aguardando cobertura para este quadro</text><text x="64" y="375" fontSize="18" fill="#555">Consulte os detalhes e o diagnóstico da geração.</text></>}
     {slide.map&&slide.status==='available'&&<MapContent key={slide.id} data={slide.map}/>}
     {narrative&&!!presentation?.paragraphs?.length&&<Narrative paragraphs={presentation.paragraphs}/>}
-    {table&&slide.status==='available'&&(presentation?.kind==='state-comparison'?<StateComparison table={table} region={selection.region}/>:cities&&page.cityColumns?<Cities columns={page.cityColumns} coverage={slide.tables[1]}/>:highlights?<Highlights slide={slide} table={table}/>:<DataTable table={table}/>)}
+    {presentation?.badge&&<Badge text={presentation.badge} color={TABLE_GREEN}/>}
+    {table&&slide.status==='available'&&(presentation?.kind==='state-comparison'?<StateComparison table={table} region={selection.region} captions={presentation.captions}/>:cities&&page.cityColumns?<Cities columns={page.cityColumns} coverage={slide.tables[1]}/>:highlights?<Highlights slide={slide} table={table}/>:presentation?.kind==='state-table'?<StateTable table={table} presentation={presentation}/>:presentation?.kind==='share-table'?<ShareTable table={table} presentation={presentation} firstHeader={slide.id.includes('Tipologia')?'Tipologia/ Estado':'Padrão/ Estado'}/>:<DataTable table={table}/>)}
     {!!charts.length&&slide.status==='available'&&!exporting&&charts.map((chart,i)=><Chart key={i} chart={chart}/>)}
+    {presentation?.kind==='comparison'&&slide.status==='available'&&<ComparisonPanel presentation={presentation}/>}
+    {presentation?.deviation&&charts[0]&&slide.status==='available'&&<DeviationMarks chart={charts[0]} mean={presentation.deviation.mean}/>}
     {presentation?.trend&&slide.status==='available'&&<TrendMarks charts={charts} trend={presentation.trend}/>}
     {presentation?.annotation&&wrap(presentation.annotation,140).map((line,i)=><text key={i} x="64" y={626+i*20} fontSize="13" fill="#555">{line}</text>)}
    </>}

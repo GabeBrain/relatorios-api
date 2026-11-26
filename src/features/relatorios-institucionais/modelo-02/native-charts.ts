@@ -9,12 +9,12 @@ export function addCharts(slide:PptxGenJS.Slide,charts:ChartPanel[]){
   const {table,box,kind}=chart,scaled=chart.scaleMax!==undefined&&kind==='columns';
   const data=table.columns.map((name,j)=>({name,labels:table.rows.map(r=>r.label),values:table.rows.map(r=>r.values[j] as number)}));
   const type=kind==='stacked-area'?'area':kind==='pie'?'pie':'bar';
-  const combo=chart.lineSeries?.length?data.map((series,j)=>({type:chart.lineSeries!.includes(j)?'line' as const:'bar' as const,data:[series],options:{chartColors:[chart.colors[j].replace('#','')],showValue:!chart.lineSeries!.includes(j)}})):null;
+  const combo=chart.lineSeries?.length?data.map((series,j)=>{const line=chart.lineSeries!.includes(j);return {type:line?'line' as const:'bar' as const,data:[series],options:{chartColors:[chart.colors[j].replace('#','')],showValue:!line,...line?{lineSize:4,lineDataSymbol:'none' as const}:chart.labelInside?{dataLabelPosition:'ctr' as const,dataLabelFontBold:true,dataLabelFontSize:13,dataLabelFontFace:'Arial',barGapWidthPct:chart.gapPct??70}:{}}};}):null;
   const digits=chart.labelDigits??(chart.percent?0:table.formats[0]==='count'?0:2);
   const options:PptxGenJS.IChartOpts={
    x:box.x/96,y:box.y/96,w:box.w/96,h:(box.h+(scaled?CATEGORY_SPACE:70))/96,
    catAxisLabelFontFace:'Arial',catAxisLabelFontSize:scaled?11:10,valAxisLabelFontSize:9,catAxisLabelColor:'444444',
-   chartColors:chart.colors.map(c=>c.replace('#','')),showLegend:kind!=='pie'&&kind!=='bars'&&table.columns.length>1,legendPos:'b',legendFontSize:10,
+   chartColors:chart.colors.map(c=>c.replace('#','')),showLegend:!scaled&&kind!=='pie'&&kind!=='bars'&&table.columns.length>1,legendPos:'b',legendFontSize:10,
    displayBlanksAs:'gap',showPercent:false,
    showValue:true,showLabel:kind==='pie',dataLabelFormatCode:chart.percent||kind==='pie'?'0"%"':digits?`#,##0.${'0'.repeat(digits)}`:'#,##0',lang:'pt-BR',showTitle:false,
    barDir:kind==='bars'?'bar':'col',barGrouping:kind==='stacked-area'||chart.stacked?'stacked':'clustered',
@@ -24,7 +24,7 @@ export function addCharts(slide:PptxGenJS.Slide,charts:ChartPanel[]){
     // Inner plot = the preview box exactly; category labels use the reserved strip below it.
     layout:{x:0,y:0,w:1,h:box.h/(box.h+CATEGORY_SPACE)},barGapWidthPct:chart.gapPct??70,
     dataLabelPosition:'ctr' as const,dataLabelFontBold:true,dataLabelFontSize:11,dataLabelFontFace:'Arial',
-   }:kind==='bars'?{
+   }:chart.labelInside&&kind==='columns'?{dataLabelPosition:'ctr' as const,dataLabelFontBold:true,dataLabelFontSize:13,dataLabelFontFace:'Arial',barGapWidthPct:60}:kind==='bars'?{
     // Ranking reads top-down as in the originals; pptxgenjs writes this value verbatim (its typing omits maxMin).
     catAxisOrientation:'maxMin' as unknown as 'minMax',catAxisLabelFontSize:12,catAxisLabelColor:'1F1F1F',dataLabelPosition:'ctr' as const,dataLabelFontBold:true,dataLabelFontSize:12,dataLabelFontFace:'Arial',barGapWidthPct:35}:{},
   };
@@ -59,7 +59,7 @@ export function preserveChartBlanks(bytes:Uint8Array){
  const files=unzipSync(bytes);
  for(const name of Object.keys(files).filter(k=>/^ppt\/charts\/chart\d+\.xml$/.test(k))){
   let chart=strFromU8(files[name]);const blanks:string[]=[];
-  if(!chart.includes('<c:pieChart>')&&!chart.includes('<c:lineChart>'))chart=contrastLabels(chart);
+  if(!chart.includes('<c:pieChart>'))chart=contrastLabels(chart);
   files[name]=strToU8(chart);
   for(const series of chart.matchAll(/<c:ser>[\s\S]*?<\/c:ser>/g)){
    const values=series[0].match(/<c:val>([\s\S]*?)<\/c:val>/)?.[1],range=values?.match(/<c:f>[^<]*!\$?([A-Z]+)\$?(\d+):/) ;

@@ -2,7 +2,8 @@ import {describe,it,expect} from 'vitest';
 import {renderToStaticMarkup} from 'react-dom/server';
 import PptxGenJS from 'pptxgenjs';
 import {strFromU8,unzipSync} from 'fflate';
-import {calculateReport,physicalPages,highlightText,accumulatedLabel,RANKING_TOP} from '../calculate';
+import {calculateReport,physicalPages,highlightText,accumulatedLabel,RANKING_TOP,stateSentence} from '../calculate';
+import {variationColor} from '../variation-classes';
 import {citiesFor,REGIONS} from '../model';
 import {cityPopulation,statePopulation} from '../population';
 import {ReportSlide} from '../ReportSlide';
@@ -90,6 +91,39 @@ describe('Modelo 02 · correção visual das cinco regiões',()=>{
    for(const line of sectionLines(id,region.label))expect(html.split(`>${line}</text>`).length-1).toBe(1);
    expect(html).not.toContain('width="650" height="325"');
   }
+ });
+ it('quadros por estado: nomes completos, janelas equivalentes nos cabeçalhos, total ao final e frase dos dados',()=>{
+  const slide=reportFor().slides.find(s=>s.id==='releases-states')!,t=slide.presentation!.displayTable!;
+  expect(t.rows.map(r=>r.label)).toEqual(['Paraná','Rio Grande do Sul','Santa Catarina','Total']);
+  expect(t.columns.slice(-5)).toEqual(['Jan–Set/2025','Jan–Set/2026','Variação (%) 2T26 X 3T26','Variação (%) 3T25 X 3T26','Variação (%) Jan–Set/25 X Jan–Set/26']);
+  expect(slide.tables[0].rows.map(r=>r.label)).toEqual(['PR','SC','RS','Total']);
+  expect(stateSentence([{name:'Paraná',value:2},{name:'Santa Catarina',value:-3},{name:'Rio Grande do Sul',value:null}],'lançamentos','com o ano anterior')).toBe('Lançamentos: aumento em Paraná; queda em Santa Catarina, na comparação com o ano anterior. Sem base comparável: Rio Grande do Sul.');
+  expect(stateSentence([{name:'A',value:1},{name:'B',value:4}],'vendas','com o ano anterior')).toBe('Todos os estados apresentaram aumento em vendas na comparação com o ano anterior.');
+ });
+ it('oferta final: cabeçalhos do original, total geral, participação destacada e chamada derivada',()=>{
+  const report=reportFor(),counts=report.slides.find(s=>s.id==='stock-Padrão')!,shares=report.slides.find(s=>s.id==='stock-Padrão-states')!;
+  expect(counts.presentation!.displayTable!.columns).toEqual(['Paraná','Santa Catarina','Rio Grande do Sul','Total Sul','Part. Total Sul (%)']);
+  expect(counts.presentation!.displayTable!.rows.at(-1)!.label).toBe('Total geral');expect(counts.presentation!.callout).toMatch(/^Padrão .* e .* representam 50% e 50% da oferta final da região Sul$/);
+  expect(shares.presentation!.headerColor).toBe('#ffc000');expect(shares.presentation!.callout).toMatch(/^Maior participação por estado:/);
+  const html=renderToStaticMarkup(<ReportSlide page={physicalPages([counts])[0]} selection={selection}/>);expect(html).toContain('Padrão/ Estado');expect(html).toContain('stroke="#262626"');
+ });
+ it('lançamentos, vendas e estoque: barras agrupadas, mesmo trimestre um ano antes e indicadores',()=>{
+  const slide=reportFor().slides.find(s=>s.id==='comparison')!;
+  expect(slide.presentation!.caption).toBe('3T2025 X 3T2026');expect(slide.presentation!.charts![0].stacked).toBeUndefined();
+  expect(slide.presentation!.indicators!.map(i=>[i.label,i.value])).toEqual([['Lançamentos',0],['Vendas',0],['Estoque',0]]);
+  expect(renderToStaticMarkup(<ReportSlide page={physicalPages([slide])[0]} selection={selection}/>)).toContain('Estoque');
+ });
+ it('preço por m²: desvio sobre a média simultânea, nunca valorização anual; legenda e média como camada editável',()=>{
+  const slide=reportFor().slides.find(s=>s.id==='meter-states')!,chart=slide.presentation!.charts![0];
+  chart.table.rows=chart.table.rows.map((r,i)=>({...r,values:[[8000,10000,12000][i],10000]}));
+  const html=renderToStaticMarkup(<ReportSlide page={{...physicalPages([slide])[0],charts:[chart]}} selection={selection} exporting/>);
+  expect(html).toContain('-20%');expect(html).toContain('+20%');expect(html).toContain('Preço médio Região Sul');expect(html).toContain('data-modelo02-overlay');
+  expect(chart.table.rows.map(r=>r.label)).toEqual(['Paraná','Santa Catarina','Rio Grande do Sul']);
+ });
+ it('comparação por UF usa as seis faixas do original e cinza claro sem base',()=>{
+  expect([12,7,3,-2,-7,-12,null].map(variationColor)).toEqual(['#7aa83c','#c5e0b3','#a6a6a6','#d9d9d9','#ff7070','#c00000','#f2f2f2']);
+  const slide=reportFor().slides.find(s=>s.id==='annual-state-comparison')!;expect(slide.title).toBe('Lançamentos x vendas x oferta - 2025 x 2026');
+  expect(slide.presentation!.captions).toEqual([['Lançamentos','Jan–Set/2025 x Jan–Set/2026'],['Vendas','Jan–Set/2025 x Jan–Set/2026'],['Oferta','3T2025 x 3T2026']]);
  });
  it('diagnóstico separa disponível parcial e registra a fonte populacional',()=>{
   const sources=fixture(),releases=sources.find(s=>s.city==='Curitiba'&&s.metric==='releases')!;releases.rows=releases.rows.filter(r=>!String(r.period).startsWith('2025-08'));

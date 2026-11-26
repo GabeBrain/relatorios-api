@@ -837,6 +837,21 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 26/11/2026 — Institucionais Imprensa: famílias P1 corrigidas nas cinco regiões — Claude
+
+- **Pedido explícito:** corrigir os 7 quadros P1 restantes do [plano visual regional](../features/relatorios-institucionais/modelo-02/PLANO_CORRECAO_VISUAL_REGIONAL_2026-11-26.md) (§8) e enviar.
+- **Entregue:**
+  - quadros por estado com estados por extenso, janelas nos cabeçalhos e frase gerada pelos dados;
+  - lançamentos/vendas/estoque em barras agrupadas, com painel de indicadores;
+  - oferta por padrão/tipologia no layout do original, com participação destacada e chamada calculada;
+  - preço por m² com rótulos internos, média na ponta da linha e setas de desvio sobre o gráfico nativo;
+  - comparação por UF com as seis faixas e a legenda do original;
+  - selo e legenda dos mapas das capitais.
+  Coluna "Faixa de valores" omitida por ser definição datada sem fonte atual.
+- **Validação:** `tsc` e lint ok. 72/72 testes do Modelo 02 e dos módulos compartilhados. Harness sintético das cinco regiões, PPTX renderizados no PowerPoint e edição de título/tabela/série na cópia Sul. Ajustes feitos depois de ver o Nordeste: 9 estados no quadro, 9 capitais no preço e UFs pequenas no mapa. Sem dados reais; aceite a cargo do usuário.
+- **Etapas/Pendências:** implementação do plano concluída; aceite real das cinco regiões pendente (usuário). Investigação da origem das lacunas reais da API no Sul segue aberta.
+- **Monday:** [DESAFIO — Estudos Entidades e Institucionais](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`. Sem escrita, por decisão do usuário.
+
 ### 26/11/2026 — Institucionais Imprensa: correção visual P0 implementada nas cinco regiões — Claude
 
 - **Pedido explícito:** executar o [plano visual regional](../features/relatorios-institucionais/modelo-02/PLANO_CORRECAO_VISUAL_REGIONAL_2026-11-26.md). O usuário assumiu o aceite com saídas reais.
@@ -2589,7 +2604,7 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 
 ## 3. Pendências
 
-- **Prioridade — Imprensa / cinco regiões (atualizado 26/11, Claude):** P0 implementado; pendentes a revisão prática das 7 famílias P1 listadas na §8 do plano e o aceite com saídas reais (usuário). Plano original: [plano visual baseado no PPTX real](../features/relatorios-institucionais/modelo-02/PLANO_CORRECAO_VISUAL_SUL_2026-11-26.md); corrigir população/participação e ordenação, títulos/divisórias, setas/colchetes/rótulos e manchetes, além de revisar lacunas e expansão dos rankings. Corrigir e conferir as cinco regiões; Sul é o caso real testado pelo usuário, não limite de escopo.
+- **Prioridade — Imprensa / cinco regiões (atualizado 26/11, Claude):** P0 e P1 implementados; pendente o aceite com saídas reais (usuário) e a investigação da origem das lacunas reais da API. Plano original: [plano visual baseado no PPTX real](../features/relatorios-institucionais/modelo-02/PLANO_CORRECAO_VISUAL_SUL_2026-11-26.md); corrigir população/participação e ordenação, títulos/divisórias, setas/colchetes/rótulos e manchetes, além de revisar lacunas e expansão dos rankings. Corrigir e conferir as cinco regiões; Sul é o caso real testado pelo usuário, não limite de escopo.
 
 - **Institucionais Imprensa (26/11):** homologação das saídas regionais e autorização de publicação desta correção; integrar população com fonte/data-base e denominador. Validação imobiliária sintética por decisão do usuário; ensaio autenticado não realizado nesta rodada.
 
