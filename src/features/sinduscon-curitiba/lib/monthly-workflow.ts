@@ -2,6 +2,7 @@ import * as XLSX from 'xlsx';
 import { strFromU8, strToU8, unzipSync, zipSync } from 'fflate';
 import type { ReportKind } from '../types';
 import { formulaCache, ooxml, patchWorkbookCells, worksheetPaths, type CellPatches, type CellPatchValue } from './ooxml-patcher';
+import { updateReportPresentation } from './report-presentation';
 
 const MONTHS = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
 const AREA_BANDS = ['Até 50', '50–75', '75–100', '100–150', '150–200', '200–250', '250–300', 'Acima de 300'];
@@ -393,7 +394,7 @@ function evaluateFormula(formula: string, valueAt: (reference: string) => unknow
   if (ifSum) { const result = sum(ifSum[2]); return sum(ifSum[1]) ? result : ''; }
   const directSum = formula.match(/^SUM\((.+)\)$/i);
   if (directSum) return sum(directSum[1]);
-  const arithmetic = formula.match(/^\$?([A-Z]+\$?\d+)\s*([/+*\-])\s*(?:\$?([A-Z]+\$?\d+)|(\d+(?:\.\d+)?))$/i);
+  const arithmetic = formula.match(/^\$?([A-Z]+\$?\d+)\s*([/+*-])\s*(?:\$?([A-Z]+\$?\d+)|(\d+(?:\.\d+)?))$/i);
   if (!arithmetic) return undefined;
   const left = number(valueAt(arithmetic[1]));
   const right = arithmetic[3] ? number(valueAt(arithmetic[3])) : Number(arithmetic[4]);
@@ -432,6 +433,7 @@ function updateReport(template: ArrayBuffer, aggregates: Aggregates, month: stri
         let title = typed.v;
         title = title.replace(/JANEIRO\s+A\s+[A-ZÁÀÃÂÉÊÍÓÔÕÚÇ]+(?:\s+DE)?\s+20\d{2}/i, `JANEIRO A ${month.toUpperCase()} DE ${year}`);
         title = title.replace(/(POR\s+ZONA\s*-\s*)20\d{2}/i, `$1${year}`);
+        title = title.replace(/(UNIDADES\s+(?:NÃO\s+)?RESIDENCIAIS\s+(?:LICENCIADAS|CONCLUÍDAS)\s*-\s*)20\d{2}/i, `$1${year}`);
         if (title !== typed.v) changes.set(reference, title);
       }
       if (vectors && typeof typed.v === 'string') {
@@ -474,11 +476,25 @@ function updateReport(template: ArrayBuffer, aggregates: Aggregates, month: stri
     }
 
     if (/10.*serie hist/.test(name)) {
+      const templateYears = Object.entries(sheet).flatMap(([reference, cell]) => {
+        if (!/^B\d+$/.test(reference) || typeof (cell as XLSX.CellObject).v !== 'number') return [];
+        const date = XLSX.SSF.parse_date_code((cell as XLSX.CellObject).v as number);
+        return date && date.y >= 2000 && date.y <= 2100 ? [date.y] : [];
+      });
+      const templateYear = templateYears.length ? Math.max(...templateYears) : year;
       for (const [reference, cell] of Object.entries(sheet)) {
-        if (reference.startsWith('!') || XLSX.utils.decode_cell(reference).c !== 1 || typeof (cell as XLSX.CellObject).v !== 'number') continue;
+        if (reference.startsWith('!') || XLSX.utils.decode_cell(reference).c !== 1) continue;
+        if (typeof (cell as XLSX.CellObject).v === 'string') {
+          const title = String((cell as XLSX.CellObject).v).replace(/(Total em\s+)(20\d{2})/i, (_, prefix, previousYear) => `${prefix}${Number(previousYear) + year - templateYear}`);
+          if (title !== (cell as XLSX.CellObject).v) changes.set(reference, title);
+          continue;
+        }
+        if (typeof (cell as XLSX.CellObject).v !== 'number') continue;
         const parsed = XLSX.SSF.parse_date_code((cell as XLSX.CellObject).v as number);
         if (!parsed) continue;
-        const values = aggregates.history.get(`${parsed.y}-${parsed.m}`) ?? Array(4).fill(0);
+        const rowYear = parsed.y + year - templateYear;
+        changes.set(reference, (Date.UTC(rowYear, parsed.m - 1, 1) - Date.UTC(1899, 11, 30)) / 86_400_000);
+        const values = rowYear === year && parsed.m > MONTHS.indexOf(month) + 1 ? Array(4).fill(0) : aggregates.history.get(`${rowYear}-${parsed.m}`) ?? Array(4).fill(0);
         setVector(changes, 2, XLSX.utils.decode_cell(reference).r + 1, values);
       }
     }
@@ -505,7 +521,7 @@ function updateReport(template: ArrayBuffer, aggregates: Aggregates, month: stri
   }
   const allNeighborhoods = new Set([...aggregates.residentialArea.keys(), ...aggregates.nonResidentialArea.keys(), ...aggregates.neighborhoodAreas.keys()]);
   const unmatchedNeighborhoods = [...allNeighborhoods].filter((key) => !matched.has(key)).map((key) => aggregates.neighborhoodAreas.get(key)?.label ?? key);
-  return { bytes: patchWorkbookCells(template, patches), unmatchedNeighborhoods };
+  return { bytes: updateReportPresentation(patchWorkbookCells(template, patches), year, MONTHS.indexOf(month) + 1), unmatchedNeighborhoods };
 }
 
 export function processMonthlyWorkflow(baseBuffer: ArrayBuffer, currentBuffer: ArrayBuffer, currentFileName: string, reportTemplate: ArrayBuffer, kind: ReportKind): MonthlyOutput {

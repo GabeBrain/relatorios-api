@@ -1,8 +1,20 @@
 # Estado do handoff
 
+## 26/11/2026 — Integração autorizada, blocos retirados e acesso pelo menu
+
+Fechamento:142 testes/11arquivos, tipos/lint e sete cenários de navegador sintético aprovados, incluindo menu e downloads. Curitiba/Araucária:86posições/96páginas. Lucas autorizou posteriormente o push da entrega finalizada; a restrição de envio sem autorização acima está atendida por essa nova mensagem. Conferência autenticada continua pendente.
+
+Lucas autorizou merge sem push. Resolvidos cinco conflitos entre `1c8790f7` e `2cec4cd9`, preservando locação/diagnóstico local e varredura/cobertura remota. LIVE conferido por identidade da base comum sem perda/duplicação. Retirados127–128 e perspectivas editoriais143–153; capas25/39/100 já omitidas.86posições com RM (62indicadores/24editoriais),40dependências externas. Menu Relatórios Automatizados → Modelo03, em implantação, rota existente/formulário preservados.111testes Modelo03/tipos/lint/build aprovados e teste de menu móvel; navegador e regressões Curitiba no fechamento. Sem resposta autenticada/deploy/homologação. [Registro](../../features/relatorios-institucionais/modelo-03/INTEGRACAO_2026-11-26.md). Não fazer push sem autorização separada.
+
 ## 26/11/2026 — Locação validada localmente, divergência Git e comparativo de revenda
 
 Codex/Lucas retomou da base local `9a97010b`; origin único, fetch3remotos/2locais exclusivos na abertura. Remotos25/11 incluem varredura de cobertura Modelo03 e correções Sinduscon Curitiba, sobrepondo arquivos da locação não commitada. Sem merge/pull/push; solicitar autorização humana para reconciliar, preservando cobertura/inventário remotos e trabalho local.88 testes e um caso temporal adicional aprovados, tipos/lint e navegador sintético com JSON/CSV/PPTX aprovados; sem ensaio autenticado. Endpoint VENDA permite revenda anunciada, mas não comprova usado; não adicionado comparativo automático. [Registro detalhado](../../features/relatorios-institucionais/modelo-03/RETOMADA_LOCACAO_2026-11-26.md).
+
+## 25/11/2026 — Varredura Modelo03 e fontes não integradas
+
+Codex/Lucas, base `296d12dd`, main/origin único0/0após fetch, árvore limpa antes da implementação. Corrigidos isolamento de fonte ausente, status inteiramente sem valores, rastreabilidade, RM desativada, cadência histórica e paginação contraditória. Inventário das45posições externas nos Insights/JSON/CSV; não são indicadores integrados.
+
+101testes/5arquivos,48combinações sintéticas, tipos/lint/build e sete cenários de navegador+quatro de fontes ausentes aprovados; exportações repetidas para conferir o inventário. Configuração03 preservada. Drive acessível para original/manual1.02; documentação online403 inclusive no Edge. Lucas confirmou novos x usados; falta contrato autorizado do lado de usados, sem afirmar inexistência do endpoint. Sem geração imobiliária autenticada/deploy observado/push/Monday. [Registro e limites](../../features/relatorios-institucionais/modelo-03/VARREDURA_2026-11-25.md).
 
 ## 24/11/2026 — Endpoint de locação fornecido e integrado
 

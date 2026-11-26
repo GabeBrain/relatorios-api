@@ -11,13 +11,13 @@ beforeEach(() => localStorage.clear());
 afterEach(cleanup);
 
 describe('marca do menu lateral', () => {
-  it('mantém Modelo 03 apenas por rota e aplica o menu sobreposto no celular', () => {
+  it('disponibiliza Modelo 03 no menu e preserva o menu sobreposto no celular', () => {
     const media=vi.spyOn(window,'matchMedia').mockImplementation(() => ({matches:true,addEventListener:vi.fn(),removeEventListener:vi.fn()} as unknown as MediaQueryList));
     try {
       render(<MemoryRouter initialEntries={['/rebrain/relatorios-institucionais/modelo-03']}><AppLayout><p>Modelo 03</p></AppLayout></MemoryRouter>);
-      expect(screen.queryByRole('link',{name:'Modelo 03'})).not.toBeInTheDocument();
       expect(screen.getByRole('button',{name:'Expandir menu'})).toHaveAttribute('aria-expanded','false');
       fireEvent.click(screen.getByRole('button',{name:'Expandir menu'}));
+      expect(screen.getByRole('link',{name:/Modelo 03/})).toHaveAttribute('href','/rebrain/relatorios-institucionais/modelo-03');
       expect(screen.getByRole('complementary')).toHaveClass('fixed');
       fireEvent.keyDown(window,{key:'Escape'});
       expect(screen.getByRole('complementary')).toHaveClass('w-14');

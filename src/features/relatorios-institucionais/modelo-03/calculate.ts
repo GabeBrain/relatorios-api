@@ -32,10 +32,10 @@ export function createCalculator(s:Selection,sources:Source[],indices:Readonly<R
  const p=period(s),cache=new Map<string,Detail[]>(),snapshotWarnings=new Map<string,string[]>(),warnings=new Set<string>();
  function get(city:string,segment:Source['segment'],metric:Source['metric'],group:Source['group']='Padrão'){
   const target=location(city,s.uf),matches=sources.filter(x=>norm(x.city)===norm(target.city)&&x.uf===target.uf&&x.segment===segment&&x.metric===metric&&x.group===group);
-  if(matches.length!==1||!matches[0].complete)throw new Error(`${city}/${segment}/${metric}/${group}: fonte não concluída.`);return matches[0];
+  if(matches.length!==1||!matches[0].complete)throw new CoverageError(`${city}/${segment}/${metric}/${group}: fonte não concluída.`);return matches[0];
  }
  const used=new Set<string>();
- function source(city:string,segment:Source['segment'],metric:Source['metric'],group:Source['group']='Padrão'){const value=get(city,segment,metric,group);used.add(sourceKey(value));return value;}
+ function source(city:string,segment:Source['segment'],metric:Source['metric'],group:Source['group']='Padrão'){const target=location(city,s.uf);used.add(sourceKey({...target,segment,metric,group}));return get(city,segment,metric,group);}
  function snapshot(city:string,segment:Source['segment'],m:string):Detail[]{
   const src=source(city,segment,'details','Empreendimento'),key=`${city}/${segment}/${m}`;if(cache.has(key)){for(const w of snapshotWarnings.get(key)??[])warnings.add(w);return cache.get(key)!;}
   const out:Detail[]=[],projects=new Map<string,string>(),excluded=new Map<string,number>();let excludedStock=0;
@@ -94,7 +94,7 @@ export function createCalculator(s:Selection,sources:Source[],indices:Readonly<R
   return Array.from({length:count},(_,i)=>{const end=shift(p.end,(i-count+1)*p.size);return {start:shift(end,1-p.size),end,label:p.size===1?end:p.size===3?`${Math.ceil(Number(end.slice(5))/3)}T${end.slice(0,4)}`:`${Math.ceil(Number(end.slice(5))/6)}S${end.slice(0,4)}`};});
  }
  function flowDetail(city:string,d:Definition,a:string,b:string){
-  const rows:Detail[]=[],src=source(city,'Vertical','details','Empreendimento'),cadence=surveyCadence(src).months;
+  const rows:Detail[]=[],src=source(city,'Vertical','details','Empreendimento'),cadence=surveyCadence(src,b).months;
   for(const m of expectedObservations(src,a,b)){
    const frame=snapshot(city,'Vertical',m),start=shift(m,1-cadence),metric=d.role==='sales'?'sales':'releases',expected=temporal(city,metric,start,m);let derived=false;
    const values=frame.map(r=>{let v=metric==='sales'?r.sales:r.launches;if(v===null&&metric==='releases'){v=r.release>=start&&r.release<=m?r.qty:0;derived=true;}if(v===null||!Number.isSafeInteger(v)||metric==='releases'&&v<0)throw new Error('Fluxo histórico por tipologia ausente ou inválido.');return {...r,stock:v};});
@@ -117,7 +117,7 @@ export function createCalculator(s:Selection,sources:Source[],indices:Readonly<R
   if(d.role?.startsWith('rental-'))return rentalSlide(d,s,sources);
   if(d.rmOnly&&!s.includeRm)return {...result,status:'not-applicable',issue:'Região metropolitana não selecionada.'};
   try{
-   const mode=geographyMode(s),allCities=[s.city,...s.rmCities];
+   const mode=geographyMode(s),allCities=[s.city,...s.includeRm?s.rmCities:[]];
    const referenceId=regionalPreset(s.uf,s.city)?.id,combinedDetail=d.localOnly&&d.segment==='Vertical'&&((referenceId==='teresina'&&!['ivv','meter'].includes(d.role!))||(referenceId==='natal'&&d.group==='neighborhood'));
    const territories=combinedDetail?[{label:studyLabel(s),cities:allCities}]:mode==='combined-cities'&&!(d.group&&['ticket','meter'].includes(d.role!))?[{label:studyLabel(s),cities:allCities}]:isPairStudy(s)||mode==='named-cities'&&!d.localOnly||mode==='combined-cities'?[s.city,...s.rmCities].map(city=>({label:location(city,s.uf).city,cities:[city]})):d.localOnly?[{label:s.city,cities:[s.city]}]:d.rmOnly?[{label:'RM',cities:s.rmCities}]:[{label:s.city,cities:[s.city]},...s.includeRm?[{label:'RM',cities:s.rmCities}]:[]];
    const monetary=d.role==='vgv-release'||d.role==='vgv-sales',buckets=bucketDefinitions(d).filter(bucket=>d.role!=='ivv'||shift(bucket.start,-1)>='2021-01');
@@ -167,6 +167,9 @@ export function createCalculator(s:Selection,sources:Source[],indices:Readonly<R
     }
    }
    result.status='available';
+   const hasNumbers=result.tables.some(t=>t.rows.some(r=>r.values.some(v=>typeof v==='number')));
+   const unavailable=[...warnings].find(w=>/sem cobertura|fonte não concluída|nenhum empreendimento com fotografia válida|indisponível|competências ausentes|não há reconciliação|não há decomposição/i.test(w));
+   if(!hasNumbers&&unavailable){result.status='waiting-source';result.issue=unavailable;}
   }catch(error){result.status='waiting-source';result.issue=error instanceof Error?error.message:'Não foi possível calcular este slide.';result.tables=[];}
   result.sourceKeys=[...used];result.warnings=[...warnings];return result;
  }

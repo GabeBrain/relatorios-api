@@ -2,6 +2,7 @@ import {norm,period,geographyMode,studyLabel} from './model';
 import {presentationPages} from './presentation';
 import type {Report} from './types';
 import {reportStandardFamily} from '../shared/standard-families';
+import {deferredSourceInventory} from './source-inventory';
 
 export type InsightKind='pending'|'divergence'|'coverage'|'ambiguity'|'method';
 export interface AnalystIssue {message:string;kind:InsightKind;slides:number[];referencePages:number[]}
@@ -25,9 +26,11 @@ export function buildModelo03Insights(report:Report){
    if(slide.definition.group==='standard'&&!['total','sem oferta no recorte','sem cobertura valida'].includes(norm(r.label))&&!reportStandardFamily(r.label))add(`Padrão sem equivalência no agrupamento confirmado: ${r.label}.`,'ambiguity',ref);
   }
  }
+ const deferredSources=deferredSourceInventory();
  const all=[...issues.values()].map(i=>({...i,slides:i.slides.sort((a,b)=>a-b)}));
  return {period:period(report.selection),geography:{mode:geographyMode(report.selection),label:studyLabel(report.selection)},generatedAt:report.finishedAt,
   summary:{available:report.slides.filter(s=>s.status==='available').length,pending:report.slides.filter(s=>s.status==='waiting-source').length,editorial:report.slides.filter(s=>s.status==='editorial').length,withWarnings,withMissingValues,divergences:all.filter(i=>i.kind==='divergence').length,ambiguities:all.filter(i=>i.kind==='ambiguity').length,sourceFailures:report.sources.filter(s=>!s.complete).length},issues:all,
+  deferredSources,
   sources:report.sources.map(s=>({city:s.city,uf:s.uf,segment:s.segment,metric:s.metric,group:s.group,complete:s.complete,records:s.rows.length,requests:s.requests,failure:s.failure})),
   limits:{homologated:false,interpretation:'Slide disponível pode conter base parcial, ressalvas ou células sem valor. Traço não é zero; ausência de pendência não é homologação.'}};
 }

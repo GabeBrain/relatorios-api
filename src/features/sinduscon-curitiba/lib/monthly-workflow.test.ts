@@ -2,8 +2,9 @@
 import * as XLSX from 'xlsx';
 import { strFromU8, strToU8, unzipSync, zipSync } from 'fflate';
 import { readFileSync } from 'node:fs';
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 import { consolidateMonthlyBase, generateFinalReport, tabulateConsolidatedBase } from './monthly-workflow';
+import { numericColumnWidth, updateReportPresentation } from './report-presentation';
 
 const HEADERS = ['MÊS', 'Bairro', 'Grupo Zoneamento', 'Quantidade Pavimentos', 'Quantidade de Unidades Residênciais', 'Quantidade Unidades Não Residênciais', 'Área Liberada', 'AREA UNIDADE', 'AREAS RESID', 'AREA NÃO RESID', 'Uso Alvará', 'Sub-Uso Alvará', 'Material', 'ANO'];
 
@@ -52,6 +53,94 @@ function reportBuffer() {
 }
 
 describe('processMonthlyWorkflow', () => {
+  // Real OOXML templates are CPU-heavy; allow the worker to flush progress between cases.
+  afterEach(async () => { await new Promise((resolve) => setTimeout(resolve, 0)); });
+  it.each(['alvaras', 'cvco'] as const)('atualiza títulos e gráficos até setembro e preserva formatos e objetos em %s', (kind) => {
+    const source = workbookBuffer([HEADERS, ['SETEMBRO', 'Cidade Industrial', 'SE-1', 5, 2, 1, 600000, 200000, 400000, 200000, 'Habitação', 'Coletiva', 'Alvenaria', 2026]]);
+    const tabulation = tabulateConsolidatedBase(source, kind);
+    const template = readFileSync(`public/sinduscon-templates/report-${kind === 'alvaras' ? 'liberados' : 'concluidos'}.xlsx`);
+    const before = unzipSync(Uint8Array.from(template));
+    const output = generateFinalReport(tabulation.bytes.buffer as ArrayBuffer, Uint8Array.from(template).buffer as ArrayBuffer, kind);
+    const after = unzipSync(output.bytes);
+    const report = XLSX.read(output.bytes, { type: 'array', cellFormula: true });
+    const floors = report.Sheets[report.SheetNames.find((name) => name.includes('Folha 07'))!];
+    expect(floors.A72.v).toContain('2026');
+    const chart = new DOMParser().parseFromString(strFromU8(after['xl/charts/chart14.xml']), 'application/xml');
+    const refs = Array.from(chart.getElementsByTagNameNS('*', 'f')).map((node) => node.textContent);
+    expect(refs.some((ref) => ref?.includes('$B$41:$B$44') && ref.includes('$B$46:$B$54'))).toBe(true);
+    expect(refs.some((ref) => ref?.includes('$G$41:$G$44') && ref.includes('$G$46:$G$54'))).toBe(true);
+    const cache = Array.from(chart.getElementsByTagNameNS('*', 'numRef')).find((node) => node.textContent?.includes('$G$46:$G$54'))!;
+    const last = Array.from(cache.getElementsByTagNameNS('*', 'pt')).at(-1)!;
+    expect(Number(last.textContent)).toBe(600000);
+    const sectorChart = new DOMParser().parseFromString(strFromU8(after['xl/charts/chart13.xml']), 'application/xml');
+    expect(sectorChart.getElementsByTagNameNS('*', 'max')).toHaveLength(0);
+    expect(Buffer.from(after['xl/styles.xml']).equals(Buffer.from(before['xl/styles.xml']))).toBe(true);
+    for (const path of Object.keys(before).filter((path) => /^(xl\/media\/|xl\/drawings\/)/.test(path))) expect(Buffer.from(after[path]).equals(Buffer.from(before[path]))).toBe(true);
+    for (let index = 2; index <= 9; index += 1) {
+      const xml = new DOMParser().parseFromString(strFromU8(after[`xl/worksheets/sheet${index}.xml`]), 'application/xml');
+      const setup = xml.getElementsByTagNameNS('*', 'pageSetup')[0];
+      expect(setup.getAttribute('fitToWidth')).toBe('1');
+      expect(setup.getAttribute('fitToHeight')).toBe('1');
+      expect(setup.hasAttribute('scale')).toBe(false);
+      expect(xml.getElementsByTagNameNS('*', 'pageSetUpPr')[0].getAttribute('fitToPage')).toBe('1');
+      expect(xml.getElementsByTagNameNS('*', 'rowBreaks')).toHaveLength(0);
+      expect(xml.getElementsByTagNameNS('*', 'colBreaks')).toHaveLength(0);
+    }
+    const definedNames = (bytes: Uint8Array) => Array.from(new DOMParser().parseFromString(strFromU8(bytes), 'application/xml').getElementsByTagNameNS('*', 'definedName')).filter((node) => node.getAttribute('name') === '_xlnm.Print_Area').map((node) => node.textContent);
+    expect(definedNames(after['xl/workbook.xml'])).toEqual(definedNames(before['xl/workbook.xml']));
+    const zones = new DOMParser().parseFromString(strFromU8(after['xl/worksheets/sheet4.xml']), 'application/xml');
+    const se = Array.from(zones.getElementsByTagNameNS('*', 'col')).find((node) => node.getAttribute('min') === '9' && node.getAttribute('max') === '9');
+    expect(Number(se?.getAttribute('width'))).toBeGreaterThan(7.5);
+  });
+
+  it('não inclui competências futuras nem os totais anuais no gráfico histórico', () => {
+    const workbook = XLSX.utils.book_new();
+    const sheet = XLSX.utils.aoa_to_sheet([
+      ['Mês', '', '', '', '', '', 'Área'],
+      ['', 45901, '', '', '', '', 100],
+      ['Total em 2025', '', '', '', '', '', 100],
+      ['', 46266, '', '', '', '', 200],
+      ['', 46296, '', '', '', '', 999],
+    ]);
+    XLSX.utils.book_append_sheet(workbook, sheet, 'Folha 10 serie hist');
+    const bytes = XLSX.write(workbook, { type: 'array', bookType: 'xlsx' });
+    const files = unzipSync(new Uint8Array(bytes));
+    files['xl/charts/chart14.xml'] = strToU8('<c:chartSpace xmlns:c="http://schemas.openxmlformats.org/drawingml/2006/chart"><c:chart><c:ser><c:cat><c:numRef><c:f>\'Folha 10 serie hist\'!$B$2:$B$5</c:f></c:numRef></c:cat><c:val><c:numRef><c:f>\'Folha 10 serie hist\'!$G$2:$G$5</c:f></c:numRef></c:val></c:ser></c:chart></c:chartSpace>');
+    const output = unzipSync(updateReportPresentation(zipSync(files), 2026, 9));
+    const chart = strFromU8(output['xl/charts/chart14.xml']);
+    expect(chart).toContain('$B$2:$B$2');
+    expect(chart).toContain('$B$4:$B$4');
+    expect(chart).not.toContain('$B$5');
+    expect(chart).not.toContain('999');
+  });
+
+  it('amplia proporcionalmente para separadores, totais maiores e fontes em negrito', () => {
+    expect(numericColumnWidth('137,441', 10, true)).toBeGreaterThan(6.125);
+    expect(numericColumnWidth('1,137,441', 10, true)).toBeGreaterThan(numericColumnWidth('137,441', 10, true));
+    expect(numericColumnWidth('137,441', 10, true)).toBeGreaterThan(numericColumnWidth('137,441', 10));
+  });
+
+  it.each([[2027, 'Janeiro', 1], [2026, 'Outubro', 10], [2028, 'Dezembro', 12]] as const)('acompanha competência %s/%s sem fixar o ano do modelo', (year, month, monthNumber) => {
+    const source = workbookBuffer([HEADERS,
+      [month, 'Centro', 'ZR2', 5, 1, 0, 100, 100, 100, 0, 'Habitação', 'Coletiva', 'Alvenaria', year - 1],
+      [month, 'Centro', 'ZR2', 5, 2, 0, 200, 100, 200, 0, 'Habitação', 'Coletiva', 'Alvenaria', year],
+    ]);
+    const tabulation = tabulateConsolidatedBase(source, 'alvaras');
+    const template = Uint8Array.from(readFileSync('public/sinduscon-templates/report-liberados.xlsx'));
+    const output = generateFinalReport(tabulation.bytes.buffer as ArrayBuffer, template.buffer, 'alvaras');
+    const workbook = XLSX.read(output.bytes, { type: 'array', cellFormula: true });
+    expect(workbook.Sheets['Folha 07 Resid-Pav'].A72.v).toContain(String(year));
+    const history = workbook.Sheets['Folha 10 serie hist'];
+    expect(history.B45.v).toBe(`Total em ${year - 1}`);
+    expect(history.B58.v).toBe(`Total em ${year}`);
+    const chart = new DOMParser().parseFromString(strFromU8(unzipSync(output.bytes)['xl/charts/chart14.xml']), 'application/xml');
+    const cat = Array.from(chart.getElementsByTagNameNS('*', 'numRef')).find((node) => node.textContent?.includes('$B$'))!;
+    const dates = Array.from(cat.getElementsByTagNameNS('*', 'pt')).map((node) => XLSX.SSF.parse_date_code(Number(node.textContent)));
+    expect(dates).toHaveLength(13);
+    expect(dates[0]).toMatchObject({ y: year - 1, m: monthNumber });
+    expect(dates.at(-1)).toMatchObject({ y: year, m: monthNumber });
+  });
+
   it.each(['alvaras', 'cvco'] as const)('preenche meses e distingue unidades de áreas no modelo %s', (kind) => {
     const source = workbookBuffer([HEADERS, ['JULHO', 'Centro', 'ZR2', 5, 2, 1, 300, 100, 200, 100, 'Habitação', 'Coletiva', 'Alvenaria', 2026]]);
     const tabulation = tabulateConsolidatedBase(source, kind);

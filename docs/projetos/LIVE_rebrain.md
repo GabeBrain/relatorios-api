@@ -837,6 +837,16 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 26/11/2026 — Modelo03 integrado: locação, cobertura, retiradas e menu
+
+**Fechamento:**142 testes/11arquivos e sete cenários de navegador aprovados, com menu, três periodicidades, exportações, vazio/erro/sem token/429. Tipos/lint aprovados; captura de locação inspecionada. Lucas autorizou o push ao concluir. Sem homologação de dados reais ou deploy observado.
+
+- **Autor/origem:** Codex/Lucas; integração de `1c8790f7` com `2cec4cd9`, autorizada explicitamente sem push. Inclui três commits locais e três remotos desde `d3ceeaa0`, sem reescrever histórico.
+- **Monday:** [DESAFIO — Estudos Entidades e Institucionais](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`.
+- **Entrega:** preservadas locação, diagnóstico de vendas inválidas e correções remotas de paginação/cadência/cobertura/inventário. Conflitos somados; identidade do LIVE conferida pela base comum, sem perda/duplicação. Lucas pediu ocultar novos/usados127–128 e perspectivas editoriais143–153; capas25/39/100 seguem omitidas, sem retirar indicadores calculados. JSON registra referências omitidas. Com RM86 posições (62 indicadores/24 editoriais); inventário40fontes externas.
+- **Acesso:** item Modelo03 em Relatórios Automatizados após Maceió, indicação em implantação e rota lazy existente. Mesmo menu móvel; sem mexer no formulário, Home ou outros relatórios. Primeira liberação para analistas depende de publicação autorizada.
+- **Verificação:**111 testes Modelo03 e tipos/lint/build aprovados; menu móvel aprovado. Regressões Curitiba e navegador/exportações no fechamento. Sem coleta autenticada nova/deploy/homologação. [Integração e limites](../features/relatorios-institucionais/modelo-03/INTEGRACAO_2026-11-26.md).
+
 ### 26/11/2026 — Retomada da locação Modelo03 e viabilidade de novos × usados
 
 - **Autor/origem:** Codex/Lucas; base local `9a97010b`, retomada da implementação não commitada em24/11 após bloqueio de créditos da sessão anterior.
@@ -868,6 +878,36 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 - **Mudança:** `sources[].salesFieldDiagnostics` identifica registros de vendas ausentes/inválidos do período selecionado: empreendimento ID/nome, tipologia ID, mês, padrão, campo, valor escalar/tipo e motivo (campo ausente, nulo, indefinido, vazio, tipo inválido, não numérico/não finito, fora da precisão segura, fracionário). Vendas negativas inteiras seguem válidas. Observações anterior/seguinte são contexto, sem imputação nem mudança dos cálculos. Limite100 amostras por fonte, total/motivos/omitidos explícitos. Não exporta objetos brutos, endereço ou autenticação; cadastro identificado somente nas anomalias.
 - **Evidência:** JSON Uberlândia3T2026 fornecido mostra quatro registros sem venda válida (Econômico agosto2, Standard setembro2), mas o arquivo anterior não permite identificar motivo bruto. Nova exportação exige nova geração com a versão atualizada. Não houve consulta imobiliária autenticada nesta sessão.
 - **Validação:** 26 testes em dois arquivos aprovados; motivos, vizinhos, recorte, omissões, preservação de zero/negativos e regressão de exportação. Tipos/lint verificados antes do fechamento.
+### 25/11/2026 — Modelo03: varredura dos16recortes e fontes ausentes — Codex/Lucas
+
+- **Ambiente/funcionalidade:** `/rebrain/relatorios-institucionais/modelo-03`. Base `296d12dd`, main/origin único0/0após fetch, árvore limpa na abertura.
+- **Correções:** fonte municipal ausente isolada por território/célula, preservando a parte válida; fontes falhas em `sourceKeys`; quadro inteiramente sem valores por falta de cobertura/preço/reconciliação vira pendente, com tabelas nulas no diagnóstico e arte sem sobreposição. RM desativada respeitada, cadência inferida limitada ao corte histórico e paginação contraditória recusada.
+- **Inventário:**45posições externas nos Insights/JSON/CSV:1geografia/consumo,13economia/funding,5alvarás,21short stay,4locação,1novos x usados. Separadas de falhasHTTP e dos58indicadores existentes; sem inventar endpoint/dado.
+- **Pedido específico:** Lucas confirmou novos x usados(ref128). Original/manual1.02lidos noDrive; catálogoOpenAPI não documenta o lado de usados. Documentação online403em consulta direta eEdge; contrato atual não confirmado, sem alegar inexistência do endpoint. [Achados, fontes e limites](../features/relatorios-institucionais/modelo-03/VARREDURA_2026-11-25.md).
+- **Validação:**101testes/5arquivos,16recortes×3periodicidades sintéticos, tipos/lint/build; sete cenários de página e quatro de fontes ausentes emdesktopclaro/celularescuro, cancelamento/429/erro/vazio/sem token eJSON/CSV/PPTXlidos. Exportação repetida para conferir inventário; capturas inspecionadas. Configuração e carregamento compartilhado preservados. Sem nova geração imobiliária autenticada/homologação.
+- **Etapas/Pendências:** implementação local; publicar com autorização e conferir nova geração real. Confirmar endpoint/esquema de usados e integrar fontes externas com contratos, sem preencher ausência comzero. Sem push/deploy/Monday nesta rodada.
+- **Monday:** [DESAFIO — Estudos Entidades e Institucionais](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`.
+
+### 25/11/2026 — Curitiba: impressão acompanha a ampliação automática das colunas — Codex/Lucas
+
+- **Ambiente/funcionalidade:** `/rebrain/sinduscon-curitiba` — exportação Excel→PDF dos dois modelos. Base `31a20548`, main/origin 0/0 após fetch; árvore limpa na abertura.
+- **Evidência:** PDF Liberados setembro/2026 do reteste contém dez páginas sem capa/mapa. Páginas 2 e 5 são faixas da direita de duas abas, com totais e partes dos gráficos. A ampliação anterior das colunas manteve a escala fixa de impressão do modelo, causando transbordamento; não se devem excluir essas páginas.
+- **Correção:** impressão de cada aba ajustada a uma página de largura/altura (`fitToPage`, `fitToWidth`, `fitToHeight`), retirando escala fixa/quebras manuais conflitantes; áreas de impressão, margens, papel, orientação, fontes, dados e colunas proporcionais preservados. Erro de contagem orienta regenerar Excel e reexportar, sem descartar páginas. O compilador continua exigindo oito páginas de conteúdo.
+- **Validação/limites:** quatro regressões dirigidas aprovadas, incluindo os dois modelos reais e todas as oito abas. Conferência headless das configurações e preservação; impressão nativa/novo PDF da analista ainda necessários. [Evidências e regra](../features/sinduscon-curitiba/FEEDBACK_2026-11-25.md).
+- **Fechamento técnico:** 20 testes dirigidos no total (quatro de geração/impressão e 16 de compilação/separadores), TypeScript, ESLint dirigido e `git diff --check` aprovados. Sem regenerar o PDF do cliente.
+- **Etapas/Pendências:** implementação local; publicar com autorização, gerar novo Excel e exportar novamente. O PDF de dez páginas existente não é corrigido pelo reenvio. Sem push/deploy/Monday nesta rodada.
+- **Monday:** —
+
+### 25/11/2026 — Curitiba: competência dinâmica, colunas proporcionais e conferência da exportação — Codex/Lucas
+
+- **Ambiente/funcionalidade:** `/rebrain/sinduscon-curitiba` — relatórios Liberados e Concluídos. Base `d3ceeaa0`, main/origin único 0/0 após fetch, árvore limpa na abertura.
+- **Pedido:** corrigir o sistema para a analista testar, sem regenerar entregáveis manualmente. Lucas confirmou ano variável, janela histórica de 13 meses (set/25–set/26, por exemplo), ajuste proporcional automático das colunas e somente o acento de “concluídos” na capa.
+- **Entrega:** títulos/datas/totais anuais seguem a competência, inclusive novos anos; referências/caches/eixo do gráfico histórico seguem os 13 meses; áreas por setor e série histórica usam escala automática. Colunas crescem conforme números formatados/fontes/negrito, preservando valores/fórmulas/arte. Capa conserva a tipografia original e recebe o acento.
+- **Separadores:** configuração regional da exportação Excel→PDF é externa; a tela orienta decimal vírgula/milhar ponto e a compilação detecta milhares com vírgula, informa páginas e pede reexportação. Não afirma converter automaticamente os separadores do Excel.
+- **Evidência/limites:** PDFs reais e Excel de Concluídos confirmam as causas; SE é 137440.88044117647 na origem, exibido 137.441. Edge headless verificou recusa do PDF real com vírgulas, aceitação brasileira, erro/recuperação/sucesso/download de dez páginas e celular escuro; captura da capa inspecionada. Exportação Excel/COM não concluiu; layout nativo e geração completa com a base da analista permanecem para homologação. [Contrato e validação](../features/sinduscon-curitiba/FEEDBACK_2026-11-25.md).
+- **Etapas/Pendências:** implementação local; conferir publicação e gerar novamente Liberados/Concluídos no sistema. Reutilizados Alert/Card/Select/Button e carregamento Brain existentes. Sem push/deploy/Monday nesta entrega.
+- **Validação final:** 33 testes em quatro arquivos, tipos, lint dirigido e build de produção aprovados; `git diff --check` limpo. Casos pesados de modelos reais cedem o event loop entre testes para evitar timeout RPC do Vitest, sem relaxar asserções.
+- **Monday:** —
 
 ### 24/11/2026 — Modelo 03: insights, fluxos Itajaí e painel SP efetivo
 
@@ -2238,6 +2278,8 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 
 ## 2. Etapas
 
+- **26/11 — Modelo03:** integração dos históricos autorizada e resolvida; locação preservada, novos/usados/perspectivas temporariamente retirados, menu pronto para testes após publicação. Homologação não concluída.
+
 - **26/11 — Locação Modelo03:** implementação local validada; integrar correções remotas de25/11 somente após autorização. Não considerada homologada ou publicada.
 
 - **24/11 — Locação Modelo03:** endpoint fornecido integrado no motor comum; pendente primeira geração real e conferência do recorte de anúncios coletados com o analista.
@@ -2245,6 +2287,11 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 - **24/11 — Modelo03:** três capas temporariamente omitidas em todas as cidades; inclusão da locação autorizada e em investigação de contrato.
 
 - **24/11 — Diagnóstico Modelo03:** identificação e motivo de vendas inválidas implementados no JSON comum a todas as cidades; cálculos e bloqueios preservados.
+- **25/11 — Modelo03, varredura:** cobertura/disponibilidade/cadência e inventário das45posições externas concluídos/testados localmente nos16recortes/3periodicidades com fontes sintéticas. Endpoint de usados/homologação real pendentes.
+
+- **25/11 — Curitiba, reteste de impressão:** corrigida localmente a interação entre largura proporcional e escala fixa; oito abas configuradas para uma página cada, preservando o conteúdo. Conferência nativa da analista pendente.
+
+- **25/11 — Sinduscon Curitiba:** competência dinâmica, janela histórica de 13 meses, largura proporcional e validação dos separadores implementadas localmente. Homologação da analista após publicação autorizada; não confundir inspeção OOXML/browser com impressão nativa verificada.
 
 - **24/11 — Relatórios automáticos:** insights Modelo03 e painel efetivo SP implementados localmente; divergências de fluxo detalhado preservadas com ressalva. Geração nova e conferência do analista ainda necessárias após publicação.
 
@@ -2440,6 +2487,8 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 
 ## 3. Pendências
 
+- **26/11 — Modelo03:** autorizar publicação do merge/menu; conferir a primeira geração real de aluguel e arquivos pareados com analistas. Comparativo novos/usados e perspectivas suspensos por pedido humano, sem contar128como fonte pendente nesta versão.
+
 - **26/11 — Integração Git:** autorizar reconciliação dos históricos (3 remotos/2 locais na abertura) sem push; preservar melhorias remotas de cobertura/inventário e locação local e repetir testes na base integrada. Novos × usados requer confirmação da condição dos anúncios VENDA e alinhamento temporal/ponderação, antes de usar o rótulo “usados”.
 
 - **24/11 — Locação:** conferir resposta autenticada ALUGUEL, permissões, fronteiras dos filtros de coleta e metodologia da amostra após publicação autorizada. Não há contrato de fotografia ativa histórica no material enviado. Pendência anterior de localizar endpoint resolvida pelo `revenda.py` fornecido.
@@ -2447,6 +2496,11 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 - **24/11 — Locação Modelo03:** confirmar URL/contrato GeoBrain de locação por bairro, tipologia e oferta/preço/área; verificar filtros geográficos, competência disponível, paginação e autenticidade antes da integração. Pedido de informação enviado a Lucas; não implementado no catálogo atual.
 
 - **24/11 — Uberlândia:** após envio autorizado, gerar novamente e baixar JSON para identificar os quatro registros e distinguir nulo/vazio/campo ausente/formato inválido. Diagnóstico da resposta não comprova a causa no cadastro GeoBrain.
+- **25/11 — Modelo03, após varredura:** autorizar envio, conferir frontend e obterJSON/CSV/PPTXda mesma geração real. Confirmar contrato autorizado de usados pararef128(documentação online403); locação/shortstay/macroeconomia/alvarás/consumo do inventário não estão integrados.101regressões sintéticas não comprovam cobertura real dos16recortes.
+
+- **25/11 — Curitiba, paginação:** enviar a correção com autorização; após atualização, gerar novo Excel de Liberados/Concluídos e exportar as oito abas novamente. Não remover as páginas excedentes do PDF recebido, pois contêm totais/gráficos transbordados. Conferir oito páginas completas, legibilidade e separadores antes da compilação final.
+
+- **25/11 — Sinduscon Curitiba:** autorizar envio, confirmar frontend atualizado e regenerar os dois modelos pelo sistema; conferir SE sem `#####`, anos, janela de 13 meses, barra XIX e capa. Configurar separadores brasileiros no programa que exporta o Excel; a compilação identifica vírgula nos milhares e orienta reexportação. Conferir paginação/layout nativo com a analista.
 
 - **24/11 — Modelo03:** publicar somente com autorização; conferir novo JSON Itajaí/Navegantes e demais cidades após gerar novamente. Base parcial/ressalvas e editoriais não equivalem à homologação. Nenhum ajuste manual artificial de unidades.
 

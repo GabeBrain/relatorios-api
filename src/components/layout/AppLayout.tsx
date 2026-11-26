@@ -75,6 +75,7 @@ const NAV_GROUPS: NavGroup[] = [
           { path: '/rebrain/relatorios-institucionais/sp', label: 'SP Institucional', icon: <BarChart2 className="h-4 w-4" /> },
           { path: '/rebrain/relatorios-institucionais/fortaleza', label: 'Sinduscon — Fortaleza', icon: <BarChart2 className="h-4 w-4" /> },
           { path: '/rebrain/relatorios-institucionais/maceio', label: 'Sinduscon — Maceió', icon: <BarChart2 className="h-4 w-4" /> },
+          { path: '/rebrain/relatorios-institucionais/modelo-03', label: 'Modelo 03', icon: <BarChart2 className="h-4 w-4" />, standbyLabel: '(em implantação)' },
         ],
       },
       { path: '/rebrain/validacao-fechamento', label: 'Validação do Fechamento', icon: <ClipboardList className="h-4 w-4" /> },

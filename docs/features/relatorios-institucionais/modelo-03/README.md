@@ -1,6 +1,14 @@
 # Modelo 03 — gerador comum
 
-Locação integrada pelo contrato enviado por Lucas: [anúncios coletados no período, critérios e limites](LOCACAO_2026-11-24.md). Quatro posições123–126 acrescentadas (62 indicadores/36 editoriais com RM), sem restaurar capas25/39/100. Anúncios não são contratos nem estoque ativo histórico; primeira geração autenticada permanece para conferência.
+## Estado integrado — 26/11/2026
+
+[Integração, retiradas e menu para testes](INTEGRACAO_2026-11-26.md): locação123–126 preservada junto das correções de cobertura de25/11; temporariamente omitidos127–128 e143–153, além das capas25/39/100. Com RM:86 posições,62 indicadores e24 editoriais; inventário40fontes externas. Acesso em **Relatórios Automatizados → Modelo 03**, sinalizado “em implantação”. Configuração preservada. Sem publicação/homologação presumida.
+
+Locação integrada pelo contrato enviado por Lucas: [anúncios coletados no período, critérios e limites](LOCACAO_2026-11-24.md). Quatro posições123–126 acrescentadas (62 indicadores/24 editoriais com RM após as retiradas de26/11), sem restaurar capas25/39/100. Anúncios não são contratos nem estoque ativo histórico; primeira geração autenticada permanece para conferência.
+
+## Varredura de 25/11/2026
+
+[Achados, correções e limites](VARREDURA_2026-11-25.md): isolamento de fonte ausente por território, status de quadro sem valores, fontes falhas rastreáveis, RM desativada, cadência histórica e paginação contraditória. As45posições externas têm inventário nos Insights/JSON/CSV. Lucas confirmou o bloco **novos x usados**(128); contrato do lado de usados ainda não confirmado — documentação online403, manual/catálogo acessíveis não o documentam. Não declarar inexistência do endpoint nem integração pronta.
 
 ## Entrega inicial — 24/11/2026, Codex/Lucas
 
@@ -60,7 +68,7 @@ As 58 posições abrangem lançamentos, vendas líquidas, estoque, IVV, preços,
 
 - Catálogo via `GeoApiScopeEngine` e seletor compartilhado. Sem IBGE como alternativa. Sem acesso válido ou período encerrado, nenhuma chamada pesada.
 - Histórico solicitado desde o maior entre 2021 e ano selecionado menos cinco; competências efetivamente necessárias são exigidas pelo indicador. Paginação confere sequência, total, última página e host; falhas não viram fonte completa.
-- Uma chamada por vez, intervalo mínimo de 500 ms entre inícios. 429 pausa até `Retry-After` ou 60 segundos e repete a mesma página; pode cancelar. 401/403 interrompem sem repetir credencial. Falhas transitórias têm tentativas limitadas.
+- Até duas fontes em voo, intervalo global mínimo de 500 ms entre inícios. 429 pausa até `Retry-After` ou 60 segundos e repete a mesma página; pode cancelar. 401/403 interrompem sem repetir credencial. Falhas transitórias têm tentativas limitadas.
 - Quantidades somadas no mês/trimestre/semestre respeitando a frequência da pesquisa municipal, sem exigir meses intermediários de fonte trimestral. Estoque é fotografia final; comparações anuais e12meses têm janelas explícitas. IVV usa vendas/(estoque anterior+lançamentos), registrando diferenças contra o estoque final sem reescrever a API; denominador vazio produz `null`, não0%. Ausência não comprovada fica sem valor, não zero.
 - Preços individuais históricos ponderados pelo estoque positivo; não usar preço/estoque cadastral atual como substituto. Zero estoque não gera preço zero. Campos contribuintes ausentes bloqueiam o respectivo quadro.
 - VGV de fluxo: valor nominal mensal × INCC-DI do fechamento ÷ índice do mês, antes da soma e conversão para milhões. Índice ausente bloqueia valores afetados; não reutilizar base anterior. Série existente de Fortaleza é somente fonte de índices, sem herdar política de Fortaleza.
