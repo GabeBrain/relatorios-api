@@ -837,6 +837,14 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 26/11/2026 — Modelo03: locação HTTP405 corrigida para POST
+
+- **Autor/origem:** Codex/Lucas; base `e9018d74`, main/origin único atualizado0/0, árvore limpa antes da alteração.
+- **Monday:** [DESAFIO — Estudos Entidades e Institucionais](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`.
+- **Causa:** JSON real Blumenau3T2026 com apenas4pendências (locação refs123–126), fonte HTTP405/uma tentativa. Coletor usava GET do script fornecido; checagem real sem credenciais retornou GET405/`Allow: POST` e POST401. Erro de método comum a todas as cidades, não oferta ausente.
+- **Correção:** POST no coletor comum, mantendo filtros/paginação/429/cancelamento. Diagnóstico registra método e status na falha; chave da fonte passa a constar nos slides de locação antes de validar sua conclusão. Sem inventar registros/zero ou alterar cálculos/layout.
+- **Validação:**43 testes/3arquivos aprovados, incluindo servidor POST-only para Blumenau/Curitiba/Natal e quatro quadros, exportação e fonte falha rastreável. Tipos/lint no fechamento. Sem consulta autenticada ALUGUEL ou deploy observado. [Evidência e limites](../features/relatorios-institucionais/modelo-03/CORRECAO_LOCACAO_405_2026-11-26.md).
+
 ### 26/11/2026 — Modelo03 integrado: locação, cobertura, retiradas e menu
 
 **Fechamento:**142 testes/11arquivos e sete cenários de navegador aprovados, com menu, três periodicidades, exportações, vazio/erro/sem token/429. Tipos/lint aprovados; captura de locação inspecionada. Lucas autorizou o push ao concluir. Sem homologação de dados reais ou deploy observado.
@@ -2278,6 +2286,8 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 
 ## 2. Etapas
 
+- **26/11 — Locação Modelo03:** método POST corrigido no motor comum apósHTTP405 real; aguardando publicação autorizada e nova geração autenticada.
+
 - **26/11 — Modelo03:** integração dos históricos autorizada e resolvida; locação preservada, novos/usados/perspectivas temporariamente retirados, menu pronto para testes após publicação. Homologação não concluída.
 
 - **26/11 — Locação Modelo03:** implementação local validada; integrar correções remotas de25/11 somente após autorização. Não considerada homologada ou publicada.
@@ -2486,6 +2496,8 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 ---
 
 ## 3. Pendências
+
+- **26/11 — Locação/Blumenau:** publicar correção POST com autorização e conferir novo JSON;405 não deve ser tratado como ausência de anúncios. Testes reais de credencial, campos e conteúdo continuam pendentes.
 
 - **26/11 — Modelo03:** autorizar publicação do merge/menu; conferir a primeira geração real de aluguel e arquivos pareados com analistas. Comparativo novos/usados e perspectivas suspensos por pedido humano, sem contar128como fonte pendente nesta versão.
 

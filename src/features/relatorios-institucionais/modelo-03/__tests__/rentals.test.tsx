@@ -29,7 +29,7 @@ describe('Rental advertisement generation',()=>{
  });
  it('distinguishes confirmed empty collection from incomplete or invalid data and exports only aggregate audit',()=>{
   const sources=fixture(),source=sources.find(s=>s.metric==='rentals')!;source.rows=[];expect(rentalSlide(definition(124),selection,sources).tables[0].rows[0].values[0]).toBe(0);
-  source.complete=false;expect(rentalSlide(definition(124),selection,sources).status).toBe('waiting-source');source.complete=true;
+  source.complete=false;const failed=rentalSlide(definition(124),selection,sources);expect(failed.status).toBe('waiting-source');expect(failed.sourceKeys).toContain(`${source.uf}/${source.city}/Vertical/rentals/Empreendimento`);source.complete=true;
   source.rows=[{id:5,cidade:source.city,estado:source.uf,tipo:'Apartamento',tipo_negocio:'ALUGUEL',coletado_em:null,logradouro:'Do not export'}];
   expect(rentalSlide(definition(124),selection,sources).tables[0].rows[0].values[0]).toBeNull();
   const report:Report={schema:'modelo-03-report-v1',selection,key:selectionKey(selection),startedAt:'2026-11-24',finishedAt:'2026-11-24',sources,slides:calculateSlides(selection,sources),errors:[],origin:'Geobrain API',homologated:false};const audit=diagnostic(report);

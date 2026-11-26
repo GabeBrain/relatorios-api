@@ -1,3 +1,4 @@
+import {RENTAL_METHOD} from './rental-contract';
 import {rentalSample} from './rentals';
 import {buildModelo03Insights} from './insights';
 import {salesFieldDiagnostics} from './field-diagnostics';
@@ -24,7 +25,7 @@ export function auditSource(s:Source,end?:string,start?:string){
  };
  if(s.metric==='details'){for(const b of s.rows)for(const row of Array.isArray(b.typologies_history)?b.typologies_history:[])if(row&&typeof row==='object')add(row,true);}
  else {for(const row of s.rows)add(row,false);}
- return {key:sourceKey(s),city:s.city,uf:s.uf,segment:s.segment,metric:s.metric,group:s.group,endpoint:s.endpoint,complete:s.complete,empty:s.complete&&s.rows.length===0,records:s.rows.length,requests:s.requests,httpStatus:s.httpStatus,failure:s.failure,finishedAt:s.finishedAt,observedMonths:[...new Set([...observations.values()].map(v=>v.month))].sort(),categories:[...new Set([...observations.values()].map(v=>v.group))].sort(),missingFields:fieldMissing,observations:[...observations.values()]};
+ return {key:sourceKey(s),city:s.city,uf:s.uf,segment:s.segment,metric:s.metric,group:s.group,endpoint:s.endpoint,requestMethod:s.metric==='rentals'?RENTAL_METHOD:s.metric==='details'?'POST':'GET',complete:s.complete,empty:s.complete&&s.rows.length===0,records:s.rows.length,requests:s.requests,httpStatus:s.httpStatus,failure:s.failure,finishedAt:s.finishedAt,observedMonths:[...new Set([...observations.values()].map(v=>v.month))].sort(),categories:[...new Set([...observations.values()].map(v=>v.group))].sort(),missingFields:fieldMissing,observations:[...observations.values()]};
 }
 export function diagnostic(report:Report){
  const summary={total:report.slides.length,available:0,waitingSource:0,editorial:0,notApplicable:0};

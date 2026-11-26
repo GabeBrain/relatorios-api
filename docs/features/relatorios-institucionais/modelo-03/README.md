@@ -1,5 +1,7 @@
 # Modelo 03 — gerador comum
 
+**Locação26/11:** corrigida a consulta para POST após comprovar405/`Allow: POST` no endpoint real. [Diagnóstico Blumenau e correção comum a todas as cidades](CORRECAO_LOCACAO_405_2026-11-26.md).
+
 ## Estado integrado — 26/11/2026
 
 [Integração, retiradas e menu para testes](INTEGRACAO_2026-11-26.md): locação123–126 preservada junto das correções de cobertura de25/11; temporariamente omitidos127–128 e143–153, além das capas25/39/100. Com RM:86 posições,62 indicadores e24 editoriais; inventário40fontes externas. Acesso em **Relatórios Automatizados → Modelo 03**, sinalizado “em implantação”. Configuração preservada. Sem publicação/homologação presumida.

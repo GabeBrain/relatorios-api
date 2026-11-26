@@ -2,9 +2,24 @@ import {describe,it,expect,vi} from 'vitest';
 import {collect,sleep,type Envelope,type Request} from '../api';
 import type {HttpResponse} from '@/lib/http-client';
 import {fixture,selection} from './fixture';
+import {createCalculator} from '../calculate';
+import {DATA_DEFINITIONS} from '../blueprint';
+import {auditSource} from '../diagnostic';
 const response=(data:Envelope|null,status=200):HttpResponse<Envelope>=>({ok:status===200,status,data,text:null,contentType:'application/json',latencyMs:0,bytes:0,error:null,requestHeaders:{},requestQuery:{},requestBody:null,url:'',method:'GET'});
 const catalog={PR:['Curitiba','Araucária']};
 describe('Modelo 03 · coleta paginada e autorização',()=>{
+ it.each([{city:'Blumenau',uf:'SC'},{city:'Curitiba',uf:'PR'},{city:'Natal',uf:'RN'}])('usa POST exigido pelo servidor e libera os quatro quadros de locação em $city',async scope=>{
+  const s={...selection,...scope,position:3,includeRm:false,rmCities:[]},rental=fixture(s).find(source=>source.metric==='rentals')!;
+  const calls:{method:string|undefined;query:unknown}[]=[];
+  const sources=await collect(s,{[scope.uf]:[scope.city]},{token:'synthetic',signal:new AbortController().signal,onProgress:()=>{},wait:async()=>{},request:async options=>{
+   if(!options.url.endsWith('rent-resale-property'))return response({data:[],meta:{current_page:1,last_page:1,total:0}});
+   calls.push({method:options.method,query:options.query});if(options.method!=='POST')return response(null,405);
+   return response({data:rental.rows,meta:{current_page:1,last_page:1,total:rental.rows.length}});
+  }});
+  expect(calls).toHaveLength(1);expect(calls[0]).toMatchObject({method:'POST',query:{cidade:scope.city,uf:scope.uf,tipo_negocio:'ALUGUEL',coletado_em_gt:'2026-06-30',coletado_em_lt:'2026-10-01'}});
+  const source=sources.find(source=>source.metric==='rentals')!;expect(source.complete).toBe(true);expect(auditSource(source).requestMethod).toBe('POST');
+  const c=createCalculator(s,sources);for(const d of DATA_DEFINITIONS.filter(d=>d.role?.startsWith('rental-'))){const slide=c.evaluate(d);expect(slide.status).toBe('available');expect(slide.sourceKeys).toContain(`${scope.uf}/${scope.city}/Vertical/rentals/Empreendimento`);}
+ });
  it.each([{city:'Curitiba',uf:'PR',periodicity:'monthly'},{city:'Natal',uf:'RN',periodicity:'quarterly'},{city:'Teresina',uf:'PI',periodicity:'semiannual'}] as const)('sobrepõe respostas lentas em $city/$periodicity com intervalo global de 500ms e todas as fontes',async scope=>{
   vi.useFakeTimers();vi.setSystemTime(new Date('2026-11-24T12:00:00Z'));
   try{

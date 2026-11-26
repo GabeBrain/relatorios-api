@@ -1,4 +1,4 @@
-import {RENTAL_ENDPOINT,rentalQuery,rentalOffer} from './rental-contract';
+import {RENTAL_ENDPOINT,RENTAL_METHOD,rentalQuery,rentalOffer} from './rental-contract';
 import {httpRequest,type HttpResponse,type RequestOptions} from '@/lib/http-client';
 import {norm,period,periodIssue,scopeIssue,selectedCities,location,type Selection} from './model';
 import {sourceKey,type Progress,type Row,type Source} from './types';
@@ -35,12 +35,12 @@ export async function collect(s:Selection,catalog:Record<string,string[]>|null,o
     while(true){
      check(signal);await slot();
      onProgress({stage:'sources',completed:count(),total:tasks.length,message:`${task.city} · ${task.segment} · ${task.metric==='details'?'histórico detalhado':task.metric} · página ${page}`,waiting:false});source.requests++;
-     response=await request({url:endpoint,method:task.metric==='details'?'POST':'GET',query:task.metric==='rentals'?rentalQuery(task.city,task.uf,'collected-in-period',p.start,p.end,page):{city:task.city,uf:task.uf,...task.metric==='details'?{type:task.segment}:{'type[]':[task.segment],group_by:task.group,start_period:`${Math.max(2021,s.year-5)}-01-01`,end_period:`${p.end}-01`},page,per_page:100},headers:{Authorization:`Bearer ${options.token}`},includeAuth:false,signal,timeoutMs:60000,cache:'no-store'});check(signal);source.httpStatus=response.status;
+     response=await request({url:endpoint,method:task.metric==='rentals'?RENTAL_METHOD:task.metric==='details'?'POST':'GET',query:task.metric==='rentals'?rentalQuery(task.city,task.uf,'collected-in-period',p.start,p.end,page):{city:task.city,uf:task.uf,...task.metric==='details'?{type:task.segment}:{'type[]':[task.segment],group_by:task.group,start_period:`${Math.max(2021,s.year-5)}-01-01`,end_period:`${p.end}-01`},page,per_page:100},headers:{Authorization:`Bearer ${options.token}`},includeAuth:false,signal,timeoutMs:60000,cache:'no-store'});check(signal);source.httpStatus=response.status;
      if(response.status===401||response.status===403){controller.abort();throw new SourceError('Acesso ao Geobrain não autorizado. Refaça o login e confira as permissões.');}
      if(response.status===429){onProgress({stage:'sources',completed:count(),total:tasks.length,message:'Aguardando resposta da API · limite de requisições; retomada automática',waiting:true});cooling++;pause=Promise.all([pause,wait(Math.max(1000,response.retryAfterMs??60000),signal).finally(()=>{cooling--;})]).then(()=>{});await pause;continue;}
      if(response.ok)break;
      if(++attempt<3&&(response.status===null||response.status===408||Number(response.status)>=500)){await wait(attempt*1500,signal);continue;}
-     throw new SourceError('Não foi possível concluir esta fonte do Geobrain.');
+     throw new SourceError(response.status===405?'Método HTTP não permitido pela fonte (405).':`Não foi possível concluir esta fonte do Geobrain${response.status===null?'':` (HTTP ${response.status})`}.`);
     }
     const data=response.data;if(!data||!Array.isArray(data.data))throw new SourceError('Resposta sem a lista de registros esperada.');
     if(data.meta?.total!==undefined){if(!Number.isSafeInteger(data.meta.total)||data.meta.total<0||expected!==undefined&&expected!==data.meta.total)throw new SourceError('Paginação com total inconsistente.');expected=data.meta.total;}

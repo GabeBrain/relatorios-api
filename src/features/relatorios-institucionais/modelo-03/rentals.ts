@@ -22,8 +22,9 @@ export function rentalSlide(definition:Definition,selection:Selection,sources:So
  try{
   for(const city of selectedCities(selection)){
    const scope=location(city,selection.uf),matches=sources.filter(s=>s.city===scope.city&&s.uf===scope.uf&&s.metric==='rentals');
+   result.sourceKeys.push(sourceKey({city:scope.city,uf:scope.uf,segment:'Vertical',metric:'rentals',group:'Empreendimento'}));
    if(matches.length!==1||!matches[0].complete)throw new Error(`${scope.city}: fonte de anúncios de aluguel não concluída.`);
-   const source=matches[0];result.sourceKeys.push(sourceKey(source));const sample=rentalSample(source,p.start,p.end),rows=sample.offers;
+   const source=matches[0];const sample=rentalSample(source,p.start,p.end),rows=sample.offers;
    result.warnings.push(`${scope.city}: amostra de ${rows.length} anúncios de apartamentos para aluguel coletados entre ${p.start} e ${p.end}; sem comprovação de estoque ativo histórico ou locações efetivadas.`);
    result.warnings.push(`${scope.city}: os preços são os recebidos na consulta, sem série histórica de preço do anúncio. O período seleciona a coleta, não comprova o preço vigente naquele fechamento.`);
    const laterUpdates=rows.filter(r=>r.updatedAt&&r.updatedAt.slice(0,7)>p.end).length;
