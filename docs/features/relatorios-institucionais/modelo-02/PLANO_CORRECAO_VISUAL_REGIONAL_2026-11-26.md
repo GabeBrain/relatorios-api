@@ -1,6 +1,6 @@
 # Institucionais Imprensa — correção visual e editorial das cinco regiões
 
-26/11/2026 · Autor: Codex, a pedido do usuário · **Estado: PLANEJADA, ainda não implementada.**
+26/11/2026 · Autor: Codex, a pedido do usuário · **Estado: EM IMPLEMENTAÇÃO (26/11, Claude): famílias P0 e parte das P1 implementadas nas cinco regiões; revisão de 7 famílias P1 e aceite com dados reais pendentes. Ver §8.**
 
 Este documento substitui a leitura de que a publicação anterior resolveu a fidelidade visual. O usuário apontou diferenças na geração real, incluindo população ausente, títulos sobrepostos, falta de setas e colchetes, rótulos mal posicionados e gráficos com lacunas. O pedido desta rodada é documentar a correção; não executar nem publicar mudanças de produto.
 
@@ -205,6 +205,26 @@ Marcar apenas com evidência da região correspondente. Um teste visual do Sul n
 - Preparação IBGE: disponível localmente, ainda não integrada nem homologada no material.
 - Verificação feita para este MD: leitura estrutural dos dois PPTX, auditoria embutida e capturas fornecidas pelo usuário; não se declara nova homologação visual das 92 páginas.
 - A tentativa anterior de navegador não analisou a pasta Auditorias; tratou-se de um equívoco de localização já corrigido. Esta análise usa os arquivos locais indicados pelo usuário.
+
+## 8. Execução — 26/11/2026 (Claude, a pedido do usuário)
+
+Implementado no código compartilhado, portanto vale para **Sul, Sudeste, Nordeste, Norte e Centro-Oeste**. Conferência feita com **mercado sintético** (harness interceptado), não com dados reais. **O aceite com saídas reais fica com o usuário, por decisão dele nesta sessão.** A matriz de aceite da §6 continua toda "Pendente".
+
+| Família (§3) | Situação | Como |
+|---|---|---|
+| Divisórias 10/13/19/25/31/33/43 | Implementada | `scripts/diagnostics/modelo02-section-art.ps1` reexporta, via PowerPoint, as 35 artes (5 regiões × 7) sem título, barra e número de página do original. O runtime escreve o título com a redação original, idêntica nas cinco matrizes. Não há mais máscara branca parcial. |
+| Cidades analisadas | Implementada | Colunas Cidade · População · % Part. Total UF e frase de cobertura por UF (IBGE Censo 2022, SIDRA 4714, `population.ts`). Denominador = população inteira da UF. Ordenação decrescente pela participação exata; sem correspondência no IBGE = "—", ao final, cobertura declarada parcial. Até 3 UFs: uma por coluna; acima disso, blocos empilhados; até 28 linhas por coluna. |
+| Destaques geral/MCMV/luxo | Implementada | Títulos completos, selo e cor da família (verde, #FFC000, salmão), tabela compacta nativa, setas verde/vermelha editáveis (nenhuma para 0% ou "—"). Rótulos `3T2025 X 3T2026`, `2T2026 X 3T2026`, `JAN–SET/2025 X JAN–SET/2026` (ano cheio só no 4T). Manchete e frases determinísticas (`highlightText`), só com comparações válidas. |
+| Séries trimestrais (unidades, VGL, vendas, VGV) | Implementada | Geometria única (`columnGeometry`) para a prévia, o gráfico nativo (área interna manual, escala e gap fixos) e as anotações. Colchete anual, seta do trimestre anterior e seta do acumulado (`TrendMarks`), desenhados acima do gráfico nativo no PPTX. Rótulos internos com contraste por barra e sem quebra (`wrap="none"`). "Sem dado" explícito e comparação suprimida quando falta base. VGL/VGV em R$ milhões inteiros (1 casa abaixo de 100). |
+| Resumo geral | Implementada | Lead em negrito no estilo do original; zero = "estabilidade"; sem base = "sem base comparável"; caracterização da oferta por família. |
+| Composição por padrão | Parcial | Ordem fixa Compactos, MCMV, Médio Padrão, Luxo, depois as desconhecidas; contraste dos rótulos. Revisão visual fina pendente. |
+| Rankings | Implementada | Títulos do original (`Unidades lançadas \| Luxo \| Jan–Set/2026`, `Maior R$/m² médio \| 3T2026`), Top 10 em uma página, barras de cima para baixo com rótulo interno, pizza com "Outros" e rótulo de cidade + %. Lista completa no CSV. |
+| Quadros por estado, comparação L/V/E, oferta padrão/tipologia, preço m², mapa por UF, mapas das capitais, institucional | Não revisadas | Só os títulos foram ajustados. |
+| Disponível parcial | Implementada | `slide.coverage`; `summary.partial`/`partialIds` no JSON; aviso na página e na ressalva do slide. |
+
+Correção compartilhada: `native-pptx.ts` passa a centralizar verticalmente as células de tabela (`tcPr anchor="ctr"`) e aceita uma camada pintada depois dos gráficos nativos (`deferSelector`), sem alterar o comportamento padrão dos demais relatórios.
+
+Evidência local (ignorada pelo Git): `.local-inputs/relatorios-lucas/modelo-02/visual-2026-11-26-v3/`, com prévias, JSON/CSV/PPTX das cinco regiões, renderização PowerPoint `pptx-<região>/` e `office-editabilidade.json` (título, tabela e série editados com sucesso na cópia Sul). A edição de uma seta não foi testada por script.
 
 **Monday:** [DESAFIO — Estudos Entidades e Institucionais](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`. Referência documental; nenhuma escrita no Monday.
 

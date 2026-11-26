@@ -1,8 +1,19 @@
-import type {ChartPanel} from './presentation';
-import {formatValue} from './format';
+import {columnGeometry,CATEGORY_SPACE,type ChartPanel} from './presentation';
+import {formatValue,formatDigits} from './format';
+import {contrastText} from './text-metrics';
+
+/** Fixed-scale single-series columns: same plot area, gap and scale as the native chart. */
+function ScaledColumns({chart}:{chart:ChartPanel}){
+ const g=columnGeometry(chart),rows=chart.table.rows;
+ return <g data-modelo02-chart="true"><line x1={chart.box.x} x2={chart.box.x+chart.box.w} y1={g.bottom} y2={g.bottom} stroke="#d9d9d9"/>
+  {rows.map((row,i)=>{const value=row.values[0],fill=chart.colors[i%chart.colors.length],cx=g.center(i);if(typeof value!=='number')return <text key={i} x={cx} y={g.bottom+CATEGORY_SPACE/2+5} textAnchor="middle" fontSize="14" fill="#444">{row.label}</text>;const top=g.valueY(value),inside=g.bottom-top>=24;
+   return <g key={i}><rect x={cx-g.bar/2} y={top} width={g.bar} height={Math.max(.5,g.bottom-top)} fill={fill}/><text x={cx} y={inside?(top+g.bottom)/2+5:top-6} textAnchor="middle" fontSize="15" fontWeight="700" fill={inside?contrastText(fill):'#273f1c'}>{formatDigits(value,chart.labelDigits??0)}</text><text x={cx} y={g.bottom+CATEGORY_SPACE/2+5} textAnchor="middle" fontSize="14" fill="#444">{row.label}</text></g>;})}
+ </g>;
+}
 
 /** Geometry is driven solely by the same chart panel sent to the PPTX writer. */
 export function Chart({chart}:{chart:ChartPanel}){
+ if(chart.kind==='columns'&&chart.scaleMax!==undefined&&chart.table.columns.length===1)return <ScaledColumns chart={chart}/>;
  const {table,box,kind,colors}=chart,{x,y,w,h}=box,rows=table.rows,n=Math.max(1,rows.length),series=table.columns.length;
  const values=rows.flatMap(r=>r.values.filter((v):v is number=>typeof v==='number'));
  const min=Math.min(0,...values),max=chart.percent?100:Math.max(1,...(chart.stacked?rows.map(r=>r.values.reduce<number>((a,v)=>a+Number(v),0)):values)),range=max-min||1,py=(v:number)=>y+h-(v-min)/range*h,zero=py(0);
@@ -24,7 +35,8 @@ export function Chart({chart}:{chart:ChartPanel}){
    {rows.map((r,i)=><g key={i}>{r.values.map((v,j)=>typeof v==='number'&&v>=8?<text key={j} x={x+i*w/Math.max(1,n-1)} y={py(r.values.slice(0,j).reduce<number>((a,n)=>a+Number(n),0)+v/2)+4} textAnchor="middle" fontSize="12" fill={color(j)==='#206082'?'white':'#333'}>{formatValue(v,'percent')}</text>:null)}<text x={x+i*w/Math.max(1,n-1)} y={y+h+24} fontSize="13" textAnchor="middle" fill="#444">{r.label}</text>{r.values.some(v=>v===null)&&<text x={x+i*w/Math.max(1,n-1)} y={y+h/2} fontSize="12" textAnchor="middle" fill="#555">Sem dado</text>}</g>)}
   </>:kind==='bars'?rows.map((row,i)=>{
    const value=row.values[0],height=h/n,bx=x+260,bw=w-300,barZero=bx+(0-min)/range*bw;
-   return <g key={i}><text x={x+250} y={y+(i+.6)*height} textAnchor="end" fontSize="15" fill="#333">{row.label}</text>{typeof value==='number'&&<rect x={Math.min(barZero,bx+(value-min)/range*bw)} y={y+i*height+4} width={Math.abs(value)/range*bw} height={Math.max(4,height-10)} fill={color(0)}/>}<text x={bx+bw+8} y={y+(i+.6)*height} fontSize="14" fill="#333">{formatValue(value,table.formats[0])}</text></g>;
+   const width=typeof value==='number'?Math.abs(value)/range*bw:0,left=typeof value==='number'?Math.min(barZero,bx+(value-min)/range*bw):barZero,inside=width>=70;
+   return <g key={i}><text x={x+250} y={y+(i+.6)*height} textAnchor="end" fontSize="15" fontWeight="700" fill="#1f1f1f">{row.label}</text>{typeof value==='number'&&<rect x={left} y={y+i*height+4} width={width} height={Math.max(4,height-10)} fill={color(0)}/>}<text x={inside?left+width/2:left+width+8} y={y+(i+.6)*height} textAnchor={inside?'middle':'start'} fontSize="14" fontWeight="700" fill={inside?contrastText(color(0)):'#333'}>{formatValue(value,table.formats[0])}</text></g>;
   }):rows.map((row,i)=>{
    const group=w/n,bw=group*.75/Math.max(1,chart.stacked?1:series-(chart.lineSeries?.length??0));
    return <g key={i}>{row.values.map((value,j)=>{if(chart.lineSeries?.includes(j))return null;const cx=x+i*group+group*.12+(chart.stacked?0:j)*bw,base=chart.stacked?row.values.slice(0,j).reduce<number>((a,v)=>a+Number(v),0):0,top=typeof value==='number'?base+value:0;return <g key={j}>{typeof value==='number'&&<rect x={cx} y={Math.min(py(top),py(base))} width={bw*.85} height={Math.max(.5,Math.abs(py(base)-py(top)))} fill={color(series===1?i:j)}/>}<text x={cx+bw*.4} y={typeof value==='number'?chart.stacked?py(base+value/2)+4:py(value)+(value>=0?-8:20):zero-12} textAnchor="middle" fontSize={series>1?11:14} fill="#333">{formatValue(value,table.formats[j])}</text></g>;})}<text x={x+(i+.5)*group} y={y+h+24} textAnchor="middle" fontSize="13" fill="#444">{row.label}</text></g>;

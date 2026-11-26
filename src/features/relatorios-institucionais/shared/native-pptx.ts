@@ -11,7 +11,12 @@ interface Box {x:number;y:number;w:number;h:number}
 const solid=(value:string,opacity=1)=>transparent(value)?'<a:noFill/>':`<a:solidFill><a:srgbClr val="${color(value)}"><a:alpha val="${Math.round(opacity*100000)}"/></a:srgbClr></a:solidFill>`;
 
 /** No slide/chart screenshot: every visible primitive becomes a DrawingML object. */
-export async function addNativePptxSlide(pptx:PptxGenJS,root:HTMLElement,signal:AbortSignal,patches:NativePatch[]){
+export interface NativeSlideOptions {
+ /** Elements matching this selector are painted after `beforeDeferred` (e.g. annotations above native charts). */
+ deferSelector?:string;
+ beforeDeferred?:(page:PptxGenJS.Slide)=>void|Promise<void>;
+}
+export async function addNativePptxSlide(pptx:PptxGenJS,root:HTMLElement,signal:AbortSignal,patches:NativePatch[],options:NativeSlideOptions={}){
  check(signal);await document.fonts?.ready;
  const page=pptx.addSlide(),frame=root.getBoundingClientRect(),sx=W/frame.width,sy=H/frame.height;
  if(!frame.width||!frame.height)throw new Error('Slide sem dimensões para exportar.');
@@ -78,13 +83,16 @@ export async function addNativePptxSlide(pptx:PptxGenJS,root:HTMLElement,signal:
    const contents=numbers.map((r,index)=>`<a:tr h="${Math.round(heights[index]*EMU)}">${rows.get(r)!.sort((a,b)=>Number(a.dataset.nativeCell!.split(':')[1])-Number(b.dataset.nativeCell!.split(':')[1])).map(cell=>{
      const source=cell.querySelector<HTMLElement>('span')!,manual=replacement(cell),hidden=getComputedStyle(source).visibility==='hidden'&&!manual,style=getComputedStyle(manual??source),value=hidden?'':(manual??source).textContent??'',size=parseFloat(style.fontSize)*sx*72*frame.width/1280,fill=manual?style.fill:style.color,rect=cell.querySelector('rect')!,background=getComputedStyle(rect).fill,div=cell.querySelector('div')!,align=getComputedStyle(div).textAlign==='left'?'l':getComputedStyle(div).textAlign==='right'?'r':'ctr';
      const fontSize=Math.round(size*100),paragraphs=value.split('\n').map(line=>`<a:p><a:pPr algn="${align}"/><a:r><a:rPr lang="pt-BR" sz="${fontSize}" b="${Number(style.fontWeight)>=600?1:0}">${solid(fill)}<a:latin typeface="Tahoma"/></a:rPr><a:t>${xml(line)}</a:t></a:r><a:endParaRPr sz="${fontSize}"/></a:p>`).join('');
-     return `<a:tc><a:txBody><a:bodyPr wrap="square" anchor="ctr"/><a:lstStyle/>${paragraphs}</a:txBody><a:tcPr marL="${Math.round(parseFloat(getComputedStyle(div).paddingLeft||'0')*sx*EMU)}" marR="${Math.round(parseFloat(getComputedStyle(div).paddingRight||'0')*sx*EMU)}" marT="0" marB="0">${['L','R','T','B'].map(side=>`<a:ln${side} w="6350">${solid('#FFFFFF')}<a:prstDash val="solid"/></a:ln${side}>`).join('')}${solid(background)}</a:tcPr></a:tc>`;
+     return `<a:tc><a:txBody><a:bodyPr wrap="square" anchor="ctr"/><a:lstStyle/>${paragraphs}</a:txBody><a:tcPr anchor="ctr" marL="${Math.round(parseFloat(getComputedStyle(div).paddingLeft||'0')*sx*EMU)}" marR="${Math.round(parseFloat(getComputedStyle(div).paddingRight||'0')*sx*EMU)}" marT="0" marB="0">${['L','R','T','B'].map(side=>`<a:ln${side} w="6350">${solid('#FFFFFF')}<a:prstDash val="solid"/></a:ln${side}>`).join('')}${solid(background)}</a:tcPr></a:tc>`;
    }).join('')}</a:tr>`).join('');
    const tableXml=`<p:graphicFrame><p:nvGraphicFramePr><p:cNvPr id="NATIVE_ID" name="Tabela editável de lançamentos"/><p:cNvGraphicFramePr/><p:nvPr/></p:nvGraphicFramePr><p:xfrm><a:off x="${Math.round(x*EMU)}" y="${Math.round(y*EMU)}"/><a:ext cx="${Math.round(w*EMU)}" cy="${Math.round(h*EMU)}"/></p:xfrm><a:graphic><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/table"><a:tbl><a:tblPr/><a:tblGrid>${rects.map(b=>`<a:gridCol w="${Math.round(b.w*EMU)}"/>`).join('')}</a:tblGrid>${contents}</a:tbl></a:graphicData></a:graphic></p:graphicFrame>`;
    patches.push({name,table:tableXml});page.addShape(pptx.ShapeType.rect,{x,y,w,h,objectName:name,line:{color:'FFFFFF',transparency:100},fill:{color:'FFFFFF',transparency:100}});
  };
- const visit=async(element:Element):Promise<void>=>{
-   check(signal);const style=getComputedStyle(element);
+ const deferred:Element[]=[];
+ const visit=async(element:Element,allowDefer=true):Promise<void>=>{
+   check(signal);
+   if(allowDefer&&options.deferSelector&&element.matches(options.deferSelector)){deferred.push(element);return;}
+   const style=getComputedStyle(element);
    if(element.classList.contains('sr-only')||style.display==='none'||style.visibility==='hidden'||style.opacity==='0'||['defs','title','desc','clipPath','style','script'].includes(element.localName))return;
    if(element.hasAttribute('data-manual-slide-layer')&&element.getAttribute('aria-label')==='Selecionar texto para editar')return;
    if(element.hasAttribute('data-slide-edit-source')){const id=element.getAttribute('data-slide-edit-source'),source=root.querySelector(`[data-slide-text-id="${id}"]`);if(source?.closest('[data-native-table]'))return;}
@@ -98,9 +106,12 @@ export async function addNativePptxSlide(pptx:PptxGenJS,root:HTMLElement,signal:
      if(!transparent(style.backgroundColor)){const b=box(element);if(b.w&&b.h)page.addShape(pptx.ShapeType.rect,{...b,fill:{color:color(style.backgroundColor)},line:{transparency:100},objectName:'Fundo editável'});}
      for(const node of [...element.childNodes].filter(node=>node.nodeType===Node.TEXT_NODE&&node.textContent?.trim())){const range=document.createRange();range.selectNodeContents(node);const r=range.getBoundingClientRect();if(!r.width||!r.height)continue;page.addText(node.textContent!,{x:(r.left-frame.left)*sx,y:(r.top-frame.top)*sy,w:r.width*sx+.02,h:r.height*sy+.01,fontFace:'Tahoma',fontSize:parseFloat(style.fontSize)*sx*72,color:color(style.color),margin:0,wrap:false,fit:'shrink',objectName:'Texto HTML editável'});}
    }
-   for(const child of [...element.children])await visit(child);
+   for(const child of [...element.children])await visit(child,allowDefer);
  };
- await visit(root);return page;
+ await visit(root);
+ await options.beforeDeferred?.(page);
+ for(const element of deferred)await visit(element,false);
+ return page;
 }
 
 /** Replace placeholders with native tables and freeform paths, keeping object IDs and paint order. */

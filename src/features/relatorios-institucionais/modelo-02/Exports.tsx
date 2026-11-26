@@ -35,7 +35,7 @@ export default function Exports({report}:{report:Report}){
     const patches:NativePatch[]=[],nodes=[...(deck.current?.querySelectorAll<HTMLElement>('[data-modelo02-export]')??[])];if(nodes.length!==pages.length)throw new Error('Prévia indisponível para exportação.');
     for(let i=0;i<nodes.length;i++){
      if(signal.aborted||current.current!==job)throw new DOMException('Cancelado.','AbortError');
-     const slide=await addNativePptxSlide(pptx,nodes[i],signal,patches),page=pages[i];if(page.slide.status==='available')addCharts(slide,page.charts);slide.addNotes([`Referência: ${page.slide.referenceNumbers?.join(', ')}`,page.slide.id,page.slide.title,page.slide.note,...page.slide.warnings,...page.slide.map?.points.map(point=>`${point.name}: ${point.stock} unidades; ${point.family}`)??[]].join('\n'));setProgress(Math.round((i+1)/nodes.length*95));await new Promise(r=>setTimeout(r,0));
+     const page=pages[i],slide=await addNativePptxSlide(pptx,nodes[i],signal,patches,{deferSelector:'[data-modelo02-overlay]',beforeDeferred:target=>{if(page.slide.status==='available')addCharts(target,page.charts);}});slide.addNotes([`Referência: ${page.slide.referenceNumbers?.join(', ')}`,page.slide.id,page.slide.title,page.slide.note,...page.slide.warnings,...page.slide.map?.points.map(point=>`${point.name}: ${point.stock} unidades; ${point.family}`)??[]].join('\n'));setProgress(Math.round((i+1)/nodes.length*95));await new Promise(r=>setTimeout(r,0));
     }
     const audit=JSON.parse(await runWorker<string>({mode:'json',report},signal));
     const blob=await pptx.write({outputType:'blob',compression:true}) as Blob;if(signal.aborted||current.current!==job)return;

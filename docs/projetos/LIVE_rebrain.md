@@ -837,6 +837,21 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 26/11/2026 — Institucionais Imprensa: correção visual P0 implementada nas cinco regiões — Claude
+
+- **Pedido explícito:** executar o [plano visual regional](../features/relatorios-institucionais/modelo-02/PLANO_CORRECAO_VISUAL_REGIONAL_2026-11-26.md). O usuário assumiu o aceite com saídas reais.
+- **Entregue (código compartilhado, vale para Sul, Sudeste, Nordeste, Norte e Centro-Oeste):**
+  - divisórias reexportadas sem título original (35 artes via PowerPoint, `modelo02-section-art.ps1`), com o título escrito pelo runtime;
+  - cidades com população e % Part. Total da UF pelo IBGE Censo 2022 (SIDRA 4714), em ordem decrescente e com frase de cobertura;
+  - destaques com títulos completos, selo e cor da família, setas editáveis e manchete gerada pelos dados;
+  - séries de unidades, VGL, vendas e VGV com colchete anual e setas do trimestre e do acumulado, numa geometria única para prévia e gráfico nativo, mais "Sem dado" explícito;
+  - resumo no estilo do original e rankings Top 10 em uma página;
+  - status "disponível parcial" no diagnóstico.
+- **Compartilhado (`native-pptx.ts`):** células de tabela centralizadas verticalmente no PPTX e camada opcional pintada depois dos gráficos nativos; padrão inalterado para os outros relatórios.
+- **Validação:** `tsc` ok. 67/67 testes do Modelo 02 e dos módulos compartilhados, incluindo a nova suíte `visual-correction.test.tsx`. Harness sintético das cinco regiões passou: prévia, JSON, CSV e PPTX. Os cinco PPTX foram renderizados no PowerPoint e, na cópia Sul, a edição de título, tabela e série funcionou. **Não houve geração com dados reais**; o aceite fica com o usuário. `sp/market-details.test.tsx` já falhava no `HEAD` limpo, sem relação com esta entrega.
+- **Etapas/Pendências:** revisão prática de 7 famílias P1 ainda aberta (quadros por estado, comparação L/V/E, oferta por padrão/tipologia, preço m², mapa por UF, mapas das capitais, institucional). A origem das lacunas reais da API no Sul também não foi investigada. Base `a836dc9c`, `origin` único, 0 atrás/2 à frente antes deste commit.
+- **Monday:** [DESAFIO — Estudos Entidades e Institucionais](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`. Sem escrita.
+
 ### 26/11/2026 — Institucionais Imprensa: escopo corretivo confirmado nas cinco regiões — Codex
 
 - **Pedido explícito:** usuário esclareceu que a correção é para Sul, Sudeste, Nordeste, Norte e Centro-Oeste; apenas o Sul foi testado por ele. Sul é evidência real, não limite de implantação.
@@ -2349,6 +2364,7 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 
 ## 2. Etapas
 
+- **26/11 — Institucionais Imprensa / correção visual:** famílias P0 (divisórias, cidades/população, destaques, séries trimestrais), além de resumo e rankings, implementadas nas cinco regiões e conferidas com dados sintéticos no PowerPoint. Faltam a revisão prática de 7 famílias P1 e o aceite real, que fica com o usuário.
 - **26/11 — Institucionais Imprensa / revisão real:** fidelidade visual reaberta após saída Sul92páginas; plano corretivo documentado, implementação e novos pares reais pendentes. Validações sintéticas anteriores não são homologação do material real.
 
 - **26/11 — Institucionais Imprensa:** correção editorial/exports e novo nome implementados localmente; matrizes das cinco regiões e validação sintética. Homologação/publicação desta entrega pendentes. [Registro](../features/relatorios-institucionais/modelo-02/EXECUCAO_2026-11-26.md).
@@ -2573,7 +2589,7 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 
 ## 3. Pendências
 
-- **Prioridade — Imprensa / cinco regiões:** executar [plano visual baseado no PPTX real](../features/relatorios-institucionais/modelo-02/PLANO_CORRECAO_VISUAL_SUL_2026-11-26.md); corrigir população/participação e ordenação, títulos/divisórias, setas/colchetes/rótulos e manchetes, além de revisar lacunas e expansão dos rankings. Corrigir e conferir as cinco regiões; Sul é o caso real testado pelo usuário, não limite de escopo.
+- **Prioridade — Imprensa / cinco regiões (atualizado 26/11, Claude):** P0 implementado; pendentes a revisão prática das 7 famílias P1 listadas na §8 do plano e o aceite com saídas reais (usuário). Plano original: [plano visual baseado no PPTX real](../features/relatorios-institucionais/modelo-02/PLANO_CORRECAO_VISUAL_SUL_2026-11-26.md); corrigir população/participação e ordenação, títulos/divisórias, setas/colchetes/rótulos e manchetes, além de revisar lacunas e expansão dos rankings. Corrigir e conferir as cinco regiões; Sul é o caso real testado pelo usuário, não limite de escopo.
 
 - **Institucionais Imprensa (26/11):** homologação das saídas regionais e autorização de publicação desta correção; integrar população com fonte/data-base e denominador. Validação imobiliária sintética por decisão do usuário; ensaio autenticado não realizado nesta rodada.
 

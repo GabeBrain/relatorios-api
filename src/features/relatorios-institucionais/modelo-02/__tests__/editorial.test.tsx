@@ -29,7 +29,7 @@ describe('Modelo 02 · contrato editorial regional',()=>{
  it('mantém nove trimestres e os mesmos meses nos acumulados parciais',()=>{
   const report=reportFor(),slide=report.slides.find(s=>s.id==='releases-units-quarters')!,charts=slide.presentation!.charts!;
   expect(charts[0].table.rows.map(r=>r.label)).toEqual(['3T2024','4T2024','1T2025','2T2025','3T2025','4T2025','1T2026','2T2026','3T2026']);
-  expect(charts[1].table.rows.map(r=>r.label)).toEqual(['Jan–09/2025','Jan–09/2026']);
+  expect(charts[1].table.rows.map(r=>r.label)).toEqual(['Jan–Set/2025','Jan–Set/2026']);
   expect(charts[1].table.rows.map(r=>r.values[0])).toEqual([54,54]);
  });
  it('preserva área empilhada, categoria desconhecida e lacuna sem trocar por tabela ou zero',()=>{

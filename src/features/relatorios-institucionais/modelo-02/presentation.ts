@@ -2,20 +2,63 @@ import manifest from './reference-manifest.json';
 import {norm,type Selection} from './model';
 import type {Slide,Table} from './types';
 
-export type PresentationKind='table'|'cities'|'columns'|'stacked-area'|'bars'|'narrative'|'institutional'|'state-comparison';
-export interface ChartPanel {kind:'columns'|'stacked-area'|'bars'|'pie';table:Table;colors:string[];box:{x:number;y:number;w:number;h:number};percent?:boolean;title?:string;lineSeries?:number[];stacked?:boolean;firstPageOnly?:boolean}
-export interface Presentation {kind:PresentationKind;rowsPerPage?:number;displayTable?:Table;annotation?:string;charts?:ChartPanel[];paragraphs?:string[];asset?:string}
+export type PresentationKind='table'|'cities'|'columns'|'stacked-area'|'bars'|'narrative'|'institutional'|'state-comparison'|'highlights';
+export interface ChartPanel {kind:'columns'|'stacked-area'|'bars'|'pie';table:Table;colors:string[];box:{x:number;y:number;w:number;h:number};percent?:boolean;title?:string;lineSeries?:number[];stacked?:boolean;firstPageOnly?:boolean;
+ /** Fixed value scale + gap: the PPTX plot area and the SVG preview/annotations share one geometry. */
+ scaleMax?:number;gapPct?:number;labelDigits?:number}
+/** Comparisons drawn over the quarterly family; computed from the same cells as CSV/JSON. */
+export interface Trend {annual:number|null;quarter:number|null;accumulated:number|null;annualLabel:string;quarterLabel:string;accumulatedLabel:string}
+export interface HighlightRow {label:string;values:(number|null)[]}
+export interface Presentation {kind:PresentationKind;rowsPerPage?:number;displayTable?:Table;annotation?:string;charts?:ChartPanel[];paragraphs?:string[];asset?:string;trend?:Trend;headline?:string;bullets?:string[];note?:string}
 export const regionalReference=(s:Selection)=>manifest[s.region as keyof typeof manifest];
 export const INSTITUTIONAL_APPROVAL={approvedOn:'2026-11-26',edition:'3T2026',sourceEdition:'4T2025',scope:'Números institucionais, contatos e composição da equipe aprovados pelo usuário nesta sessão.'};
 export const institutionalApproved=(s:Selection)=>(s.year===2026&&s.quarter===3)||(s.year===2025&&s.quarter===4);
+export const FAMILY_ORDER=['Compactos','MCMV','Médio Padrão','Luxo'];
 export const FAMILY_COLORS=['#dce6c5','#ffcf00','#206082','#577832'];
 export const SERIES_COLORS=['#577832','#eb6751','#ffcf00','#206082','#dce6c5','#8b7464','#71898c'];
+/** Quarterly family palette from the originals: older, previous year, current year. */
+export const QUARTER_COLORS={older:'#335224',previous:'#66a043',current:'#ffc000'};
+export const HIGHLIGHT_COLORS:Record<string,string>={'highlights-Residencial vertical':'#5b7536','highlights-MCMV':'#ffc000','highlights-Luxo':'#ef6144'};
 export const quarterLabel=(end:string)=>`${Math.ceil(Number(end.slice(5))/3)}T${end.slice(0,4)}`;
 export const panel=(kind:ChartPanel['kind'],table:Table,colors=SERIES_COLORS,box={x:110,y:245,w:1060,h:310}):ChartPanel=>({kind,table,colors,box});
-export function cityColumns(table:Table){
- const blocks=[...new Set(table.rows.map(r=>String(r.values[0])))].flatMap(uf=>{const rows=table.rows.filter(r=>r.values[0]===uf);return Array.from({length:Math.ceil(rows.length/30)},(_,i)=>({uf,rows:rows.slice(i*30,(i+1)*30)}));});
- const columns:(typeof blocks)[]=[];let used=0;
- for(const block of blocks){const cost=block.rows.length+3;if(!columns.length||used+cost>33){columns.push([]);used=0;}columns.at(-1)!.push(block);used+=cost;}
+
+/** Space under the plot for category labels, shared by preview and native chart frame. */
+export const CATEGORY_SPACE=40;
+export function columnGeometry(chart:ChartPanel){
+ const {x,y,w,h}=chart.box,n=Math.max(1,chart.table.rows.length),category=w/n,bar=category/(1+(chart.gapPct??70)/100);
+ const values=chart.table.rows.map(r=>r.values[0]).filter((v):v is number=>typeof v==='number');
+ const max=chart.scaleMax??Math.max(1,...values);
+ return {n,category,bar,max,bottom:y+h,top:y,center:(i:number)=>x+(i+.5)*category,valueY:(v:number)=>y+h-Math.max(0,Math.min(v,max))/max*h};
+}
+
+/** Divider titles follow the original wording (identical in the five regional decks). */
+export function sectionLines(id:string,region:string){
+ const r=`REGIÃO ${region.toLocaleUpperCase('pt-BR')}`;
+ const lines:Record<string,string[]>={
+  'regional-opening':['MERCADO IMOBILIÁRIO','COMPARATIVO',r],
+  'section-highlights':['DESTAQUES',r],
+  'section-releases':['LANÇAMENTOS',r],
+  'section-sales':['VENDAS',r],
+  'section-comparison':['COMPARATIVO','LANÇAMENTOS, VENDAS E','ESTOQUE',r],
+  'section-analysis':['ANÁLISE GERAL'],
+  'section-maps':['MAPAS DE LOCALIZAÇÃO'],
+ };
+ return lines[id];
+}
+
+/** Cities: one block per UF (Cidade · População · % Part.), split into ≤28-row columns, three columns per page. */
+export const CITY_ROWS_PER_COLUMN=28;
+export interface CityChunk {uf:string;rows:Table['rows'];continued:boolean;last:boolean}
+/** Pill reserve fits three lines (partial-coverage sentence) + gap: 28 rows + header + pill = 550px. */
+const CITY_COLUMN_HEIGHT=550,CITY_HEADER=34,CITY_ROW=16,CITY_PILL=68,CITY_GAP=16;
+export const cityChunkHeight=(chunk:CityChunk)=>CITY_HEADER+chunk.rows.length*CITY_ROW+(chunk.last?CITY_PILL:0)+CITY_GAP;
+export function cityColumns(table:Table):CityChunk[][]{
+ const ufs=[...new Set(table.rows.map(r=>String(r.values[0])))];
+ const chunks=ufs.flatMap(uf=>{const rows=table.rows.filter(r=>r.values[0]===uf),count=Math.max(1,Math.ceil(rows.length/CITY_ROWS_PER_COLUMN));return Array.from({length:count},(_,i)=>({uf,rows:rows.slice(i*CITY_ROWS_PER_COLUMN,(i+1)*CITY_ROWS_PER_COLUMN),continued:i>0,last:i===count-1}));});
+ // Up to three blocks: one UF per column, as in the originals. More blocks are packed top-down.
+ if(chunks.length<=3)return chunks.map(chunk=>[chunk]);
+ const columns:CityChunk[][]=[];let used=0;
+ for(const chunk of chunks){const cost=cityChunkHeight(chunk);if(!columns.length||used+cost>CITY_COLUMN_HEIGHT+CITY_GAP){columns.push([]);used=0;}columns.at(-1)!.push(chunk);used+=cost;}
  return columns;
 }
 
