@@ -16,7 +16,7 @@ export async function validatePdfNumberFormat(buffer: ArrayBuffer) {
       if (content.items.some((item) => 'str' in item && hasEnglishThousands(item.str))) pages.push(index + 2);
       page.cleanup();
     }
-    if (pages.length) throw new Error(`O PDF usa vírgula como separador de milhar nas páginas finais ${pages.join(', ')}. No Excel, abra Arquivo > Opções > Avançado, desmarque “Usar separadores do sistema” e defina decimal “,” e milhar “.”. Exporte novamente as oito abas e reenvie o PDF.`);
+    if (pages.length) throw new Error(`Não foi possível corrigir automaticamente todos os separadores nas páginas finais ${pages.join(', ')}. No Excel, abra Arquivo > Opções > Avançado, desmarque “Usar separadores do sistema” e defina decimal “,” e milhar “.”. Exporte novamente as oito abas e reenvie o PDF.`);
   } finally {
     await task.destroy();
   }

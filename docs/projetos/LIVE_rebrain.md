@@ -837,6 +837,13 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 26/11/2026 — Sinduscon Curitiba: separadores corrigidos no próprio PDF — Codex/Lucas
+
+- **Pedido:** analista continua bloqueada por milhares com vírgula; Lucas autorizou conversão automática. Base `e186be95`, main/origin único atualizado0/0, árvore limpa na abertura.
+- **Entrega:** normalização vetorial de agrupamentos americanos para brasileiros antes da compilação; preserva dígitos, percentuais, coordenadas, páginas e texto pesquisável. Fontes Unicode, TJ e Form XObjects cobertos; sem rasterização ou sobreposição. Mantidas oito páginas e validação após conversão; fonte sem mapeamento seguro ainda pode exigir reexportação. Aviso da tela atualizado nos componentes existentes, sem alterar carregamento.
+- **Validação:**43 testes Curitiba aprovados e teste adicional de formulário aprovado; tipos/lint dirigidos aprovados. Edge headless/PDF.js com oito páginas sintéticas aprovou conversão, validação e renderização antes/depois; captura inspecionada. PDF da analista não fornecido: sem comprovação daquele arquivo específico. Build no fechamento. [Critério, evidências e limites](../features/sinduscon-curitiba/SEPARADORES_AUTOMATICOS_2026-11-26.md).
+- **Etapas/pendências:** implementação local; publicar somente após autorização e conferir PDF real da analista. Sem escrita Monday/deploy observado. Demais relatórios intocados.
+
 ### 26/11/2026 — Modelo03: locação HTTP405 corrigida para POST
 
 - **Autor/origem:** Codex/Lucas; base `e9018d74`, main/origin único atualizado0/0, árvore limpa antes da alteração.
@@ -2286,6 +2293,8 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 
 ## 2. Etapas
 
+- **26/11 — Sinduscon Curitiba/PDF:** separadores americanos normalizados no texto vetorial antes da compilação; testes e renderização sintética verificados, aguardando publicação autorizada.
+
 - **26/11 — Locação Modelo03:** método POST corrigido no motor comum apósHTTP405 real; aguardando publicação autorizada e nova geração autenticada.
 
 - **26/11 — Modelo03:** integração dos históricos autorizada e resolvida; locação preservada, novos/usados/perspectivas temporariamente retirados, menu pronto para testes após publicação. Homologação não concluída.
@@ -2496,6 +2505,8 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 ---
 
 ## 3. Pendências
+
+- **26/11 — Sinduscon Curitiba/PDF:** publicar normalização automática mediante autorização e conferir arquivo real da analista; fontes ou textos sem mapeamento seguro continuam sujeitos a reexportação.
 
 - **26/11 — Locação/Blumenau:** publicar correção POST com autorização e conferir novo JSON;405 não deve ser tratado como ausência de anúncios. Testes reais de credencial, campos e conteúdo continuam pendentes.
 

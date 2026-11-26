@@ -1,5 +1,9 @@
 # Estado do handoff
 
+## 26/11/2026 — Sinduscon Curitiba: correção automática de separadores PDF
+
+Pedido específico de Lucas sobrepõe a exclusão histórica de Curitiba do escopo inicial deste handoff. Base `e186be95`, main/origin único atualizado0/0, árvore limpa na abertura. Normalização vetorial americana → brasileira antes de validar/compilar, preservando texto e páginas, sem rasterização.43 testes Curitiba e teste adicional de formulário aprovados; tipos/lint e Edge headless/PDF.js com documento sintético de oito páginas aprovados. PDF real não fornecido; publicação requer autorização. [Registro e limites](../../features/sinduscon-curitiba/SEPARADORES_AUTOMATICOS_2026-11-26.md).
+
 ## 26/11/2026 — Locação: método POST após diagnóstico405
 
 Base `e9018d74`, origin único atualizado0/0/main limpa. JSON Blumenau revelou4pendências de locação comHTTP405. GET real sem token confirmou `Allow: POST`; POST retornou401, sem comprovar dados/permissão. Corrigido método comum paraPOST em todas as cidades, com status/método no diagnóstico e chave da fonte mesmo quando falha.43 testes/3arquivos aprovados; cenários POST-only Blumenau/Curitiba/Natal e quatro quadros. Tipos/lint no fechamento; sem consulta autenticada, layout/médias alterados ou push desta rodada. [Evidência](../../features/relatorios-institucionais/modelo-03/CORRECAO_LOCACAO_405_2026-11-26.md).
