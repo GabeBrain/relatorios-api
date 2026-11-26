@@ -1,6 +1,6 @@
 # Institucionais Imprensa — panoramas regionais
 
-**Revisão visual reaberta — 26/11/2026:** [Plano de correção visual do Sul](PLANO_CORRECAO_VISUAL_SUL_2026-11-26.md). Base: PPTX real de 92 páginas na pasta Desktop/Auditorias. Correções ainda planejadas; a validação sintética anterior não equivale ao aceite visual desta geração.
+**Revisão visual reaberta — 26/11/2026:** [Plano de correção visual das cinco regiões](PLANO_CORRECAO_VISUAL_REGIONAL_2026-11-26.md). Base: PPTX real de 92 páginas na pasta Desktop/Auditorias. Correções ainda planejadas; a validação sintética anterior não equivale ao aceite visual desta geração.
 
 26/11/2026 · Codex/Lucas · implantação inicial na base `07c09ad4`.
 

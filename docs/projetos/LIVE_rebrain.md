@@ -837,6 +837,14 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 26/11/2026 — Institucionais Imprensa: escopo corretivo confirmado nas cinco regiões — Codex
+
+- **Pedido explícito:** usuário esclareceu que a correção é para Sul, Sudeste, Nordeste, Norte e Centro-Oeste; apenas o Sul foi testado por ele. Sul é evidência real, não limite de implantação.
+- **Documento:** [Plano visual regional consolidado](../features/relatorios-institucionais/modelo-02/PLANO_CORRECAO_VISUAL_REGIONAL_2026-11-26.md), com originais/matrizes por região e aceite separado nas cinco. Mantido o mapa real Sul53→92como apêndice. Arquivo antigo vira referência ao consolidado, preservando links. Removida a orientação de deixar as demais regiões como extensão posterior ao aceite Sul.
+- **Etapas/Pendências:** população/participação/ordem, títulos/manchetes/divisórias, gráficos/setas/rótulos e quadros exclusivos devem ser corrigidos e conferidos em todas as regiões. Nenhuma implementação de produto nesta atualização documental; preparações IBGE locais preservadas. Base `573fbe91`, origin único0atrás/1àfrenteapós fetch.
+- **Monday:** [DESAFIO — Estudos Entidades e Institucionais](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`. Sem escrita.
+
+
 ### 26/11/2026 — Institucionais Imprensa: correção visual reaberta após PPTX real — Codex
 
 - **Ambiente/funcionalidade:** Institucionais Imprensa, panorama Sul. Usuário pediu um MD de correção após apontar população/participação ausentes, ordenação alfabética indevida, falta de setas/colchetes, títulos abreviados/sobrepostos e leitura pouco comercial nos destaques/resumos.
@@ -2565,7 +2573,7 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 
 ## 3. Pendências
 
-- **Prioridade — Imprensa Sul:** executar [plano visual baseado no PPTX real](../features/relatorios-institucionais/modelo-02/PLANO_CORRECAO_VISUAL_SUL_2026-11-26.md); corrigir população/participação e ordenação, títulos/divisórias, setas/colchetes/rótulos e manchetes, além de revisar lacunas e expansão dos rankings. Conferir no PowerPoint real antes de estender às outras regiões.
+- **Prioridade — Imprensa / cinco regiões:** executar [plano visual baseado no PPTX real](../features/relatorios-institucionais/modelo-02/PLANO_CORRECAO_VISUAL_SUL_2026-11-26.md); corrigir população/participação e ordenação, títulos/divisórias, setas/colchetes/rótulos e manchetes, além de revisar lacunas e expansão dos rankings. Corrigir e conferir as cinco regiões; Sul é o caso real testado pelo usuário, não limite de escopo.
 
 - **Institucionais Imprensa (26/11):** homologação das saídas regionais e autorização de publicação desta correção; integrar população com fonte/data-base e denominador. Validação imobiliária sintética por decisão do usuário; ensaio autenticado não realizado nesta rodada.
 
