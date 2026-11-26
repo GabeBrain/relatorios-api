@@ -837,6 +837,16 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 26/11/2026 — Institucionais Imprensa: correção visual reaberta após PPTX real — Codex
+
+- **Ambiente/funcionalidade:** Institucionais Imprensa, panorama Sul. Usuário pediu um MD de correção após apontar população/participação ausentes, ordenação alfabética indevida, falta de setas/colchetes, títulos abreviados/sobrepostos e leitura pouco comercial nos destaques/resumos.
+- **Evidência:** original Sul4T2025 no Desktop e `Desktop/Auditorias/institucionais-imprensa-sul-2026-3T-editavel.pptx`3T2026, efetivamente lidos por ZIP/OOXML e diagnóstico embutido. Original53páginas/19gráficos nativos; real92páginas/40gráficos,77municípios,71posições e0bloqueadas no resumo, apesar de lacunas numéricas. Auditorias é pasta local, não página do app.
+- **Entrega documental:** [Plano de correção visual do Sul](../features/relatorios-institucionais/modelo-02/PLANO_CORRECAO_VISUAL_SUL_2026-11-26.md), com diferenças por família, prioridades, fontes/caminhos, critérios de aceite e mapa completo das53referências para as92páginas geradas. Pares sintéticos anteriores identificados como tal, sem usá-los para homologar o real. README e registro de execução apontam a reabertura; nenhuma mudança de runtime nesta rodada.
+- **Etapas/pendências:** fidelidade visual reaberta, não concluída. Implementar e conferir títulos completos, manchetes sustentadas por dados, destaques com setas, séries com comparativos, divisórias sem resíduos e população/percentuais por UF em ordem decrescente; investigar cobertura monetária/histórica sem preencher lacunas artificialmente. Preparação IBGE anterior continua local e não integrada; não incluída neste commit documental. Base `32fc0869`, main/origin único0/0após fetch; duas preparações não versionadas preservadas.
+- **Validação:** documento confrontado com o arquivo real, metadados, chaves/páginas e capturas do usuário. Não se declara nova renderização/aceite visual integral das92páginas nem nova publicação do app. Sem escrita Monday.
+- **Monday:** [DESAFIO — Estudos Entidades e Institucionais](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`.
+
+
 ### 26/11/2026 — Institucionais Imprensa: sequência regional, gráficos nativos e novo nome — Codex
 
 - **Ambiente/funcionalidade:** relatórios automatizados, antigo Modelo 02; nome solicitado nesta sessão **Institucionais Imprensa**, rota lazy `/rebrain/relatorios-institucionais/institucionais-imprensa`, com redirect do endereço anterior. Acesso só por rota preservado.
@@ -2331,6 +2341,8 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 
 ## 2. Etapas
 
+- **26/11 — Institucionais Imprensa / revisão real:** fidelidade visual reaberta após saída Sul92páginas; plano corretivo documentado, implementação e novos pares reais pendentes. Validações sintéticas anteriores não são homologação do material real.
+
 - **26/11 — Institucionais Imprensa:** correção editorial/exports e novo nome implementados localmente; matrizes das cinco regiões e validação sintética. Homologação/publicação desta entrega pendentes. [Registro](../features/relatorios-institucionais/modelo-02/EXECUCAO_2026-11-26.md).
 - **26/11 — Curitiba:** push de `1be0da71` concluído a pedido do usuário nesta sessão; analista deve regenerar Excel/PDF após deploy para testar.
 
@@ -2552,6 +2564,8 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 ---
 
 ## 3. Pendências
+
+- **Prioridade — Imprensa Sul:** executar [plano visual baseado no PPTX real](../features/relatorios-institucionais/modelo-02/PLANO_CORRECAO_VISUAL_SUL_2026-11-26.md); corrigir população/participação e ordenação, títulos/divisórias, setas/colchetes/rótulos e manchetes, além de revisar lacunas e expansão dos rankings. Conferir no PowerPoint real antes de estender às outras regiões.
 
 - **Institucionais Imprensa (26/11):** homologação das saídas regionais e autorização de publicação desta correção; integrar população com fonte/data-base e denominador. Validação imobiliária sintética por decisão do usuário; ensaio autenticado não realizado nesta rodada.
 
