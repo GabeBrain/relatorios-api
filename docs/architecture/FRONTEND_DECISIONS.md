@@ -1,3 +1,7 @@
+## 26/11/2026 — Institucionais Imprensa: sequência regional e nome público
+
+Pedido do usuário renomeia Modelo 02 para Institucionais Imprensa. Rota canônica lazy `/rebrain/relatorios-institucionais/institucionais-imprensa`, com redirect da rota anterior e mesmo shell móvel. Mantido acesso só por rota. Manifesto inspecionado dos cinco originais define sequência, referências e apresentação; painéis partilhados entre SVG e gráficos nativos PPTX, com tabelas DrawingML e artes institucionais originais aprovadas para 3T2026. Controles Maceió (`ReportSlideControls`) e loading SP (`ReportLoading`/`ReportGenerationPanel`) preservados. Sem primitive global novo. [Evidência e limites](../features/relatorios-institucionais/modelo-02/EXECUCAO_2026-11-26.md).
+
 ## 24/11/2026 — Contrato único da ferramenta de relatórios automáticos
 
 **Decisão de Lucas:** navegação/numeração/ampliação de SP institucional, Fortaleza e Modelo03 seguem Maceió; carregamento de Fortaleza, Maceió e Modelo03 segue a animação/identidade do SP institucional. Conteúdo do relatório pode ter marca/referência própria, mas o shell da mesma ferramenta/menu não muda de sistema visual. A configuração de entidade/cidade/RM/período do Modelo03 deve permanecer intacta.

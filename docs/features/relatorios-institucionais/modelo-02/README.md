@@ -1,6 +1,10 @@
-# Modelo 02 — institucionais regionais
+# Institucionais Imprensa — panoramas regionais
 
 26/11/2026 · Codex/Lucas · implantação inicial na base `07c09ad4`.
+
+**Revisão vigente:** [execução do plano de correção em 26/11/2026](EXECUCAO_2026-11-26.md). Nome solicitado: Institucionais Imprensa. As seções abaixo descrevem a implantação inicial; matrizes, sequência editorial, gráficos nativos e validação revisada estão no registro vigente.
+
+Rota atual: `/rebrain/relatorios-institucionais/institucionais-imprensa`; a rota antiga redireciona.
 
 ## Acesso e configuração
 

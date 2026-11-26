@@ -837,6 +837,18 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 26/11/2026 — Institucionais Imprensa: sequência regional, gráficos nativos e novo nome — Codex
+
+- **Ambiente/funcionalidade:** relatórios automatizados, antigo Modelo 02; nome solicitado nesta sessão **Institucionais Imprensa**, rota lazy `/rebrain/relatorios-institucionais/institucionais-imprensa`, com redirect do endereço anterior. Acesso só por rota preservado.
+- **Pedido/decisões:** executar o plano de correção; usuário autorizou validação sintética e confirmou números institucionais, contatos e equipe dos originais para 3T2026. Documentário e Anuário excluídos. Aprovação não se estende automaticamente a novas edições.
+- **Entrega:** cinco matrizes/280 miniaturas originais renderizadas pelo PowerPoint e inspecionadas, manifesto executável por região, abertura/Brain/estudos/Geobrain/metodologia/resumos recuperados, cidades em blocos por UF, nove trimestres e acumulados equivalentes, áreas por padrão, quadros UF/participações, rankings, preços combinados e mapas anuais, mapas de capitais por faixas de preço histórico R$/m² no bloco final, equipe/contracapa nas posições originais. Ordem das capitais específica por região; Norte sem ranking de luxo e Nordeste com quadros distintos de preço por UF e por capital. Referências originais e exclusões/consolidações/continuações rastreadas no JSON/CSV.
+- **Arquivos/exportação:** painéis únicos SVG/PPTX, gráficos nativos com XLSX/Editar Dados, tabelas DrawingML/textos/marcadores editáveis, artes e bases como imagens. Corrigida a assinatura do gráfico combinado e o preenchimento indevido de lacunas com zero no XLSX embutido. População/fonte/data-base/denominador seguem pendentes, sem copiar valores antigos. Loading SP e controles Maceió preservados; Modelo 03 e backend intocados. [Execução, matrizes e evidências](../features/relatorios-institucionais/modelo-02/EXECUCAO_2026-11-26.md).
+- **Validação/etapas:** tipos/lint/build aprovados; 158 testes em12arquivos dos modelos02/03 e shell compartilhado. Onze cenários browser e cinco PPTX renderizados no PowerPoint conferidos com dados sintéticos; Sul com19gráficos nativos/49páginas e piloto extra com ruas reais Mapbox. Edição de título/tabela/série comprovada em cópia Office, inclusive cache salvo. Densidade de80cidades em1página/120em2, sem perda de rótulos. Detalhes no registro da entrega. Sem coleta imobiliária autenticada nem homologação numérica/visual pelo analista.
+- **Commits/base:** plano `b791f4dc`; implementação e documentação desta entrega. Main limpa na abertura com dois commits locais; origin único atualizado. Push separado de Curitiba solicitado e concluído em `1be0da71`, sem incluir esta correção.
+- **Pendências:** push desta correção autorizado posteriormente nesta sessão, após o commit; homologação do analista, população e prova de runtime de mercado real. Não se declara réplica pixel a pixel nem localização histórica/polígono municipal.
+- **Monday:** [DESAFIO — Estudos Entidades e Institucionais](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`. Sem escrita.
+
+
 ### 26/11/2026 — Sinduscon Curitiba: calendário recalculável e meses em português — Codex/Lucas
 
 - **Ambiente/pedido:** página 10 do Sinduscon Curitiba; 13 meses inclusivos até a competência atual, com rótulos portugueses. Base `d1de4d73`, main/origin único 0/0 após fetch, árvore limpa na abertura.
@@ -2319,6 +2331,9 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 
 ## 2. Etapas
 
+- **26/11 — Institucionais Imprensa:** correção editorial/exports e novo nome implementados localmente; matrizes das cinco regiões e validação sintética. Homologação/publicação desta entrega pendentes. [Registro](../features/relatorios-institucionais/modelo-02/EXECUCAO_2026-11-26.md).
+- **26/11 — Curitiba:** push de `1be0da71` concluído a pedido do usuário nesta sessão; analista deve regenerar Excel/PDF após deploy para testar.
+
 - **26/11 — Curitiba/histórico:** calendário literal e eixo mensal português implementados; janela inclusiva de 13 pontos verificada no OOXML dos dois modelos. Impressão nativa ainda não observada.
 
 - **26/11 — Modelo02 regional:** primeira versão apenas por rota, configuração trimestral/mês automático, núcleo quantitativo e mapas por capital com continuações, exports/Insights compartilhados. Verificações locais aprovadas; publicação e geração autenticada/homologação pendentes.
@@ -2537,6 +2552,8 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 ---
 
 ## 3. Pendências
+
+- **Institucionais Imprensa (26/11):** homologação das saídas regionais e autorização de publicação desta correção; integrar população com fonte/data-base e denominador. Validação imobiliária sintética por decisão do usuário; ensaio autenticado não realizado nesta rodada.
 
 - **26/11 — Curitiba/histórico:** publicar mediante autorização, gerar novo XLSX e exportar novamente as oito abas; conferir setembro/2025–setembro/2026 no PDF final. Não reutilizar o PDF antigo.
 

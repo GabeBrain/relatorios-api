@@ -102,7 +102,8 @@ const App = () => (
                 <Route path="/rebrain/relatorios-institucionais/fortaleza" element={<FortalezaInstitutionalPage />} />
                 <Route path="/rebrain/relatorios-institucionais/maceio" element={<MaceioInstitutionalPage />} />
                 <Route path="/rebrain/relatorios-institucionais/modelo-03" element={<Modelo03Page />} />
-                <Route path="/rebrain/relatorios-institucionais/modelo-02" element={<Modelo02Page />} />
+                <Route path="/rebrain/relatorios-institucionais/modelo-02" element={<Navigate to="/rebrain/relatorios-institucionais/institucionais-imprensa" replace />} />
+                <Route path="/rebrain/relatorios-institucionais/institucionais-imprensa" element={<Modelo02Page />} />
                 <Route
                   path="/rebrain/aelo"
                   element={(

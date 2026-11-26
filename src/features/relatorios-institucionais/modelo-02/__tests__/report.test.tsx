@@ -13,7 +13,7 @@ describe('Modelo 02 regional',()=>{
   expect(report.slides.filter(s=>s.status==='waiting-source')).toEqual([]);
   const current=report.slides.find(s=>s.id==='highlights-Residencial vertical')!.tables[0].rows[0];expect(current.values).toEqual([cities.length*6,cities.length*6,cities.length*80]);
   const maps=report.slides.filter(s=>s.kind==='map');expect(maps).toHaveLength(region.capitals.length);expect(maps.every(s=>s.map?.points[0].stock===80)).toBe(true);
-  expect(maps.map(s=>s.map?.city.city)).toEqual(region.capitals.map(([,city])=>city));
+  const order=region.id==='nordeste'?['São Luís','Teresina','Fortaleza','Natal','João Pessoa','Recife','Maceió','Aracaju','Salvador']:region.id==='norte'?['Rio Branco','Manaus','Macapá','Belém','Porto Velho','Boa Vista','Palmas']:region.capitals.map(([,city])=>city);expect(maps.map(s=>s.map?.city.city)).toEqual(order);
   expect(report.slides.find(s=>s.id==='meter-states')!.tables[0].rows.every(r=>r.values[0]===10000)).toBe(true);
   expect(physicalPages(report.slides)[0].slide.kind).toBe('cover');expect(physicalPages(report.slides).at(-1)?.slide.kind).toBe('closing');
  });
@@ -71,7 +71,7 @@ describe('Modelo 02 regional',()=>{
   expect(period({...selection,quarter:2})).toMatchObject({start:'2026-04',end:'2026-06'});expect(periodIssue({...selection,quarter:4},new Date('2026-11-26T12:00:00Z'))).toMatch(/encerrado/);expect(missingUfs(selection,{PR:['Curitiba']})).toEqual(['SC','RS']);
  });
  it('consulta a janela necessária e não fabrica zeros em comparativos anteriores a 2021',()=>{
-  expect(historyStart(selection)).toBe('2024-10');const s={...selection,year:2021,quarter:1},catalog=catalogFor(),report=calculateReport(s,citiesFor(s,catalog),[],fixture(s,catalog),started);
+  expect(historyStart(selection)).toBe('2024-07');const s={...selection,year:2021,quarter:1},catalog=catalogFor(),report=calculateReport(s,citiesFor(s,catalog),[],fixture(s,catalog),started);
   expect(historyStart(s)).toBe('2021-01');expect(report.slides.find(s=>s.id==='annual-state-comparison')!.tables[0].rows.every(r=>r.values[1]===null&&r.values[3]===null&&r.values[5]===null)).toBe(true);
  });
  it('renderiza capa regional com competência editável e continuações com mesma numeração física',()=>{

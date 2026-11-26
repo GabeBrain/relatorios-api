@@ -40,3 +40,8 @@ Fazer `ReportSlide.tsx` e a exportação em `Exports.tsx` consumirem a mesma seq
 4. Aplicar os layouts conferidos ao Nordeste, Norte, Sudeste e Centro-Oeste seguindo a matriz de cada região. Gerar e comparar um PPTX por região, inclusive seus quadros exclusivos. Registrar para homologação os slides conferidos e eventuais pendências de conteúdo ou fonte.
 
 O aceite visual exige que a mesma informação seja encontrada na mesma sequência e com a mesma leitura gráfica da referência regional. A contagem de páginas por si só não demonstra essa equivalência.
+
+
+## Execução em 26/11/2026
+
+Implementação, matrizes regionais, decisões do usuário, evidências e limites registrados em [EXECUCAO_2026-11-26.md](EXECUCAO_2026-11-26.md). Nome alterado para **Institucionais Imprensa**. Homologação visual/numeral pelo analista e publicação desta correção seguem separadas da validação sintética autorizada.

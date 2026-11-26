@@ -5,6 +5,7 @@ import {BrainLoadingState} from '@/components/feedback/BrainLoadingState';
 import {Progress} from '@/components/ui/progress';
 import {addNativePptxSlide,patchNativePptx,type NativePatch} from '../shared/native-pptx';
 import {embedReportPptxAudit} from '../shared/pptx-audit';
+import {addCharts,preserveChartBlanks} from './native-charts';
 import {ReportSlide} from './ReportSlide';
 import {physicalPages} from './calculate';
 import {filename,period,regionOf} from './model';
@@ -23,7 +24,7 @@ export default function Exports({report}:{report:Report}){
  const [job,setJob]=useState<{kind:'json'|'csv'|'pptx';controller:AbortController;startedAt:number}|null>(null),[progress,setProgress]=useState(0),[error,setError]=useState(''),[notice,setNotice]=useState('');
  const current=useRef<typeof job>(null),started=useRef<typeof job>(null),deck=useRef<HTMLDivElement>(null),pages=useMemo(()=>physicalPages(report.slides),[report]);
  useEffect(()=>()=>{current.current?.controller.abort();current.current=null;},[report]);
- const portal=useMemo(()=>job?.kind==='pptx'?createPortal(<div ref={deck} aria-hidden="true" style={{position:'fixed',left:-5000,top:0,width:1280,pointerEvents:'none'}}>{pages.map((page,i)=><div data-modelo02-export={i+1} key={i} style={{width:1280,height:720}}><ReportSlide page={page} selection={report.selection}/></div>)}</div>,document.body):null,[job,pages,report]);
+ const portal=useMemo(()=>job?.kind==='pptx'?createPortal(<div ref={deck} aria-hidden="true" style={{position:'fixed',left:-5000,top:0,width:1280,pointerEvents:'none'}}>{pages.map((page,i)=><div data-modelo02-export={i+1} key={i} style={{width:1280,height:720}}><ReportSlide page={page} selection={report.selection} exporting/></div>)}</div>,document.body):null,[job,pages,report]);
  useEffect(()=>{
   if(!job||started.current===job)return;started.current=job;const signal=job.controller.signal;
   void(async()=>{try{
@@ -34,11 +35,11 @@ export default function Exports({report}:{report:Report}){
     const patches:NativePatch[]=[],nodes=[...(deck.current?.querySelectorAll<HTMLElement>('[data-modelo02-export]')??[])];if(nodes.length!==pages.length)throw new Error('Prévia indisponível para exportação.');
     for(let i=0;i<nodes.length;i++){
      if(signal.aborted||current.current!==job)throw new DOMException('Cancelado.','AbortError');
-     const slide=await addNativePptxSlide(pptx,nodes[i],signal,patches),page=pages[i];slide.addNotes([page.slide.id,page.slide.title,page.slide.note,...page.slide.warnings,...page.slide.map?.points.map(point=>`${point.name}: ${point.stock} unidades; ${point.family}`)??[]].join('\n'));setProgress(Math.round((i+1)/nodes.length*95));await new Promise(r=>setTimeout(r,0));
+     const slide=await addNativePptxSlide(pptx,nodes[i],signal,patches),page=pages[i];if(page.slide.status==='available')addCharts(slide,page.charts);slide.addNotes([`Referência: ${page.slide.referenceNumbers?.join(', ')}`,page.slide.id,page.slide.title,page.slide.note,...page.slide.warnings,...page.slide.map?.points.map(point=>`${point.name}: ${point.stock} unidades; ${point.family}`)??[]].join('\n'));setProgress(Math.round((i+1)/nodes.length*95));await new Promise(r=>setTimeout(r,0));
     }
     const audit=JSON.parse(await runWorker<string>({mode:'json',report},signal));
     const blob=await pptx.write({outputType:'blob',compression:true}) as Blob;if(signal.aborted||current.current!==job)return;
-    const bytes=embedReportPptxAudit(patchNativePptx(new Uint8Array(await blob.arrayBuffer()),patches),audit,{part:'customXml/modelo02-audit.xml',namespace:'urn:brain:modelo02:audit:v1',relationshipId:'rIdModelo02Audit'});
+    const bytes=embedReportPptxAudit(preserveChartBlanks(patchNativePptx(new Uint8Array(await blob.arrayBuffer()),patches)),audit,{part:'customXml/modelo02-audit.xml',namespace:'urn:brain:modelo02:audit:v1',relationshipId:'rIdModelo02Audit'});
     download(new Blob([bytes as BlobPart],{type:'application/vnd.openxmlformats-officedocument.presentationml.presentation'}),`${filename(report.selection)}-editavel.pptx`);
    }
    setProgress(100);setNotice('Arquivo gerado. Download iniciado.');
@@ -47,5 +48,5 @@ export default function Exports({report}:{report:Report}){
   })();
  },[job,pages,report]);
  const start=(kind:'json'|'csv'|'pptx')=>{if(current.current)return;const next={kind,controller:new AbortController(),startedAt:Date.now()};current.current=next;setError('');setNotice('');setProgress(0);setJob(next);};
- return <section className="space-y-3 rounded-xl border bg-card p-4" aria-label="Exportação do Modelo 02"><h2 className="font-semibold">Arquivos desta geração</h2><div className="flex flex-wrap gap-2"><Button variant="outline" disabled={!!job} onClick={()=>start('json')}>Baixar diagnóstico JSON</Button><Button variant="outline" disabled={!!job} onClick={()=>start('csv')}>Baixar conferência CSV</Button><Button disabled={!!job} onClick={()=>start('pptx')}>Baixar PPTX editável</Button></div><p className="text-sm text-muted-foreground">{pages.length} páginas na prévia e no PPTX. Textos, tabelas e marcadores editáveis; bases cartográficas e artes são imagens. CSV inclui a conferência dos empreendimentos localizados.</p>{job&&<><BrainLoadingState variant="operation" title={`Preparando ${job.kind.toUpperCase()}`} startedAt={job.startedAt}/><Progress value={progress}/><Button variant="outline" onClick={()=>job.controller.abort()}>Cancelar exportação</Button></>}{error&&<p role="alert" className="text-sm text-destructive">{error}</p>}{notice&&<p role="status" className="text-sm">{notice}</p>}{portal}</section>;
+ return <section className="space-y-3 rounded-xl border bg-card p-4" aria-label="Exportação de Institucionais Imprensa"><h2 className="font-semibold">Arquivos desta geração</h2><div className="flex flex-wrap gap-2"><Button variant="outline" disabled={!!job} onClick={()=>start('json')}>Baixar diagnóstico JSON</Button><Button variant="outline" disabled={!!job} onClick={()=>start('csv')}>Baixar conferência CSV</Button><Button disabled={!!job} onClick={()=>start('pptx')}>Baixar PPTX editável</Button></div><p className="text-sm text-muted-foreground">{pages.length} páginas na prévia e no PPTX. Gráficos com Editar Dados, textos, tabelas e marcadores editáveis; bases cartográficas e artes são imagens. CSV inclui a conferência dos empreendimentos localizados.</p>{job&&<><BrainLoadingState variant="operation" title={`Preparando ${job.kind.toUpperCase()}`} startedAt={job.startedAt}/><Progress value={progress}/><Button variant="outline" onClick={()=>job.controller.abort()}>Cancelar exportação</Button></>}{error&&<p role="alert" className="text-sm text-destructive">{error}</p>}{notice&&<p role="status" className="text-sm">{notice}</p>}{portal}</section>;
 }

@@ -1,5 +1,9 @@
 # Estado do handoff
 
+## 26/11/2026 — Institucionais Imprensa: correção editorial do antigo Modelo 02
+
+Sessão abriu na main limpa, origin único, fetch concluído e dois commits locais desde 26/11. Usuário pediu executar o plano, confirmou validação sintética e aprovou conteúdo institucional para 3T2026. Matrizes de 280 posições, artes/ordem regionais, gráficos nativos com Editar Dados, lacunas preservadas também no XLSX embutido, tabelas/insights/CSV e nova rota com alias implementados. Tipos/lint/build e 158 testes dirigidos aprovados. [Execução, evidências e limites](../../features/relatorios-institucionais/modelo-02/EXECUCAO_2026-11-26.md). Nesta mesma sessão, pedido separado de push Curitiba atendido com `1be0da71`; correção Imprensa teve posteriormente autorização explícita para push assim que commitada. Sem coleta imobiliária autenticada nem escrita Monday.
+
 ## 26/11/2026 — Curitiba: 13 meses e rótulos em português
 
 Base `d1de4d73`, main/origin único 0/0 após fetch e árvore limpa na abertura. Pedido de Lucas cobre página 10, setembro/2025–setembro/2026 inclusivos e janela móvel. Detectadas fórmulas antigas de soma de dias preservadas pelo refresh de cache: XLSX real duplica junho e coloca setembro em agosto. Datas mensais agora são literais no dia 1; categorias textuais portuguesas independem da localidade do Excel. Regressões dos modelos reais e viradas de ano; impressão nativa não observada. [Registro](../../features/sinduscon-curitiba/GRAFICO_HISTORICO_2026-11-26.md). Aguardar autorização para push, depois regenerar XLSX/PDF; originais preservados.

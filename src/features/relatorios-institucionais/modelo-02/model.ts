@@ -13,12 +13,12 @@ export const REGIONS:readonly Region[]=[
 export const regionOf=(s:Selection)=>REGIONS.find(r=>r.id===s.region);
 export const citySelection=(s:Selection,c:City):CitySelection=>({...c,entity:'Brain',periodicity:'quarterly',position:s.quarter,year:s.year,includeRm:false,rmCities:[]});
 export const period=(s:Selection)=>cityPeriod(citySelection(s,{uf:'',city:''}));
-export function historyStart(s:Selection){const start=[shift(period(s).end,-23),`${s.year-1}-01`].sort()[0];return start<'2021-01'?'2021-01':start;}
+export function historyStart(s:Selection){const start=[shift(period(s).end,-26),`${s.year-1}-01`].sort()[0];return start<'2021-01'?'2021-01':start;}
 export const periodIssue=(s:Selection,now=new Date())=>!regionOf(s)?'Selecione a região do Brasil.':cityPeriodIssue(citySelection(s,{uf:'',city:''}),now);
 export const keyOf=(c:City)=>`${c.uf}|${c.city}`;
 export const citiesFor=(s:Selection,catalog:Record<string,string[]>|null):City[]=>regionOf(s)?.capitals.flatMap(([uf])=>[...new Set(catalog?.[uf]??[])].sort((a,b)=>a.localeCompare(b,'pt-BR')).map(city=>({uf,city})))??[];
 export const missingUfs=(s:Selection,catalog:Record<string,string[]>|null)=>regionOf(s)?.capitals.filter(([uf])=>!catalog?.[uf]?.length).map(([uf])=>uf)??[];
 export const scopeIssue=(s:Selection,catalog:Record<string,string[]>|null)=>!catalog?'Carregue o catálogo autorizado do Geobrain.':!citiesFor(s,catalog).length?'Seu acesso não retornou municípios monitorados para esta região.':null;
 export const selectionKey=(s:Selection)=>`${s.region}/${s.year}/${s.quarter}`;
-export const filename=(s:Selection)=>`modelo-02-${s.region}-${s.year}-${s.quarter}T`;
+export const filename=(s:Selection)=>`institucionais-imprensa-${s.region}-${s.year}-${s.quarter}T`;
 export function initialSelection(now=new Date()):Selection {const previous=new Date(now.getFullYear(),Math.floor(now.getMonth()/3)*3-1,1);return {region:'',year:previous.getFullYear(),quarter:Math.ceil((previous.getMonth()+1)/3)};}

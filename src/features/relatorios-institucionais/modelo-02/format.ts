@@ -1,0 +1,1 @@
+export const formatValue=(v:unknown,f='count')=>v===null?'—':typeof v!=='number'?String(v):new Intl.NumberFormat('pt-BR',{maximumFractionDigits:f==='count'?0:f==='percent'?1:2}).format(v)+(f==='percent'?'%':'');
