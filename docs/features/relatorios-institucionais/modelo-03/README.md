@@ -1,5 +1,7 @@
 # Modelo 03 — gerador comum
 
+Locação integrada pelo contrato enviado por Lucas: [anúncios coletados no período, critérios e limites](LOCACAO_2026-11-24.md). Quatro posições123–126 acrescentadas (62 indicadores/36 editoriais com RM), sem restaurar capas25/39/100. Anúncios não são contratos nem estoque ativo histórico; primeira geração autenticada permanece para conferência.
+
 ## Entrega inicial — 24/11/2026, Codex/Lucas
 
 Rota provisória: `/rebrain/relatorios-institucionais/modelo-03`. Lazy, sem item de menu, Home ou Command Palette. Não substitui Maceió nem altera seus cálculos, referências ou exportações.

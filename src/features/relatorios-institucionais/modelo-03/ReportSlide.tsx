@@ -44,6 +44,6 @@ export function ReportSlide({page,selection}:{page:PresentationPage;selection:Se
   {!dark&&<><rect x="0" y="652" width="1280" height="68" rx="22" fill={GREEN}/><text x="64" y="692" fontSize="14" fill="#ffffff">Panorama de {studyLabel(selection)} · {p.label}</text></>}
   <text x="1208" y="695" textAnchor="end" fontSize="22" fontWeight="700" fill="#ffffff">BRAIN</text>
   {cover&&<text x="72" y="650" fontSize="36" fontWeight="700" fill="#ffffff">BRAIN</text>}
-  {!editorial&&<text x="64" y="639" fontSize="12" fill="#555555">Fonte: Geobrain{['vgv-release','vgv-sales'].includes(slide.definition.role??'')?' · Valores corrigidos pelo INCC-DI':''} · {p.label} · {page.part}/{page.parts}</text>}
+  {!editorial&&<text x="64" y="639" fontSize="12" fill="#555555">{slide.definition.role?.startsWith('rental-')?'Fonte: anúncios Geobrain · Coletados no período; não são contratos ou estoque histórico ativo':'Fonte: Geobrain'}{['vgv-release','vgv-sales'].includes(slide.definition.role??'')?' · Valores corrigidos pelo INCC-DI':''} · {p.label} · {page.part}/{page.parts}</text>}
  </svg>;
 }

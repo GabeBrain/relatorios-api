@@ -837,6 +837,22 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 26/11/2026 — Retomada da locação Modelo03 e viabilidade de novos × usados
+
+- **Autor/origem:** Codex/Lucas; base local `9a97010b`, retomada da implementação não commitada em24/11 após bloqueio de créditos da sessão anterior.
+- **Monday:** [DESAFIO — Estudos Entidades e Institucionais](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`.
+- **Entrega local:** integração ALUGUEL concluída e validada isoladamente.88 testes/sete arquivos, tipos/lint e bancada de geração/insights/JSON/CSV/PPTX sintética aprovados; cabeçalhos compactos inspecionados. Caso adicional aprovado para avisar atualização de anúncio posterior ao corte; preços recebidos não são série histórica (89 casos no conjunto). Sem coleta autenticada ou homologação em produção.
+- **Comparativo:** endpoint aceita VENDA e fornece métricas para mercado novo × anúncios de revenda. Contrato/exemplo não comprovam condição usado: `tipo_negocio` é negócio, `ano_construcao` pode vir nulo. Não adicionada coleta VENDA nem rotulado tudo como usado. [Análise, metodologia e limites](../features/relatorios-institucionais/modelo-03/RETOMADA_LOCACAO_2026-11-26.md).
+- **Git:** origin atualizado por fetch,3 commits remotos de25/11 e2 locais de24/11; há sobreposição no Modelo03. Sem merge/pull/push. Integração dos históricos exige autorização pelo AGENTS, preservando cobertura/inventário remotos e os registros locais.
+
+### 24/11/2026 — Modelo03: integração do endpoint de anúncios de aluguel
+
+- **Autor/origem:** Codex a pedido de Lucas; contrato fornecido pelo usuário em `revenda.py` e dois exemplos JSON; base `9a97010b`, main com dois commits anteriores locais.
+- **Monday:** [DESAFIO — Estudos Entidades e Institucionais](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`.
+- **Mudança:** GET `/public-api/rent-resale-property`, Apartamento/ALUGUEL por cidade autorizada, mesma fila500ms/dois workers/paginação/429/cancelamento. Refs123–126 integradas: resumo/bairros/tipologias/oferta-área-preço. Preços/áreas ausentes não viram zero, médias simples com bases visíveis; duplicatas idênticas por ID eliminadas, conflito bloqueia. JSON/CSV/PPTX/Insights incluem os quadros e critérios. Sem expor anúncio bruto, endereço ou contato nos arquivos.
+- **Critério declarado:** anúncios coletados na janela selecionada; não estoque ativo histórico nem contratos fechados. Sem INCC-DI. Recorte conservador técnico explicitado ao usuário, não confirmação do método original pelo analista. Dois exemplos são idênticos e de VENDA; testes de aluguel são sintéticos. [Contrato, critérios e limites](../features/relatorios-institucionais/modelo-03/LOCACAO_2026-11-24.md).
+- **Etapa:** com RM98 posições (62 indicadores,36 editoriais); sem RM92. Capas25/39/100 seguem omitidas;122 mantida.88 testes/sete arquivos e tipos aprovados; lint/build e navegador no fechamento. Sem consulta autenticada nova ou homologação.
+
 ### 24/11/2026 — Modelo03: retirada temporária de capas e investigação de locação
 
 - **Autor/origem:** Codex/Lucas; base `7971eb24`, um commit anterior local, origin atualizado por fetch; sem divergência.
@@ -2222,6 +2238,10 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 
 ## 2. Etapas
 
+- **26/11 — Locação Modelo03:** implementação local validada; integrar correções remotas de25/11 somente após autorização. Não considerada homologada ou publicada.
+
+- **24/11 — Locação Modelo03:** endpoint fornecido integrado no motor comum; pendente primeira geração real e conferência do recorte de anúncios coletados com o analista.
+
 - **24/11 — Modelo03:** três capas temporariamente omitidas em todas as cidades; inclusão da locação autorizada e em investigação de contrato.
 
 - **24/11 — Diagnóstico Modelo03:** identificação e motivo de vendas inválidas implementados no JSON comum a todas as cidades; cálculos e bloqueios preservados.
@@ -2419,6 +2439,10 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 ---
 
 ## 3. Pendências
+
+- **26/11 — Integração Git:** autorizar reconciliação dos históricos (3 remotos/2 locais na abertura) sem push; preservar melhorias remotas de cobertura/inventário e locação local e repetir testes na base integrada. Novos × usados requer confirmação da condição dos anúncios VENDA e alinhamento temporal/ponderação, antes de usar o rótulo “usados”.
+
+- **24/11 — Locação:** conferir resposta autenticada ALUGUEL, permissões, fronteiras dos filtros de coleta e metodologia da amostra após publicação autorizada. Não há contrato de fotografia ativa histórica no material enviado. Pendência anterior de localizar endpoint resolvida pelo `revenda.py` fornecido.
 
 - **24/11 — Locação Modelo03:** confirmar URL/contrato GeoBrain de locação por bairro, tipologia e oferta/preço/área; verificar filtros geográficos, competência disponível, paginação e autenticidade antes da integração. Pedido de informação enviado a Lucas; não implementado no catálogo atual.
 

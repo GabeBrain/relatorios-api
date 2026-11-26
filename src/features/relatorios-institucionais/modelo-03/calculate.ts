@@ -1,4 +1,5 @@
 import {CoverageError,expectedObservations,surveyCadence} from './coverage';
+import {rentalSlide} from './rentals';
 import {standardFamily,STANDARD_GROUPS} from './classification';
 import indicesFile from '../fortaleza/incc-di.json';
 import {historyFingerprint} from '@/features/panorama-secovi-fiergs/domain/building-history';
@@ -113,6 +114,7 @@ export function createCalculator(s:Selection,sources:Source[],indices:Readonly<R
    if([2,3,4,5,6,156,157,158].includes(d.sourcePage))result.note='Arte institucional preservada da referência ADEMI-PR 2T2026; números institucionais e equipe não são atualizados pela API. Imagem substituível no PowerPoint, sujeita à revisão editorial.';
    return result;
   }
+  if(d.role?.startsWith('rental-'))return rentalSlide(d,s,sources);
   if(d.rmOnly&&!s.includeRm)return {...result,status:'not-applicable',issue:'Região metropolitana não selecionada.'};
   try{
    const mode=geographyMode(s),allCities=[s.city,...s.rmCities];

@@ -1,5 +1,13 @@
 # Estado do handoff
 
+## 26/11/2026 — Locação validada localmente, divergência Git e comparativo de revenda
+
+Codex/Lucas retomou da base local `9a97010b`; origin único, fetch3remotos/2locais exclusivos na abertura. Remotos25/11 incluem varredura de cobertura Modelo03 e correções Sinduscon Curitiba, sobrepondo arquivos da locação não commitada. Sem merge/pull/push; solicitar autorização humana para reconciliar, preservando cobertura/inventário remotos e trabalho local.88 testes e um caso temporal adicional aprovados, tipos/lint e navegador sintético com JSON/CSV/PPTX aprovados; sem ensaio autenticado. Endpoint VENDA permite revenda anunciada, mas não comprova usado; não adicionado comparativo automático. [Registro detalhado](../../features/relatorios-institucionais/modelo-03/RETOMADA_LOCACAO_2026-11-26.md).
+
+## 24/11/2026 — Endpoint de locação fornecido e integrado
+
+Lucas forneceu `revenda.py` e dois JSONs idênticos (exemplo VENDA). Implementado `/public-api/rent-resale-property` com ALUGUEL/Apartamento, escopo por município, mesma fila/paginação/429/cancelamento. Refs123–126 usam anúncios coletados no período, sem alegar contratos/estoque ativo passado; médias simples/bases válidas e duplicação por ID explícitas nos arquivos/insights.62 indicadores/36 editoriais com RM; capas25/39/100 omitidas.88 testes/sete arquivos e tipos aprovados, verificação de navegador/build no fechamento; dados sintéticos não são resposta de locação em produção. [Critérios e limites](../../features/relatorios-institucionais/modelo-03/LOCACAO_2026-11-24.md). Base `9a97010b`, dois commits anteriores locais na abertura; não houve push desta rodada.
+
 ## 24/11/2026 — Capas omitidas e contrato de locação pendente
 
 Codex/Lucas: removidas temporariamente do Modelo03 as capas25/39/100; preservada122 de locação e IDs de referência.94 posições com RM/88 sem RM.67 testes aprovados; sem alteração dos indicadores. Lucas pediu integrar locação via GeoBrain; referência local confirma quadros123–126, mas contrato de locação não consta no OpenAPI instalado nem foi encontrado no código. Solicitado endpoint/tela ao Lucas; implementação de locação pendente dessa informação, sem declarar pronta. Base `7971eb24`, um commit já local na abertura, origin único atualizado sem divergência; sem push desta rodada.

@@ -1,7 +1,8 @@
-export type Role = 'projects'|'launches'|'sales'|'stock'|'vgv-release'|'vgv-sales'|'ivv'|'meter'|'ticket'|'distribution'|'availability'|'area'|'range'|'age'|'capacity'|'vgv';
+export type Role = 'rental-summary'|'rental-neighborhood'|'rental-beds'|'rental-offer'|'projects'|'launches'|'sales'|'stock'|'vgv-release'|'vgv-sales'|'ivv'|'meter'|'ticket'|'distribution'|'availability'|'area'|'range'|'age'|'capacity'|'vgv';
 export interface Definition {sourcePage:number;title:string;kind:'data'|'editorial';role?:Role;group?:'standard'|'beds'|'neighborhood'|'year'|'area'|'product';window?:'period'|'year'|'rolling';segment?:'Vertical'|'Horizontal'|'Comercial';rmOnly?:boolean;localOnly?:boolean;mcmv?:boolean;bed?:number}
 const d=(sourcePage:number,title:string,role:Role,extra:Partial<Definition>={}):Definition=>({sourcePage,title,kind:'data',role,segment:'Vertical',...extra});
 export const DATA_DEFINITIONS:Definition[]=[
+ d(123,'Anúncios de aluguel coletados no período','rental-summary'),d(124,'Locação por bairros','rental-neighborhood',{group:'neighborhood'}),d(125,'Locação por tipologia','rental-beds',{group:'beds'}),d(126,'Locação: oferta, área e preços','rental-offer',{group:'beds'}),
  d(46,'Empreendimentos verticais lançados','projects'),d(47,'Empreendimentos verticais lançados por ano','projects',{window:'year',localOnly:true}),d(48,'Empreendimentos verticais lançados · 12 meses','projects',{window:'rolling'}),
  d(49,'Unidades verticais lançadas','launches'),d(50,'Unidades verticais lançadas por ano','launches',{window:'year',localOnly:true}),d(51,'Unidades verticais lançadas · 12 meses','launches',{window:'rolling'}),d(52,'Unidades lançadas · MCMV','launches',{mcmv:true}),d(53,'Unidades lançadas · MCMV · 12 meses','launches',{window:'rolling',mcmv:true}),
  d(54,'Unidades lançadas por tipologia','launches',{group:'beds',localOnly:true}),d(55,'Unidades lançadas por padrão','launches',{group:'standard',localOnly:true}),d(56,'Unidades lançadas por bairro','launches',{group:'neighborhood',localOnly:true}),
@@ -23,5 +24,5 @@ export const OMITTED_COVER_PAGES=[25,39,100] as const;
 for(const page of OMITTED_COVER_PAGES)delete editorial[page];
 for(let p=144;p<=153;p++)editorial[p]=`Perspectivas · análise ${p-143}`;
 export const DEFINITIONS:Definition[]=[...DATA_DEFINITIONS,...Object.entries(editorial).map(([p,title])=>({sourcePage:Number(p),title,kind:'editorial' as const}))].sort((a,b)=>a.sourcePage-b.sourcePage);
-export const EXTERNAL_PAGES=[8,...Array.from({length:13},(_,i)=>26+i),...Array.from({length:5},(_,i)=>40+i),...Array.from({length:21},(_,i)=>101+i),123,124,125,126,128];
+export const EXTERNAL_PAGES=[8,...Array.from({length:13},(_,i)=>26+i),...Array.from({length:5},(_,i)=>40+i),...Array.from({length:21},(_,i)=>101+i),128];
 export const DEFINITIONS_FOR=(includeRm:boolean)=>DEFINITIONS.filter(d=>includeRm||!d.rmOnly&&![137,141].includes(d.sourcePage));

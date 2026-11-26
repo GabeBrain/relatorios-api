@@ -1,3 +1,4 @@
+import {RENTAL_ENDPOINT,rentalQuery,rentalOffer} from './rental-contract';
 import {httpRequest,type HttpResponse,type RequestOptions} from '@/lib/http-client';
 import {norm,period,periodIssue,scopeIssue,selectedCities,location,type Selection} from './model';
 import {sourceKey,type Progress,type Row,type Source} from './types';
@@ -13,7 +14,7 @@ export async function collect(s:Selection,catalog:Record<string,string[]>|null,o
  if(options.signal.aborted)controller.abort();else options.signal.addEventListener('abort',abort,{once:true});
  const issue=scopeIssue(s,catalog)??periodIssue(s);if(issue||!options.token){options.signal.removeEventListener('abort',abort);throw new SourceError(issue??'Faça login no Geobrain.');}
  const request=options.request??(o=>httpRequest<Envelope>(o)),wait=options.wait??sleep,p=period(s),sources:Source[]=[];
- const tasks=selectedCities(s).flatMap(value=>{const {city,uf}=location(value,s.uf);return [...(['releases','sales','stock'] as const).flatMap(metric=>(['Padrão','Tipologia'] as const).map(group=>({city,uf,metric,group,segment:'Vertical' as const}))),...(['Vertical','Horizontal','Comercial'] as const).map(segment=>({city,uf,metric:'details' as const,group:'Empreendimento' as const,segment}))];});
+ const tasks=selectedCities(s).flatMap(value=>{const {city,uf}=location(value,s.uf);return [...(['releases','sales','stock'] as const).flatMap(metric=>(['Padrão','Tipologia'] as const).map(group=>({city,uf,metric,group,segment:'Vertical' as const}))),...(['Vertical','Horizontal','Comercial'] as const).map(segment=>({city,uf,metric:'details' as const,group:'Empreendimento' as const,segment})),{city,uf,metric:'rentals' as const,group:'Empreendimento' as const,segment:'Vertical' as const}];});
  onProgress({stage:'scope',completed:1,total:1,message:'Municípios e competência confirmados',waiting:false});
  let lastStart=0,completed=0,nextTask=0;
  let gate=Promise.resolve(),pause=Promise.resolve();
@@ -25,7 +26,7 @@ export async function collect(s:Selection,catalog:Record<string,string[]>|null,o
  const pageProgress=new Map<number,number>();
  const count=()=>completed+[...pageProgress.values()].reduce((a,b)=>a+b,0);
  const runTask=async(task:typeof tasks[number],index:number)=>{
-  check(signal);const endpoint=task.metric==='details'?'https://app.geobrain.com.br/public-api/v2/building-with-history-internal':`https://geobrain.com.br/public-api/temporal-analysis-city/${task.metric}`;
+  check(signal);const endpoint=task.metric==='rentals'?RENTAL_ENDPOINT:task.metric==='details'?'https://app.geobrain.com.br/public-api/v2/building-with-history-internal':`https://geobrain.com.br/public-api/temporal-analysis-city/${task.metric}`;
   const source:Source={...task,endpoint,rows:[],complete:false,requests:0,httpStatus:null,failure:null,finishedAt:''};
   try{
    let expected:number|undefined,last:number|undefined;
@@ -34,7 +35,7 @@ export async function collect(s:Selection,catalog:Record<string,string[]>|null,o
     while(true){
      check(signal);await slot();
      onProgress({stage:'sources',completed:count(),total:tasks.length,message:`${task.city} · ${task.segment} · ${task.metric==='details'?'histórico detalhado':task.metric} · página ${page}`,waiting:false});source.requests++;
-     response=await request({url:endpoint,method:task.metric==='details'?'POST':'GET',query:{city:task.city,uf:task.uf,...task.metric==='details'?{type:task.segment}:{'type[]':[task.segment],group_by:task.group,start_period:`${Math.max(2021,s.year-5)}-01-01`,end_period:`${p.end}-01`},page,per_page:100},headers:{Authorization:`Bearer ${options.token}`},includeAuth:false,signal,timeoutMs:60000,cache:'no-store'});check(signal);source.httpStatus=response.status;
+     response=await request({url:endpoint,method:task.metric==='details'?'POST':'GET',query:task.metric==='rentals'?rentalQuery(task.city,task.uf,'collected-in-period',p.start,p.end,page):{city:task.city,uf:task.uf,...task.metric==='details'?{type:task.segment}:{'type[]':[task.segment],group_by:task.group,start_period:`${Math.max(2021,s.year-5)}-01-01`,end_period:`${p.end}-01`},page,per_page:100},headers:{Authorization:`Bearer ${options.token}`},includeAuth:false,signal,timeoutMs:60000,cache:'no-store'});check(signal);source.httpStatus=response.status;
      if(response.status===401||response.status===403){controller.abort();throw new SourceError('Acesso ao Geobrain não autorizado. Refaça o login e confira as permissões.');}
      if(response.status===429){onProgress({stage:'sources',completed:count(),total:tasks.length,message:'Aguardando resposta da API · limite de requisições; retomada automática',waiting:true});cooling++;pause=Promise.all([pause,wait(Math.max(1000,response.retryAfterMs??60000),signal).finally(()=>{cooling--;})]).then(()=>{});await pause;continue;}
      if(response.ok)break;
@@ -45,7 +46,7 @@ export async function collect(s:Selection,catalog:Record<string,string[]>|null,o
     if(data.meta?.total!==undefined){if(!Number.isSafeInteger(data.meta.total)||data.meta.total<0||expected!==undefined&&expected!==data.meta.total)throw new SourceError('Paginação com total inconsistente.');expected=data.meta.total;}
     if(data.meta?.current_page!==undefined&&data.meta.current_page!==page)throw new SourceError('A API repetiu ou pulou uma página.');
     if(data.meta?.last_page!==undefined){if(!Number.isSafeInteger(data.meta.last_page)||data.meta.last_page<1||last!==undefined&&last!==data.meta.last_page)throw new SourceError('Última página inconsistente.');last=data.meta.last_page;}
-    for(const row of data.data){if(!row||typeof row!=='object'||Array.isArray(row)||row.city!=null&&norm(row.city)!==norm(task.city)||row.state!=null&&norm(row.state)!==norm(task.uf)||row.building_type!=null&&norm(row.building_type)!==norm(task.segment))throw new SourceError('A API retornou um registro fora do recorte solicitado.');}
+    for(const row of data.data){if(task.metric==='rentals'){rentalOffer(row,task.city,task.uf);continue;}if(!row||typeof row!=='object'||Array.isArray(row)||row.city!=null&&norm(row.city)!==norm(task.city)||row.state!=null&&norm(row.state)!==norm(task.uf)||row.building_type!=null&&norm(row.building_type)!==norm(task.segment))throw new SourceError('A API retornou um registro fora do recorte solicitado.');}
     source.rows.push(...data.data);
     if(last){pageProgress.set(index,page/last);onProgress({stage:'sources',completed:count(),total:tasks.length,message:`${task.city} · ${task.segment} · página ${page} de ${last}`,waiting:false});}
     const next=data.links?.next;if(next){const url=new URL(next,endpoint);if(url.origin!==new URL(endpoint).origin||url.pathname!==new URL(endpoint).pathname||Number(url.searchParams.get('page'))!==page+1)throw new SourceError('Próxima página fora do endpoint ou sequência esperada.');}

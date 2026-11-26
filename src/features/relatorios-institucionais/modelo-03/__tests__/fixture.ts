@@ -10,6 +10,7 @@ export function fixture(s:Selection=selection):Source[]{
    sources.push({city,uf,segment,metric:'details',group:'Empreendimento',rows,complete:true,requests:1,httpStatus:200,failure:null,endpoint:'https://app.geobrain.com.br/public-api/v2/building-with-history-internal',finishedAt:'2026-11-24T12:00:00Z'});
   }
   for(const metric of ['releases','sales','stock'] as const)for(const group of ['Padrão','Tipologia'] as const)sources.push({city,uf,segment:'Vertical',metric,group,rows:months.flatMap(m=>(group==='Padrão'?['Standard','MCMV']:['1','2']).map(label=>({period:`${m}-01`,group:label,building_type:'Vertical',city,state:uf,releases_in_period:1,liquid_sales:1,stock:40,vgv_release:500000,vgv_liquid_sales:500000,vgv_stock:20000000}))),complete:true,requests:1,httpStatus:200,failure:null,endpoint:`https://geobrain.com.br/public-api/temporal-analysis-city/${metric}`,finishedAt:'2026-11-24T12:00:00Z'});
+  sources.push({city,uf,segment:'Vertical',metric:'rentals',group:'Empreendimento',rows:[1,2].map(i=>({id:i,cidade:city,estado:uf,tipo:'Apartamento',tipo_negocio:'ALUGUEL',bairro:'Centro',quartos:i,area_util:50,preco:2000,preco_metro:40,coletado_em:`${end}-15`,atualizado_em:`${end}-15`})),complete:true,requests:1,httpStatus:200,failure:null,endpoint:'https://app.geobrain.com.br/public-api/rent-resale-property',finishedAt:'2026-11-24T12:00:00Z'});
  }
  return sources;
 }

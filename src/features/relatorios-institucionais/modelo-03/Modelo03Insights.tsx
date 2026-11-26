@@ -15,6 +15,7 @@ export default function Modelo03Insights({report,onOpenSlide}:{report:Report;onO
   <section aria-label="Critérios utilizados" className="space-y-3"><h3 className="font-semibold">Critérios utilizados</h3><dl className="grid gap-3 text-sm md:grid-cols-2">
    {[
     ['Período e comparativos',`${view.period.start} a ${view.period.end}. Fluxos seguem a janela escolhida; estoque é fotografia do fechamento. Comparações anuais usam o mesmo corte e acumulados móveis usam 12 meses.`],
+    ['Locação — anúncios','Apartamentos de ALUGUEL coletados na janela selecionada; anúncios não são contratos fechados nem estoque ativo histórico. Médias simples dos anúncios com valor válido, com bases por campo; sem INCC-DI. Repetições do mesmo ID são descartadas; imóveis anunciados em portais diferentes podem se repetir.'],
     ['Frequência e ausência de dados','A frequência da pesquisa varia por município. O total trimestral não é distribuído em meses inventados. Traço indica valor ausente ou sem denominador; zero exige observação ou confirmação na fonte.'],
     ['Correção monetária',`INCC-DI, base ${view.period.end}, aplicado ao fluxo de VGV por competência. Preços da fotografia são os históricos do fechamento; não são substituídos por preços atuais.`],
     ['Preço e ticket','Média dos valores históricos individuais, ponderada pelas unidades com estoque positivo. Unidades sem preço/área válido não recebem preço inventado; a média fica sem valor e a quantidade é preservada.'],
