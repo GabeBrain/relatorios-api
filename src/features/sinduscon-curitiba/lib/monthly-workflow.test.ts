@@ -67,7 +67,18 @@ describe('processMonthlyWorkflow', () => {
     expect(floors.A72.v).toContain('2026');
     const chart = new DOMParser().parseFromString(strFromU8(after['xl/charts/chart14.xml']), 'application/xml');
     const refs = Array.from(chart.getElementsByTagNameNS('*', 'f')).map((node) => node.textContent);
-    expect(refs.some((ref) => ref?.includes('$B$41:$B$44') && ref.includes('$B$46:$B$54'))).toBe(true);
+    const labels = Array.from(chart.getElementsByTagNameNS('*', 'strLit')[0].getElementsByTagNameNS('*', 'v')).map((node) => node.textContent);
+    expect(labels).toEqual(['set/25', 'out/25', 'nov/25', 'dez/25', 'jan/26', 'fev/26', 'mar/26', 'abr/26', 'mai/26', 'jun/26', 'jul/26', 'ago/26', 'set/26']);
+    expect(chart.getElementsByTagNameNS('*', 'dateAx')).toHaveLength(0);
+    expect(chart.getElementsByTagNameNS('*', 'catAx')).toHaveLength(1);
+    const originalChart = new DOMParser().parseFromString(strFromU8(before['xl/charts/chart14.xml']), 'application/xml');
+    expect(chart.getElementsByTagNameNS('*', 'tx')[0].textContent).toBe(originalChart.getElementsByTagNameNS('*', 'tx')[0].textContent);
+    const history = report.Sheets[report.SheetNames.find((name) => /10.*serie hist/i.test(name))!];
+    for (const row of [41, 42, 43, 44, 46, 47, 48, 49, 50, 51, 52, 53, 54]) {
+      // Excel must not restore the template's drifting +30/+31 formulas on open.
+      expect(history[`B${row}`].f).toBeUndefined();
+      expect(XLSX.SSF.parse_date_code(history[`B${row}`].v).d).toBe(1);
+    }
     expect(refs.some((ref) => ref?.includes('$G$41:$G$44') && ref.includes('$G$46:$G$54'))).toBe(true);
     const cache = Array.from(chart.getElementsByTagNameNS('*', 'numRef')).find((node) => node.textContent?.includes('$G$46:$G$54'))!;
     const last = Array.from(cache.getElementsByTagNameNS('*', 'pt')).at(-1)!;
@@ -108,8 +119,10 @@ describe('processMonthlyWorkflow', () => {
     files['xl/charts/chart14.xml'] = strToU8('<c:chartSpace xmlns:c="http://schemas.openxmlformats.org/drawingml/2006/chart"><c:chart><c:ser><c:cat><c:numRef><c:f>\'Folha 10 serie hist\'!$B$2:$B$5</c:f></c:numRef></c:cat><c:val><c:numRef><c:f>\'Folha 10 serie hist\'!$G$2:$G$5</c:f></c:numRef></c:val></c:ser></c:chart></c:chartSpace>');
     const output = unzipSync(updateReportPresentation(zipSync(files), 2026, 9));
     const chart = strFromU8(output['xl/charts/chart14.xml']);
-    expect(chart).toContain('$B$2:$B$2');
-    expect(chart).toContain('$B$4:$B$4');
+    expect(chart).toContain('set/25');
+    expect(chart).toContain('set/26');
+    expect(chart).toContain('$G$2:$G$2');
+    expect(chart).toContain('$G$4:$G$4');
     expect(chart).not.toContain('$B$5');
     expect(chart).not.toContain('999');
   });
@@ -134,11 +147,16 @@ describe('processMonthlyWorkflow', () => {
     expect(history.B45.v).toBe(`Total em ${year - 1}`);
     expect(history.B58.v).toBe(`Total em ${year}`);
     const chart = new DOMParser().parseFromString(strFromU8(unzipSync(output.bytes)['xl/charts/chart14.xml']), 'application/xml');
-    const cat = Array.from(chart.getElementsByTagNameNS('*', 'numRef')).find((node) => node.textContent?.includes('$B$'))!;
-    const dates = Array.from(cat.getElementsByTagNameNS('*', 'pt')).map((node) => XLSX.SSF.parse_date_code(Number(node.textContent)));
-    expect(dates).toHaveLength(13);
-    expect(dates[0]).toMatchObject({ y: year - 1, m: monthNumber });
-    expect(dates.at(-1)).toMatchObject({ y: year, m: monthNumber });
+    const cat = chart.getElementsByTagNameNS('*', 'strLit')[0];
+    const labels = Array.from(cat.getElementsByTagNameNS('*', 'v')).map((node) => node.textContent);
+    const monthLabels = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
+    expect(labels).toHaveLength(13);
+    expect(labels[0]).toBe(`${monthLabels[monthNumber - 1]}/${String(year - 1).slice(-2)}`);
+    expect(labels.at(-1)).toBe(`${monthLabels[monthNumber - 1]}/${String(year).slice(-2)}`);
+    for (const reference of Object.keys(history).filter((key) => /^B\d+$/.test(key) && typeof history[key].v === 'number')) {
+      expect(history[reference].f).toBeUndefined();
+      expect(XLSX.SSF.parse_date_code(history[reference].v).d).toBe(1);
+    }
   });
 
   it.each(['alvaras', 'cvco'] as const)('preenche meses e distingue unidades de áreas no modelo %s', (kind) => {

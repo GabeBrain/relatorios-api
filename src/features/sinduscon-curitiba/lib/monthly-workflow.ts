@@ -355,7 +355,7 @@ function setVector(changes: Map<string, unknown>, startColumn: number, row: numb
   values.forEach((item, offset) => changes.set(`${ooxml.columnName(startColumn + offset)}${row}`, blankZero(item)));
 }
 
-function refreshFormulaCaches(sheet: XLSX.WorkSheet, changes: Map<string, CellPatchValue>) {
+function refreshFormulaCaches(sheet: XLSX.WorkSheet, changes: Map<string, CellPatchValue>, literalCells: ReadonlySet<string> = new Set()) {
   const visiting = new Set<string>();
   const cached = new Map<string, unknown>();
   const valueAt = (reference: string): unknown => {
@@ -373,6 +373,9 @@ function refreshFormulaCaches(sheet: XLSX.WorkSheet, changes: Map<string, CellPa
   };
   for (const [reference, cell] of Object.entries(sheet)) {
     if (reference.startsWith('!') || !(cell as XLSX.CellObject).f) continue;
+    // Calendar replacements must remove the template's day-addition formulas,
+    // not merely refresh their caches; Excel recalculates those on opening.
+    if (literalCells.has(reference)) continue;
     const result = valueAt(reference);
     if (result !== undefined) changes.set(reference, formulaCache(result));
   }
@@ -412,6 +415,7 @@ function updateReport(template: ArrayBuffer, aggregates: Aggregates, month: stri
     const sheet = workbook.Sheets[sheetName];
     const name = normalize(sheetName);
     const changes = new Map<string, unknown>();
+    const literalCells = new Set<string>();
     patches.set(sheetName, changes);
     let vectors: VectorMap | null = null;
     let width = 0;
@@ -494,6 +498,7 @@ function updateReport(template: ArrayBuffer, aggregates: Aggregates, month: stri
         if (!parsed) continue;
         const rowYear = parsed.y + year - templateYear;
         changes.set(reference, (Date.UTC(rowYear, parsed.m - 1, 1) - Date.UTC(1899, 11, 30)) / 86_400_000);
+        literalCells.add(reference);
         const values = rowYear === year && parsed.m > MONTHS.indexOf(month) + 1 ? Array(4).fill(0) : aggregates.history.get(`${rowYear}-${parsed.m}`) ?? Array(4).fill(0);
         setVector(changes, 2, XLSX.utils.decode_cell(reference).r + 1, values);
       }
@@ -516,7 +521,7 @@ function updateReport(template: ArrayBuffer, aggregates: Aggregates, month: stri
         }
       }
     }
-    refreshFormulaCaches(sheet, changes);
+    refreshFormulaCaches(sheet, changes, literalCells);
     if (!changes.size) patches.delete(sheetName);
   }
   const allNeighborhoods = new Set([...aggregates.residentialArea.keys(), ...aggregates.nonResidentialArea.keys(), ...aggregates.neighborhoodAreas.keys()]);

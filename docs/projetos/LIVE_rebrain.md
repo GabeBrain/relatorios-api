@@ -837,6 +837,14 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 26/11/2026 — Sinduscon Curitiba: calendário recalculável e meses em português — Codex/Lucas
+
+- **Ambiente/pedido:** página 10 do Sinduscon Curitiba; 13 meses inclusivos até a competência atual, com rótulos portugueses. Base `d1de4d73`, main/origin único 0/0 após fetch, árvore limpa na abertura.
+- **Causa/entrega:** arquivo real de setembro confirma datas deslocadas por fórmulas de soma de dias, inclusive referência B52 a B50. O refresh preservava as fórmulas e o Excel desfazia o cache corrigido. Datas substituídas explicitamente agora são literais no dia 1; fórmulas dos totais preservadas. Eixo mensal com 13 categorias textuais portuguesas, sem dependência da localidade. Alteração das referências limitada aos valores, preservando título da série, estilos, desenhos e impressão. [Registro e conferência](../features/sinduscon-curitiba/GRAFICO_HISTORICO_2026-11-26.md).
+- **Validação/etapas:** 47 testes Curitiba aprovados, com regressões sobre modelos reais Liberados/Concluídos e fechamentos setembro/janeiro/outubro/dezembro; tipos, lint e build aprovados. Sem impressão nativa observada; conferência desta entrega é headless sobre XLSX/OOXML, não automação do Excel. Conferir novo Excel/PDF com analista após publicação autorizada. Arquivos originais preservados.
+- **Pendências:** autorizar publicação desta correção; regenerar XLSX e reexportar oito abas. Atualiza a evidência de 25/11: caches corretos sozinhos não garantiam datas após recálculo. As correções PDF anteriores já foram publicadas antes da base desta sessão; seu reteste humano continua pendente.
+- **Monday:** — (sem escrita).
+
 ### 26/11/2026 — Modelo02: implantação dos institucionais regionais — Codex/Lucas
 
 - **Pedido:** Lucas autorizou iniciar cinco regiões apenas por rota, trimestral, com região/trimestre/ano e confirmou mês automático no encerramento. Mapas finais somente nas capitais de cada UF, com continuações quando necessário. Base `07c09ad4`, origin único atualizado0/0/main limpa na abertura.
@@ -2311,6 +2319,8 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 
 ## 2. Etapas
 
+- **26/11 — Curitiba/histórico:** calendário literal e eixo mensal português implementados; janela inclusiva de 13 pontos verificada no OOXML dos dois modelos. Impressão nativa ainda não observada.
+
 - **26/11 — Modelo02 regional:** primeira versão apenas por rota, configuração trimestral/mês automático, núcleo quantitativo e mapas por capital com continuações, exports/Insights compartilhados. Verificações locais aprovadas; publicação e geração autenticada/homologação pendentes.
 
 - **26/11 — Sinduscon Curitiba/fontes parciais:** reteste real coberto por pontuação auxiliar com avanço compensado; oito páginas verificadas sem deslocar dígitos. Publicação desta segunda correção pendente.
@@ -2527,6 +2537,8 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 ---
 
 ## 3. Pendências
+
+- **26/11 — Curitiba/histórico:** publicar mediante autorização, gerar novo XLSX e exportar novamente as oito abas; conferir setembro/2025–setembro/2026 no PDF final. Não reutilizar o PDF antigo.
 
 - **26/11 — Modelo02 regional:** autorizar publicação e conferir API real das cinco regiões; homologar recorte de municípios monitorados, valores, mapas/coordenadas e métricas. População/cobertura populacional e editoriais atualizados não integrados nesta primeira versão. Sem promessa de duração autenticada ou réplica integral dos originais.
 

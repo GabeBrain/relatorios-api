@@ -152,6 +152,39 @@ function historyRange(sheetName: string, rows: number[], column: string) {
   return ranges.length === 1 ? ranges[0] : `(${ranges.join(',')})`;
 }
 
+const PT_MONTHS = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
+
+function historyCategories(document: XMLDocument, history: XLSX.WorkSheet, rows: number[]) {
+  // Literal Portuguese labels do not depend on the Excel/OS locale.
+  for (const category of ooxml.elements(document, 'cat')) {
+    while (category.firstChild) category.removeChild(category.firstChild);
+    const literal = document.createElementNS(CHART_NS, 'c:strLit');
+    const count = document.createElementNS(CHART_NS, 'c:ptCount');
+    count.setAttribute('val', String(rows.length)); literal.appendChild(count);
+    rows.forEach((row, index) => {
+      const date = XLSX.SSF.parse_date_code(history[`B${row}`].v);
+      const point = document.createElementNS(CHART_NS, 'c:pt'); point.setAttribute('idx', String(index));
+      const value = document.createElementNS(CHART_NS, 'c:v');
+      value.textContent = `${PT_MONTHS[date.m - 1]}/${String(date.y).slice(-2)}`;
+      point.appendChild(value); literal.appendChild(point);
+    });
+    category.appendChild(literal);
+  }
+  for (const axis of ooxml.elements(document, 'dateAx')) {
+    const replacement = document.createElementNS(CHART_NS, 'c:catAx');
+    const removed = new Set(['numFmt', 'baseTimeUnit', 'majorUnit', 'majorTimeUnit', 'minorUnit', 'minorTimeUnit']);
+    for (const child of Array.from(axis.childNodes)) {
+      if (child.nodeType !== 1 || !removed.has((child as Element).localName)) replacement.appendChild(child.cloneNode(true));
+    }
+    for (const tag of ['min', 'max']) for (const bound of ooxml.elements(replacement, tag)) bound.remove();
+    for (const tag of ['tickLblSkip', 'tickMarkSkip']) {
+      const node = document.createElementNS(CHART_NS, `c:${tag}`); node.setAttribute('val', '1');
+      replacement.insertBefore(node, ooxml.elements(replacement, 'extLst')[0] ?? null);
+    }
+    axis.replaceWith(replacement);
+  }
+}
+
 /** Intentional, scoped layout changes after the cell patcher's preservation checks. */
 export function updateReportPresentation(bytes: Uint8Array, year: number, month: number) {
   const files = unzipSync(bytes);
@@ -180,23 +213,11 @@ export function updateReportPresentation(bytes: Uint8Array, year: number, month:
       for (const tag of ['max', 'majorUnit']) for (const node of ooxml.elements(axis, tag)) node.remove();
     }
     if (isHistory && historyName && rows.length) {
-      for (const formula of formulas) {
-        const text = formula.textContent ?? '';
-        if (/\$B\$\d+:/.test(text)) formula.textContent = historyRange(historyName, rows, 'B');
-        if (/\$G\$\d+:/.test(text)) formula.textContent = historyRange(historyName, rows, 'G');
+      // Only change series values; the title may also reference column G.
+      for (const values of ooxml.elements(document, 'val')) {
+        for (const formula of ooxml.elements(values, 'f')) formula.textContent = historyRange(historyName, rows, 'G');
       }
-      // Thirteen months: the reference month in the previous year through the current reference month.
-      for (const axis of ooxml.elements(document, 'dateAx')) {
-        const scaling = ooxml.elements(axis, 'scaling')[0];
-        if (!scaling) continue;
-        let max = ooxml.elements(scaling, 'max')[0];
-        if (!max) { max = document.createElementNS(CHART_NS, 'c:max'); scaling.appendChild(max); }
-        const lastDate = (Date.UTC(year, month, 0) - Date.UTC(1899, 11, 30)) / 86_400_000;
-        max.setAttribute('val', String(lastDate));
-        let min = ooxml.elements(scaling, 'min')[0];
-        if (!min) { min = document.createElementNS(CHART_NS, 'c:min'); scaling.appendChild(min); }
-        min.setAttribute('val', String((Date.UTC(year - 1, month - 1, 1) - Date.UTC(1899, 11, 30)) / 86_400_000));
-      }
+      historyCategories(document, history!, rows);
     }
     refreshChartCaches(document, workbook);
     files[path] = strToU8(new XMLSerializer().serializeToString(document));

@@ -1,5 +1,9 @@
 # Estado do handoff
 
+## 26/11/2026 — Curitiba: 13 meses e rótulos em português
+
+Base `d1de4d73`, main/origin único 0/0 após fetch e árvore limpa na abertura. Pedido de Lucas cobre página 10, setembro/2025–setembro/2026 inclusivos e janela móvel. Detectadas fórmulas antigas de soma de dias preservadas pelo refresh de cache: XLSX real duplica junho e coloca setembro em agosto. Datas mensais agora são literais no dia 1; categorias textuais portuguesas independem da localidade do Excel. Regressões dos modelos reais e viradas de ano; impressão nativa não observada. [Registro](../../features/sinduscon-curitiba/GRAFICO_HISTORICO_2026-11-26.md). Aguardar autorização para push, depois regenerar XLSX/PDF; originais preservados.
+
 ## 26/11/2026 — Modelo02 institucional regional iniciado
 
 Lucas pediu cinco regiões apenas por rota, trimestral, e confirmou mês automático de fechamento. Base `07c09ad4`, main/origin único0/0após fetch, árvore limpa. Implantados catálogo autorizado por região/UF, núcleo quantitativo reaproveitando helpers históricos03sem mudar suas regras, capas originais, mapas exclusivamente por capital com continuações, loadingSP/navegaçãoMaceió, Insights/JSON/CSV/PPTX editável e worker cancelável.142testes integrados aprovados e26testes02no fechamento após enquadramento/cobertura; sete cenários Edge/exports aprovados. Mapbox real respondeuHTTP200, com ruas ePPTXconferidos; sem coleta imobiliária autenticada/homologação. [Contrato completo](../../features/relatorios-institucionais/modelo-02/README.md). Sem menu, backend novo ou publicação sem autorização.
