@@ -837,6 +837,16 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 27/11/2026 — Imprensa: recuperação de VGV com novas consultas à API — Codex/Lucas
+
+- **Ambiente/funcionalidade:** Institucionais Imprensa, cinco regiões. [Contrato e evidências](../features/relatorios-institucionais/modelo-02/RECUPERACAO_VGV_API_2026-11-27.md).
+- **Pedido/entrega:** Lucas esclareceu que o valor deve ser buscado na API. Fontes monetárias incompletas acionam nova consulta mensal por padrão; persistindo, consulta por tipologia. Refetch exige grupos/unidades e dinheiro conhecido reconciliados; alternativa exige paginação/escopo/campos completos e mesma soma mensal de unidades. Dinheiro alternativo entra somente no total, sem distribuição artificial entre padrões. Fontes originais preservadas, nominal e tentativas auditados no JSON/CSV/Insights.
+- **Fluxo:** mesma fila autenticada, duas chamadas, 500ms, pausa429 e cancelamento. ReportLoading/ReportGenerationPanel reutilizados com tarefas adicionais reais; nenhuma consulta extra em fonte monetária válida. Modelos03 e demais motores preservados.
+- **Validação:** 218 testes 02/03 aprovados e seis casos posteriores adicionais (224 distintos, 16 no arquivo final de recuperação), build/typecheck e lint. Quatro cenários Edge na página real com API interceptada: padrão corrigido, tipologia conciliada em celular, divergência e cancelamento429; espera lenta, Brain/tempo/progresso e download/reaberturaJSON verificados, sem overflow/exceções.
+- **Etapas/Pendências:** implementação pronta para nova geração autenticada; não comprova valor real de Santa Cruz porque não há token pessoal de script disponível. Após deploy, gerar Sul3T2026 e conferir `monetaryRecovery`; lacunas históricas e arquivos reais das demais regiões seguem pendentes. Continuação do push autorizado, sem escrita Monday.
+- **Commits:** base `0d712957`; esta entrada acompanha o commit da recuperação por API.
+- **Monday:** [DESAFIO — Estudos Entidades e Institucionais](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`.
+
 ### 27/11/2026 — Imprensa: tratamento explícito de VGV indisponível e publicação autorizada — Codex/Lucas
 
 - **Ambiente/funcionalidade:** Institucionais Imprensa, cinco regiões; diagnóstico de valores monetários no calculador compartilhado 02/03. [Contrato e evidências](../features/relatorios-institucionais/modelo-02/TRATAMENTO_VGV_2026-11-27.md).
@@ -2407,6 +2417,8 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 
 ## 2. Etapas
 
+- **27/11 — Imprensa/VGV pela API:** novas consultas mensais por padrão/tipologia e recuperação conciliada implementadas e testadas. Confirmar resposta real na próxima geração; sucesso sintético não prova disponibilidade na origem.
+
 - **27/11 — Imprensa/VGV:** tratamento contextual implementado e validado nas cinco regiões, com push autorizado. Valor desconhecido do Sul não foi recomposto; correção da origem e conferência após deploy continuam abertas.
 
 - **27/11 — Imprensa/Sul real:** causas das lacunas identificadas no JSON 3T2026; regressão monetária reproduzida. Correção de origem e decisão sobre cobertura permanecem abertas; quatro outras regiões aguardam JSONs reais.
@@ -2637,6 +2649,8 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 ---
 
 ## 3. Pendências
+
+- **27/11 — Imprensa/recuperação real:** após deploy, gerar novamente Sul3T2026 com login e conferir se maio2026 foi recuperado por padrão ou total por tipologia. Persistindo vazio/divergência, arquivo identifica tentativas para conferência da origem. Demais regiões e cobertura histórica continuam abertas.
 
 - **27/11 — Imprensa/VGV após tratamento:** regenerar após publicação e conferir `monetaryIssues`/ressalva de Santa Cruz do Sul; obter valor monetário válido com o provedor. Push autorizado, sem comprovação de deploy ou de reparo da fonte. Saídas reais das demais regiões e decisão de cobertura histórica continuam pendentes.
 

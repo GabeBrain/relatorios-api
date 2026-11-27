@@ -1,6 +1,8 @@
 import type {Selection,City} from './model';
-import type {Source,Progress,Table} from '../modelo-03/types';
-export type {Source,Progress,Table};
+import type {Source as BaseSource,Progress,Table} from '../modelo-03/types';
+export type {Progress,Table};
+export interface MonetaryRecovery {month:string;retry:BaseSource;alternate?:BaseSource}
+export interface Source extends BaseSource {monetaryRecovery?:MonetaryRecovery[]}
 export interface MapPoint {id:string;name:string;latitude:number;longitude:number;stock:number;family:string;meter?:number|null}
 export interface MapData {city:City;part:number;parts:number;points:MapPoint[];totalProjects:number;locatedProjects:number;missingCoordinates:number;excludedProjects:number}
 export interface Slide {id:string;title:string;kind:'cover'|'section'|'data'|'map'|'closing'|'institutional';status:'available'|'waiting-source';tables:Table[];warnings:string[];sourceKeys:string[];note:string;map?:MapData;coverage?:'complete'|'partial';referenceNumber?:number;referenceNumbers?:number[];presentation?:import('./presentation').Presentation}

@@ -2,6 +2,8 @@
 
 27/11/2026 · Codex/Lucas · Base `2d8e0533` · Lucas autorizou a correção e o push da investigação nesta sessão.
 
+**Evolução posterior:** Lucas pediu recuperar o valor diretamente da API. Implementada a [nova consulta por padrão e recuperação de total por tipologia conciliada](RECUPERACAO_VGV_API_2026-11-27.md). A indisponibilidade descrita abaixo permanece apenas quando não há resposta monetária válida e reconciliada; nenhuma recuperação real é declarada sem nova geração autenticada.
+
 ## Contrato e comportamento
 
 A especificação local `src/assets/openapi/api-geobrain.json`, schema `SalesResource`, permite `vgv_liquid_sales` do tipo `number | null`. Essa resposta contém vendas líquidas e VGV líquido, sem valores brutos e distratos que permitam recompor o dinheiro. O [caso real do Sul](ANALISE_SUL_REAL_2026-11-27.md) tem saldo líquido de unidades zero e campo monetário inválido/ausente no diagnóstico agregado.

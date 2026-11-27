@@ -1,5 +1,9 @@
 # Estado do handoff
 
+## 27/11/2026 — Imprensa: buscar VGV novamente pela API
+
+Lucas esclareceu o pedido após `0d712957`: recuperar o dinheiro com novas consultas. Main limpa e origin único0/0após fetch. Implementado refetch mensal por padrão e alternativa por tipologia com conciliação exata das unidades, fontes originais preservadas e origem/escopo da recuperação no JSON/CSV/Insights. Alternativa recompõe só o total; padrões desconhecidos não recebem rateio. Mesma fila, paginação, autenticação, pausa429/cancelamento e painelBrain com tarefas reais.218testes02/03mais seis casos adicionais (224distintos), build/tipos/lint e quatro cenários na página real com API interceptada aprovados. [Contrato](../../features/relatorios-institucionais/modelo-02/RECUPERACAO_VGV_API_2026-11-27.md). Sem token pessoal de script, resposta real de Santa Cruz só poderá ser confirmada em nova geração após deploy. Continuação do push autorizado; sem escritaMonday.
+
 ## 27/11/2026 — Imprensa: tratamento do VGV e autorização de push
 
 Lucas autorizou enviar a investigação e pediu o tratamento monetário. Base `2d8e0533`, main limpa, origin único sem atraso após fetch, dois commits locais anteriores preservados. Contrato local permite VGV nulo; implementados motivo contextual por município/competência/grupo/campo e pendência estruturada no JSON/CSV/Insights, sem inferir dinheiro zero de saldo líquido zero. Zero/negativos válidos e unidades preservados; ressalvas dos acumulados/composição ficam nos quadros correspondentes. 208 testes 02/03, build/typecheck, lint e quatro cenários Edge headless com worker JSON/CSV aprovados. [Tratamento e limites](../../features/relatorios-institucionais/modelo-02/TRATAMENTO_VGV_2026-11-27.md). Montante de Santa Cruz do Sul continua pendente do provedor; outras quatro regiões ainda sem JSON real. Push autorizado, sem nova coleta autenticada, deploy observado ou escrita Monday.

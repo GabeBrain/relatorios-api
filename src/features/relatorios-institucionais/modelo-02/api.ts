@@ -2,13 +2,17 @@ import {httpRequest} from '@/lib/http-client';
 import {sleep,check,type Request} from '../modelo-03/api';
 import {norm,citiesFor,historyStart,period,periodIssue,scopeIssue,type Selection} from './model';
 import {sourceKey} from '../modelo-03/types';
+import {num} from '../modelo-03/calculate';
+import {patternRecovery} from './monetary-recovery';
 import type {Source,Progress} from './types';
 /** Regional plan: four municipal series + vertical history, no unrelated segments or rentals. */
 export async function collect(s:Selection,catalog:Record<string,string[]>|null,options:{token:string;signal:AbortSignal;onProgress:(p:Progress)=>void;request?:Request;wait?:typeof sleep}):Promise<Source[]> {
  const issue=periodIssue(s)??scopeIssue(s,catalog);if(issue||!options.token)throw new Error(issue??'Faça login no Geobrain.');
  const controller=new AbortController(),signal=controller.signal,abort=()=>controller.abort();options.signal.addEventListener('abort',abort,{once:true});if(options.signal.aborted)abort();
  const wait=options.wait??sleep,request=options.request??httpRequest,p=period(s);
- const tasks=citiesFor(s,catalog).flatMap(c=>[...(['releases','sales','stock'] as const).map(metric=>({...c,metric,group:'Padrão' as const})),{...c,metric:'stock' as const,group:'Tipologia' as const},{...c,metric:'details' as const,group:'Empreendimento' as const}]);
+ type Task={city:string;uf:string;metric:Source['metric'];group:Source['group'];recovery?:{parent:number;month:string;strategy:'pattern'|'typology'}};
+ const tasks:Task[]=citiesFor(s,catalog).flatMap(c=>[...(['releases','sales','stock'] as const).map(metric=>({...c,metric,group:'Padrão' as const})),{...c,metric:'stock' as const,group:'Tipologia' as const},{...c,metric:'details' as const,group:'Empreendimento' as const}]);
+ const baseCount=tasks.length;
  const sources:Source[]=[];let next=0,complete=0,lastStart=0,cooling=0,gate=Promise.resolve(),pause=Promise.resolve();const fractions=new Map<number,number>();
  const update=(message:string)=>options.onProgress({stage:'sources',completed:complete+[...fractions.values()].reduce((a,b)=>a+b,0),total:tasks.length,message:cooling?'Aguardando resposta da API · retomada automática':message,waiting:cooling>0});
  const slot=()=>{const turn=gate.then(async()=>{check(signal);await pause;await wait(Math.max(0,500-(Date.now()-lastStart)),signal);await pause;check(signal);lastStart=Date.now();});gate=turn.catch(()=>{});return turn;};
@@ -20,8 +24,9 @@ export async function collect(s:Selection,catalog:Record<string,string[]>|null,o
    for(let page=1;page<=500;page++){
     let attempt=0,response;
     while(true){
-     await slot();source.requests++;update(`${task.city} / ${task.uf} · ${details?'histórico':task.metric} · ${task.group} · página ${page}`);
-     response=await request({url:endpoint,method:details?'POST':'GET',query:{city:task.city,uf:task.uf,...details?{type:'Vertical'}:{'type[]':['Vertical'],group_by:task.group,start_period:`${historyStart(s)}-01`,end_period:`${p.end}-01`},page,per_page:100},headers:{Authorization:`Bearer ${options.token}`},includeAuth:false,signal,timeoutMs:60000,cache:'no-store'});check(signal);source.httpStatus=response.status;
+     await slot();source.requests++;update(`${task.city} / ${task.uf} · ${task.recovery?`Recuperar VGV · ${task.recovery.month} · `:''}${details?'histórico':task.metric} · ${task.group} · página ${page}`);
+     const month=task.recovery?.month,monthEnd=month?new Date(Date.UTC(Number(month.slice(0,4)),Number(month.slice(5)),0)).toISOString().slice(0,10):null;
+     response=await request({url:endpoint,method:details?'POST':'GET',query:{city:task.city,uf:task.uf,...details?{type:'Vertical'}:{'type[]':['Vertical'],group_by:task.group,start_period:`${month??historyStart(s)}-01`,end_period:monthEnd??`${p.end}-01`},page,per_page:100},headers:{Authorization:`Bearer ${options.token}`},includeAuth:false,signal,timeoutMs:60000,cache:'no-store'});check(signal);source.httpStatus=response.status;
      if(response.status===401||response.status===403)throw new Error('Acesso não autorizado. Refaça o login no Geobrain.');
      if(response.status===429){cooling++;update('');pause=Promise.all([pause,wait(Math.max(1000,response.retryAfterMs??60000),signal).finally(()=>{cooling--;})]).then(()=>{});await pause;continue;}
      if(response.ok)break;
@@ -44,8 +49,19 @@ export async function collect(s:Selection,catalog:Record<string,string[]>|null,o
    }
    if(!source.complete)throw new Error('Limite de páginas excedido.');
   }catch(error){check(signal);if(source.httpStatus===401||source.httpStatus===403){controller.abort();throw error;}source.failure=error instanceof Error&&/^(Fonte|Resposta|Página|Total|Última|Registro|Próxima|Paginação|Limite)/.test(error.message)?error.message:'Falha ao consultar a fonte.';}
-  source.finishedAt=new Date().toISOString();complete++;fractions.delete(index);update(`${sourceKey(source)} · ${source.complete?'concluída':'pendência registrada'}`);
+  source.finishedAt=new Date().toISOString();
+  if(!task.recovery&&source.complete&&(task.metric==='releases'||task.metric==='sales')){
+   const field=task.metric==='sales'?'vgv_liquid_sales':'vgv_release',months=[...new Set(source.rows.filter(row=>num(row[field],task.metric==='sales')===null).map(row=>String(row.period??'').slice(0,7)))].filter(month=>/^\d{4}-(0[1-9]|1[0-2])$/.test(month)&&month>=historyStart(s)&&month<=p.end);
+   for(const month of months)tasks.push({city:task.city,uf:task.uf,metric:task.metric,group:'Padrão',recovery:{parent:index,month,strategy:'pattern'}});
+  }else if(task.recovery){
+   const parent=sources[task.recovery.parent],month=task.recovery.month;
+   if(task.recovery.strategy==='pattern'){
+    const recovery={month,retry:source};(parent.monetaryRecovery??=[]).push(recovery);
+    if(!patternRecovery(parent,recovery))tasks.push({city:task.city,uf:task.uf,metric:task.metric,group:'Tipologia',recovery:{parent:task.recovery.parent,month,strategy:'typology'}});
+   }else{const recovery=parent.monetaryRecovery?.find(r=>r.month===month);if(recovery)recovery.alternate=source;}
+  }
+  complete++;fractions.delete(index);update(`${sourceKey(source)} · ${source.complete?'concluída':'pendência registrada'}`);
  }
  const worker=async()=>{while(next<tasks.length){check(signal);await run(next++);}};const workers=[worker(),worker()];
- try{await Promise.all(workers);return sources;}catch(error){controller.abort();await Promise.allSettled(workers);throw error;}finally{options.signal.removeEventListener('abort',abort);}
+ try{await Promise.all(workers);return sources.slice(0,baseCount);}catch(error){controller.abort();await Promise.allSettled(workers);throw error;}finally{options.signal.removeEventListener('abort',abort);}
 }
