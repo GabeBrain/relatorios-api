@@ -2,6 +2,8 @@
 
 27/11/2026 · Codex/Lucas · Continuação da [investigação das cinco regiões](INVESTIGACAO_LACUNAS_API_2026-11-27.md). **Sul analisado; outras quatro regiões ainda sem diagnóstico real.**
 
+**Atualização posterior na mesma sessão:** Lucas autorizou push e tratamento do VGV. [Tratamento implementado e validação](TRATAMENTO_VGV_2026-11-27.md): pendência monetária contextual nos Insights/JSON/CSV, com zero/negativos preservados e sem estimar o montante ausente. A análise abaixo documenta o arquivo original recebido.
+
 ## Arquivo e resultado observado
 
 Arquivo fornecido por Lucas, somente leitura: `C:\Users\lucas\OneDrive\Área de Trabalho\Trabalho\Auditorias\institucionais-imprensa-sul-2026-3T-diagnostico.json`.

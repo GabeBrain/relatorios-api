@@ -8,6 +8,24 @@ import {norm,period,shift,location,isPairStudy,studyLabel,geographyMode,regional
 import {sourceKey,type Cell,type Row,type Slide,type Source,type Table} from './types';
 
 export const num=(v:unknown,signed=false):number|null=>{if(typeof v!=='number'&&(typeof v!=='string'||!v.trim()))return null;const n=Number(v);return Number.isFinite(n)&&Math.abs(n)<Number.MAX_SAFE_INTEGER/100&&(signed||n>=0)?n:null;};
+export interface MonetaryIssue {
+ city:string;uf:string;month:string;group:string;metric:'releases'|'sales'|'stock';
+ field:'vgv_release'|'vgv_liquid_sales'|'vgv_stock';reason:'absent'|'null'|'empty'|'invalid';units:number|null;zeroNetSales:boolean;
+}
+/** Nullable monetary API fields are unavailable, never inferred from net unit counts. No raw values escape. */
+export function monetaryIssue(row:Row,metric:MonetaryIssue['metric'],city:string,uf:string):MonetaryIssue|null {
+ const field=metric==='releases'?'vgv_release':metric==='sales'?'vgv_liquid_sales':'vgv_stock',value=row[field];
+ if(num(value,metric==='sales')!==null)return null;
+ const count=num(row[metric==='releases'?'releases_in_period':metric==='sales'?'liquid_sales':'stock'],metric==='sales');
+ const units=count!==null&&Number.isSafeInteger(count)?count:null;
+ return {city,uf,month:String(row.period??'').slice(0,7),group:String(row.group??'').trim(),metric,field,
+  reason:value===undefined?'absent':value===null?'null':typeof value==='string'&&!value.trim()?'empty':'invalid',units,zeroNetSales:metric==='sales'&&units===0};
+}
+export function monetaryIssueMessage(issue:MonetaryIssue){
+ const label=issue.metric==='sales'?'VGV vendido':issue.metric==='releases'?'VGV lançado':'VGV em estoque';
+ const reason={absent:'ausente',null:'nulo',empty:'vazio',invalid:'inválido'}[issue.reason];
+ return `${label} indisponível em ${issue.city}/${issue.uf}, ${issue.month}, grupo ${issue.group}: campo ${issue.field} ${reason}. Unidades preservadas; valor monetário não estimado.${issue.zeroNetSales?' Vendas líquidas zero não comprovam VGV zero, pois podem incluir vendas e distratos de valores diferentes.':''}`;
+}
 const required=(v:unknown,signed=false)=>{const n=num(v,signed);if(n===null)throw new Error('Campo numérico necessário ausente ou inválido.');return n;};
 const integer=(v:unknown,signed=false)=>{const n=required(v,signed);if(!Number.isSafeInteger(n))throw new Error('Quantidade sem precisão inteira.');return n;};
 const sum=(xs:number[])=>{const n=xs.reduce((a,b)=>a+b,0);if(!Number.isFinite(n)||Math.abs(n)>=Number.MAX_SAFE_INTEGER/100)throw new Error('Total excede a precisão numérica segura.');return n;};
@@ -64,6 +82,7 @@ export function createCalculator(s:Selection,sources:Source[],indices:Readonly<R
   let total=0;
   for(const r of rows){const m=month(r.period),label=String(r.group??'').trim();if(!m||!label||/^(total|subtotal)(\b|$)/i.test(label)||seen.has(`${m}/${norm(label)}`))throw new Error(`${city}: competência/grupo duplicado ou inválido.`);seen.add(`${m}/${norm(label)}`);observed.add(m);
    if(filter&&!filter(r))continue;
+   if(money){const target=location(city,s.uf),issue=monetaryIssue(r,metric,target.city,target.uf);if(issue)throw new Error(monetaryIssueMessage(issue));}
    const n=money?required(r[metric==='releases'?'vgv_release':metric==='sales'?'vgv_liquid_sales':'vgv_stock'],metric==='sales'):integer(r[metric==='releases'?'releases_in_period':metric==='sales'?'liquid_sales':'stock'],metric==='sales');
    if(money&&n!==0){if(!indices[m]||!indices[p.end])throw new Error(`INCC-DI indisponível para ${!indices[p.end]?p.end:m}. Nenhuma base substituída.`);total+=n*indices[p.end]/indices[m]/1e6;}else total+=n;
   }

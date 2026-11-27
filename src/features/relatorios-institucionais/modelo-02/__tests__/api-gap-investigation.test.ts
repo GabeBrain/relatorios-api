@@ -73,7 +73,7 @@ it('reproduz a lacuna real de VGV vendido em Santa Cruz do Sul sem converter sal
  source.rows=observations.map(row=>({period:`${row.month}-01`,group:row.group,...row.values}));
  const calculator=createCalculator(citySelection(selection,city),sources);
  expect(calculator.temporal(city.city,'sales','2026-04','2026-06')).toBe(118);
- expect(()=>calculator.temporal(city.city,'sales','2026-04','2026-06','Padrão',true)).toThrow(/numérico necessário/);
+ expect(()=>calculator.temporal(city.city,'sales','2026-04','2026-06','Padrão',true)).toThrow(/Santa Cruz do Sul\/RS, 2026-05, grupo Compacto: campo vgv_liquid_sales nulo/);
  const missing=observations.filter(row=>Object.keys(row.missing).length);
  expect(missing).toMatchObject([{month:'2026-05',group:'Compacto',values:{liquid_sales:0,vgv_liquid_sales:null}}]);
 });

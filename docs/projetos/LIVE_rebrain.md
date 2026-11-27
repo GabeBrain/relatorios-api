@@ -837,6 +837,16 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 27/11/2026 — Imprensa: tratamento explícito de VGV indisponível e publicação autorizada — Codex/Lucas
+
+- **Ambiente/funcionalidade:** Institucionais Imprensa, cinco regiões; diagnóstico de valores monetários no calculador compartilhado 02/03. [Contrato e evidências](../features/relatorios-institucionais/modelo-02/TRATAMENTO_VGV_2026-11-27.md).
+- **Pedido:** Lucas autorizou push da investigação e pediu tratamento correto do VGV. `SalesResource` permite VGV nulo; saldo líquido zero não prova dinheiro zero. Preservados valores monetários zero/negativos válidos, unidades e demais janelas/grupos; valores desconhecidos não são estimados ou somados parcialmente como total.
+- **Entrega:** erro contextual com município/UF/mês/grupo/campo/motivo; critério nos Insights, `sources[].monetaryIssues` e versão de tratamento no JSON, linhas específicas no CSV. Ressalvas dos acumulados/composição anexadas ao quadro correto, sem transbordar para o quadro seguinte de unidades. Fórmulas, calendário, INCC e política de cobertura preservados; nenhum fluxo de loading alterado.
+- **Validação:** 208 testes em 14 arquivos 02/03, build com typecheck e lint dirigido aprovados. Quatro cenários Edge headless (nulo/zero × desktop claro/celular escuro), Insights e exports via worker, sem overflow/exceções. Componentes existentes reutilizados; sem nova coleta autenticada ou deploy observado.
+- **Etapas/Pendências:** tratamento implementado; montante de Santa Cruz do Sul/Compacto/maio2026 continua dependente de fonte válida, sem falso preenchimento de 2T2026/acumulado. Outras quatro regiões aguardam JSONs reais; cobertura histórica permanece pendente. Push autorizado nesta sessão, sem escrita Monday.
+- **Commits:** base `2d8e0533`; esta entrada acompanha o commit da correção. Envio autorizado inclui a investigação `411a220c` e a análise real `2d8e0533`.
+- **Monday:** [DESAFIO — Estudos Entidades e Institucionais](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`.
+
 ### 27/11/2026 — Imprensa Sul: diagnóstico real identifica histórico incompleto e VGV vendido inválido — Codex/Lucas
 
 - **Ambiente/funcionalidade:** Institucionais Imprensa, Sul 3T2026. [Análise real e encaminhamentos](../features/relatorios-institucionais/modelo-02/ANALISE_SUL_REAL_2026-11-27.md).
@@ -2397,6 +2407,8 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 
 ## 2. Etapas
 
+- **27/11 — Imprensa/VGV:** tratamento contextual implementado e validado nas cinco regiões, com push autorizado. Valor desconhecido do Sul não foi recomposto; correção da origem e conferência após deploy continuam abertas.
+
 - **27/11 — Imprensa/Sul real:** causas das lacunas identificadas no JSON 3T2026; regressão monetária reproduzida. Correção de origem e decisão sobre cobertura permanecem abertas; quatro outras regiões aguardam JSONs reais.
 
 - **27/11 — Imprensa/lacunas da API:** causas de código e riscos de cobertura reproduzidos nas cinco regiões; confirmação das causas reais por município/campo depende dos novos diagnósticos3T2026. Nenhuma correção metodológica aplicada.
@@ -2625,6 +2637,8 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 ---
 
 ## 3. Pendências
+
+- **27/11 — Imprensa/VGV após tratamento:** regenerar após publicação e conferir `monetaryIssues`/ressalva de Santa Cruz do Sul; obter valor monetário válido com o provedor. Push autorizado, sem comprovação de deploy ou de reparo da fonte. Saídas reais das demais regiões e decisão de cobertura histórica continuam pendentes.
 
 - **27/11 — Imprensa/Sul real:** verificar `vgv_liquid_sales` de Santa Cruz do Sul/Compacto/maio2026 e contrato da linha intermediária; confirmar disponibilidade histórica dos sete municípios do RS antes de decidir coorte. JSON Sul recebido e analisado; obter saídas Sudeste/Nordeste/Norte/Centro-Oeste. [Detalhes](../features/relatorios-institucionais/modelo-02/ANALISE_SUL_REAL_2026-11-27.md).
 

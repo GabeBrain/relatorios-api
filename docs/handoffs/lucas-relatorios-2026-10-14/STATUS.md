@@ -1,5 +1,9 @@
 # Estado do handoff
 
+## 27/11/2026 — Imprensa: tratamento do VGV e autorização de push
+
+Lucas autorizou enviar a investigação e pediu o tratamento monetário. Base `2d8e0533`, main limpa, origin único sem atraso após fetch, dois commits locais anteriores preservados. Contrato local permite VGV nulo; implementados motivo contextual por município/competência/grupo/campo e pendência estruturada no JSON/CSV/Insights, sem inferir dinheiro zero de saldo líquido zero. Zero/negativos válidos e unidades preservados; ressalvas dos acumulados/composição ficam nos quadros correspondentes. 208 testes 02/03, build/typecheck, lint e quatro cenários Edge headless com worker JSON/CSV aprovados. [Tratamento e limites](../../features/relatorios-institucionais/modelo-02/TRATAMENTO_VGV_2026-11-27.md). Montante de Santa Cruz do Sul continua pendente do provedor; outras quatro regiões ainda sem JSON real. Push autorizado, sem nova coleta autenticada, deploy observado ou escrita Monday.
+
 ## 27/11/2026 — Imprensa Sul: arquivo real analisado
 
 Lucas forneceu JSON 3T2026 na pasta local Trabalho/Auditorias. Codex/Lucas retomou main limpa, origin único, fetch concluído sem atraso e um commit local desde 15h43 (`411a220c`). Coleta real registra 77 municípios/385 fontes completas/523 requisições, status final 200, oito quadros parciais. Lacunas antigas dependem de fotografias inválidas em sete municípios do RS; VGV vendido de 2T2026 e acumulado de 2026 bloqueados especificamente por `vgv_liquid_sales` inválido em Santa Cruz do Sul/Compacto/maio2026, com zero vendas líquidas. Seis observações municipais agregadas viraram fixture para regressão; não se presumiu VGV zero ou ausência de histórico anterior a `since`. [Análise, hash e encaminhamentos](../../features/relatorios-institucionais/modelo-02/ANALISE_SUL_REAL_2026-11-27.md). Outras quatro regiões continuam sem diagnóstico real; sem mudança de cálculo, nova consulta autenticada, contato com provedor, push/deploy/Monday.
