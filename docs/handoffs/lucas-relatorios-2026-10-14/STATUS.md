@@ -1,5 +1,9 @@
 # Estado do handoff
 
+## 27/11/2026 — Imprensa: lacunas nas cinco regiões, investigação preliminar
+
+Codex/Lucas, base `10f9ba1b`, main limpa na abertura, origin único0/0após fetch. Registro de cadência/INCC e17testes do motor distinguem lacuna municipal propagada ao total, campoVGVausente, fotografia inválida e calendário anterior ao início de pesquisa; diagnóstico pode marcar falsos meses antigos após mudança recente para mensal. Registro contém34inícios posteriores a07/2024 nas cinco regiões; não representa catálogo do token nem prova de falhaAPI. TabelaINCCsem meses ausentes na janela até09/2026. Auditor localJSON/PPTXsomente leitura com quatro testes aprovados. PastaAuditorias e evidências02da máquina anterior ausentes, sem arquivo pessoal/variáveisGEOBRAINde script; nenhuma consulta autenticada. Lucas pediu a rota para nova geração e recebeu o caminho canônico, com pedido deJSONs3T2026. [Achados, limites e como retomar](../../features/relatorios-institucionais/modelo-02/INVESTIGACAO_LACUNAS_API_2026-11-27.md). Confirmação real e mudanças de produto abertas; sem push/deploy/Monday.
+
 ## 26/11/2026 — Institucionais Imprensa: correção editorial do antigo Modelo 02
 
 Sessão abriu na main limpa, origin único, fetch concluído e dois commits locais desde 26/11. Usuário pediu executar o plano, confirmou validação sintética e aprovou conteúdo institucional para 3T2026. Matrizes de 280 posições, artes/ordem regionais, gráficos nativos com Editar Dados, lacunas preservadas também no XLSX embutido, tabelas/insights/CSV e nova rota com alias implementados. Tipos/lint/build e 158 testes dirigidos aprovados. [Execução, evidências e limites](../../features/relatorios-institucionais/modelo-02/EXECUCAO_2026-11-26.md). Nesta mesma sessão, pedido separado de push Curitiba atendido com `1be0da71`; correção Imprensa em `02bc4ebf` teve posteriormente autorização explícita para push assim que commitada. Sem coleta imobiliária autenticada nem escrita Monday.

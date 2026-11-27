@@ -837,6 +837,15 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 27/11/2026 — Imprensa: investigação preliminar das lacunas nas cinco regiões — Codex/Lucas
+
+- **Ambiente/funcionalidade:** Institucionais Imprensa, Sul/Sudeste/Nordeste/Norte/Centro-Oeste. [Investigação e reprodução](../features/relatorios-institucionais/modelo-02/INVESTIGACAO_LACUNAS_API_2026-11-27.md).
+- **Evidência:** 17 testes do motor reproduzem propagação de lacuna municipal ao total, VGV ausente com unidades preservadas, fotografia ausente com estoque municipal válido, cadência trimestral e falsa lacuna diagnóstica ao aplicar cadência mensal recente ao passado. `since` não limita o calendário exigido; Estrela/Lajeado/Santa Cruz do Sul iniciam em06/2025 no registro, compatível com as lacunas antigas relatadas, ainda sem confirmar aquela geração real.
+- **Cinco regiões:** registro de referência tem34municípios com início posterior a07/2024 (Sul12, Sudeste6, Nordeste7, Norte7, Centro-Oeste2). Não são contagens de falhas da API nem catálogo autorizado. INCC local cobre todos os27meses até09/2026. Auditor read-only lê JSON/PPTX e separa coleta/cobertura/campos/células; quatro testes de contrato/privacidade/leitura aprovados.
+- **Etapas/Pendências:** investigação preliminar reproduzida; aguardando JSONs reais das cinco regiões, solicitados na mesma competência3T2026. Caminho antigo de Auditorias indisponível nesta máquina; sem credencial de script configurada e sem coleta autenticada nesta sessão. Lucas recebeu a rota para gerar novamente. Nenhum cálculo, interface ou motor03 alterado; sem homologação, push, deploy ou escrita Monday.
+- **Commits:** base `10f9ba1b`; esta entrada acompanha o commit da investigação.
+- **Monday:** [DESAFIO — Estudos Entidades e Institucionais](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`.
+
 ### 26/11/2026 — Institucionais Imprensa: famílias P1 corrigidas nas cinco regiões — Claude
 
 - **Pedido explícito:** corrigir os 7 quadros P1 restantes do [plano visual regional](../features/relatorios-institucionais/modelo-02/PLANO_CORRECAO_VISUAL_REGIONAL_2026-11-26.md) (§8) e enviar.
@@ -2379,6 +2388,8 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 
 ## 2. Etapas
 
+- **27/11 — Imprensa/lacunas da API:** causas de código e riscos de cobertura reproduzidos nas cinco regiões; confirmação das causas reais por município/campo depende dos novos diagnósticos3T2026. Nenhuma correção metodológica aplicada.
+
 - **26/11 — Institucionais Imprensa / correção visual:** famílias P0 (divisórias, cidades/população, destaques, séries trimestrais), além de resumo e rankings, implementadas nas cinco regiões e conferidas com dados sintéticos no PowerPoint. Faltam a revisão prática de 7 famílias P1 e o aceite real, que fica com o usuário.
 - **26/11 — Institucionais Imprensa / revisão real:** fidelidade visual reaberta após saída Sul92páginas; plano corretivo documentado, implementação e novos pares reais pendentes. Validações sintéticas anteriores não são homologação do material real.
 
@@ -2603,6 +2614,8 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 ---
 
 ## 3. Pendências
+
+- **27/11 — Imprensa/lacunas:** analisar os JSONs/PPTX reais das cinco regiões, distinguindo início do monitoramento, calendário histórico, ausência de campo monetário/fotografia e falha de coleta. Ferramenta local de auditoria pronta; achados de código não substituem coleta real. [Investigação](../features/relatorios-institucionais/modelo-02/INVESTIGACAO_LACUNAS_API_2026-11-27.md).
 
 - **Prioridade — Imprensa / cinco regiões (atualizado 26/11, Claude):** P0 e P1 implementados; pendente o aceite com saídas reais (usuário) e a investigação da origem das lacunas reais da API. Plano original: [plano visual baseado no PPTX real](../features/relatorios-institucionais/modelo-02/PLANO_CORRECAO_VISUAL_SUL_2026-11-26.md); corrigir população/participação e ordenação, títulos/divisórias, setas/colchetes/rótulos e manchetes, além de revisar lacunas e expansão dos rankings. Corrigir e conferir as cinco regiões; Sul é o caso real testado pelo usuário, não limite de escopo.
 
