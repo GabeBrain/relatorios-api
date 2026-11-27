@@ -837,6 +837,15 @@ Explorer com engine OpenAPI. Migração Streamlit→React V1 concluída (ver [`.
 
 ## 1. Desenvolvimentos
 
+### 27/11/2026 — Imprensa Sul: diagnóstico real identifica histórico incompleto e VGV vendido inválido — Codex/Lucas
+
+- **Ambiente/funcionalidade:** Institucionais Imprensa, Sul 3T2026. [Análise real e encaminhamentos](../features/relatorios-institucionais/modelo-02/ANALISE_SUL_REAL_2026-11-27.md).
+- **Evidência:** JSON fornecido por Lucas, geração de 27/11 às 15h58 de Brasília; 77 municípios, 385 fontes concluídas, 523 requisições e status final 200. Oito quadros parciais apesar de zero posições aguardando fonte. Sete municípios do RS têm fotografias inválidas em competências específicas de 3T2024 a 1T2025; ausência se propaga ao total regional. `since` não explica sozinho: há observações retroativas anteriores a 06/2025 em parte desses municípios.
+- **Causa monetária isolada:** Santa Cruz do Sul, Compacto, maio/2026: `liquid_sales=0` e `vgv_liquid_sales` ausente/inválido. Essa única anomalia numérica municipal bloqueia VGV vendido de 2T2026 e acumulado de 2026; unidades continuam válidas. Fixture agregada reproduz 118 vendas municipais e exceção monetária, sem inferir dinheiro zero de saldo líquido zero. JSON bruto não versionado; hash e seis observações agregadas documentados.
+- **Etapas/Pendências:** Sul analisado; obter campo monetário/contrato do registro intermediário com o provedor e decidir tratamento da cobertura histórica com analista. Nenhuma mensagem enviada ou cálculo alterado. Outras quatro regiões continuam sem arquivos reais; não atribuir a elas a anomalia específica de Santa Cruz do Sul. Regressão real adicionada aos testes existentes; sem nova coleta autenticada, homologação, deploy, push ou escrita Monday.
+- **Commits:** base `411a220c`; esta entrada acompanha o commit da análise real.
+- **Monday:** [DESAFIO — Estudos Entidades e Institucionais](https://brain381753.monday.com/boards/18398428946/pulses/12880538203) — `12880538203`.
+
 ### 27/11/2026 — Imprensa: investigação preliminar das lacunas nas cinco regiões — Codex/Lucas
 
 - **Ambiente/funcionalidade:** Institucionais Imprensa, Sul/Sudeste/Nordeste/Norte/Centro-Oeste. [Investigação e reprodução](../features/relatorios-institucionais/modelo-02/INVESTIGACAO_LACUNAS_API_2026-11-27.md).
@@ -2388,6 +2397,8 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 
 ## 2. Etapas
 
+- **27/11 — Imprensa/Sul real:** causas das lacunas identificadas no JSON 3T2026; regressão monetária reproduzida. Correção de origem e decisão sobre cobertura permanecem abertas; quatro outras regiões aguardam JSONs reais.
+
 - **27/11 — Imprensa/lacunas da API:** causas de código e riscos de cobertura reproduzidos nas cinco regiões; confirmação das causas reais por município/campo depende dos novos diagnósticos3T2026. Nenhuma correção metodológica aplicada.
 
 - **26/11 — Institucionais Imprensa / correção visual:** famílias P0 (divisórias, cidades/população, destaques, séries trimestrais), além de resumo e rankings, implementadas nas cinco regiões e conferidas com dados sintéticos no PowerPoint. Faltam a revisão prática de 7 famílias P1 e o aceite real, que fica com o usuário.
@@ -2614,6 +2625,8 @@ Push autorizado de `0a8a672` concluído; SHA de origin/main confirmado e 0/0 ap�
 ---
 
 ## 3. Pendências
+
+- **27/11 — Imprensa/Sul real:** verificar `vgv_liquid_sales` de Santa Cruz do Sul/Compacto/maio2026 e contrato da linha intermediária; confirmar disponibilidade histórica dos sete municípios do RS antes de decidir coorte. JSON Sul recebido e analisado; obter saídas Sudeste/Nordeste/Norte/Centro-Oeste. [Detalhes](../features/relatorios-institucionais/modelo-02/ANALISE_SUL_REAL_2026-11-27.md).
 
 - **27/11 — Imprensa/lacunas:** analisar os JSONs/PPTX reais das cinco regiões, distinguindo início do monitoramento, calendário histórico, ausência de campo monetário/fotografia e falha de coleta. Ferramenta local de auditoria pronta; achados de código não substituem coleta real. [Investigação](../features/relatorios-institucionais/modelo-02/INVESTIGACAO_LACUNAS_API_2026-11-27.md).
 

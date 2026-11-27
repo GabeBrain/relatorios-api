@@ -5,6 +5,7 @@ import {diagnostic} from '../diagnostic';
 import {createCalculator} from '../../modelo-03/calculate';
 import {scheduledObservations} from '../../modelo-03/coverage';
 import {fixture,selection,catalogFor} from './fixture';
+import sulSalesGap from './sul-sales-gap-2026-11-27.json';
 
 /** Reproduce distinct causes in the actual regional engine; fixtures are not API evidence. */
 describe.each(REGIONS)('Investigação das lacunas · $label',region=>{
@@ -63,4 +64,16 @@ it('diagnóstico com cadência mensal recente pode apontar falsas lacunas de mes
  expect(scheduledObservations(source,'2025-04','2026-09')).toContain('2025-04');
  const audit=diagnostic(calculateReport(selection,[city],['PR','SC'],sources,'2026-11-27T12:00:00Z'));
  expect(audit.sources.find(x=>x.metric==='releases')!.missingRequiredMonths).toContain('2025-04');
+});
+
+it('reproduz a lacuna real de VGV vendido em Santa Cruz do Sul sem converter saldo líquido zero em dinheiro zero',()=>{
+ const {city,observations}=sulSalesGap,sources=fixture(selection,{[city.uf]:[city.city]});
+ const source=sources.find(x=>x.metric==='sales')!;
+ expect(observations.every(row=>row.records===1)).toBe(true);
+ source.rows=observations.map(row=>({period:`${row.month}-01`,group:row.group,...row.values}));
+ const calculator=createCalculator(citySelection(selection,city),sources);
+ expect(calculator.temporal(city.city,'sales','2026-04','2026-06')).toBe(118);
+ expect(()=>calculator.temporal(city.city,'sales','2026-04','2026-06','Padrão',true)).toThrow(/numérico necessário/);
+ const missing=observations.filter(row=>Object.keys(row.missing).length);
+ expect(missing).toMatchObject([{month:'2026-05',group:'Compacto',values:{liquid_sales:0,vgv_liquid_sales:null}}]);
 });

@@ -1,0 +1,76 @@
+{
+  "evidence": {
+    "schema": "modelo-02-diagnostic-v1",
+    "generatedAt": "2026-11-27T18:58:36.923Z",
+    "inputSha256": "5cc98aa54f39ffe1ceb12f7f62948eb5b13087c3edef9a1177a4e1f77760a3bc",
+    "description": "Municipal aggregate observations only; null represents missing or invalid numeric input, not its raw API value."
+  },
+  "city": {
+    "city": "Santa Cruz do Sul",
+    "uf": "RS"
+  },
+  "observations": [
+    {
+      "month": "2026-05",
+      "group": "Compacto",
+      "records": 1,
+      "values": {
+        "liquid_sales": 0,
+        "vgv_liquid_sales": null
+      },
+      "missing": {
+        "vgv_liquid_sales": 1
+      }
+    },
+    {
+      "month": "2026-06",
+      "group": "Compacto",
+      "records": 1,
+      "values": {
+        "liquid_sales": 43,
+        "vgv_liquid_sales": 29163616.93
+      },
+      "missing": {}
+    },
+    {
+      "month": "2026-06",
+      "group": "Econômico",
+      "records": 1,
+      "values": {
+        "liquid_sales": 9,
+        "vgv_liquid_sales": 2690081.31
+      },
+      "missing": {}
+    },
+    {
+      "month": "2026-06",
+      "group": "Médio",
+      "records": 1,
+      "values": {
+        "liquid_sales": 18,
+        "vgv_liquid_sales": 25019524.28
+      },
+      "missing": {}
+    },
+    {
+      "month": "2026-06",
+      "group": "Médio-Alto",
+      "records": 1,
+      "values": {
+        "liquid_sales": -1,
+        "vgv_liquid_sales": -1881900
+      },
+      "missing": {}
+    },
+    {
+      "month": "2026-06",
+      "group": "Standard",
+      "records": 1,
+      "values": {
+        "liquid_sales": 49,
+        "vgv_liquid_sales": 32905600.25
+      },
+      "missing": {}
+    }
+  ]
+}

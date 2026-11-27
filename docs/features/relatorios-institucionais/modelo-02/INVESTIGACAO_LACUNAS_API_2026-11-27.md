@@ -2,6 +2,8 @@
 
 27/11/2026 · Codex/Lucas · Base `10f9ba1b` · **Investigação preliminar; aguardando novas gerações reais.**
 
+**Atualização na mesma data:** Lucas forneceu o diagnóstico real doSul. [Análise confirmada da geração3T2026](ANALISE_SUL_REAL_2026-11-27.md): coleta completa, lacunas históricas em sete municípios doRS e campo `vgv_liquid_sales` inválido emSanta Cruz do Sul/Compacto/maio2026. As quatro outras regiões continuam aguardando arquivos reais. O texto abaixo preserva a etapa preliminar e seus limites.
+
 ## Evidência e limite da sessão
 
 Main limpa na abertura, origin único, fetch concluído e comparação 0/0. Os binários e diagnósticos reais da máquina anterior (`C:\Users\Usuario\Desktop\Auditorias`) não estão disponíveis neste checkout. `.local-inputs/relatorios-lucas/modelo-02/` também não existia. Não há arquivo pessoal `geobrain.env` nem variáveis `GEOBRAIN_*` no ambiente consultado. Nenhum login ou coleta autenticada foi executado; não se declarou o serviço indisponível por isso.
